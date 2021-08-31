@@ -1,10 +1,12 @@
 package com.example.mfscreener.bootstrap;
 
 import com.example.mfscreener.convertor.NavServiceConvertor;
+import com.example.mfscreener.entities.ErrorMessage;
 import com.example.mfscreener.entities.MFScheme;
 import com.example.mfscreener.exception.NavNotFoundException;
 import com.example.mfscreener.exception.SchemeNotFoundException;
 import com.example.mfscreener.model.Scheme;
+import com.example.mfscreener.repository.ErrorMessageRepository;
 import com.example.mfscreener.repository.MFSchemeRepository;
 import com.example.mfscreener.service.NavService;
 import com.example.mfscreener.util.Constants;
@@ -21,6 +23,7 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 @Slf4j
@@ -28,6 +31,7 @@ import java.util.List;
 public class LoadInitialData {
 
     private final MFSchemeRepository mfSchemesRepository;
+    private final ErrorMessageRepository errorMessageRepository;
     private final NavServiceConvertor navServiceConvertor;
     private final NavService navService;
 
@@ -70,6 +74,8 @@ public class LoadInitialData {
             StopWatch stopWatch = new StopWatch();
             stopWatch.start("saving fundNames");
             List<MFScheme> list = new ArrayList<>();
+            List<Long> schemeCodesList = mfSchemesRepository.findAllSchemeIds();
+            chopArrayList.removeIf(s -> schemeCodesList.contains(Long.valueOf(s.getSchemeCode())));
             chopArrayList.forEach(scheme -> {
                 MFScheme mfSchemeEntity = navServiceConvertor.convert(scheme);
                 list.add(mfSchemeEntity);
@@ -77,16 +83,25 @@ public class LoadInitialData {
             mfSchemesRepository.saveAll(list);
             stopWatch.stop();
             log.info("saved in db in : {} sec", stopWatch.getTotalTimeSeconds());
-            stopWatch.start("loadDetails");
-            for (MFScheme mfScheme: list) {
-                try {
-                    navService.fetchSchemeDetails(mfScheme.getSchemeId());
-                } catch (SchemeNotFoundException | NavNotFoundException exception) {
-                    log.error(exception.getMessage());
-                }
-            }
-            stopWatch.stop();
-            log.info("Fund House and Scheme Type Set in : {} sec", stopWatch.getTotalTimeSeconds());
         }
+        loadFundDetailsIfNotSet();
+    }
+
+    private void loadFundDetailsIfNotSet() {
+        StopWatch stopWatch = new StopWatch();
+        stopWatch.start("loadDetails");
+        mfSchemesRepository.findAllByFundHouseNull().parallelStream().map(schemeId -> {
+            try {
+                navService.fetchSchemeDetails(schemeId);
+            } catch (SchemeNotFoundException | NavNotFoundException exception) {
+                log.error(exception.getMessage());
+                ErrorMessage errorMessage = new ErrorMessage();
+                errorMessage.setMessage(exception.getMessage());
+                errorMessageRepository.save(errorMessage);
+            }
+            return true;
+        }).collect(Collectors.toList());
+        stopWatch.stop();
+        log.info("Fund House and Scheme Type Set in : {} sec", stopWatch.getTotalTimeSeconds());
     }
 }
