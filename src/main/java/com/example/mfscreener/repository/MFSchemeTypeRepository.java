@@ -2,7 +2,10 @@ package com.example.mfscreener.repository;
 
 import com.example.mfscreener.entities.MFSchemeType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -11,5 +14,7 @@ public interface MFSchemeTypeRepository extends JpaRepository<MFSchemeType, Inte
 
     Optional<MFSchemeType> findBySchemeType(String schemeType);
 
-    Optional<MFSchemeType> findBySchemeCategory(String schemeCategory);
+    @Query("select o from MFSchemeType o JOIN FETCH o.mfSchemes ms where o.schemeCategory = :schemeCategory")
+    @Transactional(readOnly = true)
+    Optional<MFSchemeType> findBySchemeCategory(@Param("schemeCategory") String schemeCategory);
 }

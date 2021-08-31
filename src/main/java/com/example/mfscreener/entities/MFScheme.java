@@ -17,13 +17,13 @@ public class MFScheme {
     @Column(name = "scheme_id", nullable = false)
     private Long schemeId;
 
+    private String payOut;
+
     @Column(name = "fund_house")
     private String fundHouse;
 
     @Column(name = "scheme_name", nullable = false)
     private String schemeName;
-
-    private String payOut;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "mf_scheme_type_id")

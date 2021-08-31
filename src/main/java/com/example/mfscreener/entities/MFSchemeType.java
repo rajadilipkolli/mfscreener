@@ -8,11 +8,12 @@ import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
-@Table(name = "mf_scheme_types")
 @Entity
 @Getter
 @Setter
 @NoArgsConstructor
+@Table(name = "mf_scheme_types", uniqueConstraints =
+        @UniqueConstraint(columnNames = {"scheme_type", "scheme_category"}))
 public class MFSchemeType {
 
     @Id

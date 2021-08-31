@@ -5,13 +5,13 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd"
         objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
-    <changeSet id="1629499197202-1" author="rajad (generated)">
+
+    <changeSet id="create_sequences" author="rajad (generated)">
         <createSequence incrementBy="100" sequenceName="scheme_id_seq" startValue="1"/>
-    </changeSet>
-    <changeSet id="1629499197202-2" author="rajad (generated)">
         <createSequence incrementBy="2" sequenceName="scheme_type_id_seq" startValue="1"/>
     </changeSet>
-    <changeSet id="1629499197202-3" author="rajad (generated)">
+
+    <changeSet id="create_tables" author="rajad (generated)">
         <createTable tableName="mf_scheme">
             <column name="scheme_id" type="BIGINT">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="pk_mf_scheme"/>
@@ -23,8 +23,7 @@
             <column name="pay_out" type="VARCHAR(255)"/>
             <column name="mf_scheme_type_id" type="INT"/>
         </createTable>
-    </changeSet>
-    <changeSet id="1629499197202-4" author="rajad (generated)">
+
         <createTable tableName="mf_scheme_nav">
             <column name="id" type="BIGINT">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="pk_mf_scheme_nav"/>
@@ -33,8 +32,7 @@
             <column name="nav_date" type="DATE"/>
             <column name="mf_scheme_id" type="BIGINT"/>
         </createTable>
-    </changeSet>
-    <changeSet id="1629499197202-5" author="rajad (generated)">
+
         <createTable tableName="mf_scheme_types">
             <column name="scheme_type_id" type="INT">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="pk_mf_scheme_types"/>
@@ -47,15 +45,20 @@
             </column>
         </createTable>
     </changeSet>
-    <changeSet id="1629499197202-6" author="rajad (generated)">
+
+    <changeSet id="add_Indexes" author="rajad (generated)">
         <addForeignKeyConstraint baseColumnNames="mf_scheme_id" baseTableName="mf_scheme_nav"
                                  constraintName="FK_MF_SCHEME_NAV_ON_MF_SCHEME" referencedColumnNames="scheme_id"
                                  referencedTableName="mf_scheme"/>
-    </changeSet>
-    <changeSet id="1629499197202-7" author="rajad (generated)">
+
         <addForeignKeyConstraint baseColumnNames="mf_scheme_type_id" baseTableName="mf_scheme"
                                  constraintName="FK_MF_SCHEME_ON_MF_SCHEME_TYPE" referencedColumnNames="scheme_type_id"
                                  referencedTableName="mf_scheme_types"/>
+
+        <addUniqueConstraint
+                columnNames="scheme_type, scheme_category"
+                constraintName="UK_MF_SCHEME_CATEGORY_MF_SCHEME_TYPE"
+                tableName="mf_scheme_types" />
     </changeSet>
 
 </databaseChangeLog>
