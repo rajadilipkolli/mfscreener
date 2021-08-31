@@ -30,78 +30,85 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class LoadInitialData {
 
-    private final MFSchemeRepository mfSchemesRepository;
-    private final ErrorMessageRepository errorMessageRepository;
-    private final NavServiceConvertor navServiceConvertor;
-    private final NavService navService;
+  private final MFSchemeRepository mfSchemesRepository;
+  private final ErrorMessageRepository errorMessageRepository;
+  private final NavServiceConvertor navServiceConvertor;
+  private final NavService navService;
 
-    @EventListener(value = ApplicationStartedEvent.class)
-    void loadAllFunds() throws IOException {
-        long start = System.currentTimeMillis();
-        log.info("Loading All Funds...");
-        URL url = new URL(Constants.AMFI_WEBSITE_LINK);
-        List<Scheme> chopArrayList = new ArrayList<>();
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(url.openStream()))) {
-            String fileRead = br.readLine();
-            for (int i = 0; i < 4; ++i) {
-                fileRead = br.readLine();
-            }
-            while (fileRead != null) {
-                int check = 0;
-                final String[] tokenize = fileRead.split(Constants.SEPARATOR);
-                if (tokenize.length == 1) {
-                    check = 1;
-                }
-                if (check == 0) {
-                    final String schemecode = tokenize[0];
-                    final String payout = tokenize[1];
-                    final String reinvestment = tokenize[2];
-                    final String schemename = tokenize[3];
-                    final String nav = tokenize[4];
-                    final String date = tokenize[5];
-                    final Scheme tempObj = new Scheme(schemecode, payout, schemename, nav, date);
-                    chopArrayList.add(tempObj);
-                }
-                fileRead = br.readLine();
-                if ("".equals(fileRead)) {
-                    fileRead = br.readLine();
-                }
-            }
+  @EventListener(value = ApplicationStartedEvent.class)
+  void loadAllFunds() throws IOException {
+    long start = System.currentTimeMillis();
+    log.info("Loading All Funds...");
+    URL url = new URL(Constants.AMFI_WEBSITE_LINK);
+    List<Scheme> chopArrayList = new ArrayList<>();
+    try (BufferedReader br = new BufferedReader(new InputStreamReader(url.openStream()))) {
+      String fileRead = br.readLine();
+      for (int i = 0; i < 4; ++i) {
+        fileRead = br.readLine();
+      }
+      while (fileRead != null) {
+        int check = 0;
+        final String[] tokenize = fileRead.split(Constants.SEPARATOR);
+        if (tokenize.length == 1) {
+          check = 1;
         }
-        log.info("All Funds loaded in {} milliseconds, total funds loaded :{}", (System.currentTimeMillis() - start), chopArrayList.size());
-
-        if (mfSchemesRepository.count() != chopArrayList.size()) {
-            StopWatch stopWatch = new StopWatch();
-            stopWatch.start("saving fundNames");
-            List<MFScheme> list = new ArrayList<>();
-            List<Long> schemeCodesList = mfSchemesRepository.findAllSchemeIds();
-            chopArrayList.removeIf(s -> schemeCodesList.contains(Long.valueOf(s.getSchemeCode())));
-            chopArrayList.forEach(scheme -> {
-                MFScheme mfSchemeEntity = navServiceConvertor.convert(scheme);
-                list.add(mfSchemeEntity);
-            });
-            mfSchemesRepository.saveAll(list);
-            stopWatch.stop();
-            log.info("saved in db in : {} sec", stopWatch.getTotalTimeSeconds());
+        if (check == 0) {
+          final String schemecode = tokenize[0];
+          final String payout = tokenize[1];
+          final String reinvestment = tokenize[2];
+          final String schemename = tokenize[3];
+          final String nav = tokenize[4];
+          final String date = tokenize[5];
+          final Scheme tempObj = new Scheme(schemecode, payout, schemename, nav, date);
+          chopArrayList.add(tempObj);
         }
-        loadFundDetailsIfNotSet();
+        fileRead = br.readLine();
+        if ("".equals(fileRead)) {
+          fileRead = br.readLine();
+        }
+      }
     }
+    log.info(
+        "All Funds loaded in {} milliseconds, total funds loaded :{}",
+        (System.currentTimeMillis() - start),
+        chopArrayList.size());
 
-    private void loadFundDetailsIfNotSet() {
-        StopWatch stopWatch = new StopWatch();
-        stopWatch.start("loadDetails");
-        mfSchemesRepository.findAllByFundHouseNull().parallelStream().map(schemeId -> {
-            try {
+    if (mfSchemesRepository.count() != chopArrayList.size()) {
+      StopWatch stopWatch = new StopWatch();
+      stopWatch.start("saving fundNames");
+      List<MFScheme> list = new ArrayList<>();
+      List<Long> schemeCodesList = mfSchemesRepository.findAllSchemeIds();
+      chopArrayList.removeIf(s -> schemeCodesList.contains(Long.valueOf(s.getSchemeCode())));
+      chopArrayList.forEach(
+          scheme -> {
+            MFScheme mfSchemeEntity = navServiceConvertor.convert(scheme);
+            list.add(mfSchemeEntity);
+          });
+      mfSchemesRepository.saveAll(list);
+      stopWatch.stop();
+      log.info("saved in db in : {} sec", stopWatch.getTotalTimeSeconds());
+    }
+    loadFundDetailsIfNotSet();
+  }
+
+  private void loadFundDetailsIfNotSet() {
+    StopWatch stopWatch = new StopWatch();
+    stopWatch.start("loadDetails");
+    mfSchemesRepository.findAllByFundHouseNull().parallelStream()
+        .map(
+            schemeId -> {
+              try {
                 navService.fetchSchemeDetails(schemeId);
-            } catch (SchemeNotFoundException | NavNotFoundException exception) {
+              } catch (SchemeNotFoundException | NavNotFoundException exception) {
                 log.error(exception.getMessage());
                 ErrorMessage errorMessage = new ErrorMessage();
                 errorMessage.setMessage(exception.getMessage());
                 errorMessageRepository.save(errorMessage);
-            }
-            return true;
-        }).collect(Collectors.toList());
-        stopWatch.stop();
-        log.info("Fund House and Scheme Type Set in : {} sec", stopWatch.getTotalTimeSeconds());
-    }
+              }
+              return true;
+            })
+        .collect(Collectors.toList());
+    stopWatch.stop();
+    log.info("Fund House and Scheme Type Set in : {} sec", stopWatch.getTotalTimeSeconds());
+  }
 }

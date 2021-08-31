@@ -11,11 +11,11 @@ import java.io.Serializable;
 @NoArgsConstructor
 public class Scheme implements Serializable {
 
-    private static final long serialVersionUID = 585620707939795736L;
+  private static final long serialVersionUID = 585620707939795736L;
 
-    String schemeCode;
-    String payout;
-    String schemeName;
-    String nav;
-    String date;
+  String schemeCode;
+  String payout;
+  String schemeName;
+  String nav;
+  String date;
 }

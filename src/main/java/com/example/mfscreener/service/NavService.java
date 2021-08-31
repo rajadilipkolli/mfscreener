@@ -4,9 +4,9 @@ import com.example.mfscreener.model.Scheme;
 
 public interface NavService {
 
-    Scheme getNav(Long schemeCode);
+  Scheme getNav(Long schemeCode);
 
-    Scheme getNavOnDate(Long schemeCode, String date);
+  Scheme getNavOnDate(Long schemeCode, String date);
 
-    void fetchSchemeDetails(Long schemeCode);
+  void fetchSchemeDetails(Long schemeCode);
 }

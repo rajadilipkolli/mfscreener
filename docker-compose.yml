@@ -20,7 +20,7 @@ services:
       PGADMIN_DEFAULT_EMAIL: admin@email.com
       PGADMIN_DEFAULT_PASSWORD: password
     ports:
-      - 8889:80
+      - "8889:80"
     networks:
       - microservice-network
 

@@ -58,7 +58,7 @@
         <addUniqueConstraint
                 columnNames="scheme_type, scheme_category"
                 constraintName="UK_MF_SCHEME_CATEGORY_MF_SCHEME_TYPE"
-                tableName="mf_scheme_types" />
+                tableName="mf_scheme_types"/>
     </changeSet>
 
 </databaseChangeLog>

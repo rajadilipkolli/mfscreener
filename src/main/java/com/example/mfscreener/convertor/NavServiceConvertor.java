@@ -12,18 +12,19 @@ import java.time.format.DateTimeFormatter;
 @Component
 public class NavServiceConvertor implements Converter<Scheme, MFScheme> {
 
-    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd-MMM-yyyy");
+  private static final DateTimeFormatter DATE_FORMATTER =
+      DateTimeFormatter.ofPattern("dd-MMM-yyyy");
 
-    @Override
-    public MFScheme convert(Scheme source) {
-        MFScheme mfSchemes = new MFScheme();
-        mfSchemes.setSchemeId(Long.valueOf(source.getSchemeCode()));
-        mfSchemes.setPayOut(source.getPayout());
-        mfSchemes.setSchemeName(source.getSchemeName());
-        MFSchemeNav mfSchemenav = new MFSchemeNav();
-        mfSchemenav.setNav("N.A.".equals(source.getNav()) ? 0D : Double.parseDouble(source.getNav()));
-        mfSchemenav.setNavDate(LocalDate.parse(source.getDate(), DATE_FORMATTER));
-        mfSchemes.addSchemeNav(mfSchemenav);
-        return mfSchemes;
-    }
+  @Override
+  public MFScheme convert(Scheme source) {
+    MFScheme mfSchemes = new MFScheme();
+    mfSchemes.setSchemeId(Long.valueOf(source.getSchemeCode()));
+    mfSchemes.setPayOut(source.getPayout());
+    mfSchemes.setSchemeName(source.getSchemeName());
+    MFSchemeNav mfSchemenav = new MFSchemeNav();
+    mfSchemenav.setNav("N.A.".equals(source.getNav()) ? 0D : Double.parseDouble(source.getNav()));
+    mfSchemenav.setNavDate(LocalDate.parse(source.getDate(), DATE_FORMATTER));
+    mfSchemes.addSchemeNav(mfSchemenav);
+    return mfSchemes;
+  }
 }

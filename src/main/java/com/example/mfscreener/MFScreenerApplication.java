@@ -9,13 +9,12 @@ import org.springframework.web.client.RestTemplate;
 @SpringBootApplication
 public class MFScreenerApplication {
 
-    public static void main(String[] args) {
-        SpringApplication.run(MFScreenerApplication.class);
-    }
+  public static void main(String[] args) {
+    SpringApplication.run(MFScreenerApplication.class);
+  }
 
-    @Bean
-    public RestTemplate restTemplate(RestTemplateBuilder restTemplateBuilder) {
-        return restTemplateBuilder.build();
-    }
-
+  @Bean
+  public RestTemplate restTemplate(RestTemplateBuilder restTemplateBuilder) {
+    return restTemplateBuilder.build();
+  }
 }

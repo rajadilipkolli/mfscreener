@@ -13,22 +13,24 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class NAVController {
 
-    private final NavService navService;
+  private final NavService navService;
 
-    @GetMapping(path = "/getNAV/{schemeCode}")
-    @Operation(summary = "Fetch the latest NAV from AMFI website.")
-    public Scheme getScheme(
-            @Parameter(description = "scheme Code for mutual fund", example = "120503") @PathVariable(value = "schemeCode") Long schemeCode) {
+  @GetMapping(path = "/getNAV/{schemeCode}")
+  @Operation(summary = "Fetch the latest NAV from AMFI website.")
+  public Scheme getScheme(
+      @Parameter(description = "scheme Code for mutual fund", example = "120503")
+          @PathVariable(value = "schemeCode")
+          Long schemeCode) {
 
-        return navService.getNav(schemeCode);
-    }
+    return navService.getNav(schemeCode);
+  }
 
-    @GetMapping(path = "/getNAV/{schemeCode}/{date}")
-    @Operation(summary = "Fetch NAV on date DD-MM-YYYY (or the last working day before DD-MM-YYYY).")
-    public Scheme getSchemeNavOnDate(
-            @Parameter(description = "scheme Code for mutual fund", example = "120503") @PathVariable Long schemeCode,
-            @Parameter(description = "date", example = "20-01-2020") @PathVariable String date) {
-        return navService.getNavOnDate(schemeCode, date);
-    }
-
+  @GetMapping(path = "/getNAV/{schemeCode}/{date}")
+  @Operation(summary = "Fetch NAV on date DD-MM-YYYY (or the last working day before DD-MM-YYYY).")
+  public Scheme getSchemeNavOnDate(
+      @Parameter(description = "scheme Code for mutual fund", example = "120503") @PathVariable
+          Long schemeCode,
+      @Parameter(description = "date", example = "20-01-2020") @PathVariable String date) {
+    return navService.getNavOnDate(schemeCode, date);
+  }
 }

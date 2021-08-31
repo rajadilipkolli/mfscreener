@@ -9,8 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class NAVData {
 
-    private String date;
+  private String date;
 
-    private String nav;
-
+  private String nav;
 }

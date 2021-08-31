@@ -12,9 +12,10 @@ import java.util.Optional;
 @Repository
 public interface MFSchemeTypeRepository extends JpaRepository<MFSchemeType, Integer> {
 
-    Optional<MFSchemeType> findBySchemeType(String schemeType);
+  Optional<MFSchemeType> findBySchemeType(String schemeType);
 
-    @Query("select o from MFSchemeType o JOIN FETCH o.mfSchemes ms where o.schemeCategory = :schemeCategory")
-    @Transactional(readOnly = true)
-    Optional<MFSchemeType> findBySchemeCategory(@Param("schemeCategory") String schemeCategory);
+  @Query(
+      "select o from MFSchemeType o JOIN FETCH o.mfSchemes ms where o.schemeCategory = :schemeCategory")
+  @Transactional(readOnly = true)
+  Optional<MFSchemeType> findBySchemeCategory(@Param("schemeCategory") String schemeCategory);
 }
