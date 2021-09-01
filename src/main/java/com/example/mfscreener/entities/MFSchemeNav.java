@@ -4,13 +4,14 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.time.LocalDate;
 
 @Table(name = "mf_scheme_nav")
 @Entity
 @Getter
 @Setter
-public class MFSchemeNav {
+public class MFSchemeNav extends Auditable<String> implements Serializable {
 
   @Id
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "scheme_id_generator")

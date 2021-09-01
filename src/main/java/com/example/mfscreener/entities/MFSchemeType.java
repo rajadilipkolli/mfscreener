@@ -5,6 +5,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,7 +16,7 @@ import java.util.List;
 @Table(
     name = "mf_scheme_types",
     uniqueConstraints = @UniqueConstraint(columnNames = {"scheme_type", "scheme_category"}))
-public class MFSchemeType {
+public class MFSchemeType extends Auditable<String> implements Serializable {
 
   @Id
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "scheme_type_id_generator")
