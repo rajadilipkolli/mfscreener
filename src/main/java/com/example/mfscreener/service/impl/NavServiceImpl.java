@@ -110,7 +110,7 @@ public class NavServiceImpl implements NavService {
       final Meta meta = navResponse.getMeta();
       MFSchemeType mfschemeType =
           this.mfSchemeTypeRepository
-              .findBySchemeCategory(meta.getSchemeCategory())
+              .findBySchemeCategoryAndSchemeType(meta.getSchemeCategory(), meta.getSchemeType())
               .orElseGet(
                   () -> {
                     MFSchemeType entity = new MFSchemeType();
