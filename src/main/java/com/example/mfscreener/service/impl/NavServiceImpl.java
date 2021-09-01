@@ -5,10 +5,7 @@ import com.example.mfscreener.entities.MFSchemeNav;
 import com.example.mfscreener.entities.MFSchemeType;
 import com.example.mfscreener.exception.NavNotFoundException;
 import com.example.mfscreener.exception.SchemeNotFoundException;
-import com.example.mfscreener.model.Meta;
-import com.example.mfscreener.model.NAVData;
-import com.example.mfscreener.model.NavResponse;
-import com.example.mfscreener.model.Scheme;
+import com.example.mfscreener.model.*;
 import com.example.mfscreener.repository.MFSchemeRepository;
 import com.example.mfscreener.repository.MFSchemeTypeRepository;
 import com.example.mfscreener.service.NavService;
@@ -84,6 +81,11 @@ public class NavServiceImpl implements NavService {
                           "Fund with schemeCode " + schemeCode + " Not Found"));
       mergeList(entityBody, mfScheme);
     }
+  }
+
+  @Override
+  public List<FundDetailDTO> fetchSchemes(String schemeName) {
+    return this.mfSchemesRepository.findBySchemeNameIgnoringCaseLike("%" + schemeName + "%");
   }
 
   private Scheme getSchemeDetails(Long schemeCode, LocalDate navDate) {

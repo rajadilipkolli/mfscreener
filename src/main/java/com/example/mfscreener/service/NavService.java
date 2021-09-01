@@ -1,6 +1,9 @@
 package com.example.mfscreener.service;
 
+import com.example.mfscreener.model.FundDetailDTO;
 import com.example.mfscreener.model.Scheme;
+
+import java.util.List;
 
 public interface NavService {
 
@@ -9,4 +12,6 @@ public interface NavService {
   Scheme getNavOnDate(Long schemeCode, String date);
 
   void fetchSchemeDetails(Long schemeCode);
+
+  List<FundDetailDTO> fetchSchemes(String schemeName);
 }

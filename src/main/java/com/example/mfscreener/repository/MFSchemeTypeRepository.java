@@ -15,7 +15,8 @@ public interface MFSchemeTypeRepository extends JpaRepository<MFSchemeType, Inte
   Optional<MFSchemeType> findBySchemeType(String schemeType);
 
   @Query(
-            "select o from MFSchemeType o JOIN FETCH o.mfSchemes ms where o.schemeCategory = :schemeCategory and o.schemeType = :schemeType")
+      "select o from MFSchemeType o JOIN FETCH o.mfSchemes ms where o.schemeCategory = :schemeCategory and o.schemeType = :schemeType")
   @Transactional(readOnly = true)
-  Optional<MFSchemeType> findBySchemeCategoryAndSchemeType(@Param("schemeCategory") String schemeCategory, @Param("schemeType") String schemeType);
+  Optional<MFSchemeType> findBySchemeCategoryAndSchemeType(
+      @Param("schemeCategory") String schemeCategory, @Param("schemeType") String schemeType);
 }
