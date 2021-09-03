@@ -5,13 +5,16 @@ import com.example.mfscreener.entities.MFSchemeNav;
 import com.example.mfscreener.entities.MFSchemeType;
 import com.example.mfscreener.exception.NavNotFoundException;
 import com.example.mfscreener.exception.SchemeNotFoundException;
-import com.example.mfscreener.model.*;
+import com.example.mfscreener.model.FundDetailDTO;
+import com.example.mfscreener.model.Meta;
+import com.example.mfscreener.model.NAVData;
+import com.example.mfscreener.model.NavResponse;
+import com.example.mfscreener.model.Scheme;
 import com.example.mfscreener.repository.MFSchemeRepository;
 import com.example.mfscreener.repository.MFSchemeTypeRepository;
 import com.example.mfscreener.service.NavService;
 import com.example.mfscreener.util.Constants;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
@@ -30,7 +33,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
-@Slf4j
 @RequiredArgsConstructor
 public class NavServiceImpl implements NavService {
 
