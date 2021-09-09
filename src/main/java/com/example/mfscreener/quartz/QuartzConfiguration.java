@@ -16,7 +16,7 @@ public class QuartzConfiguration {
   public JobDetail createJobNAVUpdate() {
     return JobBuilder.newJob(UpdateNavJob.class)
         .withIdentity(new JobKey(UPDATE_NAV_GROUP + "-JOB", UPDATE_NAV_GROUP))
-        .storeDurably(false)
+        .storeDurably()
         .requestRecovery()
         .build();
   }
