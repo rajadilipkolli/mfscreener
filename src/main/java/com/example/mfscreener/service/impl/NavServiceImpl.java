@@ -90,6 +90,11 @@ public class NavServiceImpl implements NavService {
     return this.mfSchemesRepository.findBySchemeNameIgnoringCaseLike("%" + schemeName + "%");
   }
 
+  @Override
+  public List<FundDetailDTO> fetchSchemesByFundName(String fundName) {
+    return this.mfSchemesRepository.findByFundHouseIgnoringCaseLike("%" + fundName + "%");
+  }
+
   private Scheme getSchemeDetails(Long schemeCode, LocalDate navDate) {
     fetchSchemeDetails(schemeCode);
     return this.mfSchemesRepository

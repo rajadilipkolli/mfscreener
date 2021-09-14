@@ -46,4 +46,14 @@ public class NAVController {
 
     return navService.fetchSchemes(schemeName);
   }
+
+  @GetMapping(path = "/schemes/{fundName}")
+  @Operation(summary = "Fetches the schemes matching fund House.")
+  public List<FundDetailDTO> fetchSchemesByFundName(
+          @Parameter(description = "fund house name for mutual funds", example = "Mirae Asset Mutual fund")
+          @PathVariable(value = "fundName")
+                  String fundName) {
+
+    return navService.fetchSchemesByFundName(fundName);
+  }
 }

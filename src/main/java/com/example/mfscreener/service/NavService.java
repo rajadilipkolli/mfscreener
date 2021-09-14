@@ -14,4 +14,6 @@ public interface NavService {
   void fetchSchemeDetails(Long schemeCode);
 
   List<FundDetailDTO> fetchSchemes(String schemeName);
+
+  List<FundDetailDTO> fetchSchemesByFundName(String fundName);
 }

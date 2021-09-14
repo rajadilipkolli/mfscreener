@@ -35,4 +35,7 @@ public interface MFSchemeRepository extends JpaRepository<MFScheme, Long> {
 
   @Transactional(readOnly = true)
   List<FundDetailDTO> findBySchemeNameIgnoringCaseLike(String schemeName);
+
+  @Transactional(readOnly = true)
+  List<FundDetailDTO> findByFundHouseIgnoringCaseLike(String fundHouse);
 }
