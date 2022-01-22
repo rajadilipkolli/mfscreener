@@ -1,4 +1,4 @@
-version: "3.7"
+version: "3.8"
 
 services:
   postgresqldb:
@@ -13,7 +13,7 @@ services:
       - microservice-network
     volumes:
       - db-data:/var/lib/postgresql/data
-  
+
   pgadmin:
     image: dpage/pgadmin4
     environment:
@@ -27,6 +27,6 @@ services:
 networks:
   microservice-network:
     driver: bridge
- 
+
 volumes:
   db-data:

@@ -88,7 +88,7 @@ public class LoadInitialData {
       stopWatch.stop();
       log.info("saved in db in : {} sec", stopWatch.getTotalTimeSeconds());
     }
-    loadFundDetailsIfNotSet();
+    //loadFundDetailsIfNotSet();
   }
 
   private void loadFundDetailsIfNotSet() {
