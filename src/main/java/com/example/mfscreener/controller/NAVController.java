@@ -56,4 +56,9 @@ public class NAVController {
 
     return navService.fetchSchemesByFundName(fundName);
   }
+
+  @GetMapping("/upload")
+  public String upload() {
+    return navService.upload();
+  }
 }

@@ -7,6 +7,7 @@ import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ReflectionUtils;
 
@@ -14,6 +15,7 @@ import javax.sql.DataSource;
 import java.lang.reflect.Method;
 
 @Component
+@Profile("debug")
 public class DatasourceProxyBeanPostProcessor implements BeanPostProcessor {
 
   @Override

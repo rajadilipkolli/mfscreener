@@ -23,11 +23,13 @@ import org.springframework.util.Assert;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.io.File;
 import java.net.URI;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjusters;
+import java.util.Iterator;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -162,5 +164,31 @@ public class NavServiceImpl implements NavService {
     scheme.setDate(String.valueOf(mfScheme.getMfSchemeNavies().get(0).getNavDate()));
     scheme.setNav(String.valueOf(mfScheme.getMfSchemeNavies().get(0).getNav()));
     return scheme;
+  }
+
+  @Override
+  public String upload() {
+    File file = new File("C:\\Users\\rajad\\Downloads\\Mf.xls");
+     //Create Workbook instance holding reference to .xlsx file
+     XSSFWorkbook workbook = new XSSFWorkbook(file);
+ 
+     //Get first/desired sheet from the workbook
+     XSSFSheet sheet = workbook.getSheetAt(0);
+
+     //Iterate through each rows one by one
+     Iterator<Row> rowIterator = sheet.iterator();
+     while (rowIterator.hasNext()) 
+     {
+         Row row = rowIterator.next();
+         //For each row, iterate through all the columns
+         Iterator<Cell> cellIterator = row.cellIterator();
+          
+         while (cellIterator.hasNext()) 
+         {
+             Cell cell = cellIterator.next();
+          }
+      }
+
+    return null;
   }
 }

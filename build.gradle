@@ -38,6 +38,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.liquibase:liquibase-core'
     implementation 'org.springdoc:springdoc-openapi-ui:1.6.5'
+    implementation 'org.apache.poi:poi:5.0.0'
     implementation 'net.ttddyy:datasource-proxy:1.7'
     compileOnly 'org.projectlombok:lombok'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
