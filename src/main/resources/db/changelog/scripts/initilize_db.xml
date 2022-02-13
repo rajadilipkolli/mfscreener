@@ -67,8 +67,9 @@
             <column name="scheme_name" type="VARCHAR(255)"/>
             <column name="folio_number" type="VARCHAR(255)"/>
             <column name="transaction_type" type="VARCHAR(255)"/>
-            <column name="price" type="BIGINT"/>
-            <column name="units" type="BIGINT"/>
+            <column name="price" type="FLOAT"/>
+            <column name="units" type="FLOAT"/>
+            <column name="balance_units" type="FLOAT"/>
             <column name="created_by" type="VARCHAR(255)"/>
             <column name="created_date" type="DATETIME"/>
             <column name="last_modified_by" type="VARCHAR(255)"/>

@@ -5,13 +5,14 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.time.LocalDate;
 
 @Setter
 @Getter
 @Entity
 @NoArgsConstructor
-public class TransactionRecord {
+public class TransactionRecord extends Auditable<String> implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "transactionRecord")
@@ -20,14 +21,11 @@ public class TransactionRecord {
     private Long id;
 
     private LocalDate transactionDate;
-
     private String schemeName;
-
     private String folioNumber;
-
     private String transactionType;
+    private Float price;
+    private Float units;
+    private Float balanceUnits;
 
-    private double price;
-
-    private double units;
 }

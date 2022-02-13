@@ -197,9 +197,9 @@ public class NavServiceImpl implements NavService {
         transactionRecord.setSchemeName(row.getCell(1).getStringCellValue());
         transactionRecord.setFolioNumber(getFolioNumber(row.getCell(2)));
         transactionRecord.setTransactionType(row.getCell(3).getStringCellValue());
-        transactionRecord.setPrice(
-            Double.parseDouble(String.valueOf(row.getCell(4).getNumericCellValue())));
+        transactionRecord.setPrice(getPrice(row.getCell(4)));
         transactionRecord.setUnits(getUnits(row.getCell(5)));
+        transactionRecord.setBalanceUnits(getUnits(row.getCell(6)));
         transactionRecordList.add(transactionRecord);
       }
     }
@@ -209,11 +209,30 @@ public class NavServiceImpl implements NavService {
     return "Completed Processing";
   }
 
-  private double getUnits(Cell cell) {
+  @Override
+  public List<PortfolioDetails> getPortfolio() {
+
+    return transactionRecordRepository.getPortfolio();
+  }
+
+  @Override
+  public String updateSynonym(String schemeId, String schemaName) {
+    return null;
+  }
+
+  private Float getPrice(Cell cell) {
     if (cell.getCellType().equals(CellType.STRING)) {
-      return 0D;
+      return Float.valueOf(cell.getStringCellValue());
     } else {
-      return Double.parseDouble(String.valueOf(cell.getNumericCellValue()));
+      return (float) cell.getNumericCellValue();
+    }
+  }
+
+  private Float getUnits(Cell cell) {
+    if (cell.getCellType().equals(CellType.STRING)) {
+      return 0.0f;
+    } else {
+      return (float) cell.getNumericCellValue();
     }
   }
 
