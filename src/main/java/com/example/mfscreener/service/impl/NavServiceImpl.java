@@ -1,12 +1,10 @@
 package com.example.mfscreener.service.impl;
 
-import com.example.mfscreener.entities.MFScheme;
-import com.example.mfscreener.entities.MFSchemeNav;
-import com.example.mfscreener.entities.MFSchemeType;
-import com.example.mfscreener.entities.TransactionRecord;
+import com.example.mfscreener.entities.*;
 import com.example.mfscreener.exception.NavNotFoundException;
 import com.example.mfscreener.exception.SchemeNotFoundException;
 import com.example.mfscreener.model.*;
+import com.example.mfscreener.repository.ErrorMessageRepository;
 import com.example.mfscreener.repository.MFSchemeRepository;
 import com.example.mfscreener.repository.MFSchemeTypeRepository;
 import com.example.mfscreener.repository.TransactionRecordRepository;
@@ -24,6 +22,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
+import org.springframework.util.StopWatch;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -49,6 +48,7 @@ public class NavServiceImpl implements NavService {
   private final MFSchemeTypeRepository mfSchemeTypeRepository;
   private final RestTemplate restTemplate;
   private final TransactionRecordRepository transactionRecordRepository;
+  private final ErrorMessageRepository errorMessageRepository;
 
   Function<NAVData, MFSchemeNav> navDataToMFSchemeNavFunction =
       navData -> {
@@ -231,12 +231,35 @@ public class NavServiceImpl implements NavService {
         portfolioDetailsDTOS.stream()
             .map(PortfolioDetailsDTO::getTotalValue)
             .filter(Objects::nonNull)
-            .reduce(0f, Float::sum),portfolioDetailsDTOS);
+            .reduce(0f, Float::sum),
+        portfolioDetailsDTOS);
   }
 
   @Override
   public int updateSynonym(Long schemeId, String schemaName) {
     return transactionRecordRepository.updateSchemeId(schemeId, schemaName);
+  }
+
+  @Override
+  public void loadFundDetailsIfNotSet() {
+    StopWatch stopWatch = new StopWatch();
+    stopWatch.start("loadDetails");
+    List<Long> distinctSchemeIds = transactionRecordRepository.findDistinctSchemeId();
+
+    for (Long schemeId : distinctSchemeIds) {
+      {
+        try {
+          fetchSchemeDetails(schemeId);
+        } catch (SchemeNotFoundException | NavNotFoundException exception) {
+          log.error(exception.getMessage());
+          ErrorMessage errorMessage = new ErrorMessage();
+          errorMessage.setMessage(exception.getMessage());
+          errorMessageRepository.save(errorMessage);
+        }
+      }
+    }
+    stopWatch.stop();
+    log.info("Fund House and Scheme Type Set in : {} sec", stopWatch.getTotalTimeSeconds());
   }
 
   private Float getPrice(Cell cell) {

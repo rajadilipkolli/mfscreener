@@ -24,4 +24,6 @@ public interface NavService {
   PortfolioDTO getPortfolio();
 
   int updateSynonym(Long schemeId, String schemaName);
+
+  void loadFundDetailsIfNotSet();
 }

@@ -50,4 +50,8 @@ public interface TransactionRecordRepository extends JpaRepository<TransactionRe
     @Transactional
     @Query(value = "update transaction_record set scheme_id =:schemeId where scheme_name =:schemaName", nativeQuery = true)
     int updateSchemeId(@Param("schemeId") Long schemeId, @Param("schemaName") String schemaName);
+
+    @Transactional(readOnly = true)
+    @Query("select distinct schemeId from TransactionRecord")
+    List<Long> findDistinctSchemeId();
 }
