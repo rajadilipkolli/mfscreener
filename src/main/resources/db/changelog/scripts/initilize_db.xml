@@ -70,6 +70,7 @@
             <column name="price" type="FLOAT"/>
             <column name="units" type="FLOAT"/>
             <column name="balance_units" type="FLOAT"/>
+            <column name="scheme_id" type="BIGINT"/>
             <column name="created_by" type="VARCHAR(255)"/>
             <column name="created_date" type="DATETIME"/>
             <column name="last_modified_by" type="VARCHAR(255)"/>
