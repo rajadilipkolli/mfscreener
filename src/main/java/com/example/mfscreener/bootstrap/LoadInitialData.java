@@ -10,20 +10,22 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.event.ApplicationStartedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
+import org.springframework.util.ResourceUtils;
 import org.springframework.util.StopWatch;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Component
 @Slf4j
 @RequiredArgsConstructor
 public class LoadInitialData {
 
+  private static final String COMMA_DELIMITER = ",";
   private final MFSchemeRepository mfSchemesRepository;
   private final NavServiceConvertor navServiceConvertor;
 
@@ -78,7 +80,27 @@ public class LoadInitialData {
           });
       mfSchemesRepository.saveAll(list);
       stopWatch.stop();
+      loadAlias();
       log.info("saved in db in : {} sec", stopWatch.getTotalTimeSeconds());
     }
+  }
+
+  private void loadAlias() {
+    Map<String, Long> records = new HashMap<>();
+    try {
+      File file = ResourceUtils.getFile("classpath:scheme-mapping.csv");
+      BufferedReader br = new BufferedReader(new FileReader(file));
+      String line;
+      while ((line = br.readLine()) != null) {
+        String[] values = line.split(COMMA_DELIMITER);
+        String schemeName = values[0].substring(1, values[0].length() - 1);
+        if (!(schemeName.equals("schemaname") || "NULL".equals(values[1]))) {
+          records.put(schemeName, Long.parseLong(values[1]));
+        }
+      }
+    } catch (IOException e) {
+      log.error("IOException", e);
+    }
+    records.forEach(mfSchemesRepository::updateSchemeNameAliasBySchemeId);
   }
 }

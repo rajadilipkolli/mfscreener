@@ -3,6 +3,7 @@ package com.example.mfscreener.repository;
 import com.example.mfscreener.entities.MFScheme;
 import com.example.mfscreener.model.FundDetailDTO;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -38,4 +39,10 @@ public interface MFSchemeRepository extends JpaRepository<MFScheme, Long> {
 
   @Transactional(readOnly = true)
   List<FundDetailDTO> findByFundHouseIgnoringCaseLike(String fundHouse);
+
+  @Transactional
+  @Modifying
+  @Query("update MFScheme o set o.schemeNameAlias =:schemeName where o.schemeId=:schemeId")
+  int updateSchemeNameAliasBySchemeId(
+      @Param("schemeName") String schemeName, @Param("schemeId") Long schemeId);
 }
