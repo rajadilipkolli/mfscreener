@@ -27,5 +27,6 @@ public class TransactionRecord extends Auditable<String> implements Serializable
     private Float price;
     private Float units;
     private Float balanceUnits;
+    private Long schemeId;
 
 }

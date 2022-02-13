@@ -37,6 +37,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Function;
 
 @Service
@@ -210,14 +211,32 @@ public class NavServiceImpl implements NavService {
   }
 
   @Override
-  public List<PortfolioDetails> getPortfolio() {
-
-    return transactionRecordRepository.getPortfolio();
+  public PortfolioDTO getPortfolio() {
+    List<PortfolioDetails> portfolioDetailsList = transactionRecordRepository.getPortfolio();
+    List<PortfolioDetailsDTO> portfolioDetailsDTOS = new ArrayList<>();
+    portfolioDetailsList.forEach(
+        portfolioDetails -> {
+          PortfolioDetailsDTO portfolioDetailsDTO = new PortfolioDetailsDTO();
+          if (portfolioDetails.getSchemeId() != null) {
+            Scheme scheme =
+                getNavByDate(portfolioDetails.getSchemeId(), getAdjustedDate(LocalDate.now()));
+            portfolioDetailsDTO.setTotalValue(
+                portfolioDetails.getBalanceUnits() * Float.parseFloat(scheme.getNav()));
+          }
+          portfolioDetailsDTO.setFolioNumber(portfolioDetails.getFolioNumber());
+          portfolioDetailsDTO.setSchemeName(portfolioDetails.getSchemaName());
+          portfolioDetailsDTOS.add(portfolioDetailsDTO);
+        });
+    return new PortfolioDTO(
+        portfolioDetailsDTOS.stream()
+            .map(PortfolioDetailsDTO::getTotalValue)
+            .filter(Objects::nonNull)
+            .reduce(0f, Float::sum),portfolioDetailsDTOS);
   }
 
   @Override
-  public String updateSynonym(String schemeId, String schemaName) {
-    return null;
+  public int updateSynonym(Long schemeId, String schemaName) {
+    return transactionRecordRepository.updateSchemeId(schemeId, schemaName);
   }
 
   private Float getPrice(Cell cell) {

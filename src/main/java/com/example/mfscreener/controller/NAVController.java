@@ -1,7 +1,7 @@
 package com.example.mfscreener.controller;
 
 import com.example.mfscreener.model.FundDetailDTO;
-import com.example.mfscreener.model.PortfolioDetails;
+import com.example.mfscreener.model.PortfolioDTO;
 import com.example.mfscreener.model.Scheme;
 import com.example.mfscreener.service.NavService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -69,12 +69,12 @@ public class NAVController {
   }
 
   @PutMapping("/synonym/{schemeId}/{schemaName}")
-  public String updateSynonym(@PathVariable String schemeId, @PathVariable String schemaName) {
+  public int updateSynonym(@PathVariable Long schemeId, @PathVariable String schemaName) {
     return navService.updateSynonym(schemeId, schemaName);
   }
 
   @GetMapping("/portfolio")
-  public List<PortfolioDetails> getPortfolio(){
+  public PortfolioDTO getPortfolio(){
     return navService.getPortfolio();
   }
 }

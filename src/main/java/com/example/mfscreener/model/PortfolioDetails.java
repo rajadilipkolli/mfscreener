@@ -6,5 +6,7 @@ public interface PortfolioDetails {
 
   String getFolioNumber();
 
-  float getBalanceUnits();
+  Float getBalanceUnits();
+
+  Long getSchemeId();
 }

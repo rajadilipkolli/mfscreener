@@ -1,7 +1,7 @@
 package com.example.mfscreener.service;
 
 import com.example.mfscreener.model.FundDetailDTO;
-import com.example.mfscreener.model.PortfolioDetails;
+import com.example.mfscreener.model.PortfolioDTO;
 import com.example.mfscreener.model.Scheme;
 
 import java.io.IOException;
@@ -21,7 +21,7 @@ public interface NavService {
 
   String upload() throws IOException;
 
-  List<PortfolioDetails> getPortfolio();
+  PortfolioDTO getPortfolio();
 
-  String updateSynonym(String schemeId, String schemaName);
+  int updateSynonym(Long schemeId, String schemaName);
 }
