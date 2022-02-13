@@ -23,6 +23,7 @@
                 <constraints nullable="false"/>
             </column>
             <column name="pay_out" type="VARCHAR(255)"/>
+            <column name="scheme_name_alias" type="VARCHAR(255)"/>
             <column name="mf_scheme_type_id" type="INT"/>
             <column name="created_by" type="VARCHAR(255)"/>
             <column name="created_date" type="DATETIME"/>
