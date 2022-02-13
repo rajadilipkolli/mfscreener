@@ -3,18 +3,22 @@ package com.example.mfscreener.service.impl;
 import com.example.mfscreener.entities.MFScheme;
 import com.example.mfscreener.entities.MFSchemeNav;
 import com.example.mfscreener.entities.MFSchemeType;
+import com.example.mfscreener.entities.TransactionRecord;
 import com.example.mfscreener.exception.NavNotFoundException;
 import com.example.mfscreener.exception.SchemeNotFoundException;
-import com.example.mfscreener.model.FundDetailDTO;
-import com.example.mfscreener.model.Meta;
-import com.example.mfscreener.model.NAVData;
-import com.example.mfscreener.model.NavResponse;
-import com.example.mfscreener.model.Scheme;
+import com.example.mfscreener.model.*;
 import com.example.mfscreener.repository.MFSchemeRepository;
 import com.example.mfscreener.repository.MFSchemeTypeRepository;
+import com.example.mfscreener.repository.TransactionRecordRepository;
 import com.example.mfscreener.service.NavService;
 import com.example.mfscreener.util.Constants;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.Row;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
@@ -24,23 +28,26 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.net.URI;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjusters;
-import java.util.Iterator;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class NavServiceImpl implements NavService {
 
   private final MFSchemeRepository mfSchemesRepository;
   private final MFSchemeTypeRepository mfSchemeTypeRepository;
   private final RestTemplate restTemplate;
+  private final TransactionRecordRepository transactionRecordRepository;
 
   Function<NAVData, MFSchemeNav> navDataToMFSchemeNavFunction =
       navData -> {
@@ -112,7 +119,7 @@ public class NavServiceImpl implements NavService {
         navList.stream()
             .map(navDataToMFSchemeNavFunction)
             .filter(nav -> !mfScheme.getMfSchemeNavies().contains(nav))
-            .collect(Collectors.toList());
+            .toList();
 
     if (!newNavs.isEmpty()) {
       for (MFSchemeNav newSchemeNav : newNavs) {
@@ -167,28 +174,54 @@ public class NavServiceImpl implements NavService {
   }
 
   @Override
-  public String upload() {
-    File file = new File("C:\\Users\\rajad\\Downloads\\Mf.xls");
-     //Create Workbook instance holding reference to .xlsx file
-     XSSFWorkbook workbook = new XSSFWorkbook(file);
- 
-     //Get first/desired sheet from the workbook
-     XSSFSheet sheet = workbook.getSheetAt(0);
+  public String upload() throws IOException {
+    File file = new File("C:\\Users\\rajakolli\\Desktop\\my-transactions.xls");
 
-     //Iterate through each rows one by one
-     Iterator<Row> rowIterator = sheet.iterator();
-     while (rowIterator.hasNext()) 
-     {
-         Row row = rowIterator.next();
-         //For each row, iterate through all the columns
-         Iterator<Cell> cellIterator = row.cellIterator();
-          
-         while (cellIterator.hasNext()) 
-         {
-             Cell cell = cellIterator.next();
-          }
+    List<TransactionRecord> transactionRecordList = new ArrayList<>();
+    try (FileInputStream fileInputStream = new FileInputStream(file)) {
+      // Create Workbook instance holding reference to .xlsx file
+      HSSFWorkbook workbook = new HSSFWorkbook(fileInputStream);
+
+      // Get first/desired sheet from the workbook
+      HSSFSheet sheet = workbook.getSheetAt(0);
+
+      // Iterate through each rows one by one
+      for (int i = 1; i <= sheet.getLastRowNum(); i++) {
+
+        Row row = sheet.getRow(i);
+
+        TransactionRecord transactionRecord = new TransactionRecord();
+
+        transactionRecord.setTransactionDate(
+            LocalDate.from(row.getCell(0).getLocalDateTimeCellValue()));
+        transactionRecord.setSchemeName(row.getCell(1).getStringCellValue());
+        transactionRecord.setFolioNumber(getFolioNumber(row.getCell(2)));
+        transactionRecord.setTransactionType(row.getCell(3).getStringCellValue());
+        transactionRecord.setPrice(
+            Double.parseDouble(String.valueOf(row.getCell(4).getNumericCellValue())));
+        transactionRecord.setUnits(getUnits(row.getCell(5)));
+        transactionRecordList.add(transactionRecord);
       }
+    }
 
-    return null;
+    transactionRecordRepository.saveAll(transactionRecordList);
+
+    return "Completed Processing";
+  }
+
+  private double getUnits(Cell cell) {
+    if (cell.getCellType().equals(CellType.STRING)) {
+      return 0D;
+    } else {
+      return Double.parseDouble(String.valueOf(cell.getNumericCellValue()));
+    }
+  }
+
+  private String getFolioNumber(Cell cell) {
+    if (cell.getCellType().equals(CellType.NUMERIC)) {
+      return String.valueOf(cell.getNumericCellValue());
+    } else {
+      return cell.getStringCellValue();
+    }
   }
 }

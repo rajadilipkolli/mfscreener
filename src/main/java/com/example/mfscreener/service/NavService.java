@@ -3,6 +3,7 @@ package com.example.mfscreener.service;
 import com.example.mfscreener.model.FundDetailDTO;
 import com.example.mfscreener.model.Scheme;
 
+import java.io.IOException;
 import java.util.List;
 
 public interface NavService {
@@ -16,4 +17,6 @@ public interface NavService {
   List<FundDetailDTO> fetchSchemes(String schemeName);
 
   List<FundDetailDTO> fetchSchemesByFundName(String fundName);
+
+  String upload() throws IOException;
 }

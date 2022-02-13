@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -50,15 +51,17 @@ public class NAVController {
   @GetMapping(path = "/schemes/{fundName}")
   @Operation(summary = "Fetches the schemes matching fund House.")
   public List<FundDetailDTO> fetchSchemesByFundName(
-          @Parameter(description = "fund house name for mutual funds", example = "Mirae Asset Mutual fund")
+      @Parameter(
+              description = "fund house name for mutual funds",
+              example = "Mirae Asset Mutual fund")
           @PathVariable(value = "fundName")
-                  String fundName) {
+          String fundName) {
 
     return navService.fetchSchemesByFundName(fundName);
   }
 
   @GetMapping("/upload")
-  public String upload() {
+  public String upload() throws IOException {
     return navService.upload();
   }
 }
