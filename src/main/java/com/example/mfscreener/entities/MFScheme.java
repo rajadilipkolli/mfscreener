@@ -26,6 +26,9 @@ public class MFScheme extends Auditable<String> implements Serializable {
   @Column(name = "scheme_name", nullable = false)
   private String schemeName;
 
+  @Column(name = "scheme_name_alias")
+  private String schemeNameAlias;
+
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "mf_scheme_type_id")
   private MFSchemeType mfSchemeType = null;
