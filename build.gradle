@@ -37,7 +37,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.liquibase:liquibase-core'
-    implementation 'org.springdoc:springdoc-openapi-ui:1.6.8'
+    implementation 'org.springdoc:springdoc-openapi-ui:1.6.9'
     implementation 'org.apache.poi:poi:5.2.2'
     implementation 'net.ttddyy:datasource-proxy:1.7'
     compileOnly 'org.projectlombok:lombok'
