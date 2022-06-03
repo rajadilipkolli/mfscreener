@@ -39,7 +39,7 @@ dependencies {
     implementation 'org.liquibase:liquibase-core'
     implementation 'org.springdoc:springdoc-openapi-ui:1.6.9'
     implementation 'org.apache.poi:poi:5.2.2'
-    implementation 'net.ttddyy:datasource-proxy:1.7'
+    implementation 'net.ttddyy:datasource-proxy:1.8'
     compileOnly 'org.projectlombok:lombok'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     runtimeOnly 'org.postgresql:postgresql'
