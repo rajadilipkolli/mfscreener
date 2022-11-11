@@ -1,4 +1,4 @@
-[![Quality gate](https://sonarcloud.io/api/project_badges/quality_gate?project=rajadileepkolli_mfscreener)](https://sonarcloud.io/dashboard?id=rajadileepkolli_mfscreener)
+[![Quality gate](https://sonarcloud.io/api/project_badges/quality_gate?project=rajadilipkolli_mfscreener)](https://sonarcloud.io/dashboard?id=rajadilipkolli_mfscreener)
 
 # mfscreener
 Spring Boot REST API which fetches the Net Asset Value(NAV) of an AMFI mutual fund and saves in db
