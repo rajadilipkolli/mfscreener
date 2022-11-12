@@ -18,12 +18,12 @@ public class NavServiceConvertor implements Converter<Scheme, MFScheme> {
   @Override
   public MFScheme convert(Scheme source) {
     MFScheme mfSchemes = new MFScheme();
-    mfSchemes.setSchemeId(Long.valueOf(source.getSchemeCode()));
-    mfSchemes.setPayOut(source.getPayout());
-    mfSchemes.setSchemeName(source.getSchemeName());
+    mfSchemes.setSchemeId(Long.valueOf(source.schemeCode()));
+    mfSchemes.setPayOut(source.payout());
+    mfSchemes.setSchemeName(source.schemeName());
     MFSchemeNav mfSchemenav = new MFSchemeNav();
-    mfSchemenav.setNav("N.A.".equals(source.getNav()) ? 0D : Double.parseDouble(source.getNav()));
-    mfSchemenav.setNavDate(LocalDate.parse(source.getDate(), DATE_FORMATTER));
+    mfSchemenav.setNav("N.A.".equals(source.nav()) ? 0D : Double.parseDouble(source.nav()));
+    mfSchemenav.setNavDate(LocalDate.parse(source.date(), DATE_FORMATTER));
     mfSchemes.addSchemeNav(mfSchemenav);
     return mfSchemes;
   }
