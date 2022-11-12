@@ -9,7 +9,6 @@
     <changeSet id="create_sequences" author="rajad (generated)">
         <createSequence incrementBy="100" sequenceName="scheme_id_seq" startValue="1"/>
         <createSequence incrementBy="2" sequenceName="scheme_type_id_seq" startValue="1"/>
-        <createSequence incrementBy="50" sequenceName="transaction_record_sequence" startValue="1"/>
         <createSequence incrementBy="100" sequenceName="error_id_seq" startValue="1"/>
     </changeSet>
 
@@ -54,24 +53,6 @@
             <column name="scheme_category" type="VARCHAR(255)">
                 <constraints nullable="false"/>
             </column>
-            <column name="created_by" type="VARCHAR(255)"/>
-            <column name="created_date" type="DATETIME"/>
-            <column name="last_modified_by" type="VARCHAR(255)"/>
-            <column name="last_modified_date" type="DATETIME"/>
-        </createTable>
-
-        <createTable tableName="transaction_record">
-            <column name="id" type="BIGINT">
-                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_transactionrecord"/>
-            </column>
-            <column name="transaction_date" type="DATE"/>
-            <column name="scheme_name" type="VARCHAR(255)"/>
-            <column name="folio_number" type="VARCHAR(255)"/>
-            <column name="transaction_type" type="VARCHAR(255)"/>
-            <column name="price" type="FLOAT"/>
-            <column name="units" type="FLOAT"/>
-            <column name="balance_units" type="FLOAT"/>
-            <column name="scheme_id" type="BIGINT"/>
             <column name="created_by" type="VARCHAR(255)"/>
             <column name="created_date" type="DATETIME"/>
             <column name="last_modified_by" type="VARCHAR(255)"/>
