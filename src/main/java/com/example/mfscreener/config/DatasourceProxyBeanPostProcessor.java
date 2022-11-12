@@ -1,4 +1,4 @@
-/* Licensed under Apache-2.0 2022. */
+/* Licensed under Apache-2.0 2021-2022. */
 package com.example.mfscreener.config;
 
 import java.lang.reflect.Method;
@@ -36,10 +36,8 @@ public class DatasourceProxyBeanPostProcessor implements BeanPostProcessor {
         return bean;
     }
 
-    private static class ProxyDataSourceInterceptor implements MethodInterceptor {
-        private final DataSource dataSource;
-
-        public ProxyDataSourceInterceptor(final DataSource dataSource) {
+    private record ProxyDataSourceInterceptor(DataSource dataSource) implements MethodInterceptor {
+        private ProxyDataSourceInterceptor(final DataSource dataSource) {
             this.dataSource =
                     ProxyDataSourceBuilder.create(dataSource)
                             .name("MyDS")
