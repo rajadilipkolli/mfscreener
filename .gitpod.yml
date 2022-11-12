@@ -1,0 +1,12 @@
+image: gitpod/workspace-java-17
+
+tasks:
+  - init: ./gradlew build
+
+
+vscode:
+  extensions:
+    - vscjava.vscode-java-pack
+    - GabrielBB.vscode-lombok
+    - Pivotal.vscode-boot-dev-pack
+    - richardwillis.vscode-gradle
