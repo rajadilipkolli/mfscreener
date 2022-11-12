@@ -5,6 +5,8 @@ import com.example.mfscreener.entities.MFScheme;
 import com.example.mfscreener.model.Scheme;
 import com.example.mfscreener.repository.MFSchemeRepository;
 import com.example.mfscreener.util.Constants;
+import java.io.*;
+import java.util.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.event.ApplicationStartedEvent;
@@ -14,92 +16,89 @@ import org.springframework.util.ResourceUtils;
 import org.springframework.util.StopWatch;
 import org.springframework.web.client.RestTemplate;
 
-import java.io.*;
-import java.util.*;
-
 @Component
 @Slf4j
 @RequiredArgsConstructor
 public class LoadInitialData {
 
-  private static final String COMMA_DELIMITER = ",";
-  private final MFSchemeRepository mfSchemesRepository;
-  private final NavServiceConvertor navServiceConvertor;
-  private final RestTemplate restTemplate;
+    private static final String COMMA_DELIMITER = ",";
+    private final MFSchemeRepository mfSchemesRepository;
+    private final NavServiceConvertor navServiceConvertor;
+    private final RestTemplate restTemplate;
 
-  @EventListener(value = ApplicationStartedEvent.class)
-  void loadAllFunds() throws IOException {
-    long start = System.currentTimeMillis();
-    log.info("Loading All Funds...");
-    List<Scheme> chopArrayList = new ArrayList<>();
-    String allNAVs = restTemplate.getForObject(Constants.AMFI_WEBSITE_LINK, String.class);
-    Reader inputString = new StringReader(Objects.requireNonNull(allNAVs));
-    try (BufferedReader br = new BufferedReader(inputString)) {
-      String fileRead = br.readLine();
-      for (int i = 0; i < 4; ++i) {
-        fileRead = br.readLine();
-      }
-      while (fileRead != null) {
-        int check = 0;
-        final String[] tokenize = fileRead.split(Constants.SEPARATOR);
-        if (tokenize.length == 1) {
-          check = 1;
+    @EventListener(value = ApplicationStartedEvent.class)
+    void loadAllFunds() throws IOException {
+        long start = System.currentTimeMillis();
+        log.info("Loading All Funds...");
+        List<Scheme> chopArrayList = new ArrayList<>();
+        String allNAVs = restTemplate.getForObject(Constants.AMFI_WEBSITE_LINK, String.class);
+        Reader inputString = new StringReader(Objects.requireNonNull(allNAVs));
+        try (BufferedReader br = new BufferedReader(inputString)) {
+            String fileRead = br.readLine();
+            for (int i = 0; i < 4; ++i) {
+                fileRead = br.readLine();
+            }
+            while (fileRead != null) {
+                int check = 0;
+                final String[] tokenize = fileRead.split(Constants.SEPARATOR);
+                if (tokenize.length == 1) {
+                    check = 1;
+                }
+                if (check == 0) {
+                    final String schemecode = tokenize[0];
+                    final String payout = tokenize[1];
+                    final String reinvestment = tokenize[2];
+                    final String schemename = tokenize[3];
+                    final String nav = tokenize[4];
+                    final String date = tokenize[5];
+                    final Scheme tempObj = new Scheme(schemecode, payout, schemename, nav, date);
+                    chopArrayList.add(tempObj);
+                }
+                fileRead = br.readLine();
+                if ("".equals(fileRead)) {
+                    fileRead = br.readLine();
+                }
+            }
         }
-        if (check == 0) {
-          final String schemecode = tokenize[0];
-          final String payout = tokenize[1];
-          final String reinvestment = tokenize[2];
-          final String schemename = tokenize[3];
-          final String nav = tokenize[4];
-          final String date = tokenize[5];
-          final Scheme tempObj = new Scheme(schemecode, payout, schemename, nav, date);
-          chopArrayList.add(tempObj);
-        }
-        fileRead = br.readLine();
-        if ("".equals(fileRead)) {
-          fileRead = br.readLine();
-        }
-      }
-    }
-    log.info(
-        "All Funds loaded in {} milliseconds, total funds loaded :{}",
-        (System.currentTimeMillis() - start),
-        chopArrayList.size());
+        log.info(
+                "All Funds loaded in {} milliseconds, total funds loaded :{}",
+                (System.currentTimeMillis() - start),
+                chopArrayList.size());
 
-    if (mfSchemesRepository.count() != chopArrayList.size()) {
-      StopWatch stopWatch = new StopWatch();
-      stopWatch.start("saving fundNames");
-      List<MFScheme> list = new ArrayList<>();
-      List<Long> schemeCodesList = mfSchemesRepository.findAllSchemeIds();
-      chopArrayList.removeIf(s -> schemeCodesList.contains(Long.valueOf(s.schemeCode())));
-      chopArrayList.forEach(
-          scheme -> {
-            MFScheme mfSchemeEntity = navServiceConvertor.convert(scheme);
-            list.add(mfSchemeEntity);
-          });
-      mfSchemesRepository.saveAll(list);
-      stopWatch.stop();
-      loadAlias();
-      log.info("saved in db in : {} sec", stopWatch.getTotalTimeSeconds());
-    }
-  }
-
-  private void loadAlias() {
-    Map<String, Long> records = new HashMap<>();
-    try {
-      File file = ResourceUtils.getFile("classpath:scheme-mapping.csv");
-      BufferedReader br = new BufferedReader(new FileReader(file));
-      String line;
-      while ((line = br.readLine()) != null) {
-        String[] values = line.split(COMMA_DELIMITER);
-        String schemeName = values[0].substring(1, values[0].length() - 1);
-        if (!(schemeName.equals("schemaname") || "NULL".equals(values[1]))) {
-          records.put(schemeName, Long.parseLong(values[1]));
+        if (mfSchemesRepository.count() != chopArrayList.size()) {
+            StopWatch stopWatch = new StopWatch();
+            stopWatch.start("saving fundNames");
+            List<MFScheme> list = new ArrayList<>();
+            List<Long> schemeCodesList = mfSchemesRepository.findAllSchemeIds();
+            chopArrayList.removeIf(s -> schemeCodesList.contains(Long.valueOf(s.schemeCode())));
+            chopArrayList.forEach(
+                    scheme -> {
+                        MFScheme mfSchemeEntity = navServiceConvertor.convert(scheme);
+                        list.add(mfSchemeEntity);
+                    });
+            mfSchemesRepository.saveAll(list);
+            stopWatch.stop();
+            loadAlias();
+            log.info("saved in db in : {} sec", stopWatch.getTotalTimeSeconds());
         }
-      }
-    } catch (IOException e) {
-      log.error("IOException", e);
     }
-    records.forEach(mfSchemesRepository::updateSchemeNameAliasBySchemeId);
-  }
+
+    private void loadAlias() {
+        Map<String, Long> records = new HashMap<>();
+        try {
+            File file = ResourceUtils.getFile("classpath:scheme-mapping.csv");
+            BufferedReader br = new BufferedReader(new FileReader(file));
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] values = line.split(COMMA_DELIMITER);
+                String schemeName = values[0].substring(1, values[0].length() - 1);
+                if (!(schemeName.equals("schemaname") || "NULL".equals(values[1]))) {
+                    records.put(schemeName, Long.parseLong(values[1]));
+                }
+            }
+        } catch (IOException e) {
+            log.error("IOException", e);
+        }
+        records.forEach(mfSchemesRepository::updateSchemeNameAliasBySchemeId);
+    }
 }

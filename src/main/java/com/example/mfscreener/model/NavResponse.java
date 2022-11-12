@@ -1,16 +1,15 @@
 package com.example.mfscreener.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
-
 import java.util.ArrayList;
 import java.util.List;
+import lombok.Data;
 
 @Data
 public class NavResponse {
-  private String status;
-  private Meta meta;
+    private String status;
+    private Meta meta;
 
-  @JsonProperty("data")
-  private List<NAVData> data = new ArrayList<>();
+    @JsonProperty("data")
+    private List<NAVData> data = new ArrayList<>();
 }

@@ -2,6 +2,7 @@ package com.example.mfscreener.repository;
 
 import com.example.mfscreener.entities.TransactionRecord;
 import com.example.mfscreener.model.PortfolioDetails;
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -9,14 +10,14 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-
 @Repository
 public interface TransactionRecordRepository extends JpaRepository<TransactionRecord, Long> {
 
     @Transactional(readOnly = true)
-    @Query(nativeQuery = true,
-            value = """
+    @Query(
+            nativeQuery = true,
+            value =
+                    """
                     WITH
                             inView AS
                             (
@@ -48,7 +49,11 @@ public interface TransactionRecordRepository extends JpaRepository<TransactionRe
 
     @Modifying
     @Transactional
-    @Query(value = "update transaction_record set scheme_id =:schemeId where scheme_name =:schemaName", nativeQuery = true)
+    @Query(
+            value =
+                    "update transaction_record set scheme_id =:schemeId where scheme_name"
+                            + " =:schemaName",
+            nativeQuery = true)
     int updateSchemeId(@Param("schemeId") Long schemeId, @Param("schemaName") String schemaName);
 
     @Transactional(readOnly = true)

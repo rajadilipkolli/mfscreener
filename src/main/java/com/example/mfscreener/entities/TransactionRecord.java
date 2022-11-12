@@ -1,12 +1,11 @@
 package com.example.mfscreener.entities;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
 import jakarta.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDate;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Setter
 @Getter
@@ -28,5 +27,4 @@ public class TransactionRecord extends Auditable<String> implements Serializable
     private Float units;
     private Float balanceUnits;
     private Long schemeId;
-
 }

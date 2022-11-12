@@ -2,7 +2,7 @@ package com.example.mfscreener.model;
 
 public interface FundDetailDTO {
 
-  Long getSchemeId();
+    Long getSchemeId();
 
-  String getSchemeName();
+    String getSchemeName();
 }

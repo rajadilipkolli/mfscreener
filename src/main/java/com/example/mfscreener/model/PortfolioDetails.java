@@ -2,11 +2,11 @@ package com.example.mfscreener.model;
 
 public interface PortfolioDetails {
 
-  String getSchemaName();
+    String getSchemaName();
 
-  String getFolioNumber();
+    String getFolioNumber();
 
-  Float getBalanceUnits();
+    Float getBalanceUnits();
 
-  Long getSchemeId();
+    Long getSchemeId();
 }
