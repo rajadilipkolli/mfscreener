@@ -1,9 +1,9 @@
 /* Licensed under Apache-2.0 2021-2022. */
 package com.example.mfscreener.controller;
 
-import com.example.mfscreener.model.FundDetailDTO;
-import com.example.mfscreener.model.PortfolioDTO;
-import com.example.mfscreener.model.Scheme;
+import com.example.mfscreener.models.PortfolioDTO;
+import com.example.mfscreener.models.Scheme;
+import com.example.mfscreener.models.projection.FundDetailProjection;
 import com.example.mfscreener.service.NavService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -42,7 +42,7 @@ public class NAVController {
 
     @GetMapping(path = "/scheme/{schemeName}")
     @Operation(summary = "Fetches the schemes matching key.")
-    public List<FundDetailDTO> fetchSchemes(
+    public List<FundDetailProjection> fetchSchemes(
             @Parameter(description = "scheme name for mutual fund", example = "sbi small cap")
                     @PathVariable(value = "schemeName")
                     String schemeName) {
@@ -52,7 +52,7 @@ public class NAVController {
 
     @GetMapping(path = "/schemes/{fundName}")
     @Operation(summary = "Fetches the schemes matching fund House.")
-    public List<FundDetailDTO> fetchSchemesByFundName(
+    public List<FundDetailProjection> fetchSchemesByFundName(
             @Parameter(
                             description = "fund house name for mutual funds",
                             example = "Mirae Asset Mutual fund")

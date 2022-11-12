@@ -1,7 +1,7 @@
 /* Licensed under Apache-2.0 2022. */
-package com.example.mfscreener.model;
+package com.example.mfscreener.models.projection;
 
-public interface PortfolioDetails {
+public interface PortfolioDetailsProjection {
 
     String getSchemaName();
 

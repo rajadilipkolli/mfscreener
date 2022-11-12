@@ -1,10 +1,20 @@
 /* Licensed under Apache-2.0 2021-2022. */
 package com.example.mfscreener.service.impl;
 
-import com.example.mfscreener.entities.*;
+import com.example.mfscreener.entities.ErrorMessage;
+import com.example.mfscreener.entities.MFScheme;
+import com.example.mfscreener.entities.MFSchemeNav;
+import com.example.mfscreener.entities.MFSchemeType;
 import com.example.mfscreener.exception.NavNotFoundException;
 import com.example.mfscreener.exception.SchemeNotFoundException;
-import com.example.mfscreener.model.*;
+import com.example.mfscreener.models.Meta;
+import com.example.mfscreener.models.NAVData;
+import com.example.mfscreener.models.NavResponse;
+import com.example.mfscreener.models.PortfolioDTO;
+import com.example.mfscreener.models.PortfolioDetailsDTO;
+import com.example.mfscreener.models.Scheme;
+import com.example.mfscreener.models.projection.FundDetailProjection;
+import com.example.mfscreener.models.projection.PortfolioDetailsProjection;
 import com.example.mfscreener.repository.ErrorMessageRepository;
 import com.example.mfscreener.repository.MFSchemeRepository;
 import com.example.mfscreener.repository.MFSchemeTypeRepository;
@@ -88,12 +98,12 @@ public class NavServiceImpl implements NavService {
     }
 
     @Override
-    public List<FundDetailDTO> fetchSchemes(String schemeName) {
+    public List<FundDetailProjection> fetchSchemes(String schemeName) {
         return this.mfSchemesRepository.findBySchemeNameIgnoringCaseLike("%" + schemeName + "%");
     }
 
     @Override
-    public List<FundDetailDTO> fetchSchemesByFundName(String fundName) {
+    public List<FundDetailProjection> fetchSchemesByFundName(String fundName) {
         return this.mfSchemesRepository.findByFundHouseIgnoringCaseLike("%" + fundName + "%");
     }
 
@@ -171,7 +181,7 @@ public class NavServiceImpl implements NavService {
     public PortfolioDTO getPortfolio() {
         // List<PortfolioDetails> portfolioDetailsList = transactionRecordRepository.getPortfolio();
         List<PortfolioDetailsDTO> portfolioDetailsDTOS = new ArrayList<>();
-        List<PortfolioDetails> portfolioDetailsList = new ArrayList<>();
+        List<PortfolioDetailsProjection> portfolioDetailsList = new ArrayList<>();
         portfolioDetailsList.forEach(
                 portfolioDetails -> {
                     float totalValue = 0;

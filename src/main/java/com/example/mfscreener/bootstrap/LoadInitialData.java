@@ -1,9 +1,9 @@
 /* Licensed under Apache-2.0 2021-2022. */
 package com.example.mfscreener.bootstrap;
 
-import com.example.mfscreener.convertor.NavServiceConvertor;
+import com.example.mfscreener.adapter.ConversionServiceAdapter;
 import com.example.mfscreener.entities.MFScheme;
-import com.example.mfscreener.model.Scheme;
+import com.example.mfscreener.models.Scheme;
 import com.example.mfscreener.repository.MFSchemeRepository;
 import com.example.mfscreener.util.Constants;
 import java.io.*;
@@ -24,7 +24,7 @@ public class LoadInitialData {
 
     private static final String COMMA_DELIMITER = ",";
     private final MFSchemeRepository mfSchemesRepository;
-    private final NavServiceConvertor navServiceConvertor;
+    private final ConversionServiceAdapter conversionServiceAdapter;
     private final RestTemplate restTemplate;
 
     @EventListener(value = ApplicationStartedEvent.class)
@@ -74,7 +74,8 @@ public class LoadInitialData {
             chopArrayList.removeIf(s -> schemeCodesList.contains(Long.valueOf(s.schemeCode())));
             chopArrayList.forEach(
                     scheme -> {
-                        MFScheme mfSchemeEntity = navServiceConvertor.convert(scheme);
+                        MFScheme mfSchemeEntity =
+                                conversionServiceAdapter.mapSchemeToMFScheme(scheme);
                         list.add(mfSchemeEntity);
                     });
             mfSchemesRepository.saveAll(list);

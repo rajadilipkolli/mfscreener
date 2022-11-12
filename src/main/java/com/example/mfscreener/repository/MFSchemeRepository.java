@@ -2,7 +2,7 @@
 package com.example.mfscreener.repository;
 
 import com.example.mfscreener.entities.MFScheme;
-import com.example.mfscreener.model.FundDetailDTO;
+import com.example.mfscreener.models.projection.FundDetailProjection;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -36,10 +36,10 @@ public interface MFSchemeRepository extends JpaRepository<MFScheme, Long> {
     List<Long> findAllSchemeIds();
 
     @Transactional(readOnly = true)
-    List<FundDetailDTO> findBySchemeNameIgnoringCaseLike(String schemeName);
+    List<FundDetailProjection> findBySchemeNameIgnoringCaseLike(String schemeName);
 
     @Transactional(readOnly = true)
-    List<FundDetailDTO> findByFundHouseIgnoringCaseLike(String fundHouse);
+    List<FundDetailProjection> findByFundHouseIgnoringCaseLike(String fundHouse);
 
     @Transactional
     @Modifying

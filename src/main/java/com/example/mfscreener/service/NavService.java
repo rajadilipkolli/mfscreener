@@ -1,9 +1,9 @@
 /* Licensed under Apache-2.0 2021-2022. */
 package com.example.mfscreener.service;
 
-import com.example.mfscreener.model.FundDetailDTO;
-import com.example.mfscreener.model.PortfolioDTO;
-import com.example.mfscreener.model.Scheme;
+import com.example.mfscreener.models.PortfolioDTO;
+import com.example.mfscreener.models.Scheme;
+import com.example.mfscreener.models.projection.FundDetailProjection;
 import java.util.List;
 
 public interface NavService {
@@ -14,9 +14,9 @@ public interface NavService {
 
     void fetchSchemeDetails(Long schemeCode);
 
-    List<FundDetailDTO> fetchSchemes(String schemeName);
+    List<FundDetailProjection> fetchSchemes(String schemeName);
 
-    List<FundDetailDTO> fetchSchemesByFundName(String fundName);
+    List<FundDetailProjection> fetchSchemesByFundName(String fundName);
 
     PortfolioDTO getPortfolio();
 
