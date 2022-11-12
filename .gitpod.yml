@@ -10,3 +10,14 @@ vscode:
     - GabrielBB.vscode-lombok
     - Pivotal.vscode-boot-dev-pack
     - richardwillis.vscode-gradle
+    - redhat.java
+    - pivotal.vscode-spring-boot
+    - vscjava.vscode-spring-initializr
+
+ports:
+  - port: 5050
+    visibility: public
+  - port: 5432
+    visibility: public
+  - port: 8080
+    visibility: public
