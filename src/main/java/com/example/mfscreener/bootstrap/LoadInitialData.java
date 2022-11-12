@@ -88,13 +88,14 @@ public class LoadInitialData {
         Map<String, Long> records = new HashMap<>();
         try {
             File file = ResourceUtils.getFile("classpath:scheme-mapping.csv");
-            BufferedReader br = new BufferedReader(new FileReader(file));
-            String line;
-            while ((line = br.readLine()) != null) {
-                String[] values = line.split(COMMA_DELIMITER);
-                String schemeName = values[0].substring(1, values[0].length() - 1);
-                if (!(schemeName.equals("schemaname") || "NULL".equals(values[1]))) {
-                    records.put(schemeName, Long.parseLong(values[1]));
+            try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+                String line;
+                while ((line = br.readLine()) != null) {
+                    String[] values = line.split(COMMA_DELIMITER);
+                    String schemeName = values[0].substring(1, values[0].length() - 1);
+                    if (!(schemeName.equals("schemaname") || "NULL".equals(values[1]))) {
+                        records.put(schemeName, Long.parseLong(values[1]));
+                    }
                 }
             }
         } catch (IOException e) {

@@ -1,7 +1,15 @@
 /* Licensed under Apache-2.0 2022. */
 package com.example.mfscreener.entities;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import java.io.Serializable;
 import java.util.Objects;
 import lombok.Getter;
 import lombok.Setter;
@@ -11,7 +19,7 @@ import org.hibernate.Hibernate;
 @Setter
 @Entity
 @Table(name = "transaction_entity")
-public class TransactionEntity {
+public class TransactionEntity extends Auditable<String> implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     @Column(name = "id", nullable = false)

@@ -20,4 +20,4 @@ CREATE
         );
 
 ALTER TABLE
-    investor_info ADD CONSTRAINT FK_INVESTOR_INFO_ON_CAS_DETAILS_ENTITY FOREIGN KEY(cas_details_entity_id) REFERENCES cas_info(id);
+    investor_info ADD CONSTRAINT FK_INVESTOR_INFO_ON_CAS_DETAILS_ENTITY FOREIGN KEY(cas_details_entity_id) REFERENCES cas_details(id);
