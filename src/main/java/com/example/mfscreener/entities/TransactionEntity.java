@@ -1,0 +1,45 @@
+/* Licensed under Apache-2.0 2022. */
+package com.example.mfscreener.entities;
+
+import jakarta.persistence.*;
+import java.util.Objects;
+import lombok.Getter;
+import lombok.Setter;
+import org.hibernate.Hibernate;
+
+@Getter
+@Setter
+@Entity
+@Table(name = "transaction_entity")
+public class TransactionEntity {
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @Column(name = "id", nullable = false)
+    private Long id;
+
+    private String date;
+    private String description;
+    private String amount;
+    private String units;
+    private String nav;
+    private String balance;
+    private String type;
+    private String dividendRate;
+
+    @ManyToOne
+    @JoinColumn(name = "scheme_entity_id")
+    private SchemeEntity schemeEntity;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+        TransactionEntity that = (TransactionEntity) o;
+        return id != null && Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
+}

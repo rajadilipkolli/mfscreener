@@ -1,5 +1,5 @@
 databaseChangeLog:
-  - include:
-      file: db/changelog/scripts/liquibase.quartz.init.xml
-  - include:
-      file: db/changelog/scripts/initilize_db.xml
+  - includeAll:
+      path: /scripts
+      relativeToChangelogFile: true
+      errorIfMissingOrEmpty: true

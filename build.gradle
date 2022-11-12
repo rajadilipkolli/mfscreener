@@ -64,6 +64,10 @@ test {
 }
 
 spotless {
+  sql{
+      target 'src/main/resources/**/*.sql' // have to set manually
+      dbeaver()
+  }
   java {
       removeUnusedImports()
       googleJavaFormat('1.15.0')
