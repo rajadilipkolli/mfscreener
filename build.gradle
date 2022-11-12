@@ -65,9 +65,16 @@ test {
 
 spotless {
   java {
-    googleJavaFormat('1.15.0')
+      removeUnusedImports()
+      googleJavaFormat('1.15.0')
         .aosp()
         .reflowLongStrings()
         .groupArtifact('com.google.googlejavaformat:google-java-format')
+      // fix formatting of type annotations
+      formatAnnotations()
+      // make sure every file has the following copyright header.
+      // optionally, Spotless can set copyright years by digging
+      // through git history (see "license" section below)
+      licenseHeader '/* Licensed under Apache-2.0 $YEAR. */'
   }
 }

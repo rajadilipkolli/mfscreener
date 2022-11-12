@@ -1,3 +1,4 @@
+/* Licensed under Apache-2.0 2022. */
 package com.example.mfscreener.service;
 
 import com.example.mfscreener.model.FundDetailDTO;
