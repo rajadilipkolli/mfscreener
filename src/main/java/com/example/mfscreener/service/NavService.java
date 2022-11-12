@@ -4,7 +4,6 @@ package com.example.mfscreener.service;
 import com.example.mfscreener.model.FundDetailDTO;
 import com.example.mfscreener.model.PortfolioDTO;
 import com.example.mfscreener.model.Scheme;
-import java.io.IOException;
 import java.util.List;
 
 public interface NavService {
@@ -19,11 +18,7 @@ public interface NavService {
 
     List<FundDetailDTO> fetchSchemesByFundName(String fundName);
 
-    String upload() throws IOException;
-
     PortfolioDTO getPortfolio();
-
-    int updateSynonym(Long schemeId, String schemaName);
 
     void loadFundDetailsIfNotSet();
 }

@@ -8,12 +8,8 @@ import com.example.mfscreener.model.*;
 import com.example.mfscreener.repository.ErrorMessageRepository;
 import com.example.mfscreener.repository.MFSchemeRepository;
 import com.example.mfscreener.repository.MFSchemeTypeRepository;
-import com.example.mfscreener.repository.TransactionRecordRepository;
 import com.example.mfscreener.service.NavService;
 import com.example.mfscreener.util.Constants;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.net.URI;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -25,11 +21,6 @@ import java.util.Objects;
 import java.util.function.Function;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellType;
-import org.apache.poi.ss.usermodel.Row;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
@@ -47,7 +38,6 @@ public class NavServiceImpl implements NavService {
     private final MFSchemeRepository mfSchemesRepository;
     private final MFSchemeTypeRepository mfSchemeTypeRepository;
     private final RestTemplate restTemplate;
-    private final TransactionRecordRepository transactionRecordRepository;
     private final ErrorMessageRepository errorMessageRepository;
 
     Function<NAVData, MFSchemeNav> navDataToMFSchemeNavFunction =
@@ -178,45 +168,10 @@ public class NavServiceImpl implements NavService {
     }
 
     @Override
-    public String upload() throws IOException {
-        File file = new File("C:\\Users\\rajakolli\\Desktop\\my-transactions.xls");
-
-        List<TransactionRecord> transactionRecordList = new ArrayList<>();
-        try (FileInputStream fileInputStream = new FileInputStream(file)) {
-            // Create Workbook instance holding reference to .xlsx file
-            HSSFWorkbook workbook = new HSSFWorkbook(fileInputStream);
-
-            // Get first/desired sheet from the workbook
-            HSSFSheet sheet = workbook.getSheetAt(0);
-
-            // Iterate through each rows one by one
-            for (int i = 1; i <= sheet.getLastRowNum(); i++) {
-
-                Row row = sheet.getRow(i);
-
-                TransactionRecord transactionRecord = new TransactionRecord();
-
-                transactionRecord.setTransactionDate(
-                        LocalDate.from(row.getCell(0).getLocalDateTimeCellValue()));
-                transactionRecord.setSchemeName(row.getCell(1).getStringCellValue());
-                transactionRecord.setFolioNumber(getFolioNumber(row.getCell(2)));
-                transactionRecord.setTransactionType(row.getCell(3).getStringCellValue());
-                transactionRecord.setPrice(getPrice(row.getCell(4)));
-                transactionRecord.setUnits(getUnits(row.getCell(5)));
-                transactionRecord.setBalanceUnits(getUnits(row.getCell(6)));
-                transactionRecordList.add(transactionRecord);
-            }
-        }
-
-        transactionRecordRepository.saveAll(transactionRecordList);
-
-        return "Completed Processing";
-    }
-
-    @Override
     public PortfolioDTO getPortfolio() {
-        List<PortfolioDetails> portfolioDetailsList = transactionRecordRepository.getPortfolio();
+        // List<PortfolioDetails> portfolioDetailsList = transactionRecordRepository.getPortfolio();
         List<PortfolioDetailsDTO> portfolioDetailsDTOS = new ArrayList<>();
+        List<PortfolioDetails> portfolioDetailsList = new ArrayList<>();
         portfolioDetailsList.forEach(
                 portfolioDetails -> {
                     float totalValue = 0;
@@ -244,15 +199,11 @@ public class NavServiceImpl implements NavService {
     }
 
     @Override
-    public int updateSynonym(Long schemeId, String schemaName) {
-        return transactionRecordRepository.updateSchemeId(schemeId, schemaName);
-    }
-
-    @Override
     public void loadFundDetailsIfNotSet() {
         StopWatch stopWatch = new StopWatch();
         stopWatch.start("loadDetails");
-        List<Long> distinctSchemeIds = transactionRecordRepository.findDistinctSchemeId();
+        // List<Long> distinctSchemeIds = transactionRecordRepository.findDistinctSchemeId();
+        List<Long> distinctSchemeIds = new ArrayList<>();
 
         for (Long schemeId : distinctSchemeIds) {
             {
@@ -268,29 +219,5 @@ public class NavServiceImpl implements NavService {
         }
         stopWatch.stop();
         log.info("Fund House and Scheme Type Set in : {} sec", stopWatch.getTotalTimeSeconds());
-    }
-
-    private Float getPrice(Cell cell) {
-        if (cell.getCellType().equals(CellType.STRING)) {
-            return Float.valueOf(cell.getStringCellValue());
-        } else {
-            return (float) cell.getNumericCellValue();
-        }
-    }
-
-    private Float getUnits(Cell cell) {
-        if (cell.getCellType().equals(CellType.STRING)) {
-            return 0.0f;
-        } else {
-            return (float) cell.getNumericCellValue();
-        }
-    }
-
-    private String getFolioNumber(Cell cell) {
-        if (cell.getCellType().equals(CellType.NUMERIC)) {
-            return String.valueOf(cell.getNumericCellValue());
-        } else {
-            return cell.getStringCellValue();
-        }
     }
 }
