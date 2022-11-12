@@ -7,11 +7,16 @@ import com.example.mfscreener.models.projection.FundDetailProjection;
 import com.example.mfscreener.service.NavService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import java.io.IOException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequiredArgsConstructor
@@ -65,5 +70,11 @@ public class NAVController {
     @GetMapping("/portfolio")
     public PortfolioDTO getPortfolio() {
         return navService.getPortfolio();
+    }
+
+    @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "Persists the transaction details.")
+    public String upload(@RequestPart("file") MultipartFile multipartFile) throws IOException {
+        return navService.upload(multipartFile);
     }
 }

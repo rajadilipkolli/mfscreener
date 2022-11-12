@@ -4,7 +4,9 @@ package com.example.mfscreener.service;
 import com.example.mfscreener.models.PortfolioDTO;
 import com.example.mfscreener.models.Scheme;
 import com.example.mfscreener.models.projection.FundDetailProjection;
+import java.io.IOException;
 import java.util.List;
+import org.springframework.web.multipart.MultipartFile;
 
 public interface NavService {
 
@@ -21,4 +23,6 @@ public interface NavService {
     PortfolioDTO getPortfolio();
 
     void loadFundDetailsIfNotSet();
+
+    String upload(MultipartFile multipartFile) throws IOException;
 }

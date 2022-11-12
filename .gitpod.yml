@@ -14,6 +14,8 @@ vscode:
     - pivotal.vscode-spring-boot
     - vscjava.vscode-spring-initializr
 
+    - vscjava.vscode-java-debug
+
 ports:
   - port: 5050
     visibility: public

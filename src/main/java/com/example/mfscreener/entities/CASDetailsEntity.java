@@ -36,9 +36,20 @@ public class CASDetailsEntity extends Auditable<String> implements Serializable 
     @Column(name = "file_type", nullable = false)
     private FileType fileType;
 
-    @OneToOne(mappedBy = "casDetailsEntity", orphanRemoval = true)
+    @OneToOne(mappedBy = "casDetailsEntity", cascade = CascadeType.ALL, optional = false)
     private InvestorInfoEntity investorInfoEntity;
 
     @OneToMany(mappedBy = "casDetailsEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<FolioEntity> folioEntities = new ArrayList<>();
+
+    public void setInvestorInfoEntity(InvestorInfoEntity investorInfoEntity) {
+        if (investorInfoEntity == null) {
+            if (this.investorInfoEntity != null) {
+                this.investorInfoEntity.setCasDetailsEntity(null);
+            }
+        } else {
+            investorInfoEntity.setCasDetailsEntity(this);
+        }
+        this.investorInfoEntity = investorInfoEntity;
+    }
 }

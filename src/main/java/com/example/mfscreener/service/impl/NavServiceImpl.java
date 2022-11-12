@@ -1,12 +1,15 @@
 /* Licensed under Apache-2.0 2021-2022. */
 package com.example.mfscreener.service.impl;
 
+import com.example.mfscreener.adapter.ConversionServiceAdapter;
+import com.example.mfscreener.entities.CASDetailsEntity;
 import com.example.mfscreener.entities.ErrorMessage;
 import com.example.mfscreener.entities.MFScheme;
 import com.example.mfscreener.entities.MFSchemeNav;
 import com.example.mfscreener.entities.MFSchemeType;
 import com.example.mfscreener.exception.NavNotFoundException;
 import com.example.mfscreener.exception.SchemeNotFoundException;
+import com.example.mfscreener.models.CasDTO;
 import com.example.mfscreener.models.Meta;
 import com.example.mfscreener.models.NAVData;
 import com.example.mfscreener.models.NavResponse;
@@ -15,11 +18,14 @@ import com.example.mfscreener.models.PortfolioDetailsDTO;
 import com.example.mfscreener.models.Scheme;
 import com.example.mfscreener.models.projection.FundDetailProjection;
 import com.example.mfscreener.models.projection.PortfolioDetailsProjection;
+import com.example.mfscreener.repository.CASDetailsEntityRepository;
 import com.example.mfscreener.repository.ErrorMessageRepository;
 import com.example.mfscreener.repository.MFSchemeRepository;
 import com.example.mfscreener.repository.MFSchemeTypeRepository;
 import com.example.mfscreener.service.NavService;
 import com.example.mfscreener.util.Constants;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
 import java.net.URI;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -38,6 +44,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import org.springframework.util.StopWatch;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.UriComponentsBuilder;
 
 @Service
@@ -49,6 +56,9 @@ public class NavServiceImpl implements NavService {
     private final MFSchemeTypeRepository mfSchemeTypeRepository;
     private final RestTemplate restTemplate;
     private final ErrorMessageRepository errorMessageRepository;
+    private final ObjectMapper objectMapper;
+    private final ConversionServiceAdapter conversionServiceAdapter;
+    private final CASDetailsEntityRepository casDetailsEntityRepository;
 
     Function<NAVData, MFSchemeNav> navDataToMFSchemeNavFunction =
             navData -> {
@@ -229,5 +239,15 @@ public class NavServiceImpl implements NavService {
         }
         stopWatch.stop();
         log.info("Fund House and Scheme Type Set in : {} sec", stopWatch.getTotalTimeSeconds());
+    }
+
+    @Override
+    public String upload(MultipartFile multipartFile) throws IOException {
+        CasDTO casDTO = this.objectMapper.readValue(multipartFile.getBytes(), CasDTO.class);
+        CASDetailsEntity casDetailsEntity =
+                this.conversionServiceAdapter.mapCasDTOToCASDetailsEntity(casDTO);
+        CASDetailsEntity persistedCasDetailsEntity =
+                this.casDetailsEntityRepository.save(casDetailsEntity);
+        return "Uploaded with id " + persistedCasDetailsEntity.getId();
     }
 }

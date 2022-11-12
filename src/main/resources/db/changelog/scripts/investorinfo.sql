@@ -1,12 +1,6 @@
 CREATE
-    SEQUENCE IF NOT EXISTS investor_info_seq
-START WITH
-    1 INCREMENT BY 50;
-
-CREATE
     TABLE
         IF NOT EXISTS investor_info(
-            id BIGINT NOT NULL,
             email VARCHAR(255),
             name VARCHAR(255),
             mobile VARCHAR(255),
@@ -16,7 +10,7 @@ CREATE
             created_date TIMESTAMP WITHOUT TIME ZONE,
             last_modified_by VARCHAR(255),
             last_modified_date TIMESTAMP WITHOUT TIME ZONE,
-            CONSTRAINT pk_investor_info PRIMARY KEY(id)
+            CONSTRAINT pk_investor_info PRIMARY KEY(cas_details_entity_id)
         );
 
 ALTER TABLE
