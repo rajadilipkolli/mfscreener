@@ -1,13 +1,10 @@
 package com.example.mfscreener.model;
 
-import lombok.Data;
+public record PortfolioDetailsDTO(
 
-@Data
-public class PortfolioDetailsDTO {
+        Float totalValue,
 
-    private Float totalValue;
+        String schemeName,
 
-    private String schemeName;
-
-    private String folioNumber;
+        String folioNumber) {
 }

@@ -12,13 +12,10 @@ import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ResourceUtils;
 import org.springframework.util.StopWatch;
+import org.springframework.web.client.RestTemplate;
 
 import java.io.*;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Component
 @Slf4j
@@ -28,14 +25,16 @@ public class LoadInitialData {
   private static final String COMMA_DELIMITER = ",";
   private final MFSchemeRepository mfSchemesRepository;
   private final NavServiceConvertor navServiceConvertor;
+  private final RestTemplate restTemplate;
 
   @EventListener(value = ApplicationStartedEvent.class)
   void loadAllFunds() throws IOException {
     long start = System.currentTimeMillis();
     log.info("Loading All Funds...");
-    URL url = new URL(Constants.AMFI_WEBSITE_LINK);
     List<Scheme> chopArrayList = new ArrayList<>();
-    try (BufferedReader br = new BufferedReader(new InputStreamReader(url.openStream()))) {
+    String allNAVs = restTemplate.getForObject(Constants.AMFI_WEBSITE_LINK, String.class);
+    Reader inputString = new StringReader(Objects.requireNonNull(allNAVs));
+    try (BufferedReader br = new BufferedReader(inputString)) {
       String fileRead = br.readLine();
       for (int i = 0; i < 4; ++i) {
         fileRead = br.readLine();
@@ -72,7 +71,7 @@ public class LoadInitialData {
       stopWatch.start("saving fundNames");
       List<MFScheme> list = new ArrayList<>();
       List<Long> schemeCodesList = mfSchemesRepository.findAllSchemeIds();
-      chopArrayList.removeIf(s -> schemeCodesList.contains(Long.valueOf(s.getSchemeCode())));
+      chopArrayList.removeIf(s -> schemeCodesList.contains(Long.valueOf(s.schemeCode())));
       chopArrayList.forEach(
           scheme -> {
             MFScheme mfSchemeEntity = navServiceConvertor.convert(scheme);

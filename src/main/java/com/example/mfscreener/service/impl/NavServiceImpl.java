@@ -53,8 +53,8 @@ public class NavServiceImpl implements NavService {
   Function<NAVData, MFSchemeNav> navDataToMFSchemeNavFunction =
       navData -> {
         MFSchemeNav mfSchemeNav = new MFSchemeNav();
-        mfSchemeNav.setNav(Double.parseDouble(navData.getNav()));
-        mfSchemeNav.setNavDate(LocalDate.parse(navData.getDate(), Constants.DATE_FORMATTER));
+        mfSchemeNav.setNav(Double.parseDouble(navData.nav()));
+        mfSchemeNav.setNavDate(LocalDate.parse(navData.date(), Constants.DATE_FORMATTER));
         return mfSchemeNav;
       };
 
@@ -165,13 +165,9 @@ public class NavServiceImpl implements NavService {
   }
 
   private Scheme convertToDTO(MFScheme mfScheme) {
-    Scheme scheme = new Scheme();
-    scheme.setSchemeCode(String.valueOf(mfScheme.getSchemeId()));
-    scheme.setSchemeName(mfScheme.getSchemeName());
-    scheme.setPayout(mfScheme.getPayOut());
-    scheme.setDate(String.valueOf(mfScheme.getMfSchemeNavies().get(0).getNavDate()));
-    scheme.setNav(String.valueOf(mfScheme.getMfSchemeNavies().get(0).getNav()));
-    return scheme;
+    return new Scheme(String.valueOf(mfScheme.getSchemeId()), mfScheme.getPayOut(),
+            mfScheme.getSchemeName(),String.valueOf(mfScheme.getMfSchemeNavies().get(0).getNav()),
+            String.valueOf(mfScheme.getMfSchemeNavies().get(0).getNavDate()));
   }
 
   @Override
@@ -216,20 +212,20 @@ public class NavServiceImpl implements NavService {
     List<PortfolioDetailsDTO> portfolioDetailsDTOS = new ArrayList<>();
     portfolioDetailsList.forEach(
         portfolioDetails -> {
-          PortfolioDetailsDTO portfolioDetailsDTO = new PortfolioDetailsDTO();
+          float totalValue = 0;
           if (portfolioDetails.getSchemeId() != null) {
             Scheme scheme =
                 getNavByDate(portfolioDetails.getSchemeId(), getAdjustedDate(LocalDate.now()));
-            portfolioDetailsDTO.setTotalValue(
-                portfolioDetails.getBalanceUnits() * Float.parseFloat(scheme.getNav()));
+            totalValue =
+                portfolioDetails.getBalanceUnits() * Float.parseFloat(scheme.nav());
           }
-          portfolioDetailsDTO.setFolioNumber(portfolioDetails.getFolioNumber());
-          portfolioDetailsDTO.setSchemeName(portfolioDetails.getSchemaName());
+          PortfolioDetailsDTO portfolioDetailsDTO = new PortfolioDetailsDTO(totalValue,
+                  portfolioDetails.getSchemaName(),portfolioDetails.getFolioNumber());
           portfolioDetailsDTOS.add(portfolioDetailsDTO);
         });
     return new PortfolioDTO(
         portfolioDetailsDTOS.stream()
-            .map(PortfolioDetailsDTO::getTotalValue)
+            .map(PortfolioDetailsDTO::totalValue)
             .filter(Objects::nonNull)
             .reduce(0f, Float::sum),
         portfolioDetailsDTOS);
