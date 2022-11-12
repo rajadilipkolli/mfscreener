@@ -11,3 +11,10 @@ Spring Boot REST API which fetches the Net Asset Value(NAV) of an AMFI mutual fu
 
 > http://localhost:8080/swagger-ui.html
 
+### how to read CAS Data using [casparser](https://pypi.org/project/casparser/)
+ * Install phyton
+ * install casparser using command
+    ```shell
+    pip install casparser
+    ```
+ * generate json using below command and upload to system
