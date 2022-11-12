@@ -5,7 +5,7 @@ Spring Boot REST API which fetches the Net Asset Value(NAV) of an AMFI mutual fu
 
 ### How to access PG Admin
 
-> http://localhost:8889/
+> http://localhost:5050/
 
 ### How to access Swagger
 
