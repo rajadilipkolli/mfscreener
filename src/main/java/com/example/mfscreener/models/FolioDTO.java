@@ -3,26 +3,11 @@ package com.example.mfscreener.models;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
-import lombok.Data;
 
-@Data
-public class FolioDTO {
-
-    @JsonProperty("folio")
-    String folio;
-
-    @JsonProperty("amc")
-    String amc;
-
-    @JsonProperty("PAN")
-    String pAN;
-
-    @JsonProperty("KYC")
-    String kYC;
-
-    @JsonProperty("PANKYC")
-    String pANKYC;
-
-    @JsonProperty("schemes")
-    List<SchemeDTO> schemes;
-}
+public record FolioDTO(
+        String folio,
+        String amc,
+        @JsonProperty("PAN") String pan,
+        @JsonProperty("KYC") String kyc,
+        @JsonProperty("PANKYC") String panKyc,
+        List<SchemeDTO> schemes) {}

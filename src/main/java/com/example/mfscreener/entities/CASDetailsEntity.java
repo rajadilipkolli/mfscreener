@@ -52,4 +52,9 @@ public class CASDetailsEntity extends Auditable<String> implements Serializable 
         }
         this.investorInfoEntity = investorInfoEntity;
     }
+
+    public void addFolioEntity(FolioEntity folioEntity) {
+        this.folioEntities.add(folioEntity);
+        folioEntity.setCasDetailsEntity(this);
+    }
 }

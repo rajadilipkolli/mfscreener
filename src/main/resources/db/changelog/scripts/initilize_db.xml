@@ -60,7 +60,7 @@
         </createTable>
 
         <createTable tableName="error_message">
-            <column name="error_id" type="BIGINT">
+            <column name="error_id" type="BIGINT" defaultValueSequenceNext="error_id_seq">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="pk_errormessage"/>
             </column>
             <column name="message" type="VARCHAR(255)"/>

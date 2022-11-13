@@ -49,4 +49,9 @@ public class FolioEntity extends Auditable<String> implements Serializable {
     @ManyToOne
     @JoinColumn(name = "cas_details_entity_id")
     private CASDetailsEntity casDetailsEntity;
+
+    public void addSchemeEntity(SchemeEntity schemeEntity) {
+        this.schemeEntities.add(schemeEntity);
+        schemeEntity.setFolioEntity(this);
+    }
 }

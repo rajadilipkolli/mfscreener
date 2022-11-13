@@ -10,6 +10,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.Objects;
 import lombok.Getter;
 import lombok.Setter;
@@ -25,12 +26,12 @@ public class TransactionEntity extends Auditable<String> implements Serializable
     @Column(name = "id", nullable = false)
     private Long id;
 
-    private String date;
+    private LocalDate transactionDate;
     private String description;
-    private String amount;
-    private String units;
-    private String nav;
-    private String balance;
+    private Double amount;
+    private Double units;
+    private Double nav;
+    private Double balance;
     private String type;
     private String dividendRate;
 

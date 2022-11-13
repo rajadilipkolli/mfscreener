@@ -7,12 +7,12 @@ CREATE
     TABLE
         IF NOT EXISTS transaction_entity(
             id BIGINT NOT NULL,
-            DATE VARCHAR(255),
+            transaction_date DATE,
             description VARCHAR(255),
-            amount VARCHAR(255),
-            units VARCHAR(255),
-            nav VARCHAR(255),
-            balance VARCHAR(255),
+            amount DOUBLE PRECISION,
+            units DOUBLE PRECISION,
+            nav DOUBLE PRECISION,
+            balance DOUBLE PRECISION,
             TYPE VARCHAR(255),
             dividend_rate VARCHAR(255),
             scheme_entity_id BIGINT,

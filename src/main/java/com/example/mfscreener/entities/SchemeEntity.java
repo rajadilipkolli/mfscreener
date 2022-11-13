@@ -57,6 +57,11 @@ public class SchemeEntity extends Auditable<String> implements Serializable {
     @OneToMany(mappedBy = "schemeEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TransactionEntity> transactionEntities = new ArrayList<>();
 
+    public void addTransactionEntity(TransactionEntity transactionEntity) {
+        this.transactionEntities.add(transactionEntity);
+        transactionEntity.setSchemeEntity(this);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
