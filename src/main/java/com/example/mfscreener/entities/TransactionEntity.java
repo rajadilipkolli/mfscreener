@@ -19,7 +19,7 @@ import org.hibernate.Hibernate;
 @Getter
 @Setter
 @Entity
-@Table(name = "transaction_entity")
+@Table(name = "mf_transactions")
 public class TransactionEntity extends Auditable<String> implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)

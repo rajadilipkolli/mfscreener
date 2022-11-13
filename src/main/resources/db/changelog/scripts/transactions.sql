@@ -1,11 +1,11 @@
 CREATE
-    SEQUENCE IF NOT EXISTS transaction_entity_seq
+    SEQUENCE IF NOT EXISTS mf_transactions_seq
 START WITH
     1 INCREMENT BY 50;
 
 CREATE
     TABLE
-        IF NOT EXISTS transaction_entity(
+        IF NOT EXISTS mf_transactions(
             id BIGINT NOT NULL,
             transaction_date DATE,
             description VARCHAR(255),
@@ -20,8 +20,8 @@ CREATE
             created_date TIMESTAMP WITHOUT TIME ZONE,
             last_modified_by VARCHAR(255),
             last_modified_date TIMESTAMP WITHOUT TIME ZONE,
-            CONSTRAINT pk_transaction_entity PRIMARY KEY(id)
+            CONSTRAINT pk_mf_transactions PRIMARY KEY(id)
         );
 
 ALTER TABLE
-    transaction_entity ADD CONSTRAINT FK_TRANSACTION_ENTITY_ON_SCHEME_ENTITY FOREIGN KEY(scheme_entity_id) REFERENCES scheme(id);
+    mf_transactions ADD CONSTRAINT FK_MF_TRANSACTIONS_ON_SCHEME_ENTITY FOREIGN KEY(scheme_entity_id) REFERENCES scheme(id);

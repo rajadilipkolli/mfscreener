@@ -22,7 +22,7 @@ import org.hibernate.Hibernate;
 @Getter
 @Setter
 @Entity
-@Table(name = "scheme")
+@Table(name = "scheme_info")
 public class SchemeEntity extends Auditable<String> implements Serializable {
 
     @Id
@@ -41,6 +41,10 @@ public class SchemeEntity extends Auditable<String> implements Serializable {
     private String rtaCode;
 
     private String rta;
+
+    private String type;
+
+    private String amfi;
 
     @Column(name = "open")
     private String myopen;
