@@ -20,7 +20,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Table(name = "folio")
+@Table(name = "folio_info")
 public class FolioEntity extends Auditable<String> implements Serializable {
 
     @Id

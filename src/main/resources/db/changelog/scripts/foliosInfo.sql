@@ -1,11 +1,11 @@
 CREATE
-    SEQUENCE IF NOT EXISTS folio_SEQ
+    SEQUENCE IF NOT EXISTS folio_info_seq
 START WITH
     1 INCREMENT BY 50;
 
 CREATE
     TABLE
-        IF NOT EXISTS folio(
+        IF NOT EXISTS folio_info(
             id BIGINT NOT NULL,
             folio VARCHAR(255),
             amc VARCHAR(255),
@@ -21,4 +21,4 @@ CREATE
         );
 
 ALTER TABLE
-    folio ADD CONSTRAINT FK_FOLIO_ON_CAS_DETAILS_ENTITY FOREIGN KEY(cas_details_entity_id) REFERENCES cas_details(id);
+    folio_info ADD CONSTRAINT FK_FOLIO_ON_CAS_DETAILS_ENTITY FOREIGN KEY(cas_details_entity_id) REFERENCES cas_details(id);

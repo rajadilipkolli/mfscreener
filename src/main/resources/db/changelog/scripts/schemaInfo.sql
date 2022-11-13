@@ -26,4 +26,4 @@ CREATE
         );
 
 ALTER TABLE
-    scheme_info ADD CONSTRAINT FK_SCHEME_ON_FOLIO FOREIGN KEY(folio_id) REFERENCES folio(id);
+    scheme_info ADD CONSTRAINT FK_SCHEME_ON_FOLIO FOREIGN KEY(folio_id) REFERENCES folio_info(id);

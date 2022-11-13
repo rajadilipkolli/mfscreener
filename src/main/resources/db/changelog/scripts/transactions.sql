@@ -24,4 +24,4 @@ CREATE
         );
 
 ALTER TABLE
-    mf_transactions ADD CONSTRAINT FK_MF_TRANSACTIONS_ON_SCHEME_ENTITY FOREIGN KEY(scheme_entity_id) REFERENCES scheme(id);
+    mf_transactions ADD CONSTRAINT FK_MF_TRANSACTIONS_ON_SCHEME_ENTITY FOREIGN KEY(scheme_entity_id) REFERENCES scheme_info(id);
