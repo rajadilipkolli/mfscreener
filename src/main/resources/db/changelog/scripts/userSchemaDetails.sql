@@ -1,14 +1,13 @@
 CREATE
-    SEQUENCE IF NOT EXISTS scheme_info_seq
+    SEQUENCE IF NOT EXISTS user_scheme_details_seq
 START WITH
     1 INCREMENT BY 50;
 
 CREATE
     TABLE
-        IF NOT EXISTS scheme_info(
+        IF NOT EXISTS user_scheme_details(
             id BIGINT NOT NULL,
             scheme VARCHAR(255),
-            folio_id BIGINT,
             isin VARCHAR(255),
             advisor VARCHAR(255),
             rta_code VARCHAR(255),
@@ -18,6 +17,7 @@ CREATE
             OPEN VARCHAR(255),
             CLOSE VARCHAR(255),
             close_calculated VARCHAR(255),
+            user_folio_id BIGINT,
             created_by VARCHAR(255),
             created_date TIMESTAMP WITHOUT TIME ZONE,
             last_modified_by VARCHAR(255),
@@ -26,4 +26,4 @@ CREATE
         );
 
 ALTER TABLE
-    scheme_info ADD CONSTRAINT FK_SCHEME_ON_FOLIO FOREIGN KEY(folio_id) REFERENCES folio_info(id);
+    user_scheme_details ADD CONSTRAINT FK_USER_SCHEME_DETAILS_ON_USER_FOLIO FOREIGN KEY(user_folio_id) REFERENCES user_folio_details(id);

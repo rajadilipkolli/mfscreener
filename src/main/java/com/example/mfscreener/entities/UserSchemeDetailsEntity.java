@@ -22,8 +22,8 @@ import org.hibernate.Hibernate;
 @Getter
 @Setter
 @Entity
-@Table(name = "scheme_info")
-public class SchemeEntity extends Auditable<String> implements Serializable {
+@Table(name = "user_scheme_details")
+public class UserSchemeDetailsEntity extends Auditable<String> implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
@@ -55,23 +55,26 @@ public class SchemeEntity extends Auditable<String> implements Serializable {
     private String closeCalculated;
 
     @ManyToOne
-    @JoinColumn(name = "folio_id")
-    private FolioEntity folioEntity;
+    @JoinColumn(name = "user_folio_id")
+    private UserFolioDetailsEntity userFolioDetailsEntity;
 
-    @OneToMany(mappedBy = "schemeEntity", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<TransactionEntity> transactionEntities = new ArrayList<>();
+    @OneToMany(
+            mappedBy = "userSchemeDetailsEntity",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true)
+    private List<UserTransactionDetailsEntity> transactionEntities = new ArrayList<>();
 
-    public void addTransactionEntity(TransactionEntity transactionEntity) {
-        this.transactionEntities.add(transactionEntity);
-        transactionEntity.setSchemeEntity(this);
+    public void addTransactionEntity(UserTransactionDetailsEntity userTransactionDetailsEntity) {
+        this.transactionEntities.add(userTransactionDetailsEntity);
+        userTransactionDetailsEntity.setUserSchemeDetailsEntity(this);
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
-        SchemeEntity schemeEntity = (SchemeEntity) o;
-        return id != null && Objects.equals(id, schemeEntity.id);
+        UserSchemeDetailsEntity userSchemeDetailsEntity = (UserSchemeDetailsEntity) o;
+        return id != null && Objects.equals(id, userSchemeDetailsEntity.id);
     }
 
     @Override

@@ -21,8 +21,8 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Table(name = "cas_details")
-public class CASDetailsEntity extends Auditable<String> implements Serializable {
+@Table(name = "user_cas_details")
+public class UserCASDetailsEntity extends Auditable<String> implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     @Column(name = "id", nullable = false)
@@ -36,25 +36,25 @@ public class CASDetailsEntity extends Auditable<String> implements Serializable 
     @Column(name = "file_type", nullable = false)
     private FileType fileType;
 
-    @OneToOne(mappedBy = "casDetailsEntity", cascade = CascadeType.ALL, optional = false)
+    @OneToOne(mappedBy = "userCasDetailsEntity", cascade = CascadeType.ALL, optional = false)
     private InvestorInfoEntity investorInfoEntity;
 
-    @OneToMany(mappedBy = "casDetailsEntity", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<FolioEntity> folioEntities = new ArrayList<>();
+    @OneToMany(mappedBy = "userCasDetailsEntity", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserFolioDetailsEntity> folioEntities = new ArrayList<>();
 
     public void setInvestorInfoEntity(InvestorInfoEntity investorInfoEntity) {
         if (investorInfoEntity == null) {
             if (this.investorInfoEntity != null) {
-                this.investorInfoEntity.setCasDetailsEntity(null);
+                this.investorInfoEntity.setUserCasDetailsEntity(null);
             }
         } else {
-            investorInfoEntity.setCasDetailsEntity(this);
+            investorInfoEntity.setUserCasDetailsEntity(this);
         }
         this.investorInfoEntity = investorInfoEntity;
     }
 
-    public void addFolioEntity(FolioEntity folioEntity) {
-        this.folioEntities.add(folioEntity);
-        folioEntity.setCasDetailsEntity(this);
+    public void addFolioEntity(UserFolioDetailsEntity userFolioDetailsEntity) {
+        this.folioEntities.add(userFolioDetailsEntity);
+        userFolioDetailsEntity.setUserCasDetailsEntity(this);
     }
 }

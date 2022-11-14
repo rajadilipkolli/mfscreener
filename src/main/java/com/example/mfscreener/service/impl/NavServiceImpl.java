@@ -2,11 +2,11 @@
 package com.example.mfscreener.service.impl;
 
 import com.example.mfscreener.adapter.ConversionServiceAdapter;
-import com.example.mfscreener.entities.CASDetailsEntity;
 import com.example.mfscreener.entities.ErrorMessage;
 import com.example.mfscreener.entities.MFScheme;
 import com.example.mfscreener.entities.MFSchemeNav;
 import com.example.mfscreener.entities.MFSchemeType;
+import com.example.mfscreener.entities.UserCASDetailsEntity;
 import com.example.mfscreener.exception.NavNotFoundException;
 import com.example.mfscreener.exception.SchemeNotFoundException;
 import com.example.mfscreener.models.CasDTO;
@@ -244,9 +244,9 @@ public class NavServiceImpl implements NavService {
     @Override
     public String upload(MultipartFile multipartFile) throws IOException {
         CasDTO casDTO = this.objectMapper.readValue(multipartFile.getBytes(), CasDTO.class);
-        CASDetailsEntity casDetailsEntity =
-                this.conversionServiceAdapter.mapCasDTOToCASDetailsEntity(casDTO);
-        CASDetailsEntity persistedCasDetailsEntity =
+        UserCASDetailsEntity casDetailsEntity =
+                this.conversionServiceAdapter.mapCasDTOToUserCASDetailsEntity(casDTO);
+        UserCASDetailsEntity persistedCasDetailsEntity =
                 this.casDetailsEntityRepository.save(casDetailsEntity);
         return "Uploaded with id " + persistedCasDetailsEntity.getId();
     }

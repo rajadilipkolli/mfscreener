@@ -19,8 +19,8 @@ import org.hibernate.Hibernate;
 @Getter
 @Setter
 @Entity
-@Table(name = "mf_transactions")
-public class TransactionEntity extends Auditable<String> implements Serializable {
+@Table(name = "user_transaction_details")
+public class UserTransactionDetailsEntity extends Auditable<String> implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     @Column(name = "id", nullable = false)
@@ -36,14 +36,14 @@ public class TransactionEntity extends Auditable<String> implements Serializable
     private String dividendRate;
 
     @ManyToOne
-    @JoinColumn(name = "scheme_info_id")
-    private SchemeEntity schemeEntity;
+    @JoinColumn(name = "user_scheme_detail_id")
+    private UserSchemeDetailsEntity userSchemeDetailsEntity;
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
-        TransactionEntity that = (TransactionEntity) o;
+        UserTransactionDetailsEntity that = (UserTransactionDetailsEntity) o;
         return id != null && Objects.equals(id, that.id);
     }
 

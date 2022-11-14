@@ -39,8 +39,8 @@ public class InvestorInfoEntity extends Auditable<String> implements Serializabl
 
     @OneToOne(fetch = FetchType.LAZY)
     @MapsId
-    @JoinColumn(name = "cas_details_entity_id")
-    private CASDetailsEntity casDetailsEntity;
+    @JoinColumn(name = "user_cas_details_id")
+    private UserCASDetailsEntity userCasDetailsEntity;
 
     @Override
     public boolean equals(Object o) {

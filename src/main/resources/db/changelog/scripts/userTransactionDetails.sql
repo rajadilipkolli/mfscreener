@@ -1,21 +1,21 @@
 CREATE
-    SEQUENCE IF NOT EXISTS mf_transactions_seq
+    SEQUENCE IF NOT EXISTS user_transaction_details_seq
 START WITH
     1 INCREMENT BY 50;
 
 CREATE
     TABLE
-        IF NOT EXISTS mf_transactions(
+        IF NOT EXISTS user_transaction_details(
             id BIGINT NOT NULL,
             transaction_date DATE,
             description VARCHAR(255),
-            amount float(4),
-            units float(4),
-            nav float(4),
-            balance float(4),
+            amount FLOAT(4),
+            units FLOAT(4),
+            nav FLOAT(4),
+            balance FLOAT(4),
             TYPE VARCHAR(255),
             dividend_rate VARCHAR(255),
-            scheme_info_id BIGINT,
+            user_scheme_detail_id BIGINT,
             created_by VARCHAR(255),
             created_date TIMESTAMP WITHOUT TIME ZONE,
             last_modified_by VARCHAR(255),
@@ -24,4 +24,4 @@ CREATE
         );
 
 ALTER TABLE
-    mf_transactions ADD CONSTRAINT FK_MF_TRANSACTIONS_ON_SCHEME_ENTITY FOREIGN KEY(scheme_info_id) REFERENCES scheme_info(id);
+    user_transaction_details ADD CONSTRAINT FK_USER_TRANSACTION_DETAILS_ON_USER_SCHEME_DETAIL FOREIGN KEY(user_scheme_detail_id) REFERENCES user_scheme_details(id);

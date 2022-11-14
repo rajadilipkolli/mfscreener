@@ -1,10 +1,10 @@
 /* Licensed under Apache-2.0 2022. */
 package com.example.mfscreener.mapper;
 
-import com.example.mfscreener.entities.CASDetailsEntity;
-import com.example.mfscreener.entities.FolioEntity;
-import com.example.mfscreener.entities.SchemeEntity;
-import com.example.mfscreener.entities.TransactionEntity;
+import com.example.mfscreener.entities.UserCASDetailsEntity;
+import com.example.mfscreener.entities.UserFolioDetailsEntity;
+import com.example.mfscreener.entities.UserSchemeDetailsEntity;
+import com.example.mfscreener.entities.UserTransactionDetailsEntity;
 import com.example.mfscreener.models.CasDTO;
 import com.example.mfscreener.models.FolioDTO;
 import com.example.mfscreener.models.SchemeDTO;
@@ -17,7 +17,7 @@ import org.mapstruct.MappingTarget;
 import org.springframework.core.convert.converter.Converter;
 
 @Mapper(config = MapperSpringConfig.class)
-public interface CasDetailsMapper extends Converter<CasDTO, CASDetailsEntity> {
+public interface CasDetailsMapper extends Converter<CasDTO, UserCASDetailsEntity> {
 
     @Mapping(target = "folioEntities", ignore = true)
     @Mapping(target = "investorInfoEntity", source = "investorInfo")
@@ -27,10 +27,10 @@ public interface CasDetailsMapper extends Converter<CasDTO, CASDetailsEntity> {
     @Mapping(target = "createdDate", ignore = true)
     @Mapping(target = "createdBy", ignore = true)
     @Override
-    CASDetailsEntity convert(CasDTO casDTO);
+    UserCASDetailsEntity convert(CasDTO casDTO);
 
     @Mapping(target = "schemeEntities", ignore = true)
-    @Mapping(target = "casDetailsEntity", ignore = true)
+    @Mapping(target = "userCasDetailsEntity", ignore = true)
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "lastModifiedDate", ignore = true)
     @Mapping(target = "lastModifiedBy", ignore = true)
@@ -39,48 +39,49 @@ public interface CasDetailsMapper extends Converter<CasDTO, CASDetailsEntity> {
     @Mapping(source = "kyc", target = "kyc")
     @Mapping(source = "pan", target = "pan")
     @Mapping(source = "panKyc", target = "panKyc")
-    FolioEntity folioDTOToFolioEntity(FolioDTO folioDTO);
+    UserFolioDetailsEntity folioDTOToFolioEntity(FolioDTO folioDTO);
 
     @Mapping(target = "transactionEntities", ignore = true)
-    @Mapping(target = "folioEntity", ignore = true)
+    @Mapping(target = "userFolioDetailsEntity", ignore = true)
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "lastModifiedDate", ignore = true)
     @Mapping(target = "lastModifiedBy", ignore = true)
     @Mapping(target = "createdDate", ignore = true)
     @Mapping(target = "createdBy", ignore = true)
-    SchemeEntity schemeDTOToSchemeEntity(SchemeDTO schemeDTO);
+    UserSchemeDetailsEntity schemeDTOToSchemeEntity(SchemeDTO schemeDTO);
 
-    @Mapping(target = "schemeEntity", ignore = true)
+    @Mapping(target = "userSchemeDetailsEntity", ignore = true)
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "lastModifiedDate", ignore = true)
     @Mapping(target = "lastModifiedBy", ignore = true)
     @Mapping(target = "createdDate", ignore = true)
     @Mapping(target = "createdBy", ignore = true)
     @Mapping(target = "transactionDate", source = "date")
-    TransactionEntity transactionDTOToTransactionEntity(TransactionDTO transactionDTO);
+    UserTransactionDetailsEntity transactionDTOToTransactionEntity(TransactionDTO transactionDTO);
 
     @AfterMapping
     default void addFolioEntityToCaseDetails(
-            CasDTO casDTO, @MappingTarget CASDetailsEntity casDetailsEntity) {
+            CasDTO casDTO, @MappingTarget UserCASDetailsEntity userCasDetailsEntity) {
         Consumer<FolioDTO> addFolioEntityConsumer =
-                folioDTO -> casDetailsEntity.addFolioEntity(folioDTOToFolioEntity(folioDTO));
+                folioDTO -> userCasDetailsEntity.addFolioEntity(folioDTOToFolioEntity(folioDTO));
         casDTO.folios().forEach(addFolioEntityConsumer);
     }
 
     @AfterMapping
     default void addSchemaEntityToFolioEntity(
-            FolioDTO folioDTO, @MappingTarget FolioEntity folioEntity) {
+            FolioDTO folioDTO, @MappingTarget UserFolioDetailsEntity userFolioDetailsEntity) {
         Consumer<SchemeDTO> addSchemeEntityConsumer =
-                schemeDTO -> folioEntity.addSchemeEntity(schemeDTOToSchemeEntity(schemeDTO));
+                schemeDTO ->
+                        userFolioDetailsEntity.addSchemeEntity(schemeDTOToSchemeEntity(schemeDTO));
         folioDTO.schemes().forEach(addSchemeEntityConsumer);
     }
 
     @AfterMapping
     default void addTransactionEntityToSchemeEntity(
-            SchemeDTO schemeDTO, @MappingTarget SchemeEntity schemeEntity) {
+            SchemeDTO schemeDTO, @MappingTarget UserSchemeDetailsEntity userSchemeDetailsEntity) {
         Consumer<TransactionDTO> addTransactionEntityConsumer =
                 transactionDTO ->
-                        schemeEntity.addTransactionEntity(
+                        userSchemeDetailsEntity.addTransactionEntity(
                                 transactionDTOToTransactionEntity(transactionDTO));
         schemeDTO.transactions().forEach(addTransactionEntityConsumer);
     }
