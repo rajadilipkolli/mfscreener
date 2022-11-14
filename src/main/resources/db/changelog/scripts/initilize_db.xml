@@ -34,7 +34,7 @@
             <column name="id" type="BIGINT">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="pk_mf_scheme_nav"/>
             </column>
-            <column name="nav" type="DOUBLE"/>
+            <column name="nav" type="float(4)"/>
             <column name="nav_date" type="DATE"/>
             <column name="mf_scheme_id" type="BIGINT"/>
             <column name="created_by" type="VARCHAR(255)"/>
