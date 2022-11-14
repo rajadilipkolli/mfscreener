@@ -7,7 +7,7 @@ import java.util.List;
 public record SchemeDTO(
         String scheme,
         String isin,
-        String amfi,
+        Long amfi,
         String advisor,
         @JsonProperty("rta_code") String rtaCode,
         String type,

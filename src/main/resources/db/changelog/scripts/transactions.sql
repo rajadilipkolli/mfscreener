@@ -15,7 +15,7 @@ CREATE
             balance DOUBLE PRECISION,
             TYPE VARCHAR(255),
             dividend_rate VARCHAR(255),
-            scheme_entity_id BIGINT,
+            scheme_info_id BIGINT,
             created_by VARCHAR(255),
             created_date TIMESTAMP WITHOUT TIME ZONE,
             last_modified_by VARCHAR(255),
@@ -24,4 +24,4 @@ CREATE
         );
 
 ALTER TABLE
-    mf_transactions ADD CONSTRAINT FK_MF_TRANSACTIONS_ON_SCHEME_ENTITY FOREIGN KEY(scheme_entity_id) REFERENCES scheme_info(id);
+    mf_transactions ADD CONSTRAINT FK_MF_TRANSACTIONS_ON_SCHEME_ENTITY FOREIGN KEY(scheme_info_id) REFERENCES scheme_info(id);

@@ -14,7 +14,7 @@ CREATE
             rta_code VARCHAR(255),
             rta VARCHAR(255),
             TYPE VARCHAR(255),
-            amfi VARCHAR(255),
+            amfi BIGINT,
             OPEN VARCHAR(255),
             CLOSE VARCHAR(255),
             close_calculated VARCHAR(255),

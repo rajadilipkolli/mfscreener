@@ -44,7 +44,7 @@ public class SchemeEntity extends Auditable<String> implements Serializable {
 
     private String type;
 
-    private String amfi;
+    private Long amfi;
 
     @Column(name = "open")
     private String myopen;

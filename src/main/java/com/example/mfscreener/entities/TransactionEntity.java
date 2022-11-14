@@ -36,7 +36,7 @@ public class TransactionEntity extends Auditable<String> implements Serializable
     private String dividendRate;
 
     @ManyToOne
-    @JoinColumn(name = "scheme_entity_id")
+    @JoinColumn(name = "scheme_info_id")
     private SchemeEntity schemeEntity;
 
     @Override
