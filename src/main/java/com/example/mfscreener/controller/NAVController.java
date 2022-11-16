@@ -2,8 +2,8 @@
 package com.example.mfscreener.controller;
 
 import com.example.mfscreener.models.MFSchemeDTO;
-import com.example.mfscreener.models.PortfolioDTO;
 import com.example.mfscreener.models.projection.FundDetailProjection;
+import com.example.mfscreener.models.response.PortfolioResponse;
 import com.example.mfscreener.service.NavService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -68,7 +68,7 @@ public class NAVController {
     }
 
     @GetMapping("/portfolio")
-    public PortfolioDTO getPortfolio() {
+    public PortfolioResponse getPortfolio() {
         return navService.getPortfolio();
     }
 

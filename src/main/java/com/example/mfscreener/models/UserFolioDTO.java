@@ -2,6 +2,7 @@
 package com.example.mfscreener.models;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.io.Serializable;
 import java.util.List;
 
 public record UserFolioDTO(
@@ -10,4 +11,5 @@ public record UserFolioDTO(
         @JsonProperty("PAN") String pan,
         @JsonProperty("KYC") String kyc,
         @JsonProperty("PANKYC") String panKyc,
-        List<UserSchemeDTO> schemes) {}
+        List<UserSchemeDTO> schemes)
+        implements Serializable {}

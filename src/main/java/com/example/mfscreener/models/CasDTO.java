@@ -2,6 +2,7 @@
 package com.example.mfscreener.models;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.io.Serializable;
 import java.util.List;
 
 public record CasDTO(
@@ -9,4 +10,5 @@ public record CasDTO(
         @JsonProperty("file_type") String fileType,
         @JsonProperty("cas_type") String casType,
         @JsonProperty("investor_info") InvestorInfoDTO investorInfo,
-        @JsonProperty("folios") List<UserFolioDTO> folios) {}
+        @JsonProperty("folios") List<UserFolioDTO> folios)
+        implements Serializable {}

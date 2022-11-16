@@ -3,6 +3,7 @@ plugins {
     id 'io.spring.dependency-management' version '1.1.0'
     // id 'org.graalvm.buildtools.native' version '0.9.17'
     id 'java'
+    // id 'eclipse'
     id "org.sonarqube" version "3.5.0.2730" apply false
     id "com.diffplug.spotless" version "6.11.0"
 }
@@ -136,3 +137,15 @@ sourceSets {
         java.srcDirs += 'build/generated/sources/annotationProcesor/java'
     }
 }
+
+//adding task to fix issue with ConversationService not found in VSCode
+// eclipse {
+//     classpath {
+//         containers 'org.eclipse.buildship.core.gradleclasspathcontainer'
+//         file.whenMerged { cp ->
+//             def entries = cp.entries;
+//             def src = new org.gradle.plugins.ide.eclipse.model.SourceFolder('build/generated/sources/annotationProcessor/java/main/', null)
+//             entries.add(src)
+//         } 
+//     }
+// }

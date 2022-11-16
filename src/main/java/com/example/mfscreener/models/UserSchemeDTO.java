@@ -2,6 +2,7 @@
 package com.example.mfscreener.models;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.io.Serializable;
 import java.util.List;
 
 public record UserSchemeDTO(
@@ -16,4 +17,5 @@ public record UserSchemeDTO(
         String close,
         @JsonProperty("close_calculated") String closeCalculated,
         @JsonProperty("valuation") ValuationDTO valuation,
-        @JsonProperty("transactions") List<UserTransactionDTO> transactions) {}
+        @JsonProperty("transactions") List<UserTransactionDTO> transactions)
+        implements Serializable {}

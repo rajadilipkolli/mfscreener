@@ -13,11 +13,11 @@ import com.example.mfscreener.models.CasDTO;
 import com.example.mfscreener.models.MFSchemeDTO;
 import com.example.mfscreener.models.MetaDTO;
 import com.example.mfscreener.models.NAVData;
-import com.example.mfscreener.models.NavResponse;
-import com.example.mfscreener.models.PortfolioDTO;
 import com.example.mfscreener.models.PortfolioDetailsDTO;
 import com.example.mfscreener.models.projection.FundDetailProjection;
 import com.example.mfscreener.models.projection.PortfolioDetailsProjection;
+import com.example.mfscreener.models.response.NavResponse;
+import com.example.mfscreener.models.response.PortfolioResponse;
 import com.example.mfscreener.repository.CASDetailsEntityRepository;
 import com.example.mfscreener.repository.ErrorMessageRepository;
 import com.example.mfscreener.repository.MFSchemeRepository;
@@ -188,7 +188,7 @@ public class NavServiceImpl implements NavService {
     }
 
     @Override
-    public PortfolioDTO getPortfolio() {
+    public PortfolioResponse getPortfolio() {
         // List<PortfolioDetails> portfolioDetailsList = transactionRecordRepository.getPortfolio();
         List<PortfolioDetailsDTO> portfolioDetailsDTOS = new ArrayList<>();
         List<PortfolioDetailsProjection> portfolioDetailsList = new ArrayList<>();
@@ -210,7 +210,7 @@ public class NavServiceImpl implements NavService {
                                     portfolioDetails.getFolioNumber());
                     portfolioDetailsDTOS.add(portfolioDetailsDTO);
                 });
-        return new PortfolioDTO(
+        return new PortfolioResponse(
                 portfolioDetailsDTOS.stream()
                         .map(PortfolioDetailsDTO::totalValue)
                         .filter(Objects::nonNull)

@@ -2,8 +2,8 @@
 package com.example.mfscreener.service;
 
 import com.example.mfscreener.models.MFSchemeDTO;
-import com.example.mfscreener.models.PortfolioDTO;
 import com.example.mfscreener.models.projection.FundDetailProjection;
+import com.example.mfscreener.models.response.PortfolioResponse;
 import java.io.IOException;
 import java.util.List;
 import org.springframework.web.multipart.MultipartFile;
@@ -20,7 +20,7 @@ public interface NavService {
 
     List<FundDetailProjection> fetchSchemesByFundName(String fundName);
 
-    PortfolioDTO getPortfolio();
+    PortfolioResponse getPortfolio();
 
     void loadFundDetailsIfNotSet();
 

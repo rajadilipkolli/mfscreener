@@ -1,4 +1,7 @@
 /* Licensed under Apache-2.0 2022. */
 package com.example.mfscreener.models;
 
-public record PortfolioDetailsDTO(Float totalValue, String schemeName, String folioNumber) {}
+import java.io.Serializable;
+
+public record PortfolioDetailsDTO(Float totalValue, String schemeName, String folioNumber)
+        implements Serializable {}
