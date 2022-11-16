@@ -4,10 +4,10 @@ package com.example.mfscreener.models;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 
-public record FolioDTO(
+public record UserFolioDTO(
         String folio,
         String amc,
         @JsonProperty("PAN") String pan,
         @JsonProperty("KYC") String kyc,
         @JsonProperty("PANKYC") String panKyc,
-        List<SchemeDTO> schemes) {}
+        List<UserSchemeDTO> schemes) {}

@@ -9,4 +9,4 @@ public record CasDTO(
         @JsonProperty("file_type") String fileType,
         @JsonProperty("cas_type") String casType,
         @JsonProperty("investor_info") InvestorInfoDTO investorInfo,
-        @JsonProperty("folios") List<FolioDTO> folios) {}
+        @JsonProperty("folios") List<UserFolioDTO> folios) {}

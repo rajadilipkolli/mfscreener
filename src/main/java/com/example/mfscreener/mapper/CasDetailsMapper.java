@@ -6,9 +6,9 @@ import com.example.mfscreener.entities.UserFolioDetailsEntity;
 import com.example.mfscreener.entities.UserSchemeDetailsEntity;
 import com.example.mfscreener.entities.UserTransactionDetailsEntity;
 import com.example.mfscreener.models.CasDTO;
-import com.example.mfscreener.models.FolioDTO;
-import com.example.mfscreener.models.SchemeDTO;
-import com.example.mfscreener.models.TransactionDTO;
+import com.example.mfscreener.models.UserFolioDTO;
+import com.example.mfscreener.models.UserSchemeDTO;
+import com.example.mfscreener.models.UserTransactionDTO;
 import java.util.function.Consumer;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
@@ -39,7 +39,7 @@ public interface CasDetailsMapper extends Converter<CasDTO, UserCASDetailsEntity
     @Mapping(source = "kyc", target = "kyc")
     @Mapping(source = "pan", target = "pan")
     @Mapping(source = "panKyc", target = "panKyc")
-    UserFolioDetailsEntity folioDTOToFolioEntity(FolioDTO folioDTO);
+    UserFolioDetailsEntity folioDTOToFolioEntity(UserFolioDTO folioDTO);
 
     @Mapping(target = "transactionEntities", ignore = true)
     @Mapping(target = "userFolioDetailsEntity", ignore = true)
@@ -48,7 +48,7 @@ public interface CasDetailsMapper extends Converter<CasDTO, UserCASDetailsEntity
     @Mapping(target = "lastModifiedBy", ignore = true)
     @Mapping(target = "createdDate", ignore = true)
     @Mapping(target = "createdBy", ignore = true)
-    UserSchemeDetailsEntity schemeDTOToSchemeEntity(SchemeDTO schemeDTO);
+    UserSchemeDetailsEntity schemeDTOToSchemeEntity(UserSchemeDTO schemeDTO);
 
     @Mapping(target = "userSchemeDetailsEntity", ignore = true)
     @Mapping(target = "id", ignore = true)
@@ -57,20 +57,21 @@ public interface CasDetailsMapper extends Converter<CasDTO, UserCASDetailsEntity
     @Mapping(target = "createdDate", ignore = true)
     @Mapping(target = "createdBy", ignore = true)
     @Mapping(target = "transactionDate", source = "date")
-    UserTransactionDetailsEntity transactionDTOToTransactionEntity(TransactionDTO transactionDTO);
+    UserTransactionDetailsEntity transactionDTOToTransactionEntity(
+            UserTransactionDTO transactionDTO);
 
     @AfterMapping
     default void addFolioEntityToCaseDetails(
             CasDTO casDTO, @MappingTarget UserCASDetailsEntity userCasDetailsEntity) {
-        Consumer<FolioDTO> addFolioEntityConsumer =
+        Consumer<UserFolioDTO> addFolioEntityConsumer =
                 folioDTO -> userCasDetailsEntity.addFolioEntity(folioDTOToFolioEntity(folioDTO));
         casDTO.folios().forEach(addFolioEntityConsumer);
     }
 
     @AfterMapping
     default void addSchemaEntityToFolioEntity(
-            FolioDTO folioDTO, @MappingTarget UserFolioDetailsEntity userFolioDetailsEntity) {
-        Consumer<SchemeDTO> addSchemeEntityConsumer =
+            UserFolioDTO folioDTO, @MappingTarget UserFolioDetailsEntity userFolioDetailsEntity) {
+        Consumer<UserSchemeDTO> addSchemeEntityConsumer =
                 schemeDTO ->
                         userFolioDetailsEntity.addSchemeEntity(schemeDTOToSchemeEntity(schemeDTO));
         folioDTO.schemes().forEach(addSchemeEntityConsumer);
@@ -78,8 +79,9 @@ public interface CasDetailsMapper extends Converter<CasDTO, UserCASDetailsEntity
 
     @AfterMapping
     default void addTransactionEntityToSchemeEntity(
-            SchemeDTO schemeDTO, @MappingTarget UserSchemeDetailsEntity userSchemeDetailsEntity) {
-        Consumer<TransactionDTO> addTransactionEntityConsumer =
+            UserSchemeDTO schemeDTO,
+            @MappingTarget UserSchemeDetailsEntity userSchemeDetailsEntity) {
+        Consumer<UserTransactionDTO> addTransactionEntityConsumer =
                 transactionDTO ->
                         userSchemeDetailsEntity.addTransactionEntity(
                                 transactionDTOToTransactionEntity(transactionDTO));

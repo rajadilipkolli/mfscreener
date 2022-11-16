@@ -4,7 +4,7 @@ package com.example.mfscreener.models;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 
-public record SchemeDTO(
+public record UserSchemeDTO(
         String scheme,
         String isin,
         Long amfi,
@@ -16,4 +16,4 @@ public record SchemeDTO(
         String close,
         @JsonProperty("close_calculated") String closeCalculated,
         @JsonProperty("valuation") ValuationDTO valuation,
-        @JsonProperty("transactions") List<TransactionDTO> transactions) {}
+        @JsonProperty("transactions") List<UserTransactionDTO> transactions) {}

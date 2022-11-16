@@ -3,7 +3,7 @@ package com.example.mfscreener.models;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public record TransactionDTO(
+public record UserTransactionDTO(
         String date,
         String description,
         String amount,

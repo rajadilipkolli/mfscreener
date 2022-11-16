@@ -17,7 +17,7 @@ CREATE
             created_date TIMESTAMP WITHOUT TIME ZONE,
             last_modified_by VARCHAR(255),
             last_modified_date TIMESTAMP WITHOUT TIME ZONE,
-            CONSTRAINT pk_folio PRIMARY KEY(id)
+            CONSTRAINT pk_user_folio_details PRIMARY KEY(id)
         );
 
 ALTER TABLE
