@@ -9,7 +9,7 @@ import lombok.Data;
 @Data
 public class NavResponse {
     private String status;
-    private Meta meta;
+    private MetaDTO meta;
 
     @JsonProperty("data")
     private List<NAVData> data = new ArrayList<>();

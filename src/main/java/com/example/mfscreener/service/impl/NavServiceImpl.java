@@ -10,12 +10,12 @@ import com.example.mfscreener.entities.UserCASDetailsEntity;
 import com.example.mfscreener.exception.NavNotFoundException;
 import com.example.mfscreener.exception.SchemeNotFoundException;
 import com.example.mfscreener.models.CasDTO;
-import com.example.mfscreener.models.Meta;
+import com.example.mfscreener.models.MetaDTO;
 import com.example.mfscreener.models.NAVData;
 import com.example.mfscreener.models.NavResponse;
 import com.example.mfscreener.models.PortfolioDTO;
 import com.example.mfscreener.models.PortfolioDetailsDTO;
-import com.example.mfscreener.models.Scheme;
+import com.example.mfscreener.models.MFSchemeDTO;
 import com.example.mfscreener.models.projection.FundDetailProjection;
 import com.example.mfscreener.models.projection.PortfolioDetailsProjection;
 import com.example.mfscreener.repository.CASDetailsEntityRepository;
@@ -69,7 +69,7 @@ public class NavServiceImpl implements NavService {
             };
 
     @Override
-    public Scheme getNav(Long schemeCode) {
+    public MFSchemeDTO getNav(Long schemeCode) {
         return mfSchemesRepository
                 .findBySchemeIdAndNavDate(schemeCode, getAdjustedDate(LocalDate.now()))
                 .map(this::convertToDTO)
@@ -77,7 +77,7 @@ public class NavServiceImpl implements NavService {
     }
 
     @Override
-    public Scheme getNavOnDate(Long schemeCode, String inputDate) {
+    public MFSchemeDTO getNavOnDate(Long schemeCode, String inputDate) {
         LocalDate adjustedDate = getAdjustedDateForNAV(inputDate);
         return getNavByDate(schemeCode, adjustedDate);
     }
@@ -117,7 +117,7 @@ public class NavServiceImpl implements NavService {
         return this.mfSchemesRepository.findByFundHouseIgnoringCaseLike("%" + fundName + "%");
     }
 
-    private Scheme getSchemeDetails(Long schemeCode, LocalDate navDate) {
+    private MFSchemeDTO getSchemeDetails(Long schemeCode, LocalDate navDate) {
         fetchSchemeDetails(schemeCode);
         return this.mfSchemesRepository
                 .findBySchemeIdAndNavDate(schemeCode, navDate)
@@ -138,7 +138,7 @@ public class NavServiceImpl implements NavService {
             for (MFSchemeNav newSchemeNav : newNavs) {
                 mfScheme.addSchemeNav(newSchemeNav);
             }
-            final Meta meta = navResponse.getMeta();
+            final MetaDTO meta = navResponse.getMeta();
             MFSchemeType mfschemeType =
                     this.mfSchemeTypeRepository
                             .findBySchemeCategoryAndSchemeType(
@@ -156,7 +156,7 @@ public class NavServiceImpl implements NavService {
         }
     }
 
-    private Scheme getNavByDate(Long schemeCode, LocalDate navDate) {
+    private MFSchemeDTO getNavByDate(Long schemeCode, LocalDate navDate) {
         return this.mfSchemesRepository
                 .findBySchemeIdAndNavDate(schemeCode, navDate)
                 .map(this::convertToDTO)
@@ -178,8 +178,8 @@ public class NavServiceImpl implements NavService {
         return getAdjustedDate(adjustedDate);
     }
 
-    private Scheme convertToDTO(MFScheme mfScheme) {
-        return new Scheme(
+    private MFSchemeDTO convertToDTO(MFScheme mfScheme) {
+        return new MFSchemeDTO(
                 String.valueOf(mfScheme.getSchemeId()),
                 mfScheme.getPayOut(),
                 mfScheme.getSchemeName(),
@@ -196,7 +196,7 @@ public class NavServiceImpl implements NavService {
                 portfolioDetails -> {
                     float totalValue = 0;
                     if (portfolioDetails.getSchemeId() != null) {
-                        Scheme scheme =
+                        MFSchemeDTO scheme =
                                 getNavByDate(
                                         portfolioDetails.getSchemeId(),
                                         getAdjustedDate(LocalDate.now()));

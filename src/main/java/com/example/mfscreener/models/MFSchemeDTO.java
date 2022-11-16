@@ -3,5 +3,5 @@ package com.example.mfscreener.models;
 
 import java.io.Serializable;
 
-public record Scheme(String schemeCode, String payout, String schemeName, String nav, String date)
+public record MFSchemeDTO(String schemeCode, String payout, String schemeName, String nav, String date)
         implements Serializable {}

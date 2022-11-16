@@ -3,7 +3,7 @@ package com.example.mfscreener.bootstrap;
 
 import com.example.mfscreener.adapter.ConversionServiceAdapter;
 import com.example.mfscreener.entities.MFScheme;
-import com.example.mfscreener.models.Scheme;
+import com.example.mfscreener.models.MFSchemeDTO;
 import com.example.mfscreener.repository.MFSchemeRepository;
 import com.example.mfscreener.util.Constants;
 import java.io.*;
@@ -31,7 +31,7 @@ public class LoadInitialData {
     void loadAllFunds() throws IOException {
         long start = System.currentTimeMillis();
         log.info("Loading All Funds...");
-        List<Scheme> chopArrayList = new ArrayList<>();
+        List<MFSchemeDTO> chopArrayList = new ArrayList<>();
         String allNAVs = restTemplate.getForObject(Constants.AMFI_WEBSITE_LINK, String.class);
         Reader inputString = new StringReader(Objects.requireNonNull(allNAVs));
         try (BufferedReader br = new BufferedReader(inputString)) {
@@ -52,7 +52,7 @@ public class LoadInitialData {
                     final String schemename = tokenize[3];
                     final String nav = tokenize[4];
                     final String date = tokenize[5];
-                    final Scheme tempObj = new Scheme(schemecode, payout, schemename, nav, date);
+                    final MFSchemeDTO tempObj = new MFSchemeDTO(schemecode, payout, schemename, nav, date);
                     chopArrayList.add(tempObj);
                 }
                 fileRead = br.readLine();

@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 @Data
-public class Meta {
+public class MetaDTO {
 
     @JsonProperty("fund_house")
     private String fundHouse;

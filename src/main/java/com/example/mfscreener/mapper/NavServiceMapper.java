@@ -3,7 +3,7 @@ package com.example.mfscreener.mapper;
 
 import com.example.mfscreener.entities.MFScheme;
 import com.example.mfscreener.entities.MFSchemeNav;
-import com.example.mfscreener.models.Scheme;
+import com.example.mfscreener.models.MFSchemeDTO;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import org.mapstruct.AfterMapping;
@@ -13,7 +13,7 @@ import org.mapstruct.MappingTarget;
 import org.springframework.core.convert.converter.Converter;
 
 @Mapper(config = MapperSpringConfig.class)
-public interface NavServiceMapper extends Converter<Scheme, MFScheme> {
+public interface NavServiceMapper extends Converter<MFSchemeDTO, MFScheme> {
 
     DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd-MMM-yyyy");
 
@@ -26,10 +26,10 @@ public interface NavServiceMapper extends Converter<Scheme, MFScheme> {
     @Mapping(target = "createdDate", ignore = true)
     @Mapping(target = "createdBy", ignore = true)
     @Override
-    MFScheme convert(Scheme scheme);
+    MFScheme convert(MFSchemeDTO scheme);
 
     @AfterMapping
-    default void updateMFScheme(Scheme scheme, @MappingTarget MFScheme mfScheme) {
+    default void updateMFScheme(MFSchemeDTO scheme, @MappingTarget MFScheme mfScheme) {
         MFSchemeNav mfSchemenav = new MFSchemeNav();
         mfSchemenav.setNav("N.A.".equals(scheme.nav()) ? 0D : Double.parseDouble(scheme.nav()));
         mfSchemenav.setNavDate(LocalDate.parse(scheme.date(), DATE_FORMATTER));

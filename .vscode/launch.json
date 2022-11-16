@@ -15,7 +15,10 @@
             "name": "Launch MFScreenerApplication",
             "request": "launch",
             "mainClass": "com.example.mfscreener.MFScreenerApplication",
-            "projectName": "mfscreener"
+            "projectName": "mfscreener",
+            "sourcePaths": [
+                "${workspaceFolder}/build/generated/"
+            ]
         }
     ]
 }

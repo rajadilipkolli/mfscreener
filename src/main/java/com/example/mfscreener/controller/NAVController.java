@@ -2,7 +2,7 @@
 package com.example.mfscreener.controller;
 
 import com.example.mfscreener.models.PortfolioDTO;
-import com.example.mfscreener.models.Scheme;
+import com.example.mfscreener.models.MFSchemeDTO;
 import com.example.mfscreener.models.projection.FundDetailProjection;
 import com.example.mfscreener.service.NavService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -26,7 +26,7 @@ public class NAVController {
 
     @GetMapping(path = "/nav/{schemeCode}")
     @Operation(summary = "Fetch the latest NAV from AMFI website.")
-    public Scheme getScheme(
+    public MFSchemeDTO getScheme(
             @Parameter(description = "scheme Code for mutual fund", example = "120503")
                     @PathVariable(value = "schemeCode")
                     Long schemeCode) {
@@ -37,7 +37,7 @@ public class NAVController {
     @GetMapping(path = "/nav/{schemeCode}/{date}")
     @Operation(
             summary = "Fetch NAV on date DD-MM-YYYY (or the last working day before DD-MM-YYYY).")
-    public Scheme getSchemeNavOnDate(
+    public MFSchemeDTO getSchemeNavOnDate(
             @Parameter(description = "scheme Code for mutual fund", example = "120503")
                     @PathVariable
                     Long schemeCode,
