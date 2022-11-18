@@ -3,7 +3,7 @@ package com.example.mfscreener.models.projection;
 
 public interface PortfolioDetailsProjection {
 
-    String getSchemaName();
+    String getSchemeName();
 
     String getFolioNumber();
 

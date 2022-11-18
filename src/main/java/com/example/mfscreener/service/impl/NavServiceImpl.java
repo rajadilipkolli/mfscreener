@@ -32,8 +32,8 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpMethod;
@@ -84,6 +84,7 @@ public class NavServiceImpl implements NavService {
 
     @Override
     public void fetchSchemeDetails(Long schemeCode) {
+        log.info("Fetching SchemeDetails for SchemaCode :{} ", schemeCode);
         URI uri =
                 UriComponentsBuilder.fromHttpUrl(Constants.MFAPI_WEBSITE_BASE_URL + schemeCode)
                         .build()
@@ -118,6 +119,7 @@ public class NavServiceImpl implements NavService {
     }
 
     private MFSchemeDTO getSchemeDetails(Long schemeCode, LocalDate navDate) {
+        log.info("Fetching Nav for SchemaCode :{} for date :{} from Server", schemeCode, navDate);
         fetchSchemeDetails(schemeCode);
         var optionalMFSchemeDTO =
                 this.mfSchemesRepository
@@ -165,6 +167,7 @@ public class NavServiceImpl implements NavService {
     }
 
     private MFSchemeDTO getNavByDate(Long schemeCode, LocalDate navDate) {
+        log.info("Fetching Nav for SchemaCode :{} for date :{} from Database", schemeCode, navDate);
         return this.mfSchemesRepository
                 .findBySchemeIdAndNavDate(schemeCode, navDate)
                 .map(this::convertToDTO)
@@ -197,24 +200,32 @@ public class NavServiceImpl implements NavService {
 
     @Override
     public PortfolioResponse getPortfolioByPAN(String panNumber) {
-        List<PortfolioDetailsDTO> portfolioDetailsDTOS =
+        List<CompletableFuture<PortfolioDetailsDTO>> completableFutureList =
                 casDetailsEntityRepository.getPortfolioDetails(panNumber).stream()
                         .map(
-                                portfolioDetails -> {
-                                    MFSchemeDTO scheme =
-                                            getNavByDate(
-                                                    portfolioDetails.getSchemeId(),
-                                                    getAdjustedDate(LocalDate.now()));
-                                    float totalValue =
-                                            portfolioDetails.getBalanceUnits()
-                                                    * Float.parseFloat(scheme.nav());
+                                portfolioDetails ->
+                                        CompletableFuture.supplyAsync(
+                                                () -> {
+                                                    MFSchemeDTO scheme =
+                                                            getNavByDate(
+                                                                    portfolioDetails.getSchemeId(),
+                                                                    getAdjustedDate(
+                                                                            LocalDate.now()));
+                                                    float totalValue =
+                                                            portfolioDetails.getBalanceUnits()
+                                                                    * Float.parseFloat(
+                                                                            scheme.nav());
 
-                                    return new PortfolioDetailsDTO(
-                                            totalValue,
-                                            portfolioDetails.getSchemeName(),
-                                            portfolioDetails.getFolioNumber());
-                                })
-                        .collect(Collectors.toList());
+                                                    return new PortfolioDetailsDTO(
+                                                            totalValue,
+                                                            portfolioDetails.getSchemeName(),
+                                                            portfolioDetails.getFolioNumber());
+                                                }))
+                        .toList();
+
+        List<PortfolioDetailsDTO> portfolioDetailsDTOS =
+                completableFutureList.stream().map(CompletableFuture::join).toList();
+
         return new PortfolioResponse(
                 portfolioDetailsDTOS.stream()
                         .map(PortfolioDetailsDTO::totalValue)

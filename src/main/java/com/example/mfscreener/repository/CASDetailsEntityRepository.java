@@ -36,9 +36,11 @@ public interface CASDetailsEntityRepository extends JpaRepository<UserCASDetails
                   type NOT IN ('STAMP_DUTY_TAX', 'STT_TAX')
               ) tempView
               join user_scheme_details usd on tempView.user_scheme_detail_id = usd.id
+              join user_folio_details ufd on usd.user_folio_id = ufd.id
             where
               row_number = 1
               and balance <> 0
+              and ufd.pan = :pan
             group by
               usd.scheme,
               usd.amfi
