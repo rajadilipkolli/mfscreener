@@ -18,3 +18,7 @@ Spring Boot REST API which fetches the Net Asset Value(NAV) of an AMFI mutual fu
     pip install casparser
     ```
  * generate json using below command and upload to system
+   ```shell
+   casparser 42103626220211831ZFFDEPR3H0RBD644686241F761CPIMBCP142488446.pdf -p ABCDE1234F -o pdf_parsed.json
+   ```
+   Here 2nd argument is the path of the pdf file, followed by password of CAS file and the output Type needed
