@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
@@ -119,20 +120,13 @@ public class NavServiceImpl implements NavService {
     }
 
     private MFSchemeDTO getSchemeDetails(Long schemeCode, LocalDate navDate) {
-        log.info("Fetching Nav for SchemaCode :{} for date :{} from Server", schemeCode, navDate);
+        log.info("Fetching Nav for SchemeCode :{} for date :{} from Server", schemeCode, navDate);
         fetchSchemeDetails(schemeCode);
-        var optionalMFSchemeDTO =
-                this.mfSchemesRepository
-                        .findBySchemeIdAndNavDate(schemeCode, navDate)
-                        .map(this::convertToDTO);
-        if (optionalMFSchemeDTO.isEmpty()) {
-            return this.mfSchemesRepository
-                    .findBySchemeIdAndNavDate(schemeCode, navDate.minusDays(1))
-                    .map(this::convertToDTO)
-                    .orElseThrow(() -> new NavNotFoundException("Nav Not Found for given Date"));
-        } else {
-            return optionalMFSchemeDTO.get();
-        }
+        log.info("Fetched Nav for SchemeCode :{} for date :{} from Server", schemeCode, navDate);
+        return this.mfSchemesRepository
+                .findBySchemeIdAndNavDate(schemeCode, navDate)
+                .map(this::convertToDTO)
+                .orElseThrow(() -> new NavNotFoundException("Nav Not Found for given Date"));
     }
 
     private void mergeList(@NonNull NavResponse navResponse, MFScheme mfScheme) {
@@ -174,6 +168,17 @@ public class NavServiceImpl implements NavService {
                 .orElseGet(() -> getSchemeDetails(schemeCode, navDate));
     }
 
+    private LocalDate getAdjustedDate(LocalDateTime localDateTime) {
+        LocalDate adjustedDate = localDateTime.toLocalDate();
+        if (adjustedDate.getDayOfWeek() == DayOfWeek.SATURDAY
+                || adjustedDate.getDayOfWeek() == DayOfWeek.SUNDAY) {
+            return adjustedDate.with(TemporalAdjusters.previous(DayOfWeek.FRIDAY));
+        } else if (localDateTime.getHour() < 23) {
+            adjustedDate = adjustedDate.minusDays(1);
+        }
+        return adjustedDate;
+    }
+
     private LocalDate getAdjustedDate(LocalDate adjustedDate) {
         if (adjustedDate.getDayOfWeek() == DayOfWeek.SATURDAY
                 || adjustedDate.getDayOfWeek() == DayOfWeek.SUNDAY) {
@@ -210,11 +215,11 @@ public class NavServiceImpl implements NavService {
                                                             getNavByDate(
                                                                     portfolioDetails.getSchemeId(),
                                                                     getAdjustedDate(
-                                                                            LocalDate.now()));
+                                                                            LocalDateTime.now()));
                                                     float totalValue =
                                                             portfolioDetails.getBalanceUnits()
                                                                     * Float.parseFloat(
-                                                                            scheme.nav());
+                                                                    scheme.nav());
 
                                                     return new PortfolioDetailsDTO(
                                                             totalValue,
