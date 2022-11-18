@@ -25,7 +25,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjusters;
 import java.util.List;
@@ -168,17 +167,6 @@ public class NavServiceImpl implements NavService {
                 .orElseGet(() -> getSchemeDetails(schemeCode, navDate));
     }
 
-    private LocalDate getAdjustedDate(LocalDateTime localDateTime) {
-        LocalDate adjustedDate = localDateTime.toLocalDate();
-        if (adjustedDate.getDayOfWeek() == DayOfWeek.SATURDAY
-                || adjustedDate.getDayOfWeek() == DayOfWeek.SUNDAY) {
-            return adjustedDate.with(TemporalAdjusters.previous(DayOfWeek.FRIDAY));
-        } else if (localDateTime.getHour() < 23) {
-            adjustedDate = adjustedDate.minusDays(1);
-        }
-        return adjustedDate;
-    }
-
     private LocalDate getAdjustedDate(LocalDate adjustedDate) {
         if (adjustedDate.getDayOfWeek() == DayOfWeek.SATURDAY
                 || adjustedDate.getDayOfWeek() == DayOfWeek.SUNDAY) {
@@ -204,9 +192,15 @@ public class NavServiceImpl implements NavService {
     }
 
     @Override
-    public PortfolioResponse getPortfolioByPAN(String panNumber, LocalDate date) {
+    public PortfolioResponse getPortfolioByPAN(String panNumber, LocalDate asOfDate) {
+        if (null == asOfDate) {
+            asOfDate = LocalDate.now().minusDays(1);
+        } else if (asOfDate.isAfter(LocalDate.now())) {
+            asOfDate = LocalDate.now().minusDays(1);
+        }
+        LocalDate finalAsOfDate = asOfDate;
         List<CompletableFuture<PortfolioDetailsDTO>> completableFutureList =
-                casDetailsEntityRepository.getPortfolioDetails(panNumber).stream()
+                casDetailsEntityRepository.getPortfolioDetails(panNumber, asOfDate).stream()
                         .map(
                                 portfolioDetails ->
                                         CompletableFuture.supplyAsync(
@@ -214,8 +208,7 @@ public class NavServiceImpl implements NavService {
                                                     MFSchemeDTO scheme =
                                                             getNavByDate(
                                                                     portfolioDetails.getSchemeId(),
-                                                                    getAdjustedDate(
-                                                                            LocalDateTime.now()));
+                                                                    getAdjustedDate(finalAsOfDate));
                                                     float totalValue =
                                                             portfolioDetails.getBalanceUnits()
                                                                     * Float.parseFloat(

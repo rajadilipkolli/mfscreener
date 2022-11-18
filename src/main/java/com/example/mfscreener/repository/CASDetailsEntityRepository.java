@@ -3,6 +3,7 @@ package com.example.mfscreener.repository;
 
 import com.example.mfscreener.entities.UserCASDetailsEntity;
 import com.example.mfscreener.models.projection.PortfolioDetailsProjection;
+import java.time.LocalDate;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -35,6 +36,7 @@ public interface CASDetailsEntityRepository extends JpaRepository<UserCASDetails
                         where
                           utd.type NOT IN ('STAMP_DUTY_TAX', 'STT_TAX')
                           and ufd.pan = :pan
+                          and utd.transaction_date <= :asOfDate
                       )
                     select
                       sum(balance) as balanceUnits,
@@ -50,5 +52,6 @@ public interface CASDetailsEntityRepository extends JpaRepository<UserCASDetails
                       schemeId,
                       folioNumber
                     """)
-    List<PortfolioDetailsProjection> getPortfolioDetails(@Param("pan") String panNumber);
+    List<PortfolioDetailsProjection> getPortfolioDetails(
+            @Param("pan") String panNumber, @Param("asOfDate") LocalDate asOfDate);
 }

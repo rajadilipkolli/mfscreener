@@ -1,9 +1,11 @@
+import org.gradle.plugins.ide.eclipse.model.SourceFolder
+
 plugins {
     id 'org.springframework.boot' version '3.0.0-RC2'
     id 'io.spring.dependency-management' version '1.1.0'
     // id 'org.graalvm.buildtools.native' version '0.9.17'
     id 'java'
-    // id 'eclipse'
+    id 'eclipse'
     id "org.sonarqube" version "3.5.0.2730" apply false
     id "com.diffplug.spotless" version "6.11.0"
 }
@@ -35,9 +37,10 @@ ext {
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    // implementation 'org.springframework.boot:spring-boot-starter-quartz'
+//    implementation 'org.springframework.boot:spring-boot-starter-quartz'
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-cache'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.liquibase:liquibase-core'
@@ -139,13 +142,13 @@ sourceSets {
 }
 
 //adding task to fix issue with ConversationService not found in VSCode
-// eclipse {
-//     classpath {
-//         containers 'org.eclipse.buildship.core.gradleclasspathcontainer'
-//         file.whenMerged { cp ->
-//             def entries = cp.entries;
-//             def src = new org.gradle.plugins.ide.eclipse.model.SourceFolder('build/generated/sources/annotationProcessor/java/main/', null)
-//             entries.add(src)
-//         } 
-//     }
-// }
+eclipse {
+    classpath {
+        containers 'org.eclipse.buildship.core.gradleclasspathcontainer'
+        file.whenMerged { cp ->
+            def entries = cp.entries;
+            def src = new SourceFolder('build/generated/sources/annotationProcessor/java/main/', null)
+            entries.add(src)
+        }
+    }
+}

@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.ReflectionUtils;
 
 @Component
-@Profile("debug")
+@Profile("!prod")
 public class DatasourceProxyBeanPostProcessor implements BeanPostProcessor {
 
     @Override
