@@ -16,34 +16,39 @@ public interface CASDetailsEntityRepository extends JpaRepository<UserCASDetails
             nativeQuery = true,
             value =
                     """
-                     select
-              sum(tempView.balance) as balanceUnits,
-              usd.scheme as schemeName,
-              usd.amfi as schemeId
-            from
-              (
-                select
-                  balance,
-                  user_scheme_detail_id,
-                  row_number() over (
-                    partition by user_scheme_detail_id
-                    order by
-                      transaction_date desc
-                  ) as row_number
-                from
-                  user_transaction_details
-                where
-                  type NOT IN ('STAMP_DUTY_TAX', 'STT_TAX')
-              ) tempView
-              join user_scheme_details usd on tempView.user_scheme_detail_id = usd.id
-              join user_folio_details ufd on usd.user_folio_id = ufd.id
-            where
-              row_number = 1
-              and balance <> 0
-              and ufd.pan = :pan
-            group by
-              usd.scheme,
-              usd.amfi
+                    with tempView as (
+                        select
+                          utd.balance,
+                          utd.user_scheme_detail_id,
+                          usd.scheme as schemeName,
+                          usd.amfi as schemeId,
+                          ufd.folio as folioNumber,
+                          row_number() over (
+                            partition by utd.user_scheme_detail_id
+                            order by
+                              utd.transaction_date desc
+                          ) as row_number
+                        from
+                          user_transaction_details utd
+                          join user_scheme_details usd on utd.user_scheme_detail_id = usd.id
+                          join user_folio_details ufd on usd.user_folio_id = ufd.id
+                        where
+                          utd.type NOT IN ('STAMP_DUTY_TAX', 'STT_TAX')
+                          and ufd.pan = :pan
+                      )
+                    select
+                      sum(balance) as balanceUnits,
+                      schemeName,
+                      schemeId,
+                      folioNumber
+                      from tempView
+                    where
+                      row_number = 1
+                      and balance <> 0
+                    group by
+                      schemeName,
+                      schemeId,
+                      folioNumber
                     """)
     List<PortfolioDetailsProjection> getPortfolioDetails(@Param("pan") String panNumber);
 }
