@@ -67,9 +67,9 @@ public class NAVController {
         return navService.fetchSchemesByFundName(fundName);
     }
 
-    @GetMapping("/portfolio")
-    public PortfolioResponse getPortfolio() {
-        return navService.getPortfolio();
+    @GetMapping("/portfolio/{pan}")
+    public PortfolioResponse getPortfolio(@PathVariable("pan") String panNumber) {
+        return navService.getPortfolioByPAN(panNumber);
     }
 
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

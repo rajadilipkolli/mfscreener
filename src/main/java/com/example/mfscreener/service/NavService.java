@@ -20,7 +20,7 @@ public interface NavService {
 
     List<FundDetailProjection> fetchSchemesByFundName(String fundName);
 
-    PortfolioResponse getPortfolio();
+    PortfolioResponse getPortfolioByPAN(String panNumber);
 
     void loadFundDetailsIfNotSet();
 

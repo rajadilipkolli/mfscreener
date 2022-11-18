@@ -15,7 +15,6 @@ import com.example.mfscreener.models.MetaDTO;
 import com.example.mfscreener.models.NAVData;
 import com.example.mfscreener.models.PortfolioDetailsDTO;
 import com.example.mfscreener.models.projection.FundDetailProjection;
-import com.example.mfscreener.models.projection.PortfolioDetailsProjection;
 import com.example.mfscreener.models.response.NavResponse;
 import com.example.mfscreener.models.response.PortfolioResponse;
 import com.example.mfscreener.repository.CASDetailsEntityRepository;
@@ -33,8 +32,8 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpMethod;
@@ -56,9 +55,10 @@ public class NavServiceImpl implements NavService {
     private final MFSchemeTypeRepository mfSchemeTypeRepository;
     private final RestTemplate restTemplate;
     private final ErrorMessageRepository errorMessageRepository;
+
+    private final CASDetailsEntityRepository casDetailsEntityRepository;
     private final ObjectMapper objectMapper;
     private final ConversionServiceAdapter conversionServiceAdapter;
-    private final CASDetailsEntityRepository casDetailsEntityRepository;
 
     Function<NAVData, MFSchemeNav> navDataToMFSchemeNavFunction =
             navData -> {
@@ -119,10 +119,18 @@ public class NavServiceImpl implements NavService {
 
     private MFSchemeDTO getSchemeDetails(Long schemeCode, LocalDate navDate) {
         fetchSchemeDetails(schemeCode);
-        return this.mfSchemesRepository
-                .findBySchemeIdAndNavDate(schemeCode, navDate)
-                .map(this::convertToDTO)
-                .orElseThrow(() -> new NavNotFoundException("Nav Not Found for given Date"));
+        var optionalMFSchemeDTO =
+                this.mfSchemesRepository
+                        .findBySchemeIdAndNavDate(schemeCode, navDate)
+                        .map(this::convertToDTO);
+        if (optionalMFSchemeDTO.isEmpty()) {
+            return this.mfSchemesRepository
+                    .findBySchemeIdAndNavDate(schemeCode, navDate.minusDays(1))
+                    .map(this::convertToDTO)
+                    .orElseThrow(() -> new NavNotFoundException("Nav Not Found for given Date"));
+        } else {
+            return optionalMFSchemeDTO.get();
+        }
     }
 
     private void mergeList(@NonNull NavResponse navResponse, MFScheme mfScheme) {
@@ -188,32 +196,28 @@ public class NavServiceImpl implements NavService {
     }
 
     @Override
-    public PortfolioResponse getPortfolio() {
-        // List<PortfolioDetails> portfolioDetailsList = transactionRecordRepository.getPortfolio();
-        List<PortfolioDetailsDTO> portfolioDetailsDTOS = new ArrayList<>();
-        List<PortfolioDetailsProjection> portfolioDetailsList = new ArrayList<>();
-        portfolioDetailsList.forEach(
-                portfolioDetails -> {
-                    float totalValue = 0;
-                    if (portfolioDetails.getSchemeId() != null) {
-                        MFSchemeDTO scheme =
-                                getNavByDate(
-                                        portfolioDetails.getSchemeId(),
-                                        getAdjustedDate(LocalDate.now()));
-                        totalValue =
-                                portfolioDetails.getBalanceUnits() * Float.parseFloat(scheme.nav());
-                    }
-                    PortfolioDetailsDTO portfolioDetailsDTO =
-                            new PortfolioDetailsDTO(
-                                    totalValue,
-                                    portfolioDetails.getSchemaName(),
-                                    portfolioDetails.getFolioNumber());
-                    portfolioDetailsDTOS.add(portfolioDetailsDTO);
-                });
+    public PortfolioResponse getPortfolioByPAN(String panNumber) {
+        List<PortfolioDetailsDTO> portfolioDetailsDTOS =
+                casDetailsEntityRepository.getPortfolioDetails(panNumber).stream()
+                        .map(
+                                portfolioDetails -> {
+                                    MFSchemeDTO scheme =
+                                            getNavByDate(
+                                                    portfolioDetails.getSchemeId(),
+                                                    getAdjustedDate(LocalDate.now()));
+                                    float totalValue =
+                                            portfolioDetails.getBalanceUnits()
+                                                    * Float.parseFloat(scheme.nav());
+
+                                    return new PortfolioDetailsDTO(
+                                            totalValue,
+                                            portfolioDetails.getSchemeName(),
+                                            portfolioDetails.getFolioNumber());
+                                })
+                        .collect(Collectors.toList());
         return new PortfolioResponse(
                 portfolioDetailsDTOS.stream()
                         .map(PortfolioDetailsDTO::totalValue)
-                        .filter(Objects::nonNull)
                         .reduce(0f, Float::sum),
                 portfolioDetailsDTOS);
     }
