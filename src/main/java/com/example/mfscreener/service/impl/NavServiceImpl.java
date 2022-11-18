@@ -17,10 +17,7 @@ import com.example.mfscreener.models.PortfolioDetailsDTO;
 import com.example.mfscreener.models.projection.FundDetailProjection;
 import com.example.mfscreener.models.response.NavResponse;
 import com.example.mfscreener.models.response.PortfolioResponse;
-import com.example.mfscreener.repository.CASDetailsEntityRepository;
-import com.example.mfscreener.repository.ErrorMessageRepository;
-import com.example.mfscreener.repository.MFSchemeRepository;
-import com.example.mfscreener.repository.MFSchemeTypeRepository;
+import com.example.mfscreener.repository.*;
 import com.example.mfscreener.service.NavService;
 import com.example.mfscreener.util.Constants;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -31,7 +28,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjusters;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
@@ -54,11 +50,12 @@ public class NavServiceImpl implements NavService {
 
     private final MFSchemeRepository mfSchemesRepository;
     private final MFSchemeTypeRepository mfSchemeTypeRepository;
-    private final RestTemplate restTemplate;
     private final ErrorMessageRepository errorMessageRepository;
-
     private final CASDetailsEntityRepository casDetailsEntityRepository;
+    private final UserSchemeDetailsEntityRepository userSchemeDetailsEntityRepository;
+
     private final ObjectMapper objectMapper;
+    private final RestTemplate restTemplate;
     private final ConversionServiceAdapter conversionServiceAdapter;
 
     Function<NAVData, MFSchemeNav> navDataToMFSchemeNavFunction =
@@ -85,7 +82,7 @@ public class NavServiceImpl implements NavService {
 
     @Override
     public void fetchSchemeDetails(Long schemeCode) {
-        log.info("Fetching SchemeDetails for SchemaCode :{} ", schemeCode);
+        log.info("Fetching SchemeDetails for AMFISchemeCode :{} ", schemeCode);
         URI uri =
                 UriComponentsBuilder.fromHttpUrl(Constants.MFAPI_WEBSITE_BASE_URL + schemeCode)
                         .build()
@@ -161,7 +158,10 @@ public class NavServiceImpl implements NavService {
     }
 
     private MFSchemeDTO getNavByDate(Long schemeCode, LocalDate navDate) {
-        log.info("Fetching Nav for SchemaCode :{} for date :{} from Database", schemeCode, navDate);
+        log.info(
+                "Fetching Nav for AMFISchemeCode : {} for date : {} from Database",
+                schemeCode,
+                navDate);
         return this.mfSchemesRepository
                 .findBySchemeIdAndNavDate(schemeCode, navDate)
                 .map(this::convertToDTO)
@@ -204,7 +204,7 @@ public class NavServiceImpl implements NavService {
     }
 
     @Override
-    public PortfolioResponse getPortfolioByPAN(String panNumber) {
+    public PortfolioResponse getPortfolioByPAN(String panNumber, LocalDate date) {
         List<CompletableFuture<PortfolioDetailsDTO>> completableFutureList =
                 casDetailsEntityRepository.getPortfolioDetails(panNumber).stream()
                         .map(
@@ -219,7 +219,7 @@ public class NavServiceImpl implements NavService {
                                                     float totalValue =
                                                             portfolioDetails.getBalanceUnits()
                                                                     * Float.parseFloat(
-                                                                    scheme.nav());
+                                                                            scheme.nav());
 
                                                     return new PortfolioDetailsDTO(
                                                             totalValue,
@@ -242,8 +242,7 @@ public class NavServiceImpl implements NavService {
     public void loadFundDetailsIfNotSet() {
         StopWatch stopWatch = new StopWatch();
         stopWatch.start("loadDetails");
-        // List<Long> distinctSchemeIds = transactionRecordRepository.findDistinctSchemeId();
-        List<Long> distinctSchemeIds = new ArrayList<>();
+        List<Long> distinctSchemeIds = userSchemeDetailsEntityRepository.findDistinctByAmfi();
 
         for (Long schemeId : distinctSchemeIds) {
             {

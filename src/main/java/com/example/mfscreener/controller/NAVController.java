@@ -8,14 +8,12 @@ import com.example.mfscreener.service.NavService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 @RestController
@@ -68,8 +66,16 @@ public class NAVController {
     }
 
     @GetMapping("/portfolio/{pan}")
-    public PortfolioResponse getPortfolio(@PathVariable("pan") String panNumber) {
-        return navService.getPortfolioByPAN(panNumber);
+    @Operation(
+            summary =
+                    "Fetches the portfolio by Pan and given date, if date is empty then current"
+                            + " date portfolio will be returned")
+    public PortfolioResponse getPortfolio(
+            @PathVariable("pan") String panNumber,
+            @RequestParam(value = "date", required = false)
+                    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+                    LocalDate date) {
+        return navService.getPortfolioByPAN(panNumber, date);
     }
 
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
