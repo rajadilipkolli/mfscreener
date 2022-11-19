@@ -20,7 +20,7 @@ import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Primary;
 
 @Configuration(proxyBeanMethods = false)
-@ConditionalOnProperty(prefix = "quartz", name = "enable", havingValue = "true")
+@ConditionalOnProperty(prefix = "quartz", name = "enabled", havingValue = "true")
 public class QuartzConfig {
 
     @Bean

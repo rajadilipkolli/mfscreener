@@ -10,12 +10,14 @@ import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.factory.config.BeanPostProcessor;
-import org.springframework.context.annotation.Profile;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ReflectionUtils;
 
 @Component
-@Profile("!prod")
+@RefreshScope
+@ConditionalOnProperty(prefix = "datasourceProxy", name = "enabled", havingValue = "true")
 public class DatasourceProxyBeanPostProcessor implements BeanPostProcessor {
 
     @Override
