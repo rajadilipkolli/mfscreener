@@ -33,9 +33,11 @@ ext {
     set('testcontainersVersion', "1.17.6")
     set('mapstructVersion', "1.5.3.Final")
     set('mapstructSpringExtensionsVersion', "0.1.2")
+    set('springCloudVersion', "2022.0.0-RC2")
 }
 
 dependencies {
+    implementation 'org.springframework.cloud:spring-cloud-starter-config'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-quartz'
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
@@ -68,6 +70,7 @@ dependencies {
 dependencyManagement {
     imports {
         mavenBom "org.testcontainers:testcontainers-bom:${testcontainersVersion}"
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
     }
 }
 

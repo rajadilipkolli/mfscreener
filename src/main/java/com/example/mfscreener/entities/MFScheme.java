@@ -5,6 +5,9 @@ import jakarta.persistence.*;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.hibernate.annotations.DynamicUpdate;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -12,6 +15,7 @@ import lombok.Setter;
 @Entity
 @Getter
 @Setter
+@DynamicUpdate
 public class MFScheme extends Auditable<String> implements Serializable {
 
     @Id
