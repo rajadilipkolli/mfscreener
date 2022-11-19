@@ -1,5 +1,0 @@
-databaseChangeLog:
-  - includeAll:
-      path: "/quartz"
-      relativeToChangelogFile: true
-      errorIfMissingOrEmpty: true

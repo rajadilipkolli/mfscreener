@@ -20,7 +20,9 @@ public class DatasourceProxyBeanPostProcessor implements BeanPostProcessor {
 
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) {
-        if (bean instanceof DataSource && !(bean instanceof ProxyDataSource)) {
+        if (bean instanceof DataSource
+                && !(bean instanceof ProxyDataSource)
+                && ("dataSource".equals(beanName))) {
             // Instead of directly returning a less specific datasource bean
             // (e.g.: HikariDataSource -> DataSource), return a proxy object.
             final ProxyFactory factory = new ProxyFactory(bean);
