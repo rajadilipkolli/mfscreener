@@ -34,6 +34,7 @@ ext {
     set('mapstructVersion', "1.5.3.Final")
     set('mapstructSpringExtensionsVersion', "0.1.2")
     set('springCloudVersion', "2022.0.0-RC2")
+    set('lombokMapstructBindingVersion', "0.2.0")
 }
 
 dependencies {
@@ -56,11 +57,13 @@ dependencies {
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
     annotationProcessor 'org.projectlombok:lombok'
     annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
+    annotationProcessor "org.projectlombok:lombok-mapstruct-binding:${lombokMapstructBindingVersion}"
     annotationProcessor "org.mapstruct.extensions.spring:mapstruct-spring-extensions:${mapstructSpringExtensionsVersion}"
 
     // If you are using mapstruct in test code
     testAnnotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
     testAnnotationProcessor "org.mapstruct.extensions.spring:mapstruct-spring-extensions:${mapstructSpringExtensionsVersion}"
+    testAnnotationProcessor "org.projectlombok:lombok-mapstruct-binding:${lombokMapstructBindingVersion}"
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.testcontainers:junit-jupiter'
