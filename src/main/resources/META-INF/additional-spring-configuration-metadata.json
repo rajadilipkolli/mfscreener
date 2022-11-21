@@ -1,17 +1,14 @@
-{"properties": [
-  {
-    "name": "quartz.enabled",
-    "type": "java.lang.Boolean",
-    "description": "Enables or disables the quartz job"
-  },
-  {
-    "name": "datasourceProxy.enabled",
-    "type": "java.lang.String",
-    "description": "Enables or disables 'datasourceProxy.enabled'"
-  },
-  {
-    "name": "datasourceProxy.enabled",
-    "type": "java.lang.String",
-    "description": "A description for 'datasourceProxy.enabled'"
-  }
-]}
+{
+  "properties": [
+    {
+      "name": "quartz.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Enables or disables the quartz job"
+    },
+    {
+      "name": "datasourceProxy.enabled",
+      "type": "java.lang.String",
+      "description": "Enables or disables 'datasourceProxy' for logging database"
+    }
+  ]
+}
