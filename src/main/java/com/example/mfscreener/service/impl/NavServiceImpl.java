@@ -29,7 +29,6 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Function;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpMethod;
@@ -56,14 +55,6 @@ public class NavServiceImpl implements NavService {
     private final ObjectMapper objectMapper;
     private final RestTemplate restTemplate;
     private final ConversionServiceAdapter conversionServiceAdapter;
-
-    Function<NAVData, MFSchemeNav> navDataToMFSchemeNavFunction =
-            navData -> {
-                MFSchemeNav mfSchemeNav = new MFSchemeNav();
-                mfSchemeNav.setNav(Double.parseDouble(navData.nav()));
-                mfSchemeNav.setNavDate(LocalDate.parse(navData.date(), Constants.DATE_FORMATTER));
-                return mfSchemeNav;
-            };
 
     @Override
     public MFSchemeDTO getNav(Long schemeCode) {
@@ -130,7 +121,7 @@ public class NavServiceImpl implements NavService {
 
         List<MFSchemeNav> newNavs =
                 navList.stream()
-                        .map(navDataToMFSchemeNavFunction)
+                        .map(conversionServiceAdapter::mapNAVDataToMFSchemeNav)
                         .filter(nav -> !mfScheme.getMfSchemeNavies().contains(nav))
                         .toList();
 

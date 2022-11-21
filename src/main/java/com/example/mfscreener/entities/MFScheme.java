@@ -5,11 +5,9 @@ import jakarta.persistence.*;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-
-import org.hibernate.annotations.DynamicUpdate;
-
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.DynamicUpdate;
 
 @Table(name = "mf_scheme")
 @Entity
