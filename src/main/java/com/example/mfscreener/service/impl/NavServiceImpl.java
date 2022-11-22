@@ -60,7 +60,7 @@ public class NavServiceImpl implements NavService {
     public MFSchemeDTO getNav(Long schemeCode) {
         return mfSchemesRepository
                 .findBySchemeIdAndNavDate(schemeCode, getAdjustedDate(LocalDate.now()))
-                .map(this::convertToDTO)
+                .map(conversionServiceAdapter::mapMFSchemeToMFSchemeDTO)
                 .orElseThrow(() -> new SchemeNotFoundException("Scheme Not Found"));
     }
 
@@ -112,7 +112,7 @@ public class NavServiceImpl implements NavService {
         log.info("Fetched Nav for SchemeCode :{} for date :{} from Server", schemeCode, navDate);
         return this.mfSchemesRepository
                 .findBySchemeIdAndNavDate(schemeCode, navDate)
-                .map(this::convertToDTO)
+                .map(conversionServiceAdapter::mapMFSchemeToMFSchemeDTO)
                 .orElseThrow(() -> new NavNotFoundException("Nav Not Found for given Date"));
     }
 
@@ -154,7 +154,7 @@ public class NavServiceImpl implements NavService {
                 navDate);
         return this.mfSchemesRepository
                 .findBySchemeIdAndNavDate(schemeCode, navDate)
-                .map(this::convertToDTO)
+                .map(conversionServiceAdapter::mapMFSchemeToMFSchemeDTO)
                 .orElseGet(() -> getSchemeDetails(schemeCode, navDate));
     }
 
@@ -171,15 +171,6 @@ public class NavServiceImpl implements NavService {
                 DateTimeFormatter.ofPattern(Constants.DATE_PATTERN_DD_MM_YYYY);
         LocalDate adjustedDate = LocalDate.parse(inputDate, formatter);
         return getAdjustedDate(adjustedDate);
-    }
-
-    private MFSchemeDTO convertToDTO(MFScheme mfScheme) {
-        return new MFSchemeDTO(
-                String.valueOf(mfScheme.getSchemeId()),
-                mfScheme.getPayOut(),
-                mfScheme.getSchemeName(),
-                String.valueOf(mfScheme.getMfSchemeNavies().get(0).getNav()),
-                String.valueOf(mfScheme.getMfSchemeNavies().get(0).getNavDate()));
     }
 
     @Override
