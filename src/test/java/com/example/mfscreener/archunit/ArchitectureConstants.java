@@ -15,7 +15,7 @@ public class ArchitectureConstants {
     public static final String SERVICE_PACKAGE = "..service..";
 
     // Package to scan
-    public static final String DEFAULT_PACKAGE = "com.example.archunit";
+    public static final String DEFAULT_PACKAGE = "com.example.mfscreener";
 
     // Explanations
     public static final String ANNOTATED_EXPLANATION =

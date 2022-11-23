@@ -50,9 +50,12 @@ class GeneralCodingRulesTest {
                     .beFinal()
                     .andShould()
                     .haveName("LOGGER")
+                    .orShould()
+                    .haveName("log")
                     .because(
                             "Logger variables should be private, static and final, and it should be"
-                                    + " named as LOGGER");
+                                    + " named as LOGGER")
+                    .allowEmptyShould(true);
 
     @ArchTest
     static final ArchRule finalStaticVariablesInUppercase =
@@ -63,12 +66,15 @@ class GeneralCodingRulesTest {
                     .and()
                     .doNotHaveName("serialVersionUID")
                     .and()
+                    .doNotHaveName("log")
+                    .and()
                     .doNotHaveModifier(JavaModifier.SYNTHETIC)
                     .should()
                     .haveNameMatching(".*^[A-Z].*")
                     .because(
                             "Variables with static and final modifiers should be named in"
-                                    + " uppercase");
+                                    + " uppercase")
+                    .allowEmptyShould(true);
     // Methods
     @ArchTest
     static final ArchRule beanMethodsShouldBePublic =
