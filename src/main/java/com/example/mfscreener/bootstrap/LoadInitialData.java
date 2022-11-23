@@ -5,12 +5,22 @@ import com.example.mfscreener.adapter.ConversionServiceAdapter;
 import com.example.mfscreener.entities.MFScheme;
 import com.example.mfscreener.models.MFSchemeDTO;
 import com.example.mfscreener.repository.MFSchemeRepository;
-import com.example.mfscreener.util.Constants;
-import java.io.*;
-import java.util.*;
+import com.example.mfscreener.utils.AppConstants;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.Reader;
+import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.event.ApplicationStartedEvent;
+import org.springframework.context.annotation.Profile;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ResourceUtils;
@@ -20,6 +30,7 @@ import org.springframework.web.client.RestTemplate;
 @Component
 @Slf4j
 @RequiredArgsConstructor
+@Profile(AppConstants.PROFILE_NOT_TEST)
 public class LoadInitialData {
 
     private static final String COMMA_DELIMITER = ",";
@@ -32,7 +43,7 @@ public class LoadInitialData {
         long start = System.currentTimeMillis();
         log.info("Loading All Funds...");
         List<MFSchemeDTO> chopArrayList = new ArrayList<>();
-        String allNAVs = restTemplate.getForObject(Constants.AMFI_WEBSITE_LINK, String.class);
+        String allNAVs = restTemplate.getForObject(AppConstants.AMFI_WEBSITE_LINK, String.class);
         Reader inputString = new StringReader(Objects.requireNonNull(allNAVs));
         try (BufferedReader br = new BufferedReader(inputString)) {
             String fileRead = br.readLine();
@@ -41,7 +52,7 @@ public class LoadInitialData {
             }
             while (fileRead != null) {
                 int check = 0;
-                final String[] tokenize = fileRead.split(Constants.SEPARATOR);
+                final String[] tokenize = fileRead.split(AppConstants.SEPARATOR);
                 if (tokenize.length == 1) {
                     check = 1;
                 }

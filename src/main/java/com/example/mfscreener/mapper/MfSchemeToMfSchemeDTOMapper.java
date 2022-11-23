@@ -8,9 +8,9 @@ import org.mapstruct.Mapping;
 import org.springframework.core.convert.converter.Converter;
 
 @Mapper(config = MapperSpringConfig.class)
-public interface MfSchemeToMfSchemeDTO extends Converter<MFScheme, MFSchemeDTO> {
+public interface MfSchemeToMfSchemeDTOMapper extends Converter<MFScheme, MFSchemeDTO> {
 
-    @Mapping(target = "schemeCode", source = "schemeName")
+    @Mapping(target = "schemeCode", source = "schemeId")
     @Mapping(target = "payout", source = "payOut")
     @Mapping(
             target = "nav",

@@ -19,7 +19,7 @@ import com.example.mfscreener.models.response.NavResponse;
 import com.example.mfscreener.models.response.PortfolioResponse;
 import com.example.mfscreener.repository.*;
 import com.example.mfscreener.service.NavService;
-import com.example.mfscreener.util.Constants;
+import com.example.mfscreener.utils.AppConstants;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.net.URI;
@@ -74,7 +74,7 @@ public class NavServiceImpl implements NavService {
     public void fetchSchemeDetails(Long schemeCode) {
         log.info("Fetching SchemeDetails for AMFISchemeCode :{} ", schemeCode);
         URI uri =
-                UriComponentsBuilder.fromHttpUrl(Constants.MFAPI_WEBSITE_BASE_URL + schemeCode)
+                UriComponentsBuilder.fromHttpUrl(AppConstants.MFAPI_WEBSITE_BASE_URL + schemeCode)
                         .build()
                         .toUri();
 
@@ -168,7 +168,7 @@ public class NavServiceImpl implements NavService {
 
     private LocalDate getAdjustedDateForNAV(String inputDate) {
         DateTimeFormatter formatter =
-                DateTimeFormatter.ofPattern(Constants.DATE_PATTERN_DD_MM_YYYY);
+                DateTimeFormatter.ofPattern(AppConstants.DATE_PATTERN_DD_MM_YYYY);
         LocalDate adjustedDate = LocalDate.parse(inputDate, formatter);
         return getAdjustedDate(adjustedDate);
     }
