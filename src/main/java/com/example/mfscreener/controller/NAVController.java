@@ -13,7 +13,13 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 @RestController
@@ -24,45 +30,45 @@ public class NAVController {
 
     @GetMapping(path = "/nav/{schemeCode}")
     @Operation(summary = "Fetch the latest NAV from AMFI website.")
-    public MFSchemeDTO getScheme(
+    public ResponseEntity<MFSchemeDTO> getScheme(
             @Parameter(description = "scheme Code for mutual fund", example = "120503")
                     @PathVariable(value = "schemeCode")
                     Long schemeCode) {
 
-        return navService.getNav(schemeCode);
+        return ResponseEntity.ok(navService.getNav(schemeCode));
     }
 
     @GetMapping(path = "/nav/{schemeCode}/{date}")
     @Operation(
             summary = "Fetch NAV on date DD-MM-YYYY (or the last working day before DD-MM-YYYY).")
-    public MFSchemeDTO getSchemeNavOnDate(
+    public ResponseEntity<MFSchemeDTO> getSchemeNavOnDate(
             @Parameter(description = "scheme Code for mutual fund", example = "120503")
                     @PathVariable
                     Long schemeCode,
             @Parameter(description = "date", example = "20-01-2020") @PathVariable String date) {
-        return navService.getNavOnDate(schemeCode, date);
+        return ResponseEntity.ok(navService.getNavOnDate(schemeCode, date));
     }
 
     @GetMapping(path = "/scheme/{schemeName}")
     @Operation(summary = "Fetches the schemes matching key.")
-    public List<FundDetailProjection> fetchSchemes(
+    public ResponseEntity<List<FundDetailProjection>> fetchSchemes(
             @Parameter(description = "scheme name for mutual fund", example = "sbi small cap")
                     @PathVariable(value = "schemeName")
                     String schemeName) {
 
-        return navService.fetchSchemes(schemeName);
+        return ResponseEntity.ok(navService.fetchSchemes(schemeName));
     }
 
     @GetMapping(path = "/schemes/{fundName}")
     @Operation(summary = "Fetches the schemes matching fund House.")
-    public List<FundDetailProjection> fetchSchemesByFundName(
+    public ResponseEntity<List<FundDetailProjection>> fetchSchemesByFundName(
             @Parameter(
                             description = "fund house name for mutual funds",
                             example = "Mirae Asset Mutual fund")
                     @PathVariable(value = "fundName")
                     String fundName) {
 
-        return navService.fetchSchemesByFundName(fundName);
+        return ResponseEntity.ok(navService.fetchSchemesByFundName(fundName));
     }
 
     @GetMapping("/portfolio/{pan}")
@@ -70,17 +76,18 @@ public class NAVController {
             summary =
                     "Fetches the portfolio by Pan and given date, if date is empty then current"
                             + " date portfolio will be returned")
-    public PortfolioResponse getPortfolio(
+    public ResponseEntity<PortfolioResponse> getPortfolio(
             @PathVariable("pan") String panNumber,
             @RequestParam(value = "date", required = false)
                     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
                     LocalDate date) {
-        return navService.getPortfolioByPAN(panNumber, date);
+        return ResponseEntity.ok(navService.getPortfolioByPAN(panNumber, date));
     }
 
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "Persists the transaction details.")
-    public String upload(@RequestPart("file") MultipartFile multipartFile) throws IOException {
-        return navService.upload(multipartFile);
+    public ResponseEntity<String> upload(@RequestPart("file") MultipartFile multipartFile)
+            throws IOException {
+        return ResponseEntity.ok(navService.upload(multipartFile));
     }
 }

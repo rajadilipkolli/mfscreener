@@ -18,6 +18,7 @@ import com.tngtech.archunit.core.importer.ImportOption;
 import com.tngtech.archunit.junit.AnalyzeClasses;
 import com.tngtech.archunit.junit.ArchTest;
 import com.tngtech.archunit.lang.ArchRule;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -72,17 +73,17 @@ class ControllerRulesTest {
     static final ArchRule static_methods_are_not_allowed =
             staticMethodsAreNotAllowedRule(CONTROLLER_PACKAGE);
 
-    // @ArchTest
-    // static final ArchRule methods_should_return_response_entity =
-    //         methods()
-    //                 .that()
-    //                 .arePublic()
-    //                 .and()
-    //                 .areDeclaredInClassesThat()
-    //                 .resideInAPackage(CONTROLLER_PACKAGE)
-    //                 .should()
-    //                 .haveRawReturnType(ResponseEntity.class)
-    //                 .because("Controller endpoints should return a ResponseEntity object");
+    @ArchTest
+    static final ArchRule methods_should_return_response_entity =
+            methods()
+                    .that()
+                    .arePublic()
+                    .and()
+                    .areDeclaredInClassesThat()
+                    .resideInAPackage(CONTROLLER_PACKAGE)
+                    .should()
+                    .haveRawReturnType(ResponseEntity.class)
+                    .because("Controller endpoints should return a ResponseEntity object");
 
     @ArchTest
     static final ArchRule methods_should_be_annotated_with_valid_annotations =
