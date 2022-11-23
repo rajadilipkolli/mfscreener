@@ -10,6 +10,6 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     void contextLoads() {
-        assertThat(sqlContainer.isRunning()).isTrue();
+        assertThat(POSTGRE_SQL_CONTAINER.isRunning()).isTrue();
     }
 }

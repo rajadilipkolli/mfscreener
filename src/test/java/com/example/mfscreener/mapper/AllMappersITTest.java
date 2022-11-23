@@ -23,10 +23,17 @@ class AllMappersITTest extends AbstractIntegrationTest {
         MFScheme mfScheme = null;
 
         MFSchemeDTO target = conversionServiceAdapter.mapMFSchemeToMFSchemeDTO(mfScheme);
-
         assertThat(target).isNull();
 
         mfScheme = new MFScheme();
+        target = conversionServiceAdapter.mapMFSchemeToMFSchemeDTO(mfScheme);
+        assertThat(target).isNotNull();
+        assertThat(target.schemeCode()).isNull();
+        assertThat(target.nav()).isNull();
+        assertThat(target.schemeName()).isNull();
+        assertThat(target.date()).isNull();
+        assertThat(target.payout()).isNull();
+
         mfScheme.setSchemeId(1L);
         mfScheme.setSchemeName("JunitScheme");
         mfScheme.setPayOut("dividend");

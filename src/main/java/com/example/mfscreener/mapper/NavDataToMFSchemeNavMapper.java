@@ -13,6 +13,10 @@ public interface NavDataToMFSchemeNavMapper extends Converter<NAVData, MFSchemeN
 
     @Mapping(target = "mfScheme", ignore = true)
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "lastModifiedDate", ignore = true)
+    @Mapping(target = "lastModifiedBy", ignore = true)
+    @Mapping(target = "createdDate", ignore = true)
+    @Mapping(target = "createdBy", ignore = true)
     @Mapping(target = "navDate", source = "date", dateFormat = AppConstants.DATE_PATTERN_DD_MM_YYYY)
     @Override
     MFSchemeNav convert(NAVData navData);
