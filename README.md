@@ -1,8 +1,6 @@
 # 👋 Welcome to Mutual Fund all-in-one
 
-{% hint style="info" %}
-**GitBook tip:** your product docs aren't just a reference of all your features! use them to encourage folks to perform certain actions and discover the value in your product.
-{% endhint %}
+[![Quality gate](https://sonarcloud.io/api/project\_badges/quality\_gate?project=rajadilipkolli\_mfscreener)](https://sonarcloud.io/dashboard?id=rajadilipkolli\_mfscreener) [![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/rajadilipkolli/mfscreener)
 
 ## Overview
 
