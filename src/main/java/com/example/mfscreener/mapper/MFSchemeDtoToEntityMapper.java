@@ -13,18 +13,20 @@ import org.mapstruct.MappingTarget;
 import org.springframework.core.convert.converter.Converter;
 
 @Mapper(config = MapperSpringConfig.class)
-public interface NavServiceMapper extends Converter<MFSchemeDTO, MFScheme> {
+public interface MFSchemeDtoToEntityMapper extends Converter<MFSchemeDTO, MFScheme> {
 
     DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd-MMM-yyyy");
 
+    @Mapping(target = "mfSchemeType", ignore = true)
+    @Mapping(target = "mfSchemeNavies", ignore = true)
     @Mapping(target = "schemeNameAlias", ignore = true)
-    @Mapping(target = "payOut", ignore = true)
-    @Mapping(target = "schemeId", source = "schemeCode")
     @Mapping(target = "lastModifiedDate", ignore = true)
     @Mapping(target = "lastModifiedBy", ignore = true)
     @Mapping(target = "fundHouse", ignore = true)
     @Mapping(target = "createdDate", ignore = true)
     @Mapping(target = "createdBy", ignore = true)
+    @Mapping(target = "payOut", source = "payout")
+    @Mapping(target = "schemeId", source = "schemeCode")
     @Override
     MFScheme convert(MFSchemeDTO scheme);
 

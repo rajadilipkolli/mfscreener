@@ -19,13 +19,12 @@ class AllMappersITTest extends AbstractIntegrationTest {
     @Autowired private ConversionServiceAdapter conversionServiceAdapter;
 
     @Test
-    void testMfSchemeToMfSchemeDTOMapper() {
-        MFScheme mfScheme = null;
+    void testMfSchemeToDTOMapper() {
 
-        MFSchemeDTO target = conversionServiceAdapter.mapMFSchemeToMFSchemeDTO(mfScheme);
+        MFSchemeDTO target = conversionServiceAdapter.mapMFSchemeToMFSchemeDTO(null);
         assertThat(target).isNull();
 
-        mfScheme = new MFScheme();
+        MFScheme mfScheme = new MFScheme();
         target = conversionServiceAdapter.mapMFSchemeToMFSchemeDTO(mfScheme);
         assertThat(target).isNotNull();
         assertThat(target.schemeCode()).isNull();
@@ -37,13 +36,20 @@ class AllMappersITTest extends AbstractIntegrationTest {
         mfScheme.setSchemeId(1L);
         mfScheme.setSchemeName("JunitScheme");
         mfScheme.setPayOut("dividend");
+        target = conversionServiceAdapter.mapMFSchemeToMFSchemeDTO(mfScheme);
+        assertThat(target).isNotNull();
+        assertThat(target.schemeCode()).isEqualTo("1");
+        assertThat(target.nav()).isNull();
+        assertThat(target.schemeName()).isEqualTo("JunitScheme");
+        assertThat(target.date()).isNull();
+        assertThat(target.payout()).isEqualTo("dividend");
+
         List<MFSchemeNav> mfSchemenavies = new ArrayList<>();
         MFSchemeNav mfSchemenav = new MFSchemeNav();
         mfSchemenav.setNav(22.45D);
         mfSchemenav.setNavDate(LocalDate.of(2022, 1, 1));
         mfSchemenavies.add(mfSchemenav);
         mfScheme.setMfSchemeNavies(mfSchemenavies);
-
         target = conversionServiceAdapter.mapMFSchemeToMFSchemeDTO(mfScheme);
         assertThat(target).isNotNull();
         assertThat(target.schemeCode()).isEqualTo("1");
@@ -51,5 +57,40 @@ class AllMappersITTest extends AbstractIntegrationTest {
         assertThat(target.schemeName()).isEqualTo("JunitScheme");
         assertThat(target.date()).isEqualTo("2022-01-01");
         assertThat(target.payout()).isEqualTo("dividend");
+    }
+
+    @Test
+    void testMfSchemeDtoToEntityMapper() {
+        MFScheme target = conversionServiceAdapter.mapMFSchemeDTOToMFScheme(null);
+        assertThat(target).isNull();
+
+        MFSchemeDTO mfScheme =
+                new MFSchemeDTO("1", "dividend", "JunitSchemeName", "22.34", "23-Nov-2022");
+        target = conversionServiceAdapter.mapMFSchemeDTOToMFScheme(mfScheme);
+        assertThat(target).isNotNull();
+        assertThat(target.getSchemeId()).isEqualTo(1);
+        assertThat(target.getSchemeName()).isEqualTo("JunitSchemeName");
+        assertThat(target.getPayOut()).isEqualTo("dividend");
+        assertThat(target.getFundHouse()).isNull();
+        assertThat(target.getMfSchemeType()).isNull();
+        assertThat(target.getSchemeNameAlias()).isNull();
+        assertThat(target.getMfSchemeNavies()).isNotEmpty().hasSize(1);
+        assertThat(target.getMfSchemeNavies().get(0).getNav()).isEqualTo(22.34);
+        assertThat(target.getMfSchemeNavies().get(0).getNavDate())
+                .isEqualTo(LocalDate.of(2022, 11, 23));
+
+        mfScheme = new MFSchemeDTO("1", "dividend", "JunitSchemeName", "N.A.", "23-Nov-2022");
+        target = conversionServiceAdapter.mapMFSchemeDTOToMFScheme(mfScheme);
+        assertThat(target).isNotNull();
+        assertThat(target.getSchemeId()).isEqualTo(1);
+        assertThat(target.getSchemeName()).isEqualTo("JunitSchemeName");
+        assertThat(target.getPayOut()).isEqualTo("dividend");
+        assertThat(target.getFundHouse()).isNull();
+        assertThat(target.getMfSchemeType()).isNull();
+        assertThat(target.getSchemeNameAlias()).isNull();
+        assertThat(target.getMfSchemeNavies()).isNotEmpty().hasSize(1);
+        assertThat(target.getMfSchemeNavies().get(0).getNav()).isEqualTo(0);
+        assertThat(target.getMfSchemeNavies().get(0).getNavDate())
+                .isEqualTo(LocalDate.of(2022, 11, 23));
     }
 }

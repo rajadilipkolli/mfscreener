@@ -10,7 +10,7 @@ import org.mapstruct.MappingTarget;
 import org.springframework.core.convert.converter.Converter;
 
 @Mapper(config = MapperSpringConfig.class)
-public interface MfSchemeToMfSchemeDTOMapper extends Converter<MFScheme, MFSchemeDTO> {
+public interface MfSchemeEntityToDtoMapper extends Converter<MFScheme, MFSchemeDTO> {
 
     @Mapping(target = "date", ignore = true)
     @Mapping(target = "nav", ignore = true)
