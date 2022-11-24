@@ -5,10 +5,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.example.mfscreener.adapter.ConversionServiceAdapter;
 import com.example.mfscreener.common.AbstractIntegrationTest;
-import com.example.mfscreener.entities.MFSchemeEntity;
-import com.example.mfscreener.entities.MFSchemeNavEntity;
-import com.example.mfscreener.models.MFSchemeDTO;
-import com.example.mfscreener.models.NAVDataDTO;
+import com.example.mfscreener.entities.*;
+import com.example.mfscreener.models.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -112,5 +110,75 @@ class AllMappersITTest extends AbstractIntegrationTest {
         assertThat(target.getCreatedDate()).isNull();
         assertThat(target.getLastModifiedBy()).isNull();
         assertThat(target.getLastModifiedDate()).isNull();
+    }
+
+    @Test
+    void testMapCasDTOToUserCASDetailsEntity() {
+        UserCASDetailsEntity target =
+                this.conversionServiceAdapter.mapCasDTOToUserCASDetailsEntity(null);
+        assertThat(target).isNull();
+
+        List<UserFolioDTO> userFolioDTOS = new ArrayList<>();
+        List<UserSchemeDTO> userSchemeDTOS = new ArrayList<>();
+        ValuationDTO valuationDTO = null;
+        List<UserTransactionDTO> userTransactionDTOS = new ArrayList<>();
+        UserTransactionDTO transactionDTO =
+                new UserTransactionDTO(
+                        "2022-01-31", "", "499.95", "50", "23.45", "100.45", "SIP", null);
+        userTransactionDTOS.add(transactionDTO);
+        UserSchemeDTO userSchemeDTO =
+                new UserSchemeDTO(
+                        "scheme",
+                        "isin",
+                        12053L,
+                        "advisor",
+                        "rtaCode",
+                        "type",
+                        "rta",
+                        null,
+                        null,
+                        null,
+                        valuationDTO,
+                        userTransactionDTOS);
+        userSchemeDTOS.add(userSchemeDTO);
+        UserFolioDTO userFolioDTO =
+                new UserFolioDTO("123456", "SBI", "ABCDE1234F", "OK", "OK", userSchemeDTOS);
+        userFolioDTOS.add(userFolioDTO);
+        StatementPeriodDTO statementPeriod = new StatementPeriodDTO("2020-02-02", "2022-12-31");
+        InvestorInfoDTO investorInfo =
+                new InvestorInfoDTO("junit@email.com", "junit", "9848022338", "JunitAddress");
+        CasDTO casDTO =
+                new CasDTO(
+                        statementPeriod,
+                        FileTypeEnum.CAMS.toString(),
+                        CasTypeEnum.DETAILED.toString(),
+                        investorInfo,
+                        userFolioDTOS);
+        target = this.conversionServiceAdapter.mapCasDTOToUserCASDetailsEntity(casDTO);
+        assertThat(target).isNotNull();
+        assertThat(target.getCasTypeEnum()).isEqualTo(CasTypeEnum.DETAILED);
+        assertThat(target.getFileTypeEnum()).isEqualTo(FileTypeEnum.CAMS);
+        assertThat(target.getId()).isNull();
+        assertThat(target.getCreatedBy()).isNull();
+        assertThat(target.getCreatedDate()).isNull();
+        assertThat(target.getLastModifiedBy()).isNull();
+        assertThat(target.getLastModifiedDate()).isNull();
+
+        InvestorInfoEntity investorInfoEntity = target.getInvestorInfoEntity();
+        assertThat(investorInfoEntity).isNotNull();
+        assertThat(investorInfoEntity.getId()).isNull();
+        assertThat(investorInfoEntity.getCreatedBy()).isNull();
+        assertThat(investorInfoEntity.getCreatedDate()).isNull();
+        assertThat(investorInfoEntity.getLastModifiedBy()).isNull();
+        assertThat(investorInfoEntity.getLastModifiedDate()).isNull();
+        assertThat(investorInfoEntity.getEmail()).isEqualTo("junit@email.com");
+        assertThat(investorInfoEntity.getName()).isEqualTo("junit");
+        assertThat(investorInfoEntity.getMobile()).isEqualTo("9848022338");
+        assertThat(investorInfoEntity.getAddress()).isEqualTo("JunitAddress");
+
+        List<UserFolioDetailsEntity> folioEntities = target.getFolioEntities();
+        assertThat(folioEntities).isNotEmpty().hasSize(1);
+        UserFolioDetailsEntity userFolioDetailsEntity = folioEntities.get(0);
+        assertThat(userFolioDetailsEntity).isNotNull();
     }
 }

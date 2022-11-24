@@ -20,12 +20,14 @@ import org.springframework.core.convert.converter.Converter;
 public interface CasDetailsMapper extends Converter<CasDTO, UserCASDetailsEntity> {
 
     @Mapping(target = "folioEntities", ignore = true)
-    @Mapping(target = "investorInfoEntity", source = "investorInfo")
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "lastModifiedDate", ignore = true)
     @Mapping(target = "lastModifiedBy", ignore = true)
     @Mapping(target = "createdDate", ignore = true)
     @Mapping(target = "createdBy", ignore = true)
+    @Mapping(target = "casTypeEnum", source = "casType")
+    @Mapping(target = "fileTypeEnum", source = "fileType")
+    @Mapping(target = "investorInfoEntity", source = "investorInfo")
     @Override
     UserCASDetailsEntity convert(CasDTO casDTO);
 
