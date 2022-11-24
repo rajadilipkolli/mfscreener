@@ -8,6 +8,7 @@ import com.example.mfscreener.common.AbstractIntegrationTest;
 import com.example.mfscreener.entities.MFScheme;
 import com.example.mfscreener.entities.MFSchemeNav;
 import com.example.mfscreener.models.MFSchemeDTO;
+import com.example.mfscreener.models.NAVData;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,12 +45,12 @@ class AllMappersITTest extends AbstractIntegrationTest {
         assertThat(target.date()).isNull();
         assertThat(target.payout()).isEqualTo("dividend");
 
-        List<MFSchemeNav> mfSchemenavies = new ArrayList<>();
+        List<MFSchemeNav> mfSchemeNavs = new ArrayList<>();
         MFSchemeNav mfSchemenav = new MFSchemeNav();
         mfSchemenav.setNav(22.45D);
         mfSchemenav.setNavDate(LocalDate.of(2022, 1, 1));
-        mfSchemenavies.add(mfSchemenav);
-        mfScheme.setMfSchemeNavies(mfSchemenavies);
+        mfSchemeNavs.add(mfSchemenav);
+        mfScheme.setMfSchemeNavies(mfSchemeNavs);
         target = conversionServiceAdapter.mapMFSchemeToMFSchemeDTO(mfScheme);
         assertThat(target).isNotNull();
         assertThat(target.schemeCode()).isEqualTo("1");
@@ -92,5 +93,23 @@ class AllMappersITTest extends AbstractIntegrationTest {
         assertThat(target.getMfSchemeNavies().get(0).getNav()).isEqualTo(0);
         assertThat(target.getMfSchemeNavies().get(0).getNavDate())
                 .isEqualTo(LocalDate.of(2022, 11, 23));
+    }
+
+    @Test
+    void testMapNAVDataToMFSchemeNav() {
+        MFSchemeNav target = this.conversionServiceAdapter.mapNAVDataToMFSchemeNav(null);
+        assertThat(target).isNull();
+
+        NAVData navData = new NAVData("01-01-2022", "20.45");
+        target = this.conversionServiceAdapter.mapNAVDataToMFSchemeNav(navData);
+        assertThat(target).isNotNull();
+        assertThat(target.getNavDate()).isEqualTo(LocalDate.of(2022, 1, 1));
+        assertThat(target.getNav()).isEqualTo(20.45);
+        assertThat(target.getMfScheme()).isNull();
+        assertThat(target.getId()).isNull();
+        assertThat(target.getCreatedBy()).isNull();
+        assertThat(target.getCreatedDate()).isNull();
+        assertThat(target.getLastModifiedBy()).isNull();
+        assertThat(target.getLastModifiedDate()).isNull();
     }
 }
