@@ -4,7 +4,7 @@ package com.example.mfscreener.archunit;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.example.mfscreener.mapper.CasDetailsMapper;
-import com.example.mfscreener.mapper.MFSchemeDtoToEntityMapper;
+import com.example.mfscreener.mapper.MfSchemeDtoToEntityMapper;
 import com.example.mfscreener.mapper.MfSchemeEntityToDtoMapper;
 import com.example.mfscreener.mapper.NavDataToMFSchemeNavMapper;
 import com.tngtech.archunit.core.importer.ClassFileImporter;
@@ -28,7 +28,7 @@ class MapperArchUnitTest {
                         CasDetailsMapper.class,
                         MfSchemeEntityToDtoMapper.class,
                         NavDataToMFSchemeNavMapper.class,
-                        MFSchemeDtoToEntityMapper.class);
+                        MfSchemeDtoToEntityMapper.class);
 
         assertThat(mappers)
                 .withFailMessage("Scanned number of mappers doesn't match the provided amount")

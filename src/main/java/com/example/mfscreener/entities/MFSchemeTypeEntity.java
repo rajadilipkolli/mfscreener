@@ -16,7 +16,7 @@ import lombok.Setter;
 @Table(
         name = "mf_scheme_types",
         uniqueConstraints = @UniqueConstraint(columnNames = {"scheme_type", "scheme_category"}))
-public class MFSchemeType extends Auditable<String> implements Serializable {
+public class MFSchemeTypeEntity extends AuditableEntity<String> implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "scheme_type_id_generator")
@@ -33,11 +33,11 @@ public class MFSchemeType extends Auditable<String> implements Serializable {
     @Column(name = "scheme_category", nullable = false)
     private String schemeCategory;
 
-    @OneToMany(mappedBy = "mfSchemeType", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<MFScheme> mfSchemes = new ArrayList<>();
+    @OneToMany(mappedBy = "mfSchemeTypeEntity", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<MFSchemeEntity> mfSchemeEntities = new ArrayList<>();
 
-    public void addMFScheme(MFScheme mfScheme) {
-        mfSchemes.add(mfScheme);
-        mfScheme.setMfSchemeType(this);
+    public void addMFScheme(MFSchemeEntity mfSchemeEntity) {
+        mfSchemeEntities.add(mfSchemeEntity);
+        mfSchemeEntity.setMfSchemeTypeEntity(this);
     }
 }

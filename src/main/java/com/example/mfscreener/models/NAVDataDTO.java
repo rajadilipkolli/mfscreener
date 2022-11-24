@@ -3,4 +3,4 @@ package com.example.mfscreener.models;
 
 import java.io.Serializable;
 
-public record NAVData(String date, String nav) implements Serializable {}
+public record NAVDataDTO(String date, String nav) implements Serializable {}

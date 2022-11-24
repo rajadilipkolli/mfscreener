@@ -20,7 +20,7 @@ import org.hibernate.Hibernate;
 @Setter
 @Entity
 @Table(name = "user_transaction_details")
-public class UserTransactionDetailsEntity extends Auditable<String> implements Serializable {
+public class UserTransactionDetailsEntity extends AuditableEntity<String> implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     @Column(name = "id", nullable = false)

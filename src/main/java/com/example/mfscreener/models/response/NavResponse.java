@@ -2,7 +2,7 @@
 package com.example.mfscreener.models.response;
 
 import com.example.mfscreener.models.MetaDTO;
-import com.example.mfscreener.models.NAVData;
+import com.example.mfscreener.models.NAVDataDTO;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,5 +14,5 @@ public class NavResponse {
     private MetaDTO meta;
 
     @JsonProperty("data")
-    private List<NAVData> data = new ArrayList<>();
+    private List<NAVDataDTO> data = new ArrayList<>();
 }

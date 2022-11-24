@@ -11,7 +11,7 @@ import lombok.Setter;
 @Entity
 @Getter
 @Setter
-public class MFSchemeNav extends Auditable<String> implements Serializable {
+public class MFSchemeNavEntity extends AuditableEntity<String> implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "scheme_id_generator")
@@ -28,14 +28,14 @@ public class MFSchemeNav extends Auditable<String> implements Serializable {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "mf_scheme_id")
-    private MFScheme mfScheme;
+    private MFSchemeEntity mfSchemeEntity;
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof MFSchemeNav)) return false;
-        return nav.equals(((MFSchemeNav) o).getNav())
-                && navDate.equals(((MFSchemeNav) o).getNavDate());
+        if (!(o instanceof MFSchemeNavEntity)) return false;
+        return nav.equals(((MFSchemeNavEntity) o).getNav())
+                && navDate.equals(((MFSchemeNavEntity) o).getNavDate());
     }
 
     @Override

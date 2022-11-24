@@ -9,7 +9,8 @@ import lombok.Setter;
 @Entity
 @Getter
 @Setter
-public class ErrorMessage extends Auditable<String> implements Serializable {
+@Table(name = "error_message")
+public class ErrorMessageEntity extends AuditableEntity<String> implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "error_id_generator")

@@ -14,7 +14,7 @@ import org.hibernate.annotations.DynamicUpdate;
 @Getter
 @Setter
 @DynamicUpdate
-public class MFScheme extends Auditable<String> implements Serializable {
+public class MFSchemeEntity extends AuditableEntity<String> implements Serializable {
 
     @Id
     @Column(name = "scheme_id", nullable = false)
@@ -33,13 +33,13 @@ public class MFScheme extends Auditable<String> implements Serializable {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "mf_scheme_type_id")
-    private MFSchemeType mfSchemeType = null;
+    private MFSchemeTypeEntity mfSchemeTypeEntity = null;
 
-    @OneToMany(mappedBy = "mfScheme", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<MFSchemeNav> mfSchemeNavies = new ArrayList<>();
+    @OneToMany(mappedBy = "mfSchemeEntity", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<MFSchemeNavEntity> mfSchemeNavEntities = new ArrayList<>();
 
-    public void addSchemeNav(MFSchemeNav mfSchemeNav) {
-        mfSchemeNavies.add(mfSchemeNav);
-        mfSchemeNav.setMfScheme(this);
+    public void addSchemeNav(MFSchemeNavEntity mfSchemeNavEntity) {
+        mfSchemeNavEntities.add(mfSchemeNavEntity);
+        mfSchemeNavEntity.setMfSchemeEntity(this);
     }
 }

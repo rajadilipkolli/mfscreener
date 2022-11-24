@@ -2,22 +2,26 @@
 package com.example.mfscreener.service.impl;
 
 import com.example.mfscreener.adapter.ConversionServiceAdapter;
-import com.example.mfscreener.entities.ErrorMessage;
-import com.example.mfscreener.entities.MFScheme;
-import com.example.mfscreener.entities.MFSchemeNav;
-import com.example.mfscreener.entities.MFSchemeType;
+import com.example.mfscreener.entities.ErrorMessageEntity;
+import com.example.mfscreener.entities.MFSchemeEntity;
+import com.example.mfscreener.entities.MFSchemeNavEntity;
+import com.example.mfscreener.entities.MFSchemeTypeEntity;
 import com.example.mfscreener.entities.UserCASDetailsEntity;
 import com.example.mfscreener.exception.NavNotFoundException;
 import com.example.mfscreener.exception.SchemeNotFoundException;
 import com.example.mfscreener.models.CasDTO;
 import com.example.mfscreener.models.MFSchemeDTO;
 import com.example.mfscreener.models.MetaDTO;
-import com.example.mfscreener.models.NAVData;
+import com.example.mfscreener.models.NAVDataDTO;
 import com.example.mfscreener.models.PortfolioDetailsDTO;
 import com.example.mfscreener.models.projection.FundDetailProjection;
 import com.example.mfscreener.models.response.NavResponse;
 import com.example.mfscreener.models.response.PortfolioResponse;
-import com.example.mfscreener.repository.*;
+import com.example.mfscreener.repository.CASDetailsEntityRepository;
+import com.example.mfscreener.repository.ErrorMessageRepository;
+import com.example.mfscreener.repository.MFSchemeRepository;
+import com.example.mfscreener.repository.MFSchemeTypeRepository;
+import com.example.mfscreener.repository.UserSchemeDetailsEntityRepository;
 import com.example.mfscreener.service.NavService;
 import com.example.mfscreener.utils.AppConstants;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -60,7 +64,7 @@ public class NavServiceImpl implements NavService {
     public MFSchemeDTO getNav(Long schemeCode) {
         return mfSchemesRepository
                 .findBySchemeIdAndNavDate(schemeCode, getAdjustedDate(LocalDate.now()))
-                .map(conversionServiceAdapter::mapMFSchemeToMFSchemeDTO)
+                .map(conversionServiceAdapter::mapMFSchemeEntityToMFSchemeDTO)
                 .orElseThrow(() -> new SchemeNotFoundException("Scheme Not Found"));
     }
 
@@ -83,7 +87,7 @@ public class NavServiceImpl implements NavService {
         if (navResponseResponseEntity.getStatusCode().is2xxSuccessful()) {
             NavResponse entityBody = navResponseResponseEntity.getBody();
             Assert.notNull(entityBody, () -> "Body Can't be Null");
-            MFScheme mfScheme =
+            MFSchemeEntity mfSchemeEntity =
                     mfSchemesRepository
                             .findBySchemeId(schemeCode)
                             .orElseThrow(
@@ -92,7 +96,7 @@ public class NavServiceImpl implements NavService {
                                                     "Fund with schemeCode "
                                                             + schemeCode
                                                             + " Not Found"));
-            mergeList(entityBody, mfScheme);
+            mergeList(entityBody, mfSchemeEntity);
         }
     }
 
@@ -112,38 +116,38 @@ public class NavServiceImpl implements NavService {
         log.info("Fetched Nav for SchemeCode :{} for date :{} from Server", schemeCode, navDate);
         return this.mfSchemesRepository
                 .findBySchemeIdAndNavDate(schemeCode, navDate)
-                .map(conversionServiceAdapter::mapMFSchemeToMFSchemeDTO)
+                .map(conversionServiceAdapter::mapMFSchemeEntityToMFSchemeDTO)
                 .orElseThrow(() -> new NavNotFoundException("Nav Not Found for given Date"));
     }
 
-    private void mergeList(@NonNull NavResponse navResponse, MFScheme mfScheme) {
-        List<NAVData> navList = navResponse.getData();
+    private void mergeList(@NonNull NavResponse navResponse, MFSchemeEntity mfSchemeEntity) {
+        List<NAVDataDTO> navList = navResponse.getData();
 
-        List<MFSchemeNav> newNavs =
+        List<MFSchemeNavEntity> newNavs =
                 navList.stream()
-                        .map(conversionServiceAdapter::mapNAVDataToMFSchemeNav)
-                        .filter(nav -> !mfScheme.getMfSchemeNavies().contains(nav))
+                        .map(conversionServiceAdapter::mapNAVDataDTOToMFSchemeNavEntity)
+                        .filter(nav -> !mfSchemeEntity.getMfSchemeNavEntities().contains(nav))
                         .toList();
 
         if (!newNavs.isEmpty()) {
-            for (MFSchemeNav newSchemeNav : newNavs) {
-                mfScheme.addSchemeNav(newSchemeNav);
+            for (MFSchemeNavEntity newSchemeNav : newNavs) {
+                mfSchemeEntity.addSchemeNav(newSchemeNav);
             }
             final MetaDTO meta = navResponse.getMeta();
-            MFSchemeType mfschemeType =
+            MFSchemeTypeEntity mfschemeTypeEntity =
                     this.mfSchemeTypeRepository
                             .findBySchemeCategoryAndSchemeType(
-                                    meta.getSchemeCategory(), meta.getSchemeType())
+                                    meta.schemeCategory(), meta.schemeType())
                             .orElseGet(
                                     () -> {
-                                        MFSchemeType entity = new MFSchemeType();
-                                        entity.setSchemeType(meta.getSchemeType());
-                                        entity.setSchemeCategory(meta.getSchemeCategory());
+                                        MFSchemeTypeEntity entity = new MFSchemeTypeEntity();
+                                        entity.setSchemeType(meta.schemeType());
+                                        entity.setSchemeCategory(meta.schemeCategory());
                                         return this.mfSchemeTypeRepository.save(entity);
                                     });
-            mfScheme.setFundHouse(meta.getFundHouse());
-            mfschemeType.addMFScheme(mfScheme);
-            this.mfSchemesRepository.save(mfScheme);
+            mfSchemeEntity.setFundHouse(meta.fundHouse());
+            mfschemeTypeEntity.addMFScheme(mfSchemeEntity);
+            this.mfSchemesRepository.save(mfSchemeEntity);
         }
     }
 
@@ -154,7 +158,7 @@ public class NavServiceImpl implements NavService {
                 navDate);
         return this.mfSchemesRepository
                 .findBySchemeIdAndNavDate(schemeCode, navDate)
-                .map(conversionServiceAdapter::mapMFSchemeToMFSchemeDTO)
+                .map(conversionServiceAdapter::mapMFSchemeEntityToMFSchemeDTO)
                 .orElseGet(() -> getSchemeDetails(schemeCode, navDate));
     }
 
@@ -225,9 +229,9 @@ public class NavServiceImpl implements NavService {
                     fetchSchemeDetails(schemeId);
                 } catch (SchemeNotFoundException | NavNotFoundException exception) {
                     log.error(exception.getMessage());
-                    ErrorMessage errorMessage = new ErrorMessage();
-                    errorMessage.setMessage(exception.getMessage());
-                    errorMessageRepository.save(errorMessage);
+                    ErrorMessageEntity errorMessageEntity = new ErrorMessageEntity();
+                    errorMessageEntity.setMessage(exception.getMessage());
+                    errorMessageRepository.save(errorMessageEntity);
                 }
             }
         }

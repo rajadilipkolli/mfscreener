@@ -19,7 +19,7 @@ import org.hibernate.Hibernate;
 @Setter
 @Entity
 @Table(name = "investor_info")
-public class InvestorInfoEntity extends Auditable<String> implements Serializable {
+public class InvestorInfoEntity extends AuditableEntity<String> implements Serializable {
 
     @Id
     @Column(name = "id", nullable = false)

@@ -22,7 +22,7 @@ import lombok.Setter;
 @Setter
 @Entity
 @Table(name = "user_cas_details")
-public class UserCASDetailsEntity extends Auditable<String> implements Serializable {
+public class UserCASDetailsEntity extends AuditableEntity<String> implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     @Column(name = "id", nullable = false)
@@ -30,11 +30,11 @@ public class UserCASDetailsEntity extends Auditable<String> implements Serializa
 
     @Enumerated(EnumType.STRING)
     @Column(name = "cas_type", nullable = false)
-    private CasType casType;
+    private CasTypeEnum casTypeEnum;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "file_type", nullable = false)
-    private FileType fileType;
+    private FileTypeEnum fileTypeEnum;
 
     @OneToOne(mappedBy = "userCasDetailsEntity", cascade = CascadeType.ALL, optional = false)
     private InvestorInfoEntity investorInfoEntity;

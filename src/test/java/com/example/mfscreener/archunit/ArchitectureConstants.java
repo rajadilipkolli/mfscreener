@@ -6,6 +6,7 @@ public class ArchitectureConstants {
     public static final String CONTROLLER_SUFFIX = "Controller";
     public static final String REPOSITORY_SUFFIX = "Repository";
     public static final String SERVICE_SUFFIX = "Service";
+    public static final String ENTITY_SUFFIX = "Entity";
 
     // Packages
     public static final String CONTROLLER_PACKAGE = "..controller..";
@@ -13,6 +14,7 @@ public class ArchitectureConstants {
     public static final String DTO_PACKAGE = "..dto..";
     public static final String REPOSITORY_PACKAGE = "..repository..";
     public static final String SERVICE_PACKAGE = "..service.impl..";
+    public static final String ENTITIES_PACKAGE = "..entities..";
 
     // Package to scan
     public static final String DEFAULT_PACKAGE = "com.example.mfscreener";

@@ -2,23 +2,12 @@
 package com.example.mfscreener.models;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
+import java.io.Serializable;
 
-@Data
-public class MetaDTO {
-
-    @JsonProperty("fund_house")
-    private String fundHouse;
-
-    @JsonProperty("scheme_type")
-    private String schemeType;
-
-    @JsonProperty("scheme_category")
-    private String schemeCategory;
-
-    @JsonProperty("scheme_code")
-    private String schemeCode;
-
-    @JsonProperty("scheme_name")
-    private String schemeName;
-}
+public record MetaDTO(
+        @JsonProperty("fund_house") String fundHouse,
+        @JsonProperty("scheme_type") String schemeType,
+        @JsonProperty("scheme_category") String schemeCategory,
+        @JsonProperty("scheme_code") String schemeCode,
+        @JsonProperty("scheme_name") String schemeName)
+        implements Serializable {}

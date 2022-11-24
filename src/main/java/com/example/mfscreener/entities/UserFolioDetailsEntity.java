@@ -21,7 +21,7 @@ import lombok.Setter;
 @Setter
 @Entity
 @Table(name = "user_folio_details")
-public class UserFolioDetailsEntity extends Auditable<String> implements Serializable {
+public class UserFolioDetailsEntity extends AuditableEntity<String> implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)

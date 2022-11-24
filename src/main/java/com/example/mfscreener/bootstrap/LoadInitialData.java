@@ -2,7 +2,7 @@
 package com.example.mfscreener.bootstrap;
 
 import com.example.mfscreener.adapter.ConversionServiceAdapter;
-import com.example.mfscreener.entities.MFScheme;
+import com.example.mfscreener.entities.MFSchemeEntity;
 import com.example.mfscreener.models.MFSchemeDTO;
 import com.example.mfscreener.repository.MFSchemeRepository;
 import com.example.mfscreener.utils.AppConstants;
@@ -81,13 +81,13 @@ public class LoadInitialData {
         if (mfSchemesRepository.count() != chopArrayList.size()) {
             StopWatch stopWatch = new StopWatch();
             stopWatch.start("saving fundNames");
-            List<MFScheme> list = new ArrayList<>();
+            List<MFSchemeEntity> list = new ArrayList<>();
             List<Long> schemeCodesList = mfSchemesRepository.findAllSchemeIds();
             chopArrayList.removeIf(s -> schemeCodesList.contains(Long.valueOf(s.schemeCode())));
             chopArrayList.forEach(
                     scheme -> {
-                        MFScheme mfSchemeEntity =
-                                conversionServiceAdapter.mapMFSchemeDTOToMFScheme(scheme);
+                        MFSchemeEntity mfSchemeEntity =
+                                conversionServiceAdapter.mapMFSchemeDTOToMFSchemeEntity(scheme);
                         list.add(mfSchemeEntity);
                     });
             mfSchemesRepository.saveAll(list);

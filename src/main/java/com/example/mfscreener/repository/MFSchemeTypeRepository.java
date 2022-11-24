@@ -1,7 +1,7 @@
 /* Licensed under Apache-2.0 2021-2022. */
 package com.example.mfscreener.repository;
 
-import com.example.mfscreener.entities.MFSchemeType;
+import com.example.mfscreener.entities.MFSchemeTypeEntity;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -10,14 +10,14 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 @Repository
-public interface MFSchemeTypeRepository extends JpaRepository<MFSchemeType, Integer> {
+public interface MFSchemeTypeRepository extends JpaRepository<MFSchemeTypeEntity, Integer> {
 
-    Optional<MFSchemeType> findBySchemeType(String schemeType);
+    Optional<MFSchemeTypeEntity> findBySchemeType(String schemeType);
 
     @Query(
-            "select o from MFSchemeType o JOIN FETCH o.mfSchemes ms where o.schemeCategory ="
-                    + " :schemeCategory and o.schemeType = :schemeType")
+            "select o from MFSchemeTypeEntity o JOIN FETCH o.mfSchemeEntities ms where"
+                    + " o.schemeCategory = :schemeCategory and o.schemeType = :schemeType")
     @Transactional(readOnly = true)
-    Optional<MFSchemeType> findBySchemeCategoryAndSchemeType(
+    Optional<MFSchemeTypeEntity> findBySchemeCategoryAndSchemeType(
             @Param("schemeCategory") String schemeCategory, @Param("schemeType") String schemeType);
 }

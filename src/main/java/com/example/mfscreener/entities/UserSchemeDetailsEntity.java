@@ -23,7 +23,7 @@ import org.hibernate.Hibernate;
 @Setter
 @Entity
 @Table(name = "user_scheme_details")
-public class UserSchemeDetailsEntity extends Auditable<String> implements Serializable {
+public class UserSchemeDetailsEntity extends AuditableEntity<String> implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
