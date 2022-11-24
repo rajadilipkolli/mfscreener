@@ -1,17 +1,15 @@
 # ✨ Our Features
 
-{% hint style="info" %}
-**GitBook tip:** A succinct video overview is a great way to introduce folks to your product. Embed a Loom, Vimeo or YouTube video and you're good to go! We love this video from the fine folks at Loom as a perfect example of a succinct feature overview.
-{% endhint %}
+## How to generate json from CAS
 
-## Awesome Feature One
+&#x20;Install Phyton
 
-Get amazing things done with awesome feature one. But remember that awesome feature two and three exist too. In fact, Awesome Product is full of awesome features.
+Install casparser using command `pip install casparser`
 
-![](https://images.unsplash.com/photo-1555774698-0b77e0d5fac6?crop=entropy\&cs=tinysrgb\&fm=jpg\&ixid=MnwxOTcwMjR8MHwxfHNlYXJjaHwyfHxhcHB8ZW58MHx8fHwxNjYwNTgzMzQz\&ixlib=rb-1.2.1\&q=80)
+generate json using below command and upload to system via upload endpoint
 
-## Awesome Feature Two
+```shell
+casparser 42103626220211831ZFFDEPR3H0RBD644686241F761CPIMBCP142488446.pdf -p ABCDE1234F -o pdf_parsed.json
+```
 
-Get amazing things done with awesome feature two. But remember that awesome feature one and three exist too. In fact, Awesome Product is full of awesome features.
-
-![](https://images.unsplash.com/photo-1569144157591-c60f3f82f137?crop=entropy\&cs=tinysrgb\&fm=jpg\&ixid=MnwxOTcwMjR8MHwxfHNlYXJjaHwxfHxmZWF0dXJlfGVufDB8fHx8MTY2MDU4MzM1OQ\&ixlib=rb-1.2.1\&q=80)
+Here 2nd argument is the path of the pdf file, followed by password of CAS file and the output Type needed
