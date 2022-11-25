@@ -7,7 +7,7 @@ plugins {
     id 'java'
     id 'eclipse'
     id "org.sonarqube" version "3.5.0.2730" apply false
-    id "com.diffplug.spotless" version "6.11.0"
+    id "com.diffplug.spotless" version "6.12.0"
 }
 apply from: "gradle/code-quality.gradle"
 if (project.hasProperty("ci")) {
