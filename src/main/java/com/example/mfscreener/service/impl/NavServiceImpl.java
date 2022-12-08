@@ -110,7 +110,7 @@ public class NavServiceImpl implements NavService {
         return this.mfSchemesRepository.findByFundHouseIgnoringCaseLike("%" + fundName + "%");
     }
 
-    private MFSchemeDTO getSchemeDetails(Long schemeCode, LocalDate navDate) {
+    MFSchemeDTO getSchemeDetails(Long schemeCode, LocalDate navDate) {
         log.info("Fetching Nav for SchemeCode :{} for date :{} from Server", schemeCode, navDate);
         fetchSchemeDetails(schemeCode);
         log.info("Fetched Nav for SchemeCode :{} for date :{} from Server", schemeCode, navDate);
@@ -120,7 +120,7 @@ public class NavServiceImpl implements NavService {
                 .orElseThrow(() -> new NavNotFoundException("Nav Not Found for given Date"));
     }
 
-    private void mergeList(@NonNull NavResponse navResponse, MFSchemeEntity mfSchemeEntity) {
+    void mergeList(@NonNull NavResponse navResponse, MFSchemeEntity mfSchemeEntity) {
         List<NAVDataDTO> navList = navResponse.getData();
 
         List<MFSchemeNavEntity> newNavs =
@@ -151,7 +151,7 @@ public class NavServiceImpl implements NavService {
         }
     }
 
-    private MFSchemeDTO getNavByDate(Long schemeCode, LocalDate navDate) {
+    MFSchemeDTO getNavByDate(Long schemeCode, LocalDate navDate) {
         log.info(
                 "Fetching Nav for AMFISchemeCode : {} for date : {} from Database",
                 schemeCode,
@@ -162,7 +162,7 @@ public class NavServiceImpl implements NavService {
                 .orElseGet(() -> getSchemeDetails(schemeCode, navDate));
     }
 
-    private LocalDate getAdjustedDate(LocalDate adjustedDate) {
+    LocalDate getAdjustedDate(LocalDate adjustedDate) {
         if (adjustedDate.getDayOfWeek() == DayOfWeek.SATURDAY
                 || adjustedDate.getDayOfWeek() == DayOfWeek.SUNDAY) {
             adjustedDate = adjustedDate.with(TemporalAdjusters.previous(DayOfWeek.FRIDAY));
@@ -170,7 +170,7 @@ public class NavServiceImpl implements NavService {
         return adjustedDate;
     }
 
-    private LocalDate getAdjustedDateForNAV(String inputDate) {
+    LocalDate getAdjustedDateForNAV(String inputDate) {
         DateTimeFormatter formatter =
                 DateTimeFormatter.ofPattern(AppConstants.DATE_PATTERN_DD_MM_YYYY);
         LocalDate adjustedDate = LocalDate.parse(inputDate, formatter);
