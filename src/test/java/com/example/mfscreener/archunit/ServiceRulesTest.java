@@ -8,6 +8,7 @@ import static com.example.mfscreener.archunit.ArchitectureConstants.SERVICE_SUFF
 import static com.example.mfscreener.archunit.CommonRules.beanMethodsAreNotAllowedRule;
 import static com.example.mfscreener.archunit.CommonRules.componentAnnotationIsNotAllowedRule;
 import static com.example.mfscreener.archunit.CommonRules.fieldsShouldNotBePublic;
+import static com.example.mfscreener.archunit.CommonRules.privateMethodsAreNotAllowedRule;
 import static com.example.mfscreener.archunit.CommonRules.publicConstructorsRule;
 import static com.example.mfscreener.archunit.CommonRules.staticMethodsAreNotAllowedRule;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
@@ -51,9 +52,9 @@ class ServiceRulesTest {
     static final ArchRule bean_methods_are_not_allowed =
             beanMethodsAreNotAllowedRule(SERVICE_PACKAGE);
 
-    //     @ArchTest
-    //     static final ArchRule private_methods_are_not_allowed =
-    //             privateMethodsAreNotAllowedRule(SERVICE_PACKAGE);
+    @ArchTest
+    static final ArchRule private_methods_are_not_allowed =
+            privateMethodsAreNotAllowedRule(SERVICE_PACKAGE);
 
     @ArchTest
     static final ArchRule static_methods_are_not_allowed =
