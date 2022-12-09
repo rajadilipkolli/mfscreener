@@ -24,13 +24,11 @@ import com.example.mfscreener.repository.MFSchemeTypeRepository;
 import com.example.mfscreener.repository.UserSchemeDetailsEntityRepository;
 import com.example.mfscreener.service.NavService;
 import com.example.mfscreener.utils.AppConstants;
+import com.example.mfscreener.utils.LocalDateUtility;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.net.URI;
-import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import lombok.RequiredArgsConstructor;
@@ -63,14 +61,15 @@ public class NavServiceImpl implements NavService {
     @Override
     public MFSchemeDTO getNav(Long schemeCode) {
         return mfSchemesRepository
-                .findBySchemeIdAndNavDate(schemeCode, getAdjustedDate(LocalDate.now()))
+                .findBySchemeIdAndNavDate(
+                        schemeCode, LocalDateUtility.getAdjustedDate(LocalDate.now()))
                 .map(conversionServiceAdapter::mapMFSchemeEntityToMFSchemeDTO)
                 .orElseThrow(() -> new SchemeNotFoundException("Scheme Not Found"));
     }
 
     @Override
     public MFSchemeDTO getNavOnDate(Long schemeCode, String inputDate) {
-        LocalDate adjustedDate = getAdjustedDateForNAV(inputDate);
+        LocalDate adjustedDate = LocalDateUtility.getAdjustedDateForNAV(inputDate);
         return getNavByDate(schemeCode, adjustedDate);
     }
 
@@ -162,21 +161,6 @@ public class NavServiceImpl implements NavService {
                 .orElseGet(() -> getSchemeDetails(schemeCode, navDate));
     }
 
-    LocalDate getAdjustedDate(LocalDate adjustedDate) {
-        if (adjustedDate.getDayOfWeek() == DayOfWeek.SATURDAY
-                || adjustedDate.getDayOfWeek() == DayOfWeek.SUNDAY) {
-            adjustedDate = adjustedDate.with(TemporalAdjusters.previous(DayOfWeek.FRIDAY));
-        }
-        return adjustedDate;
-    }
-
-    LocalDate getAdjustedDateForNAV(String inputDate) {
-        DateTimeFormatter formatter =
-                DateTimeFormatter.ofPattern(AppConstants.DATE_PATTERN_DD_MM_YYYY);
-        LocalDate adjustedDate = LocalDate.parse(inputDate, formatter);
-        return getAdjustedDate(adjustedDate);
-    }
-
     @Override
     public PortfolioResponse getPortfolioByPAN(String panNumber, LocalDate asOfDate) {
         if (null == asOfDate) {
@@ -194,7 +178,9 @@ public class NavServiceImpl implements NavService {
                                                     MFSchemeDTO scheme =
                                                             getNavByDate(
                                                                     portfolioDetails.getSchemeId(),
-                                                                    getAdjustedDate(finalAsOfDate));
+                                                                    LocalDateUtility
+                                                                            .getAdjustedDate(
+                                                                                    finalAsOfDate));
                                                     float totalValue =
                                                             portfolioDetails.getBalanceUnits()
                                                                     * Float.parseFloat(
