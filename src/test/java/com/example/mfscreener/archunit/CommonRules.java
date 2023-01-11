@@ -28,6 +28,8 @@ public class CommonRules {
                 .that()
                 .resideInAPackage(packageName)
                 .and()
+                .haveSimpleNameNotEndingWith("BeanDefinitions")
+                .and()
                 .resideOutsideOfPackages(excludedPackages)
                 .should()
                 .beInterfaces()
@@ -38,6 +40,8 @@ public class CommonRules {
         return classes()
                 .that()
                 .resideInAPackage(packageName)
+                .and()
+                .haveSimpleNameNotEndingWith("BeanDefinitions")
                 .should()
                 .notBeAnnotatedWith(Component.class)
                 .because(String.format("Component annotation is not allowed in %s", packageName));
@@ -166,6 +170,8 @@ public class CommonRules {
                 .that()
                 .areDeclaredInClassesThat()
                 .resideInAPackage(packageName)
+                .and()
+                .haveNameNotEndingWith("InstanceSupplier")
                 .should()
                 .notBePrivate()
                 .because(String.format("Private methods are not allowed in %s", packageName));
@@ -176,6 +182,10 @@ public class CommonRules {
                 .that()
                 .areDeclaredInClassesThat()
                 .resideInAPackage(packageName)
+                .and()
+                .haveNameNotEndingWith("BeanDefinition")
+                .and()
+                .haveNameNotEndingWith("InstanceSupplier")
                 .should()
                 .notBeStatic()
                 .because(String.format("Static methods are not allowed in %s", packageName));
