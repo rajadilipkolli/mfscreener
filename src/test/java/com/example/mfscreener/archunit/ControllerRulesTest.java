@@ -93,7 +93,7 @@ class ControllerRulesTest {
                     .and()
                     .areDeclaredInClassesThat()
                     .resideInAPackage(CONTROLLER_PACKAGE)
-                    .and().haveSimpleNameNotEndingWith("BeanDefinitions")
+                    .and().haveNameNotEndingWith("BeanDefinitions")
                     .should()
                     .beAnnotatedWith(PostMapping.class)
                     .orShould()
