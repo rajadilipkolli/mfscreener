@@ -23,6 +23,7 @@ class RepositoryRulesTest {
             classes()
                     .that()
                     .resideInAPackage(REPOSITORY_PACKAGE)
+                    .and().haveSimpleNameNotEndingWith("BeanDefinitions")
                     .should()
                     .beAnnotatedWith(Repository.class)
                     .because(
