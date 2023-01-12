@@ -33,6 +33,8 @@ class ServiceRulesTest {
                     .that()
                     .resideInAPackage(SERVICE_PACKAGE)
                     .and()
+                    .haveSimpleNameNotEndingWith("BeanDefinitions")
+                    .and()
                     .doNotHaveSimpleName("package-info")
                     .should()
                     .beAnnotatedWith(Service.class)
