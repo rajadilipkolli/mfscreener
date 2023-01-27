@@ -23,9 +23,9 @@ datasources:
       apiVersion: 1
       uid: tempo
       jsonData:
-          httpMethod: GET
-          tracesToLogs:
-              datasourceUid: 'loki'
+        httpMethod: GET
+        tracesToLogs:
+          datasourceUid: 'loki'
     - name: Loki
       type: loki
       uid: loki
@@ -38,8 +38,8 @@ datasources:
       editable: false
       apiVersion: 1
       jsonData:
-          derivedFields:
-              -   datasourceUid: tempo
-                  matcherRegex: \[.+,(.+?),
-                  name: TraceID
-                  url: $${__value.raw}
+        derivedFields:
+          -   datasourceUid: tempo
+              matcherRegex: \[.+,(.+?),
+              name: TraceID
+              url: $${__value.raw}
