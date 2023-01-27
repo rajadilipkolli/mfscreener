@@ -3376,8 +3376,8 @@
           "allValue": null,
           "current": {
             "selected": false,
-            "text": "book-service",
-            "value": "book-service"
+            "text": "mfscreener",
+            "value": "mfscreener"
           },
           "datasource": "Prometheus",
           "definition": "",
@@ -3407,8 +3407,8 @@
           "allValue": null,
           "current": {
             "selected": false,
-            "text": "host.docker.internal:9001",
-            "value": "host.docker.internal:9001"
+            "text": "host.docker.internal:8080",
+            "value": "host.docker.internal:8080"
           },
           "datasource": "Prometheus",
           "definition": "",
