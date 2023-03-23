@@ -1,13 +1,13 @@
 import org.gradle.plugins.ide.eclipse.model.SourceFolder
 
 plugins {
-    id 'org.springframework.boot' version '3.0.4'
+    id 'org.springframework.boot' version '3.0.5'
     id 'io.spring.dependency-management' version '1.1.0'
     // id 'org.graalvm.buildtools.native' version '0.9.20'
     id 'java'
     id 'eclipse'
     id "org.sonarqube" version "4.0.0.2929" apply false
-    id "com.diffplug.spotless" version "6.16.0"
+    id "com.diffplug.spotless" version "6.17.0"
 }
 apply from: "gradle/code-quality.gradle"
 if (project.hasProperty("ci")) {
@@ -47,7 +47,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.liquibase:liquibase-core'
-    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.2'
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.3'
     implementation 'net.ttddyy:datasource-proxy:1.8.1'
     implementation "org.mapstruct:mapstruct:${mapstructVersion}"
     implementation "org.mapstruct.extensions.spring:mapstruct-spring-annotations:${mapstructSpringExtensionsVersion}"
