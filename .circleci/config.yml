@@ -6,21 +6,22 @@ orbs:
 executors:
   machine_executor_amd64:
     machine:
-      image: ubuntu-2204:2022.04.2
+      image: cimg/openjdk:17.0
     environment:
       architecture: "amd64"
       platform: "linux/amd64"
 
 jobs:
-  gradle/test:
+  build:
     executor: machine_executor_amd64
     steps:
       - checkout
-      - gradle/cached-install:
-          gradle-version: 7.6
-      - run: ./gradlew integrationTest
+      - run: java --version
+      - gradle/build:
+          gradle-version: '8.0.2'
+          java-version: 17
 
 workflows:
   gradle_test:
     jobs:
-      - gradle/test
+      - build
