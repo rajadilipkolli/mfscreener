@@ -3,5 +3,5 @@ package com.example.mfscreener.models;
 
 public enum TransactionType {
     BUY,
-    REDEMPTION
+    REDEEM
 }
