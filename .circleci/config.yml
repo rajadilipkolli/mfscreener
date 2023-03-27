@@ -3,25 +3,19 @@ version: 2.1
 orbs:
   gradle: circleci/gradle@3.0.0
 
-executors:
-  machine_executor_amd64:
-    machine:
-      image: cimg/openjdk:17.0
-    environment:
-      architecture: "amd64"
-      platform: "linux/amd64"
-
 jobs:
   build:
-    executor: machine_executor_amd64
+    docker:
+      - image: circleci/openjdk:17-jdk
     steps:
       - checkout
-      - run: java --version
-      - gradle/build:
-          gradle-version: '8.0.2'
-          java-version: 17
+      - gradle/setup-cache
+      - gradle/restore-cache
+      - gradle/run:
+          command: "./gradlew build"
+      - gradle/save-cache
 
 workflows:
-  gradle_test:
+  build:
     jobs:
       - build
