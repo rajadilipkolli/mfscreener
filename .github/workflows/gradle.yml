@@ -34,7 +34,7 @@ jobs:
           restore-keys: ${{ runner.os }}-sonar
       - name: Start up redis via Docker Compose
         run: |
-          docker-compose up -d tempo
+          docker-compose up -d tempo loki
           sleep 5
           docker ps -a
 
