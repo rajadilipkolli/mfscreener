@@ -17,7 +17,7 @@ jobs:
     steps:
       - checkout
       - gradle/cached-install:
-          gradle-version: 8.0.2
+          gradle-version: 7.6
       - run: ./gradlew integrationTest
 
 workflows:
