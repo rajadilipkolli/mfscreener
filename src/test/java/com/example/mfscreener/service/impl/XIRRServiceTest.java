@@ -3,6 +3,7 @@ package com.example.mfscreener.service.impl;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import com.example.mfscreener.exception.XIRRException;
 import com.example.mfscreener.models.Transaction;
 import com.example.mfscreener.models.TransactionType;
 import java.time.LocalDate;
@@ -15,7 +16,7 @@ class XIRRServiceTest {
     private final XIRRService xirrService = new XIRRService();
 
     @Test
-    void calculateXIRR() {
+    void calculateXIRR() throws XIRRException {
         List<Transaction> cashflows = new ArrayList<>();
         cashflows.add(new Transaction(LocalDate.of(2022, 1, 1), 10000.0, TransactionType.BUY));
         cashflows.add(new Transaction(LocalDate.of(2022, 3, 1), 5000.0, TransactionType.BUY));

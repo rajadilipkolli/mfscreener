@@ -1,6 +1,7 @@
 /* Licensed under Apache-2.0 2023. */
 package com.example.mfscreener.service.impl;
 
+import com.example.mfscreener.exception.XIRRException;
 import com.example.mfscreener.models.Transaction;
 import com.example.mfscreener.models.TransactionType;
 import java.time.LocalDate;
@@ -21,7 +22,7 @@ public class XIRRService {
     private static final double ACCURACY = 0.000001;
     private static final int MAX_EVALUATIONS = 1000;
 
-    public double calculateXIRR(List<Transaction> cashflowsList) {
+    public double calculateXIRR(List<Transaction> cashflowsList) throws XIRRException {
         List<Transaction> buys = new ArrayList<>();
         List<Transaction> redeems = new ArrayList<>();
 
@@ -85,7 +86,7 @@ public class XIRRService {
         try {
             return solver.solve(MAX_EVALUATIONS, function, 0.0, 1.0, guess);
         } catch (TooManyEvaluationsException e) {
-            throw new RuntimeException("Unable to calculate XIRR: " + e.getMessage(), e);
+            throw new XIRRException(e.getMessage(), e);
         }
     }
 }
