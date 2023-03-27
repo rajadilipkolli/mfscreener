@@ -1,7 +1,6 @@
 /* Licensed under Apache-2.0 2023. */
 package com.example.mfscreener.service.impl;
 
-import com.example.mfscreener.exception.XIRRException;
 import com.example.mfscreener.models.Transaction;
 import com.example.mfscreener.models.TransactionType;
 import java.time.LocalDate;
@@ -13,7 +12,6 @@ import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import org.apache.commons.math3.analysis.solvers.BrentSolver;
 import org.apache.commons.math3.analysis.solvers.UnivariateSolver;
-import org.apache.commons.math3.exception.TooManyEvaluationsException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -22,7 +20,7 @@ public class XIRRService {
     private static final double ACCURACY = 0.000001;
     private static final int MAX_EVALUATIONS = 1000;
 
-    public double calculateXIRR(List<Transaction> cashflowsList) throws XIRRException {
+    public double calculateXIRR(List<Transaction> cashflowsList) {
         List<Transaction> buys = new ArrayList<>();
         List<Transaction> redeems = new ArrayList<>();
 
@@ -83,10 +81,6 @@ public class XIRRService {
         UnivariateSolver solver = new BrentSolver(ACCURACY);
         double guess = 0.1;
 
-        try {
-            return solver.solve(MAX_EVALUATIONS, function, 0.0, 1.0, guess);
-        } catch (TooManyEvaluationsException e) {
-            throw new XIRRException(e.getMessage(), e);
-        }
+        return solver.solve(MAX_EVALUATIONS, function, 0.0, 1.0, guess);
     }
 }
