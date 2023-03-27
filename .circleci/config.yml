@@ -1,6 +1,8 @@
 version: 2.1
+
 orbs:
   gradle: circleci/gradle@3.0.0
+
 executors:
   machine_executor_amd64:
     machine:
@@ -8,10 +10,17 @@ executors:
     environment:
       architecture: "amd64"
       platform: "linux/amd64"
+
+jobs:
+  gradle/test:
+    executor: machine_executor_amd64
+    steps:
+      - checkout
+      - gradle/cached-install:
+          gradle-version: 8.0.2
+      - run: ./gradlew integrationTest
+
 workflows:
   gradle_test:
     jobs:
-      - gradle/test:
-          executor: machine_executor_amd64
-      - gradle/integrationTest:
-          executor: machine_executor_amd64
+      - gradle/test
