@@ -33,7 +33,7 @@ ext {
     set('testcontainersVersion', "1.17.6")
     set('mapstructVersion', "1.5.3.Final")
     set('mapstructSpringExtensionsVersion', "1.0.0")
-    set('springCloudVersion', "2022.0.1")
+    set('springCloudVersion', "2022.0.2")
     set('lombokMapstructBindingVersion', "0.2.0")
 }
 
