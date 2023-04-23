@@ -31,7 +31,7 @@ repositories {
 
 ext {
     set('testcontainersVersion', "1.18.0")
-    set('mapstructVersion', "1.5.4.Final")
+    set('mapstructVersion', "1.5.5.Final")
     set('mapstructSpringExtensionsVersion', "1.0.1")
     set('springCloudVersion', "2022.0.2")
     set('lombokMapstructBindingVersion', "0.2.0")
