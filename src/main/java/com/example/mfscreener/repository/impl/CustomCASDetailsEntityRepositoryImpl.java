@@ -1,7 +1,9 @@
-package com.example.mfscreener.repository;
+/* Licensed under Apache-2.0 2023. */
+package com.example.mfscreener.repository.impl;
 
 import com.example.mfscreener.entities.UserCASDetailsEntity;
 import com.example.mfscreener.entities.UserFolioDetailsEntity;
+import com.example.mfscreener.repository.CustomCASDetailsEntityRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import java.util.List;

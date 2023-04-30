@@ -7,6 +7,7 @@ import com.example.mfscreener.mapper.CasDetailsMapper;
 import com.example.mfscreener.mapper.MfSchemeDtoToEntityMapper;
 import com.example.mfscreener.mapper.MfSchemeEntityToDtoMapper;
 import com.example.mfscreener.mapper.NavDataToMFSchemeNavMapper;
+import com.example.mfscreener.mapper.UserTransactionDtoToEntityMapper;
 import com.tngtech.archunit.core.importer.ClassFileImporter;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -26,7 +27,8 @@ class MapperArchUnitTest {
                 CasDetailsMapper.class,
                 MfSchemeEntityToDtoMapper.class,
                 NavDataToMFSchemeNavMapper.class,
-                MfSchemeDtoToEntityMapper.class);
+                MfSchemeDtoToEntityMapper.class,
+                UserTransactionDtoToEntityMapper.class);
 
         assertThat(mappers)
                 .withFailMessage("Scanned number of mappers doesn't match the provided amount")

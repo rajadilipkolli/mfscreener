@@ -215,7 +215,7 @@ public class NavServiceImpl implements NavService {
         String email = casDTO.investorInfo().email();
         String name = casDTO.investorInfo().name();
         UserCASDetailsEntity casDetailsEntity;
-        if (folioExistsInDB(email, name)) {
+        if (this.investorInfoEntityRepository.existsByEmailAndName(email, name)) {
             casDetailsEntity = findDelta(email, name, casDTO);
         } else {
             casDetailsEntity = this.conversionServiceAdapter.mapCasDTOToUserCASDetailsEntity(casDTO);
@@ -225,7 +225,7 @@ public class NavServiceImpl implements NavService {
         return "Uploaded with id " + persistedCasDetailsEntity.getId();
     }
 
-    protected UserCASDetailsEntity findDelta(String email, String name, CasDTO casDTO) {
+    UserCASDetailsEntity findDelta(String email, String name, CasDTO casDTO) {
         UserCASDetailsEntity userCASDetailsEntity =
                 this.casDetailsEntityRepository.findByInvestorInfoEntity_EmailAndInvestorInfoEntity_Name(email, name);
         // get Entities present in DB
@@ -311,7 +311,7 @@ public class NavServiceImpl implements NavService {
         return userCASDetailsEntity;
     }
 
-    private List<UserTransactionDTO> findNewTransactions(
+    List<UserTransactionDTO> findNewTransactions(
             List<UserTransactionDetailsEntity> transactionEntities, List<UserTransactionDTO> transactions) {
 
         List<UserTransactionDTO> userTransactionDTOS = new ArrayList<>();
@@ -330,9 +330,5 @@ public class NavServiceImpl implements NavService {
             }
         }
         return userTransactionDTOS;
-    }
-
-    private boolean folioExistsInDB(String email, String name) {
-        return this.investorInfoEntityRepository.existsByEmailAndName(email, name);
     }
 }
