@@ -18,3 +18,5 @@ $ ./gradlew bootRun --args='--spring.profiles.active=local'
 ### Useful Links
 * Swagger UI: http://localhost:8080/swagger-ui.html
 * Actuator Endpoint: http://localhost:8080/actuator
+* PgAdmin (UI for Postgres Database) : http://localhost:5050 (pgadmin4@pgadmin.org/admin)
+* Grafana : http://localhost:3000
