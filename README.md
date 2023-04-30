@@ -7,7 +7,7 @@ Spring Boot REST API which fetches the Net Asset Value(NAV) of an AMFI mutual fu
 ### Run locally
 ```shell
 $ docker compose -f docker-compose.yml up -d
-$ ./mvnw spring-boot:run -Dspring-boot.run.profiles=local
+$ ./gradlew bootRun --args='--spring.profiles.active=local'
 ```
 
 ### Useful Links
