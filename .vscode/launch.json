@@ -9,13 +9,10 @@
             "name": "TestMFScreenerApplication",
             "request": "launch",
             "mainClass": "com.example.mfscreener.TestMFScreenerApplication",
-            "projectName": "mfscreener"
-        },
-        {
-            "type": "java",
-            "name": "Launch Current File",
-            "request": "launch",
-            "mainClass": "${file}"
+            "projectName": "mfscreener",
+            "sourcePaths": [
+                "${workspaceFolder}/build/generated/"
+            ]
         },
         {
             "type": "java",
@@ -25,7 +22,8 @@
             "projectName": "mfscreener",
             "sourcePaths": [
                 "${workspaceFolder}/build/generated/"
-            ]
+            ],
+            "args": "--spring.profiles.active=local"
         }
     ]
 }
