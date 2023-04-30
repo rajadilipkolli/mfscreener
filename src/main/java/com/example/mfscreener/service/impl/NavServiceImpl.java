@@ -149,14 +149,13 @@ public class NavServiceImpl implements NavService {
 
     @Override
     public PortfolioResponse getPortfolioByPAN(String panNumber, LocalDate asOfDate) {
-        if (null == asOfDate) {
-            asOfDate = LocalDate.now().minusDays(1);
-        } else if (asOfDate.isAfter(LocalDate.now())) {
+        if (asOfDate.isAfter(LocalDate.now())) {
             asOfDate = LocalDate.now().minusDays(1);
         }
         LocalDate finalAsOfDate = asOfDate;
         List<CompletableFuture<PortfolioDetailsDTO>> completableFutureList =
                 casDetailsEntityRepository.getPortfolioDetails(panNumber, asOfDate).stream()
+                        .filter(portfolioDetailsProjection -> portfolioDetailsProjection.getSchemeId() != null)
                         .map(portfolioDetails -> CompletableFuture.supplyAsync(() -> {
                             MFSchemeDTO scheme = getNavByDate(
                                     portfolioDetails.getSchemeId(), LocalDateUtility.getAdjustedDate(finalAsOfDate));
