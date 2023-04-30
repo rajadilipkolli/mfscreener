@@ -1,3 +1,4 @@
+/* Licensed under Apache-2.0 2023. */
 package com.example.mfscreener;
 
 import org.springframework.boot.test.context.TestConfiguration;
@@ -16,10 +17,13 @@ public class TestcontainersConfig {
         return new PostgreSQLContainer<>("postgres:15.2-alpine");
     }
 
-    static final GenericContainer lokiContainer =
+    static final GenericContainer LOKI_CONTAINER =
             new GenericContainer(DockerImageName.parse("grafana/loki")).withExposedPorts(3100);
 
     static {
-        lokiContainer.start();
+        LOKI_CONTAINER.start();
+        System.setProperty(
+                "application.loki.url",
+                "http://" + LOKI_CONTAINER.getHost() + ":" + LOKI_CONTAINER.getMappedPort(3100) + "/loki/api/v1/push");
     }
 }
