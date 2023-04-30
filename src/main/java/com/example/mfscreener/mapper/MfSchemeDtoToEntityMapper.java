@@ -27,6 +27,7 @@ public interface MfSchemeDtoToEntityMapper extends Converter<MFSchemeDTO, MFSche
     @Mapping(target = "createdBy", ignore = true)
     @Mapping(target = "payOut", source = "payout")
     @Mapping(target = "schemeId", source = "schemeCode")
+    @Mapping(target = "version", ignore = true)
     @Override
     MFSchemeEntity convert(MFSchemeDTO scheme);
 

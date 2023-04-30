@@ -3,14 +3,15 @@ package com.example.mfscreener.models;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Serializable;
+import java.time.LocalDate;
 
 public record UserTransactionDTO(
-        String date,
+        LocalDate date,
         String description,
-        String amount,
-        String units,
-        String nav,
-        String balance,
+        Double amount,
+        Double units,
+        Double nav,
+        Double balance,
         String type,
         @JsonProperty("dividend_rate") String dividendRate)
         implements Serializable {}

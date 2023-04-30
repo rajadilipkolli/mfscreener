@@ -119,7 +119,7 @@ class AllMappersITTest extends AbstractIntegrationTest {
         ValuationDTO valuationDTO = null;
         List<UserTransactionDTO> userTransactionDTOS = new ArrayList<>();
         UserTransactionDTO transactionDTO =
-                new UserTransactionDTO("2022-01-31", "", "499.95", "50", "23.45", "100.45", "SIP", null);
+                new UserTransactionDTO(LocalDate.parse("2022-01-31"), "", 499.95d, 50d, 23.45d, 100.45d, "SIP", null);
         userTransactionDTOS.add(transactionDTO);
         UserSchemeDTO userSchemeDTO = new UserSchemeDTO(
                 "scheme",
