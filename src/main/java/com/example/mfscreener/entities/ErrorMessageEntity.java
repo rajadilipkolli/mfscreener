@@ -13,8 +13,7 @@ import lombok.Setter;
 public class ErrorMessageEntity extends AuditableEntity<String> implements Serializable {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "error_id_generator")
-    @SequenceGenerator(name = "error_id_generator", sequenceName = "error_id_seq", allocationSize = 100)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     @Column(name = "error_id", nullable = false)
     private Long id;
 

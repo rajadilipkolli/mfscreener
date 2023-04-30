@@ -6,6 +6,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "TestMFScreenerApplication",
+            "request": "launch",
+            "mainClass": "com.example.mfscreener.TestMFScreenerApplication",
+            "projectName": "mfscreener"
+        },
+        {
+            "type": "java",
             "name": "Launch Current File",
             "request": "launch",
             "mainClass": "${file}"
