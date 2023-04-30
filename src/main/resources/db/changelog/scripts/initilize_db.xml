@@ -24,6 +24,7 @@
             <column name="pay_out" type="text"/>
             <column name="scheme_name_alias" type="text"/>
             <column name="mf_scheme_type_id" type="INT"/>
+            <column name="version" type="BIGINT"/>
             <column name="created_by" type="text"/>
             <column name="created_date" type="DATETIME"/>
             <column name="last_modified_by" type="text"/>
@@ -60,7 +61,7 @@
         </createTable>
 
         <createTable tableName="error_message">
-            <column name="error_id" type="BIGINT" defaultValueSequenceNext="error_id_seq">
+            <column name="error_id" type="BIGINT" defaultValueSequenceNext="error_message_seq">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="pk_errormessage"/>
             </column>
             <column name="message" type="text"/>

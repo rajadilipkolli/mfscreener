@@ -16,7 +16,8 @@ public class TestcontainersConfig {
         return new PostgreSQLContainer<>("postgres:15.2-alpine");
     }
 
-    static final GenericContainer lokiContainer = new GenericContainer(DockerImageName.parse("grafana/loki"));
+    static final GenericContainer lokiContainer =
+            new GenericContainer(DockerImageName.parse("grafana/loki")).withExposedPorts(3100);
 
     static {
         lokiContainer.start();
