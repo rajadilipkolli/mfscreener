@@ -1,9 +1,23 @@
+/* Licensed under Apache-2.0 2023. */
 package com.example.mfscreener.service.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
 
-import com.example.mfscreener.entities.*;
-import com.example.mfscreener.models.*;
+import com.example.mfscreener.adapter.ConversionServiceAdapter;
+import com.example.mfscreener.entities.CasTypeEnum;
+import com.example.mfscreener.entities.InvestorInfoEntity;
+import com.example.mfscreener.entities.UserCASDetailsEntity;
+import com.example.mfscreener.entities.UserFolioDetailsEntity;
+import com.example.mfscreener.entities.UserSchemeDetailsEntity;
+import com.example.mfscreener.entities.UserTransactionDetailsEntity;
+import com.example.mfscreener.mapper.UserTransactionDtoToEntityMapper;
+import com.example.mfscreener.models.CasDTO;
+import com.example.mfscreener.models.InvestorInfoDTO;
+import com.example.mfscreener.models.UserFolioDTO;
+import com.example.mfscreener.models.UserSchemeDTO;
+import com.example.mfscreener.models.UserTransactionDTO;
 import com.example.mfscreener.repository.CASDetailsEntityRepository;
 import com.example.mfscreener.repository.InvestorInfoEntityRepository;
 import java.time.LocalDate;
@@ -11,7 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.BDDMockito;
+import org.mapstruct.factory.Mappers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -23,6 +37,9 @@ class NavServiceImplTest {
     private InvestorInfoEntityRepository investorInfoEntityRepository;
 
     @Mock
+    private ConversionServiceAdapter conversionServiceAdapter;
+
+    @Mock
     private CASDetailsEntityRepository casDetailsEntityRepository;
 
     @InjectMocks
@@ -31,7 +48,7 @@ class NavServiceImplTest {
     @Test
     void findDeltaWithNoNewTransactions() {
         // given
-        BDDMockito.given(casDetailsEntityRepository.findByInvestorInfoEntity_EmailAndInvestorInfoEntity_Name(
+        given(casDetailsEntityRepository.findByInvestorInfoEntity_EmailAndInvestorInfoEntity_Name(
                         "junit@email.com", "name"))
                 .willReturn(getInvestorInfoEntity());
         // when
@@ -41,11 +58,17 @@ class NavServiceImplTest {
     }
 
     @Test
-    void findDeltaWithNewTransactionAdded() {
+    void findDeltaWithNewTransactionAdded() throws InstantiationException, IllegalAccessException {
         // given
-        BDDMockito.given(casDetailsEntityRepository.findByInvestorInfoEntity_EmailAndInvestorInfoEntity_Name(
+        given(casDetailsEntityRepository.findByInvestorInfoEntity_EmailAndInvestorInfoEntity_Name(
                         "junit@email.com", "name"))
                 .willReturn(getInvestorInfoEntity());
+        given(conversionServiceAdapter.mapUserTransactionDTOToUserTransactionDetailsEntity(
+                        any(UserTransactionDTO.class)))
+                .willAnswer(invocation -> Mappers.getMapperClass(UserTransactionDtoToEntityMapper.class)
+                        .newInstance()
+                        .convert(invocation.getArgument(0)));
+
         // when
         CasDTO casDto = getCasDTO();
         casDto.folios()

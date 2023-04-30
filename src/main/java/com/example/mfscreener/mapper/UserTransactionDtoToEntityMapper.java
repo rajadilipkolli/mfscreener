@@ -1,3 +1,4 @@
+/* Licensed under Apache-2.0 2023. */
 package com.example.mfscreener.mapper;
 
 import com.example.mfscreener.entities.UserTransactionDetailsEntity;

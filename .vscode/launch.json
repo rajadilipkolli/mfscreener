@@ -6,16 +6,6 @@
     "configurations": [
         {
             "type": "java",
-            "name": "TestMFScreenerApplication",
-            "request": "launch",
-            "mainClass": "com.example.mfscreener.TestMFScreenerApplication",
-            "projectName": "mfscreener",
-            "sourcePaths": [
-                "${workspaceFolder}/build/generated/"
-            ]
-        },
-        {
-            "type": "java",
             "name": "Launch MFScreenerApplication",
             "request": "launch",
             "mainClass": "com.example.mfscreener.MFScreenerApplication",
