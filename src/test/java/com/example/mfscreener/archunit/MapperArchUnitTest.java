@@ -17,18 +17,16 @@ class MapperArchUnitTest {
     void testMappers() {
 
         // we have some built other ArchUnit-checks that make sure we can rely on this filter
-        final long mapperCount =
-                new ClassFileImporter()
-                        .importPackages("com.example.mfscreener.mapper").stream()
-                                .filter(javaClass -> javaClass.getSimpleName().endsWith("Mapper"))
-                                .count();
+        final long mapperCount = new ClassFileImporter()
+                .importPackages("com.example.mfscreener.mapper").stream()
+                        .filter(javaClass -> javaClass.getSimpleName().endsWith("Mapper"))
+                        .count();
 
-        final List<Object> mappers =
-                List.of(
-                        CasDetailsMapper.class,
-                        MfSchemeEntityToDtoMapper.class,
-                        NavDataToMFSchemeNavMapper.class,
-                        MfSchemeDtoToEntityMapper.class);
+        final List<Object> mappers = List.of(
+                CasDetailsMapper.class,
+                MfSchemeEntityToDtoMapper.class,
+                NavDataToMFSchemeNavMapper.class,
+                MfSchemeDtoToEntityMapper.class);
 
         assertThat(mappers)
                 .withFailMessage("Scanned number of mappers doesn't match the provided amount")

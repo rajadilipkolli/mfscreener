@@ -18,11 +18,15 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @EntityListeners(AuditingEntityListener.class)
 public abstract class AuditableEntity<T> {
 
-    @CreatedBy protected T createdBy;
+    @CreatedBy
+    protected T createdBy;
 
-    @CreatedDate protected LocalDateTime createdDate;
+    @CreatedDate
+    protected LocalDateTime createdDate;
 
-    @LastModifiedBy protected T lastModifiedBy;
+    @LastModifiedBy
+    protected T lastModifiedBy;
 
-    @LastModifiedDate protected LocalDateTime lastModifiedDate;
+    @LastModifiedDate
+    protected LocalDateTime lastModifiedDate;
 }

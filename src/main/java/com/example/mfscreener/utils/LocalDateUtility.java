@@ -14,8 +14,7 @@ public class LocalDateUtility {
             DateTimeFormatter.ofPattern(AppConstants.DATE_PATTERN_DD_MM_YYYY);
 
     public LocalDate getAdjustedDate(LocalDate adjustedDate) {
-        if (adjustedDate.getDayOfWeek() == DayOfWeek.SATURDAY
-                || adjustedDate.getDayOfWeek() == DayOfWeek.SUNDAY) {
+        if (adjustedDate.getDayOfWeek() == DayOfWeek.SATURDAY || adjustedDate.getDayOfWeek() == DayOfWeek.SUNDAY) {
             adjustedDate = adjustedDate.with(TemporalAdjusters.previous(DayOfWeek.FRIDAY));
         }
         return adjustedDate;

@@ -61,8 +61,7 @@ public class NavServiceImpl implements NavService {
     @Override
     public MFSchemeDTO getNav(Long schemeCode) {
         return mfSchemesRepository
-                .findBySchemeIdAndNavDate(
-                        schemeCode, LocalDateUtility.getAdjustedDate(LocalDate.now()))
+                .findBySchemeIdAndNavDate(schemeCode, LocalDateUtility.getAdjustedDate(LocalDate.now()))
                 .map(conversionServiceAdapter::mapMFSchemeEntityToMFSchemeDTO)
                 .orElseThrow(() -> new SchemeNotFoundException("Scheme Not Found"));
     }
@@ -76,25 +75,19 @@ public class NavServiceImpl implements NavService {
     @Override
     public void fetchSchemeDetails(Long schemeCode) {
         log.info("Fetching SchemeDetails for AMFISchemeCode :{} ", schemeCode);
-        URI uri =
-                UriComponentsBuilder.fromHttpUrl(AppConstants.MFAPI_WEBSITE_BASE_URL + schemeCode)
-                        .build()
-                        .toUri();
+        URI uri = UriComponentsBuilder.fromHttpUrl(AppConstants.MFAPI_WEBSITE_BASE_URL + schemeCode)
+                .build()
+                .toUri();
 
         ResponseEntity<NavResponse> navResponseResponseEntity =
                 this.restTemplate.exchange(uri, HttpMethod.GET, null, NavResponse.class);
         if (navResponseResponseEntity.getStatusCode().is2xxSuccessful()) {
             NavResponse entityBody = navResponseResponseEntity.getBody();
             Assert.notNull(entityBody, () -> "Body Can't be Null");
-            MFSchemeEntity mfSchemeEntity =
-                    mfSchemesRepository
-                            .findBySchemeId(schemeCode)
-                            .orElseThrow(
-                                    () ->
-                                            new SchemeNotFoundException(
-                                                    "Fund with schemeCode "
-                                                            + schemeCode
-                                                            + " Not Found"));
+            MFSchemeEntity mfSchemeEntity = mfSchemesRepository
+                    .findBySchemeId(schemeCode)
+                    .orElseThrow(
+                            () -> new SchemeNotFoundException("Fund with schemeCode " + schemeCode + " Not Found"));
             mergeList(entityBody, mfSchemeEntity);
         }
     }
@@ -122,28 +115,24 @@ public class NavServiceImpl implements NavService {
     void mergeList(@NonNull NavResponse navResponse, MFSchemeEntity mfSchemeEntity) {
         List<NAVDataDTO> navList = navResponse.getData();
 
-        List<MFSchemeNavEntity> newNavs =
-                navList.stream()
-                        .map(conversionServiceAdapter::mapNAVDataDTOToMFSchemeNavEntity)
-                        .filter(nav -> !mfSchemeEntity.getMfSchemeNavEntities().contains(nav))
-                        .toList();
+        List<MFSchemeNavEntity> newNavs = navList.stream()
+                .map(conversionServiceAdapter::mapNAVDataDTOToMFSchemeNavEntity)
+                .filter(nav -> !mfSchemeEntity.getMfSchemeNavEntities().contains(nav))
+                .toList();
 
         if (!newNavs.isEmpty()) {
             for (MFSchemeNavEntity newSchemeNav : newNavs) {
                 mfSchemeEntity.addSchemeNav(newSchemeNav);
             }
             final MetaDTO meta = navResponse.getMeta();
-            MFSchemeTypeEntity mfschemeTypeEntity =
-                    this.mfSchemeTypeRepository
-                            .findBySchemeCategoryAndSchemeType(
-                                    meta.schemeCategory(), meta.schemeType())
-                            .orElseGet(
-                                    () -> {
-                                        MFSchemeTypeEntity entity = new MFSchemeTypeEntity();
-                                        entity.setSchemeType(meta.schemeType());
-                                        entity.setSchemeCategory(meta.schemeCategory());
-                                        return this.mfSchemeTypeRepository.save(entity);
-                                    });
+            MFSchemeTypeEntity mfschemeTypeEntity = this.mfSchemeTypeRepository
+                    .findBySchemeCategoryAndSchemeType(meta.schemeCategory(), meta.schemeType())
+                    .orElseGet(() -> {
+                        MFSchemeTypeEntity entity = new MFSchemeTypeEntity();
+                        entity.setSchemeType(meta.schemeType());
+                        entity.setSchemeCategory(meta.schemeCategory());
+                        return this.mfSchemeTypeRepository.save(entity);
+                    });
             mfSchemeEntity.setFundHouse(meta.fundHouse());
             mfschemeTypeEntity.addMFScheme(mfSchemeEntity);
             this.mfSchemesRepository.save(mfSchemeEntity);
@@ -151,10 +140,7 @@ public class NavServiceImpl implements NavService {
     }
 
     MFSchemeDTO getNavByDate(Long schemeCode, LocalDate navDate) {
-        log.info(
-                "Fetching Nav for AMFISchemeCode : {} for date : {} from Database",
-                schemeCode,
-                navDate);
+        log.info("Fetching Nav for AMFISchemeCode : {} for date : {} from Database", schemeCode, navDate);
         return this.mfSchemesRepository
                 .findBySchemeIdAndNavDate(schemeCode, navDate)
                 .map(conversionServiceAdapter::mapMFSchemeEntityToMFSchemeDTO)
@@ -171,26 +157,14 @@ public class NavServiceImpl implements NavService {
         LocalDate finalAsOfDate = asOfDate;
         List<CompletableFuture<PortfolioDetailsDTO>> completableFutureList =
                 casDetailsEntityRepository.getPortfolioDetails(panNumber, asOfDate).stream()
-                        .map(
-                                portfolioDetails ->
-                                        CompletableFuture.supplyAsync(
-                                                () -> {
-                                                    MFSchemeDTO scheme =
-                                                            getNavByDate(
-                                                                    portfolioDetails.getSchemeId(),
-                                                                    LocalDateUtility
-                                                                            .getAdjustedDate(
-                                                                                    finalAsOfDate));
-                                                    float totalValue =
-                                                            portfolioDetails.getBalanceUnits()
-                                                                    * Float.parseFloat(
-                                                                            scheme.nav());
+                        .map(portfolioDetails -> CompletableFuture.supplyAsync(() -> {
+                            MFSchemeDTO scheme = getNavByDate(
+                                    portfolioDetails.getSchemeId(), LocalDateUtility.getAdjustedDate(finalAsOfDate));
+                            float totalValue = portfolioDetails.getBalanceUnits() * Float.parseFloat(scheme.nav());
 
-                                                    return new PortfolioDetailsDTO(
-                                                            totalValue,
-                                                            portfolioDetails.getSchemeName(),
-                                                            portfolioDetails.getFolioNumber());
-                                                }))
+                            return new PortfolioDetailsDTO(
+                                    totalValue, portfolioDetails.getSchemeName(), portfolioDetails.getFolioNumber());
+                        }))
                         .toList();
 
         List<PortfolioDetailsDTO> portfolioDetailsDTOS =
@@ -228,10 +202,8 @@ public class NavServiceImpl implements NavService {
     @Override
     public String upload(MultipartFile multipartFile) throws IOException {
         CasDTO casDTO = this.objectMapper.readValue(multipartFile.getBytes(), CasDTO.class);
-        UserCASDetailsEntity casDetailsEntity =
-                this.conversionServiceAdapter.mapCasDTOToUserCASDetailsEntity(casDTO);
-        UserCASDetailsEntity persistedCasDetailsEntity =
-                this.casDetailsEntityRepository.save(casDetailsEntity);
+        UserCASDetailsEntity casDetailsEntity = this.conversionServiceAdapter.mapCasDTOToUserCASDetailsEntity(casDTO);
+        UserCASDetailsEntity persistedCasDetailsEntity = this.casDetailsEntityRepository.save(casDetailsEntity);
         return "Uploaded with id " + persistedCasDetailsEntity.getId();
     }
 }

@@ -39,12 +39,9 @@ public class NAVController {
     }
 
     @GetMapping(path = "/nav/{schemeCode}/{date}")
-    @Operation(
-            summary = "Fetch NAV on date DD-MM-YYYY (or the last working day before DD-MM-YYYY).")
+    @Operation(summary = "Fetch NAV on date DD-MM-YYYY (or the last working day before DD-MM-YYYY).")
     public ResponseEntity<MFSchemeDTO> getSchemeNavOnDate(
-            @Parameter(description = "scheme Code for mutual fund", example = "120503")
-                    @PathVariable
-                    Long schemeCode,
+            @Parameter(description = "scheme Code for mutual fund", example = "120503") @PathVariable Long schemeCode,
             @Parameter(description = "date", example = "20-01-2020") @PathVariable String date) {
         return ResponseEntity.ok(navService.getNavOnDate(schemeCode, date));
     }
@@ -62,9 +59,7 @@ public class NAVController {
     @GetMapping(path = "/schemes/{fundName}")
     @Operation(summary = "Fetches the schemes matching fund House.")
     public ResponseEntity<List<FundDetailProjection>> fetchSchemesByFundName(
-            @Parameter(
-                            description = "fund house name for mutual funds",
-                            example = "Mirae Asset Mutual fund")
+            @Parameter(description = "fund house name for mutual funds", example = "Mirae Asset Mutual fund")
                     @PathVariable(value = "fundName")
                     String fundName) {
 
@@ -73,21 +68,18 @@ public class NAVController {
 
     @GetMapping("/portfolio/{pan}")
     @Operation(
-            summary =
-                    "Fetches the portfolio by Pan and given date, if date is empty then current"
-                            + " date portfolio will be returned")
+            summary = "Fetches the portfolio by Pan and given date, if date is empty then current"
+                    + " date portfolio will be returned")
     public ResponseEntity<PortfolioResponse> getPortfolio(
             @PathVariable("pan") String panNumber,
-            @RequestParam(value = "date", required = false)
-                    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+            @RequestParam(value = "date", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
                     LocalDate date) {
         return ResponseEntity.ok(navService.getPortfolioByPAN(panNumber, date));
     }
 
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "Persists the transaction details.")
-    public ResponseEntity<String> upload(@RequestPart("file") MultipartFile multipartFile)
-            throws IOException {
+    public ResponseEntity<String> upload(@RequestPart("file") MultipartFile multipartFile) throws IOException {
         return ResponseEntity.ok(navService.upload(multipartFile));
     }
 }

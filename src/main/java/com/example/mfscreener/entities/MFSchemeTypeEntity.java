@@ -20,10 +20,7 @@ public class MFSchemeTypeEntity extends AuditableEntity<String> implements Seria
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "scheme_type_id_generator")
-    @SequenceGenerator(
-            name = "scheme_type_id_generator",
-            sequenceName = "scheme_type_id_seq",
-            allocationSize = 2)
+    @SequenceGenerator(name = "scheme_type_id_generator", sequenceName = "scheme_type_id_seq", allocationSize = 2)
     @Column(name = "scheme_type_id", nullable = false)
     private Integer schemeTypeId;
 

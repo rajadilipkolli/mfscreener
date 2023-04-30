@@ -20,8 +20,7 @@ public class ArchitectureConstants {
     public static final String DEFAULT_PACKAGE = "com.example.mfscreener";
 
     // Explanations
-    public static final String ANNOTATED_EXPLANATION =
-            "Classes in %s package should be annotated with %s";
+    public static final String ANNOTATED_EXPLANATION = "Classes in %s package should be annotated with %s";
 
     private ArchitectureConstants() {}
 }

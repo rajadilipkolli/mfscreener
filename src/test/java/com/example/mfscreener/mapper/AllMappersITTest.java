@@ -15,7 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 class AllMappersITTest extends AbstractIntegrationTest {
 
-    @Autowired private ConversionServiceAdapter conversionServiceAdapter;
+    @Autowired
+    private ConversionServiceAdapter conversionServiceAdapter;
 
     @Test
     void testMfSchemeToDTOMapper() {
@@ -63,8 +64,7 @@ class AllMappersITTest extends AbstractIntegrationTest {
         MFSchemeEntity target = conversionServiceAdapter.mapMFSchemeDTOToMFSchemeEntity(null);
         assertThat(target).isNull();
 
-        MFSchemeDTO mfScheme =
-                new MFSchemeDTO("1", "dividend", "JunitSchemeName", "22.34", "23-Nov-2022");
+        MFSchemeDTO mfScheme = new MFSchemeDTO("1", "dividend", "JunitSchemeName", "22.34", "23-Nov-2022");
         target = conversionServiceAdapter.mapMFSchemeDTOToMFSchemeEntity(mfScheme);
         assertThat(target).isNotNull();
         assertThat(target.getSchemeId()).isEqualTo(1);
@@ -75,8 +75,7 @@ class AllMappersITTest extends AbstractIntegrationTest {
         assertThat(target.getSchemeNameAlias()).isNull();
         assertThat(target.getMfSchemeNavEntities()).isNotEmpty().hasSize(1);
         assertThat(target.getMfSchemeNavEntities().get(0).getNav()).isEqualTo(22.34);
-        assertThat(target.getMfSchemeNavEntities().get(0).getNavDate())
-                .isEqualTo(LocalDate.of(2022, 11, 23));
+        assertThat(target.getMfSchemeNavEntities().get(0).getNavDate()).isEqualTo(LocalDate.of(2022, 11, 23));
 
         mfScheme = new MFSchemeDTO("1", "dividend", "JunitSchemeName", "N.A.", "23-Nov-2022");
         target = conversionServiceAdapter.mapMFSchemeDTOToMFSchemeEntity(mfScheme);
@@ -89,14 +88,12 @@ class AllMappersITTest extends AbstractIntegrationTest {
         assertThat(target.getSchemeNameAlias()).isNull();
         assertThat(target.getMfSchemeNavEntities()).isNotEmpty().hasSize(1);
         assertThat(target.getMfSchemeNavEntities().get(0).getNav()).isEqualTo(0);
-        assertThat(target.getMfSchemeNavEntities().get(0).getNavDate())
-                .isEqualTo(LocalDate.of(2022, 11, 23));
+        assertThat(target.getMfSchemeNavEntities().get(0).getNavDate()).isEqualTo(LocalDate.of(2022, 11, 23));
     }
 
     @Test
     void testMapNAVDataToMFSchemeNav() {
-        MFSchemeNavEntity target =
-                this.conversionServiceAdapter.mapNAVDataDTOToMFSchemeNavEntity(null);
+        MFSchemeNavEntity target = this.conversionServiceAdapter.mapNAVDataDTOToMFSchemeNavEntity(null);
         assertThat(target).isNull();
 
         NAVDataDTO navDataDTO = new NAVDataDTO("01-01-2022", "20.45");
@@ -114,8 +111,7 @@ class AllMappersITTest extends AbstractIntegrationTest {
 
     @Test
     void testMapCasDTOToUserCASDetailsEntity() {
-        UserCASDetailsEntity target =
-                this.conversionServiceAdapter.mapCasDTOToUserCASDetailsEntity(null);
+        UserCASDetailsEntity target = this.conversionServiceAdapter.mapCasDTOToUserCASDetailsEntity(null);
         assertThat(target).isNull();
 
         List<UserFolioDTO> userFolioDTOS = new ArrayList<>();
@@ -123,37 +119,32 @@ class AllMappersITTest extends AbstractIntegrationTest {
         ValuationDTO valuationDTO = null;
         List<UserTransactionDTO> userTransactionDTOS = new ArrayList<>();
         UserTransactionDTO transactionDTO =
-                new UserTransactionDTO(
-                        "2022-01-31", "", "499.95", "50", "23.45", "100.45", "SIP", null);
+                new UserTransactionDTO("2022-01-31", "", "499.95", "50", "23.45", "100.45", "SIP", null);
         userTransactionDTOS.add(transactionDTO);
-        UserSchemeDTO userSchemeDTO =
-                new UserSchemeDTO(
-                        "scheme",
-                        "isin",
-                        12053L,
-                        "advisor",
-                        "rtaCode",
-                        "type",
-                        "rta",
-                        null,
-                        null,
-                        null,
-                        valuationDTO,
-                        userTransactionDTOS);
+        UserSchemeDTO userSchemeDTO = new UserSchemeDTO(
+                "scheme",
+                "isin",
+                12053L,
+                "advisor",
+                "rtaCode",
+                "type",
+                "rta",
+                null,
+                null,
+                null,
+                valuationDTO,
+                userTransactionDTOS);
         userSchemeDTOS.add(userSchemeDTO);
-        UserFolioDTO userFolioDTO =
-                new UserFolioDTO("123456", "SBI", "ABCDE1234F", "OK", "OK", userSchemeDTOS);
+        UserFolioDTO userFolioDTO = new UserFolioDTO("123456", "SBI", "ABCDE1234F", "OK", "OK", userSchemeDTOS);
         userFolioDTOS.add(userFolioDTO);
         StatementPeriodDTO statementPeriod = new StatementPeriodDTO("2020-02-02", "2022-12-31");
-        InvestorInfoDTO investorInfo =
-                new InvestorInfoDTO("junit@email.com", "junit", "9848022338", "JunitAddress");
-        CasDTO casDTO =
-                new CasDTO(
-                        statementPeriod,
-                        FileTypeEnum.CAMS.toString(),
-                        CasTypeEnum.DETAILED.toString(),
-                        investorInfo,
-                        userFolioDTOS);
+        InvestorInfoDTO investorInfo = new InvestorInfoDTO("junit@email.com", "junit", "9848022338", "JunitAddress");
+        CasDTO casDTO = new CasDTO(
+                statementPeriod,
+                FileTypeEnum.CAMS.toString(),
+                CasTypeEnum.DETAILED.toString(),
+                investorInfo,
+                userFolioDTOS);
         target = this.conversionServiceAdapter.mapCasDTOToUserCASDetailsEntity(casDTO);
         assertThat(target).isNotNull();
         assertThat(target.getCasTypeEnum()).isEqualTo(CasTypeEnum.DETAILED);

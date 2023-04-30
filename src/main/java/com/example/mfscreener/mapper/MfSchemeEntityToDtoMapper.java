@@ -20,8 +20,7 @@ public interface MfSchemeEntityToDtoMapper extends Converter<MFSchemeEntity, MFS
     MFSchemeDTO convert(MFSchemeEntity mfSchemeEntity);
 
     @AfterMapping
-    default MFSchemeDTO updateMFScheme(
-            MFSchemeEntity mfSchemeEntity, @MappingTarget MFSchemeDTO mfSchemeDTO) {
+    default MFSchemeDTO updateMFScheme(MFSchemeEntity mfSchemeEntity, @MappingTarget MFSchemeDTO mfSchemeDTO) {
         if (!mfSchemeEntity.getMfSchemeNavEntities().isEmpty()) {
             var navDouble = mfSchemeEntity.getMfSchemeNavEntities().get(0).getNav();
             var localDate = mfSchemeEntity.getMfSchemeNavEntities().get(0).getNavDate();

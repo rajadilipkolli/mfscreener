@@ -9,11 +9,11 @@ import org.testcontainers.junit.jupiter.Container;
 public class AbstractPostgreSQLContainerBase {
 
     @Container
-    protected static final PostgreSQLContainer<?> POSTGRE_SQL_CONTAINER =
-            new PostgreSQLContainer<>("postgres:15-alpine")
-                    .withDatabaseName("integration-tests-db")
-                    .withUsername("username")
-                    .withPassword("password");
+    protected static final PostgreSQLContainer<?> POSTGRE_SQL_CONTAINER = new PostgreSQLContainer<>(
+                    "postgres:15-alpine")
+            .withDatabaseName("integration-tests-db")
+            .withUsername("username")
+            .withPassword("password");
 
     static {
         POSTGRE_SQL_CONTAINER.start();

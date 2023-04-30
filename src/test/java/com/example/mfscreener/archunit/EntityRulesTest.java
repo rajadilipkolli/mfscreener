@@ -18,25 +18,20 @@ import jakarta.persistence.Table;
 public class EntityRulesTest {
 
     @ArchTest
-    static final ArchRule classes_should_be_annotated =
-            classes()
-                    .that()
-                    .resideInAPackage(ENTITIES_PACKAGE)
-                    .and()
-                    .haveSimpleNameNotEndingWith("Enum")
-                    .and()
-                    .doNotHaveSimpleName("AuditableEntity")
-                    .should()
-                    .beAnnotatedWith(Entity.class)
-                    .andShould()
-                    .beAnnotatedWith(Table.class)
-                    .because(String.format(ANNOTATED_EXPLANATION, ENTITY_SUFFIX, "@Entity"));
+    static final ArchRule classes_should_be_annotated = classes()
+            .that()
+            .resideInAPackage(ENTITIES_PACKAGE)
+            .and()
+            .haveSimpleNameNotEndingWith("Enum")
+            .and()
+            .doNotHaveSimpleName("AuditableEntity")
+            .should()
+            .beAnnotatedWith(Entity.class)
+            .andShould()
+            .beAnnotatedWith(Table.class)
+            .because(String.format(ANNOTATED_EXPLANATION, ENTITY_SUFFIX, "@Entity"));
 
     @ArchTest
     static final ArchRule CLASSES_SHOULD_END_WITH_NAME_RULE =
-            classes()
-                    .that()
-                    .areAnnotatedWith(Entity.class)
-                    .should()
-                    .haveSimpleNameEndingWith("Entity");
+            classes().that().areAnnotatedWith(Entity.class).should().haveSimpleNameEndingWith("Entity");
 }

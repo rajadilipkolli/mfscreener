@@ -58,10 +58,7 @@ public class UserSchemeDetailsEntity extends AuditableEntity<String> implements 
     @JoinColumn(name = "user_folio_id")
     private UserFolioDetailsEntity userFolioDetailsEntity;
 
-    @OneToMany(
-            mappedBy = "userSchemeDetailsEntity",
-            cascade = CascadeType.ALL,
-            orphanRemoval = true)
+    @OneToMany(mappedBy = "userSchemeDetailsEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserTransactionDetailsEntity> transactionEntities = new ArrayList<>();
 
     public void addTransactionEntity(UserTransactionDetailsEntity userTransactionDetailsEntity) {

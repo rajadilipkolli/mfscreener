@@ -14,10 +14,7 @@ public class ErrorMessageEntity extends AuditableEntity<String> implements Seria
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "error_id_generator")
-    @SequenceGenerator(
-            name = "error_id_generator",
-            sequenceName = "error_id_seq",
-            allocationSize = 100)
+    @SequenceGenerator(name = "error_id_generator", sequenceName = "error_id_seq", allocationSize = 100)
     @Column(name = "error_id", nullable = false)
     private Long id;
 

@@ -66,8 +66,7 @@ public class QuartzConfig {
                 .forJob(createJobNAVUpdate())
                 .withIdentity(UPDATE_NAV_GROUP + "-TRIGGER", UPDATE_NAV_GROUP)
                 .withSchedule(
-                        SimpleScheduleBuilder.repeatHourlyForever()
-                                .withMisfireHandlingInstructionIgnoreMisfires())
+                        SimpleScheduleBuilder.repeatHourlyForever().withMisfireHandlingInstructionIgnoreMisfires())
                 .build();
     }
 }
