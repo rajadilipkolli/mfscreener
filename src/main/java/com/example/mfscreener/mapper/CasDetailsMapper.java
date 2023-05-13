@@ -59,12 +59,10 @@ public interface CasDetailsMapper extends Converter<CasDTO, UserCASDetailsEntity
     @Mapping(target = "createdDate", ignore = true)
     @Mapping(target = "createdBy", ignore = true)
     @Mapping(target = "transactionDate", source = "date")
-    UserTransactionDetailsEntity transactionDTOToTransactionEntity(
-            UserTransactionDTO transactionDTO);
+    UserTransactionDetailsEntity transactionDTOToTransactionEntity(UserTransactionDTO transactionDTO);
 
     @AfterMapping
-    default void addFolioEntityToCaseDetails(
-            CasDTO casDTO, @MappingTarget UserCASDetailsEntity userCasDetailsEntity) {
+    default void addFolioEntityToCaseDetails(CasDTO casDTO, @MappingTarget UserCASDetailsEntity userCasDetailsEntity) {
         Consumer<UserFolioDTO> addFolioEntityConsumer =
                 folioDTO -> userCasDetailsEntity.addFolioEntity(folioDTOToFolioEntity(folioDTO));
         casDTO.folios().forEach(addFolioEntityConsumer);
@@ -74,19 +72,15 @@ public interface CasDetailsMapper extends Converter<CasDTO, UserCASDetailsEntity
     default void addSchemaEntityToFolioEntity(
             UserFolioDTO folioDTO, @MappingTarget UserFolioDetailsEntity userFolioDetailsEntity) {
         Consumer<UserSchemeDTO> addSchemeEntityConsumer =
-                schemeDTO ->
-                        userFolioDetailsEntity.addSchemeEntity(schemeDTOToSchemeEntity(schemeDTO));
+                schemeDTO -> userFolioDetailsEntity.addSchemeEntity(schemeDTOToSchemeEntity(schemeDTO));
         folioDTO.schemes().forEach(addSchemeEntityConsumer);
     }
 
     @AfterMapping
     default void addTransactionEntityToSchemeEntity(
-            UserSchemeDTO schemeDTO,
-            @MappingTarget UserSchemeDetailsEntity userSchemeDetailsEntity) {
-        Consumer<UserTransactionDTO> addTransactionEntityConsumer =
-                transactionDTO ->
-                        userSchemeDetailsEntity.addTransactionEntity(
-                                transactionDTOToTransactionEntity(transactionDTO));
+            UserSchemeDTO schemeDTO, @MappingTarget UserSchemeDetailsEntity userSchemeDetailsEntity) {
+        Consumer<UserTransactionDTO> addTransactionEntityConsumer = transactionDTO ->
+                userSchemeDetailsEntity.addTransactionEntity(transactionDTOToTransactionEntity(transactionDTO));
         schemeDTO.transactions().forEach(addTransactionEntityConsumer);
     }
 }

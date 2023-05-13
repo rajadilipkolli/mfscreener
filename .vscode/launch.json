@@ -6,19 +6,14 @@
     "configurations": [
         {
             "type": "java",
-            "name": "Launch Current File",
-            "request": "launch",
-            "mainClass": "${file}"
-        },
-        {
-            "type": "java",
             "name": "Launch MFScreenerApplication",
             "request": "launch",
             "mainClass": "com.example.mfscreener.MFScreenerApplication",
             "projectName": "mfscreener",
             "sourcePaths": [
                 "${workspaceFolder}/build/generated/"
-            ]
+            ],
+            "args": "--spring.profiles.active=local"
         }
     ]
 }

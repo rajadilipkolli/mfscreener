@@ -1,8 +1,9 @@
-/* Licensed under Apache-2.0 2022. */
+/* Licensed under Apache-2.0 2022-2023. */
 package com.example.mfscreener.archunit;
 
 import static com.example.mfscreener.archunit.ArchitectureConstants.ANNOTATED_EXPLANATION;
 import static com.example.mfscreener.archunit.ArchitectureConstants.DEFAULT_PACKAGE;
+import static com.example.mfscreener.archunit.ArchitectureConstants.REPOSITORY_IMPL_PACKAGE;
 import static com.example.mfscreener.archunit.ArchitectureConstants.REPOSITORY_PACKAGE;
 import static com.example.mfscreener.archunit.ArchitectureConstants.REPOSITORY_SUFFIX;
 import static com.example.mfscreener.archunit.CommonRules.interfacesAreOnlyAllowedRule;
@@ -19,18 +20,18 @@ class RepositoryRulesTest {
 
     // Classes
     @ArchTest
-    static final ArchRule classes_should_be_annotated =
-            classes()
-                    .that()
-                    .resideInAPackage(REPOSITORY_PACKAGE)
-                    .and()
-                    .haveSimpleNameNotEndingWith("BeanDefinitions")
-                    .should()
-                    .beAnnotatedWith(Repository.class)
-                    .because(
-                            String.format(ANNOTATED_EXPLANATION, REPOSITORY_SUFFIX, "@Repository"));
+    static final ArchRule classes_should_be_annotated = classes()
+            .that()
+            .resideInAPackage(REPOSITORY_PACKAGE)
+            .and()
+            .haveSimpleNameNotEndingWith("BeanDefinitions")
+            .and()
+            .haveSimpleNameNotStartingWith("Custom")
+            .should()
+            .beAnnotatedWith(Repository.class)
+            .because(String.format(ANNOTATED_EXPLANATION, REPOSITORY_SUFFIX, "@Repository"));
 
     @ArchTest
     static final ArchRule classesShouldBeInterfaces =
-            interfacesAreOnlyAllowedRule(REPOSITORY_PACKAGE);
+            interfacesAreOnlyAllowedRule(REPOSITORY_PACKAGE, REPOSITORY_IMPL_PACKAGE);
 }

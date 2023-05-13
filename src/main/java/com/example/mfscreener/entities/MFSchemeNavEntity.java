@@ -15,10 +15,7 @@ public class MFSchemeNavEntity extends AuditableEntity<String> implements Serial
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "scheme_id_generator")
-    @SequenceGenerator(
-            name = "scheme_id_generator",
-            sequenceName = "scheme_id_seq",
-            allocationSize = 100)
+    @SequenceGenerator(name = "scheme_id_generator", sequenceName = "scheme_id_seq", allocationSize = 100)
     @Column(name = "id", nullable = false)
     private Long id;
 
@@ -34,8 +31,7 @@ public class MFSchemeNavEntity extends AuditableEntity<String> implements Serial
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof MFSchemeNavEntity)) return false;
-        return nav.equals(((MFSchemeNavEntity) o).getNav())
-                && navDate.equals(((MFSchemeNavEntity) o).getNavDate());
+        return nav.equals(((MFSchemeNavEntity) o).getNav()) && navDate.equals(((MFSchemeNavEntity) o).getNavDate());
     }
 
     @Override

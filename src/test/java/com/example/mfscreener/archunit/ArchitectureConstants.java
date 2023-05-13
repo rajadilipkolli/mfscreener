@@ -13,6 +13,7 @@ public class ArchitectureConstants {
     public static final String MODEL_PACKAGE = "..models..";
     public static final String DTO_PACKAGE = "..dto..";
     public static final String REPOSITORY_PACKAGE = "..repository..";
+    public static final String REPOSITORY_IMPL_PACKAGE = "..repository.impl..";
     public static final String SERVICE_PACKAGE = "..service.impl..";
     public static final String ENTITIES_PACKAGE = "..entities..";
 
@@ -20,8 +21,7 @@ public class ArchitectureConstants {
     public static final String DEFAULT_PACKAGE = "com.example.mfscreener";
 
     // Explanations
-    public static final String ANNOTATED_EXPLANATION =
-            "Classes in %s package should be annotated with %s";
+    public static final String ANNOTATED_EXPLANATION = "Classes in %s package should be annotated with %s";
 
     private ArchitectureConstants() {}
 }

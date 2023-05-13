@@ -12,7 +12,8 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 @Repository
-public interface CASDetailsEntityRepository extends JpaRepository<UserCASDetailsEntity, Long> {
+public interface CASDetailsEntityRepository
+        extends JpaRepository<UserCASDetailsEntity, Long>, CustomCASDetailsEntityRepository {
 
     @Transactional(readOnly = true)
     @Query(

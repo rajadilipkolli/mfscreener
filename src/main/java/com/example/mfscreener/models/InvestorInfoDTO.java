@@ -3,5 +3,4 @@ package com.example.mfscreener.models;
 
 import java.io.Serializable;
 
-public record InvestorInfoDTO(String email, String name, String mobile, String address)
-        implements Serializable {}
+public record InvestorInfoDTO(String email, String name, String mobile, String address) implements Serializable {}

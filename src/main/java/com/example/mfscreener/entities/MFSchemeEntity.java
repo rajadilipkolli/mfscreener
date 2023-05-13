@@ -31,6 +31,9 @@ public class MFSchemeEntity extends AuditableEntity<String> implements Serializa
     @Column(name = "scheme_name_alias")
     private String schemeNameAlias;
 
+    @Version
+    private Long version;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "mf_scheme_type_id")
     private MFSchemeTypeEntity mfSchemeTypeEntity = null;

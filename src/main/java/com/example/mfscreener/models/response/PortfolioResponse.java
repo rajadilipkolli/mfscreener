@@ -5,6 +5,5 @@ import com.example.mfscreener.models.PortfolioDetailsDTO;
 import java.io.Serializable;
 import java.util.List;
 
-public record PortfolioResponse(
-        Float totalPortfolioValue, List<PortfolioDetailsDTO> portfolioDetailsDTOS)
+public record PortfolioResponse(Float totalPortfolioValue, List<PortfolioDetailsDTO> portfolioDetailsDTOS)
         implements Serializable {}

@@ -22,9 +22,7 @@ public class DatasourceProxyBeanPostProcessor implements BeanPostProcessor {
 
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) {
-        if (bean instanceof DataSource
-                && !(bean instanceof ProxyDataSource)
-                && ("dataSource".equals(beanName))) {
+        if (bean instanceof DataSource && !(bean instanceof ProxyDataSource) && ("dataSource".equals(beanName))) {
             // Instead of directly returning a less specific datasource bean
             // (e.g.: HikariDataSource -> DataSource), return a proxy object.
             final ProxyFactory factory = new ProxyFactory(bean);
@@ -42,19 +40,17 @@ public class DatasourceProxyBeanPostProcessor implements BeanPostProcessor {
 
     private record ProxyDataSourceInterceptor(DataSource dataSource) implements MethodInterceptor {
         private ProxyDataSourceInterceptor(final DataSource dataSource) {
-            this.dataSource =
-                    ProxyDataSourceBuilder.create(dataSource)
-                            .name("MyDS")
-                            .multiline()
-                            .logQueryBySlf4j(SLF4JLogLevel.INFO)
-                            .build();
+            this.dataSource = ProxyDataSourceBuilder.create(dataSource)
+                    .name("MyDS")
+                    .multiline()
+                    .logQueryBySlf4j(SLF4JLogLevel.INFO)
+                    .build();
         }
 
         @Override
         public Object invoke(final MethodInvocation invocation) throws Throwable {
-            final Method proxyMethod =
-                    ReflectionUtils.findMethod(
-                            this.dataSource.getClass(), invocation.getMethod().getName());
+            final Method proxyMethod = ReflectionUtils.findMethod(
+                    this.dataSource.getClass(), invocation.getMethod().getName());
             if (proxyMethod != null) {
                 return proxyMethod.invoke(this.dataSource, invocation.getArguments());
             }

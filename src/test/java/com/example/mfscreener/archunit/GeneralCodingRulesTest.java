@@ -30,8 +30,7 @@ class GeneralCodingRulesTest {
 
     @ArchTest
     static final ArchRule noGenericExceptions =
-            NO_CLASSES_SHOULD_THROW_GENERIC_EXCEPTIONS.because(
-                    "Throw AlmundoException or any child of this instead");
+            NO_CLASSES_SHOULD_THROW_GENERIC_EXCEPTIONS.because("Throw AlmundoException or any child of this instead");
 
     @ArchTest
     static final ArchRule noJavaUtilLogging =
@@ -39,49 +38,42 @@ class GeneralCodingRulesTest {
 
     // Fields
     @ArchTest
-    static final ArchRule loggersShouldBePrivateStaticAndFinal =
-            fields().that()
-                    .haveRawType(Logger.class)
-                    .should()
-                    .bePrivate()
-                    .andShould()
-                    .beStatic()
-                    .andShould()
-                    .beFinal()
-                    .andShould()
-                    .haveName("LOGGER")
-                    .orShould()
-                    .haveName("log")
-                    .because(
-                            "Logger variables should be private, static and final, and it should be"
-                                    + " named as LOGGER")
-                    .allowEmptyShould(true);
+    static final ArchRule loggersShouldBePrivateStaticAndFinal = fields().that()
+            .haveRawType(Logger.class)
+            .should()
+            .bePrivate()
+            .andShould()
+            .beStatic()
+            .andShould()
+            .beFinal()
+            .andShould()
+            .haveName("LOGGER")
+            .orShould()
+            .haveName("log")
+            .because("Logger variables should be private, static and final, and it should be" + " named as LOGGER")
+            .allowEmptyShould(true);
 
     @ArchTest
-    static final ArchRule finalStaticVariablesInUppercase =
-            fields().that()
-                    .areStatic()
-                    .and()
-                    .areFinal()
-                    .and()
-                    .doNotHaveName("serialVersionUID")
-                    .and()
-                    .doNotHaveName("log")
-                    .and()
-                    .doNotHaveModifier(JavaModifier.SYNTHETIC)
-                    .should()
-                    .haveNameMatching(".*^[A-Z].*")
-                    .because(
-                            "Variables with static and final modifiers should be named in"
-                                    + " uppercase")
-                    .allowEmptyShould(true);
+    static final ArchRule finalStaticVariablesInUppercase = fields().that()
+            .areStatic()
+            .and()
+            .areFinal()
+            .and()
+            .doNotHaveName("serialVersionUID")
+            .and()
+            .doNotHaveName("log")
+            .and()
+            .doNotHaveModifier(JavaModifier.SYNTHETIC)
+            .should()
+            .haveNameMatching(".*^[A-Z].*")
+            .because("Variables with static and final modifiers should be named in" + " uppercase")
+            .allowEmptyShould(true);
     // Methods
     @ArchTest
-    static final ArchRule beanMethodsShouldBePublic =
-            methods()
-                    .that()
-                    .areAnnotatedWith(Bean.class)
-                    .should()
-                    .bePublic()
-                    .because("@Bean annotation does not work in non public methods");
+    static final ArchRule beanMethodsShouldBePublic = methods()
+            .that()
+            .areAnnotatedWith(Bean.class)
+            .should()
+            .bePublic()
+            .because("@Bean annotation does not work in non public methods");
 }

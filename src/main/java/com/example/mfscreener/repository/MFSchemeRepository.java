@@ -16,23 +16,18 @@ import org.springframework.transaction.annotation.Transactional;
 @Repository
 public interface MFSchemeRepository extends JpaRepository<MFSchemeEntity, Long> {
 
-    @Query(
-            "select o from MFSchemeEntity o JOIN FETCH o.mfSchemeNavEntities msn where o.schemeId ="
-                    + " :schemeId")
+    @Query("select o from MFSchemeEntity o JOIN FETCH o.mfSchemeNavEntities msn where o.schemeId =" + " :schemeId")
     @Transactional(readOnly = true)
     Optional<MFSchemeEntity> findBySchemeId(@Param("schemeId") Long aLong);
 
-    @Query(
-            "select o from MFSchemeEntity o JOIN FETCH o.mfSchemeNavEntities msn where o.schemeId ="
-                    + " :schemeCode and msn.navDate = :date")
+    @Query("select o from MFSchemeEntity o JOIN FETCH o.mfSchemeNavEntities msn where o.schemeId ="
+            + " :schemeCode and msn.navDate = :date")
     @Transactional(readOnly = true)
     Optional<MFSchemeEntity> findBySchemeIdAndNavDate(
             @Param("schemeCode") Long schemeCode, @Param("date") LocalDate navDate);
 
     @Transactional(readOnly = true)
-    @Query(
-            "select o.schemeId from MFSchemeEntity o where o.fundHouse is null order by o.schemeId"
-                    + " desc")
+    @Query("select o.schemeId from MFSchemeEntity o where o.fundHouse is null order by o.schemeId" + " desc")
     List<Long> findAllByFundHouseNull();
 
     @Transactional(readOnly = true)
@@ -48,6 +43,5 @@ public interface MFSchemeRepository extends JpaRepository<MFSchemeEntity, Long> 
     @Transactional
     @Modifying
     @Query("update MFSchemeEntity o set o.schemeNameAlias =:schemeName where o.schemeId=:schemeId")
-    int updateSchemeNameAliasBySchemeId(
-            @Param("schemeName") String schemeName, @Param("schemeId") Long schemeId);
+    int updateSchemeNameAliasBySchemeId(@Param("schemeName") String schemeName, @Param("schemeId") Long schemeId);
 }

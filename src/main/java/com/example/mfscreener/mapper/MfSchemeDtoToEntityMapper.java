@@ -27,14 +27,14 @@ public interface MfSchemeDtoToEntityMapper extends Converter<MFSchemeDTO, MFSche
     @Mapping(target = "createdBy", ignore = true)
     @Mapping(target = "payOut", source = "payout")
     @Mapping(target = "schemeId", source = "schemeCode")
+    @Mapping(target = "version", ignore = true)
     @Override
     MFSchemeEntity convert(MFSchemeDTO scheme);
 
     @AfterMapping
     default void updateMFScheme(MFSchemeDTO scheme, @MappingTarget MFSchemeEntity mfSchemeEntity) {
         MFSchemeNavEntity mfSchemenavEntity = new MFSchemeNavEntity();
-        mfSchemenavEntity.setNav(
-                "N.A.".equals(scheme.nav()) ? 0D : Double.parseDouble(scheme.nav()));
+        mfSchemenavEntity.setNav("N.A.".equals(scheme.nav()) ? 0D : Double.parseDouble(scheme.nav()));
         mfSchemenavEntity.setNavDate(LocalDate.parse(scheme.date(), DATE_FORMATTER));
         mfSchemeEntity.addSchemeNav(mfSchemenavEntity);
     }

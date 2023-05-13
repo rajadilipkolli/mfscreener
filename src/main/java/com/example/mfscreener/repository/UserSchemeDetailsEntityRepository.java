@@ -8,8 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface UserSchemeDetailsEntityRepository
-        extends JpaRepository<UserSchemeDetailsEntity, Long> {
+public interface UserSchemeDetailsEntityRepository extends JpaRepository<UserSchemeDetailsEntity, Long> {
 
     @Query("select distinct(amfi) u from UserSchemeDetailsEntity u")
     List<Long> findDistinctByAmfi();

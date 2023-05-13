@@ -1,39 +1,34 @@
-# 👋 Welcome to Mutual Fund all-in-one
+[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/rajadilipkolli/mfscreener)
 
-[![Quality gate](https://sonarcloud.io/api/project\_badges/quality\_gate?project=rajadilipkolli\_mfscreener)](https://sonarcloud.io/dashboard?id=rajadilipkolli\_mfscreener) [![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/rajadilipkolli/mfscreener)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-## Overview
 
-This project is aimed at providing analytical solution of mutual fund investments in INDIA :smile:
+# mfscreener
+Spring Boot REST API which fetches the Net Asset Value(NAV) of an AMFI mutual fund and saves in db
 
-> Updates daily NAV from [AMFI](https://www.amfiindia.com/spages/NAVAll.txt)
->
-> Parses the [CAS](https://www.amfiindia.com/investor-corner/online-center/download-CAS.html) from [CAMS](https://www.camsonline.com/) or [Karvy](https://www.karvymfs.com/platformservice/) using [casparser](https://pypi.org/project/casparser/)
->
->
+### Run tests
+`$ ./mvnw clean verify`
 
-## Quick links
+### Run locally
+```shell
+$ docker compose -f docker-compose.yml up -d
+$ ./gradlew bootRun --args='--spring.profiles.active=local'
+```
 
-{% content-ref url="overview/what-we-do.md" %}
-[what-we-do.md](overview/what-we-do.md)
-{% endcontent-ref %}
+### Useful Links
+* Swagger UI: http://localhost:8080/swagger-ui.html
+* Actuator Endpoint: http://localhost:8080/actuator
+* PgAdmin (UI for Postgres Database) : http://localhost:5050 (pgadmin4@pgadmin.org/admin)
+* Grafana : http://localhost:3000
 
-{% content-ref url="overview/our-features.md" %}
-[our-features.md](overview/our-features.md)
-{% endcontent-ref %}
-
-## Get Started
-
-We've put together some helpful guides for you to get setup with our product quickly and easily.
-
-{% content-ref url="fundamentals/getting-set-up/" %}
-[getting-set-up](fundamentals/getting-set-up/)
-{% endcontent-ref %}
-
-{% content-ref url="fundamentals/getting-set-up/setting-permissions.md" %}
-[setting-permissions.md](fundamentals/getting-set-up/setting-permissions.md)
-{% endcontent-ref %}
-
-{% content-ref url="fundamentals/getting-set-up/inviting-members.md" %}
-[inviting-members.md](fundamentals/getting-set-up/inviting-members.md)
-{% endcontent-ref %}
+### how to read CAS Data using [casparser](https://pypi.org/project/casparser/)
+ * Install phyton
+ * install casparser using command
+    ```shell
+    pip install casparser
+    ```
+ * generate json using below command and upload to system
+   ```shell
+   casparser 42103626220211831ZFFDEPR3H0RBD644686241F761CPIMBCP142488446.pdf -p ABCDE1234F -o pdf_parsed.json
+   ```
+   Here 2nd argument is the path of the pdf file, followed by password of CAS file and the output Type needed

@@ -11,8 +11,7 @@ public class AppConstants {
     public static final String SEPARATOR = ";";
     public static final String DATE_PATTERN_DD_MM_YYYY = "dd-MM-yyyy";
 
-    public static final DateTimeFormatter DATE_FORMATTER =
-            DateTimeFormatter.ofPattern(DATE_PATTERN_DD_MM_YYYY);
+    public static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern(DATE_PATTERN_DD_MM_YYYY);
 
     public static final String PROFILE_TEST = "test";
     public static final String PROFILE_NOT_TEST = "!" + PROFILE_TEST;

@@ -63,8 +63,7 @@ public class LoadInitialData {
                     final String schemename = tokenize[3];
                     final String nav = tokenize[4];
                     final String date = tokenize[5];
-                    final MFSchemeDTO tempObj =
-                            new MFSchemeDTO(schemecode, payout, schemename, nav, date);
+                    final MFSchemeDTO tempObj = new MFSchemeDTO(schemecode, payout, schemename, nav, date);
                     chopArrayList.add(tempObj);
                 }
                 fileRead = br.readLine();
@@ -84,12 +83,10 @@ public class LoadInitialData {
             List<MFSchemeEntity> list = new ArrayList<>();
             List<Long> schemeCodesList = mfSchemesRepository.findAllSchemeIds();
             chopArrayList.removeIf(s -> schemeCodesList.contains(Long.valueOf(s.schemeCode())));
-            chopArrayList.forEach(
-                    scheme -> {
-                        MFSchemeEntity mfSchemeEntity =
-                                conversionServiceAdapter.mapMFSchemeDTOToMFSchemeEntity(scheme);
-                        list.add(mfSchemeEntity);
-                    });
+            chopArrayList.forEach(scheme -> {
+                MFSchemeEntity mfSchemeEntity = conversionServiceAdapter.mapMFSchemeDTOToMFSchemeEntity(scheme);
+                list.add(mfSchemeEntity);
+            });
             mfSchemesRepository.saveAll(list);
             stopWatch.stop();
             loadAlias();
