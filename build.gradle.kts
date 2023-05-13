@@ -46,6 +46,7 @@ dependencies {
 	implementation("io.micrometer:micrometer-tracing-bridge-otel")
 	implementation("io.opentelemetry:opentelemetry-exporter-zipkin")
 	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0")
+	implementation("org.apache.commons:commons-math3:3.6.1")
     // Mapstruct
     implementation ("org.mapstruct:mapstruct:1.5.5.Final")
     implementation ("org.mapstruct.extensions.spring:mapstruct-spring-annotations:1.0.1")
