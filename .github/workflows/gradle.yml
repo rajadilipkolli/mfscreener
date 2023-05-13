@@ -30,12 +30,17 @@ jobs:
           path: ~/.sonar/cache
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar
+      - name: Start up loki via Docker Compose
+        run: |
+          docker-compose up -d tempo loki
+          sleep 5
+          docker ps -a
 
       - name: Build and analyze
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  
           # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: ./gradlew clean build bootBuildImage sonar --info
+        run: ./gradlew clean build bootBuildImage sonarqube --info
       - name: Codecov
         uses: codecov/codecov-action@v3.1.3
