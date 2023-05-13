@@ -7,7 +7,7 @@
 	"features": {
 		"ghcr.io/devcontainers/features/java:1": {
 			"installGradle": true,
-			"version": "latest",
+			"version": "17",
 			"jdkDistro": "ms",
 			"gradleVersion": "latest",
 			"installMaven": false,
