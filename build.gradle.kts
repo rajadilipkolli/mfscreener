@@ -5,7 +5,7 @@ import java.util.*
 
 plugins {
 	java
-	id("org.springframework.boot") version "3.1.0-RC1"
+	id("org.springframework.boot") version "3.1.0-RC2"
 	id("io.spring.dependency-management") version "1.1.0"
 	id("com.diffplug.spotless") version "6.18.0"
 	id("com.gorylenko.gradle-git-properties") version "2.4.1"
@@ -46,7 +46,6 @@ dependencies {
 	implementation("io.micrometer:micrometer-tracing-bridge-otel")
 	implementation("io.opentelemetry:opentelemetry-exporter-zipkin")
 	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0")
-	implementation("org.springframework.boot:spring-boot-docker-compose")
     // Mapstruct
     implementation ("org.mapstruct:mapstruct:1.5.5.Final")
     implementation ("org.mapstruct.extensions.spring:mapstruct-spring-annotations:1.0.1")
@@ -54,6 +53,7 @@ dependencies {
     runtimeOnly ("com.github.loki4j:loki-logback-appender:1.4.0")
 
     developmentOnly("org.springframework.boot:spring-boot-devtools")
+	developmentOnly("org.springframework.boot:spring-boot-docker-compose")
 
     compileOnly("org.projectlombok:lombok")
 
@@ -66,8 +66,9 @@ dependencies {
 	testImplementation("org.springframework.boot:spring-boot-testcontainers")
 	testImplementation("org.testcontainers:junit-jupiter")
 	testImplementation("org.testcontainers:postgresql")
-    testImplementation ("com.tngtech.archunit:archunit-junit5:1.0.1")
-     // If you are using mapstruct in test code
+    testImplementation("com.tngtech.archunit:archunit-junit5:1.0.1")
+
+    // If you are using mapstruct in test code
     testAnnotationProcessor("org.mapstruct:mapstruct-processor:1.5.5.Final")
     testAnnotationProcessor("org.mapstruct.extensions.spring:mapstruct-spring-extensions:1.0.1")
 	
