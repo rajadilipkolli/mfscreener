@@ -22,7 +22,9 @@
 			"installGradle": true,
 			"version": "latest",
 			"jdkDistro": "ms",
-			"gradleVersion": "latest"
+			"gradleVersion": "latest",
+			"installMaven" : false,
+			"installAnt" : false
 		},
 		"ghcr.io/devcontainers-contrib/features/gradle-sdkman:2": {
 			"version": "latest",
