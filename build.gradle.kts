@@ -51,7 +51,7 @@ dependencies {
     implementation ("org.mapstruct:mapstruct:1.5.5.Final")
     implementation ("org.mapstruct.extensions.spring:mapstruct-spring-annotations:1.0.1")
     // For pushing logs out
-    runtimeOnly ("com.github.loki4j:loki-logback-appender:1.4.0")
+    runtimeOnly ("com.github.loki4j:loki-logback-appender:1.4.1")
 
     developmentOnly("org.springframework.boot:spring-boot-devtools")
 	developmentOnly("org.springframework.boot:spring-boot-docker-compose")
