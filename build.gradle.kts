@@ -29,7 +29,7 @@ repositories {
 	maven { url = uri("https://repo.spring.io/milestone") }
 }
 
-extra["springCloudVersion"] = "2022.0.2"
+extra["springCloudVersion"] = "2022.0.3"
 
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-web")
