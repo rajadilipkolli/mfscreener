@@ -1,4 +1,4 @@
-package com.example.mfscreener.repository.util;
+package com.example.mfscreener.repositoryutil;
 
 public class ClassId<T> {
 

@@ -30,9 +30,9 @@ import com.example.mfscreener.repository.MFSchemeRepository;
 import com.example.mfscreener.repository.MFSchemeTypeRepository;
 import com.example.mfscreener.repository.UserSchemeDetailsEntityRepository;
 import com.example.mfscreener.repository.UserTransactionDetailsEntityRepository;
-import com.example.mfscreener.repository.util.ClassId;
-import com.example.mfscreener.repository.util.EntityGraphBuilder;
-import com.example.mfscreener.repository.util.EntityVisitor;
+import com.example.mfscreener.repositoryutil.ClassId;
+import com.example.mfscreener.repositoryutil.EntityGraphBuilder;
+import com.example.mfscreener.repositoryutil.EntityVisitor;
 import com.example.mfscreener.service.NavService;
 import com.example.mfscreener.utils.AppConstants;
 import com.example.mfscreener.utils.LocalDateUtility;
@@ -321,8 +321,7 @@ public class NavServiceImpl implements NavService {
         return userCASDetailsEntity;
     }
 
-    private UserCASDetailsEntity getFullyLoadedObject(
-            List<UserTransactionDetailsEntity> userTransactionDetailsEntityList) {
+    UserCASDetailsEntity getFullyLoadedObject(List<UserTransactionDetailsEntity> userTransactionDetailsEntityList) {
         EntityGraphBuilder entityGraphBuilder = new EntityGraphBuilder(new EntityVisitor[] {
                     UserTransactionDetailsEntity.ENTITY_VISITOR,
                     UserSchemeDetailsEntity.ENTITY_VISITOR,

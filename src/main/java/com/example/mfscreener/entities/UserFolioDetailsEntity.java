@@ -1,7 +1,8 @@
 /* Licensed under Apache-2.0 2022. */
 package com.example.mfscreener.entities;
 
-import com.example.mfscreener.repository.util.EntityVisitor;
+import com.example.mfscreener.repositoryutil.EntityVisitor;
+import com.example.mfscreener.repositoryutil.Identifiable;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

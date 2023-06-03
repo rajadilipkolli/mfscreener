@@ -22,7 +22,7 @@ public class EntityRulesTest {
             .that()
             .resideInAPackage(ENTITIES_PACKAGE)
             .and()
-            .haveSimpleNameNotEndingWith("Enum")
+            .haveSimpleNameEndingWith("Entity")
             .and()
             .doNotHaveSimpleName("AuditableEntity")
             .should()

@@ -1,6 +1,5 @@
-package com.example.mfscreener.repository.util;
+package com.example.mfscreener.repositoryutil;
 
-import com.example.mfscreener.entities.Identifiable;
 import java.util.List;
 
 /**

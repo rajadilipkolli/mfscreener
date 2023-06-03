@@ -1,4 +1,4 @@
-package com.example.mfscreener.entities;
+package com.example.mfscreener.repositoryutil;
 
 public interface Identifiable {
     Long getId();

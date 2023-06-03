@@ -1,4 +1,4 @@
-package com.example.mfscreener.repository.util;
+package com.example.mfscreener.repositoryutil;
 
 import java.util.Map;
 
