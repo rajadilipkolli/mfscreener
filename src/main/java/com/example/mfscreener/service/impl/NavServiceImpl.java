@@ -70,7 +70,7 @@ public class NavServiceImpl implements NavService {
 
     @Override
     public MFSchemeDTO getNav(Long schemeCode) {
-        return mfSchemesRepository
+        return this.mfSchemesRepository
                 .findBySchemeIdAndNavDate(schemeCode, LocalDateUtility.getAdjustedDate(LocalDate.now()))
                 .map(conversionServiceAdapter::mapMFSchemeEntityToMFSchemeDTO)
                 .orElseThrow(() -> new SchemeNotFoundException("Scheme Not Found"));
