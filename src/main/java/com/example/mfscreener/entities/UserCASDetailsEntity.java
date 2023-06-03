@@ -1,6 +1,8 @@
 /* Licensed under Apache-2.0 2022. */
 package com.example.mfscreener.entities;
 
+import com.example.mfscreener.repositoryutil.EntityVisitor;
+import com.example.mfscreener.repositoryutil.Identifiable;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -22,7 +24,10 @@ import lombok.Setter;
 @Setter
 @Entity
 @Table(name = "user_cas_details")
-public class UserCASDetailsEntity extends AuditableEntity<String> implements Serializable {
+public class UserCASDetailsEntity extends AuditableEntity<String> implements Serializable, Identifiable {
+    public static final EntityVisitor<UserCASDetailsEntity, Identifiable> ENTITY_VISITOR =
+            new EntityVisitor<>(UserCASDetailsEntity.class) {};
+
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     @Column(name = "id", nullable = false)

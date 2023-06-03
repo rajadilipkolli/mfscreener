@@ -1,6 +1,8 @@
 /* Licensed under Apache-2.0 2022. */
 package com.example.mfscreener.entities;
 
+import com.example.mfscreener.repositoryutil.EntityVisitor;
+import com.example.mfscreener.repositoryutil.Identifiable;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -21,7 +23,23 @@ import lombok.Setter;
 @Setter
 @Entity
 @Table(name = "user_folio_details")
-public class UserFolioDetailsEntity extends AuditableEntity<String> implements Serializable {
+public class UserFolioDetailsEntity extends AuditableEntity<String> implements Serializable, Identifiable {
+
+    public static final EntityVisitor<UserFolioDetailsEntity, UserCASDetailsEntity> ENTITY_VISITOR =
+            new EntityVisitor<>(UserFolioDetailsEntity.class) {
+
+                public UserCASDetailsEntity getParent(UserFolioDetailsEntity visitingObject) {
+                    return visitingObject.getUserCasDetailsEntity();
+                }
+
+                public List<UserFolioDetailsEntity> getChildren(UserCASDetailsEntity parent) {
+                    return parent.getFolioEntities();
+                }
+
+                public void setChildren(UserCASDetailsEntity parent) {
+                    parent.setFolioEntities(new ArrayList<>());
+                }
+            };
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)

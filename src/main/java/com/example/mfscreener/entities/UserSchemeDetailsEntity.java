@@ -1,6 +1,8 @@
 /* Licensed under Apache-2.0 2022. */
 package com.example.mfscreener.entities;
 
+import com.example.mfscreener.repositoryutil.EntityVisitor;
+import com.example.mfscreener.repositoryutil.Identifiable;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -23,7 +25,23 @@ import org.hibernate.Hibernate;
 @Setter
 @Entity
 @Table(name = "user_scheme_details")
-public class UserSchemeDetailsEntity extends AuditableEntity<String> implements Serializable {
+public class UserSchemeDetailsEntity extends AuditableEntity<String> implements Serializable, Identifiable {
+
+    public static final EntityVisitor<UserSchemeDetailsEntity, UserFolioDetailsEntity> ENTITY_VISITOR =
+            new EntityVisitor<>(UserSchemeDetailsEntity.class) {
+
+                public UserFolioDetailsEntity getParent(UserSchemeDetailsEntity visitingObject) {
+                    return visitingObject.getUserFolioDetailsEntity();
+                }
+
+                public List<UserSchemeDetailsEntity> getChildren(UserFolioDetailsEntity parent) {
+                    return parent.getSchemeEntities();
+                }
+
+                public void setChildren(UserFolioDetailsEntity parent) {
+                    parent.setSchemeEntities(new ArrayList<>());
+                }
+            };
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
