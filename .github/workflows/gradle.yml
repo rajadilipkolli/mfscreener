@@ -24,7 +24,7 @@ jobs:
           distribution: 'zulu'
           cache: 'gradle'
 
-      - name: Start up loki via Docker Compose
+      - name: Start up tempo and loki via Docker Compose
         run: |
           docker-compose up -d tempo loki
           sleep 5
