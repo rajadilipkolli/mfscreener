@@ -29,6 +29,10 @@ import com.example.mfscreener.repository.InvestorInfoEntityRepository;
 import com.example.mfscreener.repository.MFSchemeRepository;
 import com.example.mfscreener.repository.MFSchemeTypeRepository;
 import com.example.mfscreener.repository.UserSchemeDetailsEntityRepository;
+import com.example.mfscreener.repository.UserTransactionDetailsEntityRepository;
+import com.example.mfscreener.repository.util.ClassId;
+import com.example.mfscreener.repository.util.EntityGraphBuilder;
+import com.example.mfscreener.repository.util.EntityVisitor;
 import com.example.mfscreener.service.NavService;
 import com.example.mfscreener.utils.AppConstants;
 import com.example.mfscreener.utils.LocalDateUtility;
@@ -63,6 +67,7 @@ public class NavServiceImpl implements NavService {
     private final CASDetailsEntityRepository casDetailsEntityRepository;
     private final UserSchemeDetailsEntityRepository userSchemeDetailsEntityRepository;
     private final InvestorInfoEntityRepository investorInfoEntityRepository;
+    private final UserTransactionDetailsEntityRepository userTransactionDetailsEntityRepository;
 
     private final ObjectMapper objectMapper;
     private final RestTemplate restTemplate;
@@ -226,8 +231,13 @@ public class NavServiceImpl implements NavService {
     }
 
     UserCASDetailsEntity findDelta(String email, String name, CasDTO casDTO) {
-        UserCASDetailsEntity userCASDetailsEntity =
-                this.casDetailsEntityRepository.findByInvestorInfoEntity_EmailAndInvestorInfoEntity_Name(email, name);
+        // UserCASDetailsEntity userCASDetailsEntity =
+        // this.casDetailsEntityRepository.findByInvestorInfoEntity_EmailAndInvestorInfoEntity_Name(email, name);
+
+        List<UserTransactionDetailsEntity> userTransactionDetailsEntityList =
+                this.userTransactionDetailsEntityRepository.findAllTransactionsByEmailAndName(email, name);
+        UserCASDetailsEntity userCASDetailsEntity = getFullyLoadedObject(userTransactionDetailsEntityList);
+
         // get Entities present in DB
         List<UserFolioDetailsEntity> userFolioDetailsEntities = userCASDetailsEntity.getFolioEntities();
         if (userFolioDetailsEntities.size() == casDTO.folios().size()) {
@@ -309,6 +319,28 @@ public class NavServiceImpl implements NavService {
 
         // for each scheme check the new transactions added.
         return userCASDetailsEntity;
+    }
+
+    private UserCASDetailsEntity getFullyLoadedObject(
+            List<UserTransactionDetailsEntity> userTransactionDetailsEntityList) {
+        EntityGraphBuilder entityGraphBuilder = new EntityGraphBuilder(new EntityVisitor[] {
+                    UserTransactionDetailsEntity.ENTITY_VISITOR,
+                    UserSchemeDetailsEntity.ENTITY_VISITOR,
+                    UserFolioDetailsEntity.ENTITY_VISITOR,
+                    UserCASDetailsEntity.ENTITY_VISITOR
+                })
+                .build(userTransactionDetailsEntityList);
+
+        ClassId<UserCASDetailsEntity> userCASDetailsEntityClassId = new ClassId<>(
+                UserCASDetailsEntity.class,
+                userTransactionDetailsEntityList
+                        .get(0)
+                        .getUserSchemeDetailsEntity()
+                        .getUserFolioDetailsEntity()
+                        .getUserCasDetailsEntity()
+                        .getId());
+
+        return entityGraphBuilder.getEntityContext().getObject(userCASDetailsEntityClassId);
     }
 
     List<UserTransactionDTO> findNewTransactions(

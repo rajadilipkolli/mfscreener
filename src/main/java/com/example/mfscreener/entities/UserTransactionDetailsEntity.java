@@ -1,6 +1,7 @@
 /* Licensed under Apache-2.0 2022. */
 package com.example.mfscreener.entities;
 
+import com.example.mfscreener.repository.util.EntityVisitor;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -11,6 +12,8 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import lombok.Getter;
 import lombok.Setter;
@@ -20,7 +23,23 @@ import org.hibernate.Hibernate;
 @Setter
 @Entity
 @Table(name = "user_transaction_details")
-public class UserTransactionDetailsEntity extends AuditableEntity<String> implements Serializable {
+public class UserTransactionDetailsEntity extends AuditableEntity<String> implements Serializable, Identifiable {
+    public static final EntityVisitor<UserTransactionDetailsEntity, UserSchemeDetailsEntity> ENTITY_VISITOR =
+            new EntityVisitor<>(UserTransactionDetailsEntity.class) {
+
+                public UserSchemeDetailsEntity getParent(UserTransactionDetailsEntity visitingObject) {
+                    return visitingObject.getUserSchemeDetailsEntity();
+                }
+
+                public List<UserTransactionDetailsEntity> getChildren(UserSchemeDetailsEntity parent) {
+                    return parent.getTransactionEntities();
+                }
+
+                public void setChildren(UserSchemeDetailsEntity parent) {
+                    parent.setTransactionEntities(new ArrayList<>());
+                }
+            };
+
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     @Column(name = "id", nullable = false)
