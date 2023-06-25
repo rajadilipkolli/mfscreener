@@ -16,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-@Transactional(readOnly = true)
+@Transactional
 public class NavService {
 
     private final MFSchemeRepository mfSchemesRepository;
@@ -24,6 +24,7 @@ public class NavService {
     private final SchemeService schemeService;
 
     @Loggable
+    @Transactional(readOnly = true)
     public MFSchemeDTO getNav(Long schemeCode) {
         return mfSchemesRepository
                 .findBySchemeIdAndMfSchemeNavEntities_NavDate(
@@ -32,8 +33,9 @@ public class NavService {
                 .orElseThrow(() -> new SchemeNotFoundException(String.format("Scheme %s Not Found", schemeCode)));
     }
 
-    public MFSchemeDTO getNavOnDate(Long schemeCode, String inputDate) {
-        LocalDate adjustedDate = LocalDateUtility.getAdjustedDateForNAV(inputDate);
+    @Loggable
+    public MFSchemeDTO getNavOnDate(Long schemeCode, LocalDate inputDate) {
+        LocalDate adjustedDate = LocalDateUtility.getAdjustedDate(inputDate);
         return getNavByDate(schemeCode, adjustedDate);
     }
 

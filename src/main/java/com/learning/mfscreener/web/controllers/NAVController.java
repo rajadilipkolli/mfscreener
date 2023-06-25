@@ -3,7 +3,9 @@ package com.learning.mfscreener.web.controllers;
 import com.learning.mfscreener.models.MFSchemeDTO;
 import com.learning.mfscreener.service.NavService;
 import com.learning.mfscreener.web.api.NAVApi;
+import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,7 +26,9 @@ public class NAVController implements NAVApi {
 
     @Override
     @GetMapping(path = "/{schemeCode}/{date}")
-    public ResponseEntity<MFSchemeDTO> getSchemeNavOnDate(Long schemeCode, String date) {
+    public ResponseEntity<MFSchemeDTO> getSchemeNavOnDate(
+            @PathVariable Long schemeCode,
+            @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
         return ResponseEntity.ok(navService.getNavOnDate(schemeCode, date));
     }
 }

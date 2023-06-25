@@ -37,4 +37,17 @@ class NavControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.nav", notNullValue(String.class)))
                 .andExpect(jsonPath("$.date", notNullValue(String.class)));
     }
+
+    @Test
+    void shouldLoadDataWhenSchemeFoundAndLoadHistoricalData() throws Exception {
+        this.mockMvc
+                .perform(get("/api/nav/{schemeCode}/{date}", 120503L, "2022-12-20"))
+                .andExpect(status().isOk())
+                .andExpect(header().string("Content-Type", is("application/json")))
+                .andExpect(jsonPath("$.schemeCode", is(120503L), Long.class))
+                .andExpect(jsonPath("$.payout", is("INF846K01EW2")))
+                .andExpect(jsonPath("$.schemeName", is("Axis Long Term Equity Fund - Direct Plan - Growth Option")))
+                .andExpect(jsonPath("$.nav", is("77.6483")))
+                .andExpect(jsonPath("$.date", is("2023-06-23")));
+    }
 }

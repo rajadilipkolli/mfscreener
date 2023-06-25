@@ -1,6 +1,7 @@
 package com.learning.mfscreener.service;
 
 import com.learning.mfscreener.adapter.ConversionServiceAdapter;
+import com.learning.mfscreener.config.logging.Loggable;
 import com.learning.mfscreener.entities.MFSchemeEntity;
 import com.learning.mfscreener.entities.MFSchemeNavEntity;
 import com.learning.mfscreener.entities.MFSchemeTypeEntity;
@@ -32,6 +33,7 @@ public class SchemeService {
     private final MFSchemeTypeRepository mfSchemeTypeRepository;
     private final ConversionServiceAdapter conversionServiceAdapter;
 
+    @Loggable
     void fetchSchemeDetails(Long schemeCode) {
         log.info("Fetching SchemeDetails for AMFISchemeCode :{} ", schemeCode);
         URI uri = UriComponentsBuilder.fromHttpUrl(AppConstants.MFAPI_WEBSITE_BASE_URL + schemeCode)

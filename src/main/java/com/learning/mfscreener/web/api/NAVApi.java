@@ -4,6 +4,7 @@ import com.learning.mfscreener.models.MFSchemeDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import java.time.LocalDate;
 import org.springframework.http.ResponseEntity;
 
 public interface NAVApi {
@@ -21,5 +22,5 @@ public interface NAVApi {
     public ResponseEntity<MFSchemeDTO> getSchemeNavOnDate(
             @Parameter(description = "scheme Code for mutual fund", in = ParameterIn.PATH, example = "120503")
                     Long schemeCode,
-            @Parameter(description = "date", in = ParameterIn.PATH, example = "20-01-2020") String date);
+            @Parameter(description = "date", in = ParameterIn.PATH, example = "2020-20-01") LocalDate date);
 }
