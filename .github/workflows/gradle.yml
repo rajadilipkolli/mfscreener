@@ -39,5 +39,5 @@ jobs:
         name: Build and Publish Docker Image
         run: |
           docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
-          ./gradlew bootBuildImage --imageName=${{ secrets.DOCKER_USERNAME }}/mfdcreener
-          docker push ${{ secrets.DOCKER_USERNAME }}/mfdcreener
+          ./gradlew bootBuildImage --imageName=${{ secrets.DOCKER_USERNAME }}/mfscreener
+          docker push ${{ secrets.DOCKER_USERNAME }}/mfscreener
