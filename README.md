@@ -3,7 +3,7 @@
 
 ### Run tests
 
-``shell
+```shell
 $ ./gradlew clean build`
 ```
 
