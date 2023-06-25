@@ -1,3 +1,5 @@
+import org.gradle.plugins.ide.eclipse.model.SourceFolder
+
 buildscript {
     repositories {
         mavenCentral()
@@ -10,6 +12,7 @@ plugins {
     id "org.springframework.boot"
     id "io.spring.dependency-management"
     id "java-library"
+    id 'eclipse'
     id "com.gorylenko.gradle-git-properties"
     id "com.github.ben-manes.versions"
     id "com.diffplug.spotless"
@@ -52,6 +55,13 @@ dependencies {
     implementation "commons-io:commons-io:${commons_io_version}"
     runtimeOnly "io.micrometer:micrometer-registry-prometheus"
 
+    // Mapstruct
+    implementation ("org.mapstruct:mapstruct:1.5.5.Final")
+    implementation ("org.mapstruct.extensions.spring:mapstruct-spring-annotations:1.0.1")
+
+    annotationProcessor ("org.mapstruct:mapstruct-processor:1.5.5.Final")
+    annotationProcessor ("org.mapstruct.extensions.spring:mapstruct-spring-extensions:1.0.1")
+
     testImplementation "org.springframework.boot:spring-boot-starter-test"
     testImplementation "org.springframework.boot:spring-boot-testcontainers"
     testImplementation "org.projectlombok:lombok"
@@ -59,12 +69,24 @@ dependencies {
     testImplementation "org.testcontainers:junit-jupiter"
     testImplementation "org.testcontainers:postgresql"
     testAnnotationProcessor "org.projectlombok:lombok"
+    // If you are using mapstruct in test code
+    testAnnotationProcessor("org.mapstruct:mapstruct-processor:1.5.5.Final")
+    testAnnotationProcessor("org.mapstruct.extensions.spring:mapstruct-spring-extensions:1.0.1")
 }
 
 dependencyManagement {
     imports {
         mavenBom "org.springframework.cloud:spring-cloud-dependencies:${spring_cloud_version}"
     }
+}
+
+tasks.withType(JavaCompile) {
+    options.compilerArgs += [
+            '-Amapstruct.suppressGeneratorTimestamp=true',
+            '-Amapstruct.suppressGeneratorVersionInfoComment=true',
+            '-Amapstruct.verbose=true',
+            '-Amapstruct.defaultComponentModel=spring'
+    ]
 }
 
 defaultTasks "bootRun"
@@ -144,4 +166,22 @@ task testReport(type: TestReport) {
 task integrationTestReport(type: TestReport) {
     destinationDir = file("$buildDir/reports/tests")
     reportOn integrationTest
+}
+
+sourceSets {
+    main {
+        java.srcDirs += 'build/generated/sources/annotationProcesor/java'
+    }
+}
+
+//adding task to fix issue with ConversationService not found in VSCode
+eclipse {
+    classpath {
+        containers 'org.eclipse.buildship.core.gradleclasspathcontainer'
+        file.whenMerged { cp ->
+            def entries = cp.entries;
+            def src = new SourceFolder('build/generated/sources/annotationProcessor/java/main/', null)
+            entries.add(src)
+        }
+    }
 }
