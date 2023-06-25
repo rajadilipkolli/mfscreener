@@ -1,0 +1,15 @@
+{
+  "generator-springboot": {
+    "appName": "mfscreener",
+    "packageName": "com.learning.mfscreener",
+    "databaseType": "postgresql",
+    "dbMigrationTool": "liquibase",
+    "dbMigrationFormat": "xml",
+    "features": [
+      "monitoring"
+    ],
+    "buildTool": "gradle",
+    "packageFolder": "com/learning/mfscreener",
+    "liquibaseMigrationCounter": 1
+  }
+}
