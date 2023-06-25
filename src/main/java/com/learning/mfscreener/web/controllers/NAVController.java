@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @RequestMapping("/api/nav")
 public class NAVController implements NAVApi {
+
     private final NavService navService;
 
     @Override

@@ -8,12 +8,15 @@ import com.learning.mfscreener.entities.MFSchemeTypeEntity;
 import com.learning.mfscreener.exception.SchemeNotFoundException;
 import com.learning.mfscreener.models.MetaDTO;
 import com.learning.mfscreener.models.NAVDataDTO;
+import com.learning.mfscreener.models.projection.FundDetailProjection;
 import com.learning.mfscreener.models.response.NavResponse;
 import com.learning.mfscreener.repository.MFSchemeRepository;
 import com.learning.mfscreener.repository.MFSchemeTypeRepository;
 import com.learning.mfscreener.utils.AppConstants;
 import java.net.URI;
 import java.util.List;
+import java.util.Locale;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpMethod;
@@ -78,5 +81,12 @@ public class SchemeService {
             mfschemeTypeEntity.addMFScheme(mfSchemeEntity);
             this.mfSchemesRepository.save(mfSchemeEntity);
         }
+    }
+
+    @Loggable
+    public List<FundDetailProjection> fetchSchemes(String schemeName) {
+        String sName = "%" + schemeName.toUpperCase(Locale.ROOT) + "%";
+        log.info("Fetching schemes with :{}", sName);
+        return this.mfSchemesRepository.findBySchemeNameLikeIgnoreCase(sName);
     }
 }
