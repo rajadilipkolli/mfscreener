@@ -53,7 +53,8 @@ public class Initializer implements CommandLineRunner {
                     final String schemename = tokenize[3];
                     final String nav = tokenize[4];
                     final String date = tokenize[5];
-                    final MFSchemeDTO tempObj = new MFSchemeDTO(schemecode, payout, schemename, nav, date);
+                    final MFSchemeDTO tempObj =
+                            new MFSchemeDTO(Long.valueOf(schemecode), payout, schemename, nav, date);
                     chopArrayList.add(tempObj);
                 }
                 fileRead = br.readLine();

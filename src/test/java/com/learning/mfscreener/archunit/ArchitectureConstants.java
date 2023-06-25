@@ -9,7 +9,7 @@ public class ArchitectureConstants {
     public static final String ENTITY_SUFFIX = "Entity";
 
     // Packages
-    public static final String CONTROLLER_PACKAGE = "..controller..";
+    public static final String CONTROLLER_PACKAGE = "..controllers..";
     public static final String MODEL_PACKAGE = "..models..";
     public static final String DTO_PACKAGE = "..dto..";
     public static final String REPOSITORY_PACKAGE = "..repository..";

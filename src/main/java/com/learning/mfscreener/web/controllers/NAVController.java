@@ -1,4 +1,4 @@
-package com.learning.mfscreener.web.controller;
+package com.learning.mfscreener.web.controllers;
 
 import com.learning.mfscreener.models.MFSchemeDTO;
 import com.learning.mfscreener.service.NavService;
@@ -7,15 +7,17 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/api/nav")
 public class NAVController implements NAVApi {
     private final NavService navService;
 
     @Override
-    @GetMapping(path = "/nav/{schemeCode}")
+    @GetMapping(path = "/{schemeCode}")
     public ResponseEntity<MFSchemeDTO> getScheme(@PathVariable(value = "schemeCode") Long schemeCode) {
         return ResponseEntity.ok(navService.getNav(schemeCode));
     }

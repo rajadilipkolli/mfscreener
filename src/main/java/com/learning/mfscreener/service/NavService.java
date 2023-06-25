@@ -22,6 +22,6 @@ public class NavService {
         return mfSchemesRepository
                 .findBySchemeIdAndNavDate(schemeCode, LocalDateUtility.getAdjustedDate(LocalDate.now()))
                 .map(conversionServiceAdapter::mapMFSchemeEntityToMFSchemeDTO)
-                .orElseThrow(() -> new SchemeNotFoundException("Scheme Not Found"));
+                .orElseThrow(() -> new SchemeNotFoundException(String.format("Scheme %s Not Found", schemeCode)));
     }
 }

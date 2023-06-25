@@ -4,14 +4,14 @@
 ### Run tests
 
 ```shell
-$ ./gradlew clean build`
+./gradlew clean build
 ```
 
 ### Run locally
 
 ```shell
-$ docker-compose -f docker/docker-compose.yml up -d
-$ ./gradlew bootRun -Plocal
+docker-compose -f docker/docker-compose.yml up -d
+./gradlew bootRun -Plocal
 ```
 
 ### Using Testcontainers at Development Time
