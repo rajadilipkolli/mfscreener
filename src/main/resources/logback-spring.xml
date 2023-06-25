@@ -16,6 +16,7 @@
     </springProfile>
 
     <logger name="com.learning.mfscreener" level="DEBUG"/>
+    <logger name="net.ttddyy.dsproxy.listener" level="DEBUG"/>
     <logger name="org.springframework" level="INFO"/>
 
 </configuration>

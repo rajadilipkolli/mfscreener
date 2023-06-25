@@ -50,6 +50,7 @@ dependencies {
     runtimeOnly "com.h2database:h2"
     runtimeOnly "org.postgresql:postgresql"
     implementation "org.liquibase:liquibase-core"
+    implementation 'com.github.gavlyukovskiy:datasource-proxy-spring-boot-starter:1.9.0'
     implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:${springdoc_openapi_version}"
     implementation "org.apache.commons:commons-lang3"
     implementation "commons-io:commons-io:${commons_io_version}"
@@ -83,7 +84,7 @@ dependencyManagement {
     }
 }
 
-tasks.withType(JavaCompile) {
+tasks.withType(JavaCompile).configureEach {
     options.compilerArgs += [
             '-Amapstruct.suppressGeneratorTimestamp=true',
             '-Amapstruct.suppressGeneratorVersionInfoComment=true',
@@ -146,7 +147,7 @@ test {
     }
 }
 
-task integrationTest(type: Test) {
+tasks.register('integrationTest', Test) {
     useJUnitPlatform()
 
     include "**/*IT*", "**/*IntegrationTest*", "**/*IntTest*"
@@ -162,12 +163,12 @@ task integrationTest(type: Test) {
 check.dependsOn integrationTest
 check.dependsOn jacocoTestReport
 
-task testReport(type: TestReport) {
+tasks.register('testReport', TestReport) {
     destinationDir = file("$buildDir/reports/tests")
     reportOn test
 }
 
-task integrationTestReport(type: TestReport) {
+tasks.register('integrationTestReport', TestReport) {
     destinationDir = file("$buildDir/reports/tests")
     reportOn integrationTest
 }

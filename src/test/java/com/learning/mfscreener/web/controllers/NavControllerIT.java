@@ -28,7 +28,7 @@ class NavControllerIT extends AbstractIntegrationTest {
     @Test
     void shouldLoadDataWhenSchemeFound() throws Exception {
         this.mockMvc
-                .perform(get("/api/nav/{schemeCode}", 120503))
+                .perform(get("/api/nav/{schemeCode}", 120503L))
                 .andExpect(status().isOk())
                 .andExpect(header().string("Content-Type", is("application/json")))
                 .andExpect(jsonPath("$.schemeCode", is(120503L), Long.class))

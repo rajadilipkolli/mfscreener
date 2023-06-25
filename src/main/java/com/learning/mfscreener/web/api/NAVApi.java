@@ -18,9 +18,9 @@ public interface NAVApi {
                             example = "120503")
                     Long schemeCode);
 
-    @Operation(summary = "Fetch NAV on date DD-MM-YYYY (or the last working day before DD-MM-YYYY).")
+    @Operation(summary = "Fetch NAV on date yyyy-MM-dd (or the last working day before yyyy-MM-dd).")
     public ResponseEntity<MFSchemeDTO> getSchemeNavOnDate(
             @Parameter(description = "scheme Code for mutual fund", in = ParameterIn.PATH, example = "120503")
                     Long schemeCode,
-            @Parameter(description = "date", in = ParameterIn.PATH, example = "2020-20-01") LocalDate date);
+            @Parameter(description = "date", in = ParameterIn.PATH, example = "2022-12-31") LocalDate date);
 }
