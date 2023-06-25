@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.learning.mfscreener.mapper.MfSchemeDtoToEntityMapper;
 import com.learning.mfscreener.mapper.MfSchemeEntityToDtoMapper;
+import com.learning.mfscreener.mapper.NavDataToMFSchemeNavMapper;
 import com.tngtech.archunit.core.importer.ClassFileImporter;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -20,7 +21,8 @@ class MapperArchUnitTest {
                         .filter(javaClass -> javaClass.getSimpleName().endsWith("Mapper"))
                         .count();
 
-        final List<Object> mappers = List.of(MfSchemeDtoToEntityMapper.class, MfSchemeEntityToDtoMapper.class);
+        final List<Object> mappers = List.of(
+                MfSchemeDtoToEntityMapper.class, MfSchemeEntityToDtoMapper.class, NavDataToMFSchemeNavMapper.class);
 
         assertThat(mappers)
                 .withFailMessage("Scanned number of mappers doesn't match the provided amount")
