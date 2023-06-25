@@ -19,4 +19,7 @@ public interface MFSchemeRepository extends JpaRepository<MFSchemeEntity, Long> 
 
     @EntityGraph(attributePaths = "mfSchemeNavEntities")
     Optional<MFSchemeEntity> findBySchemeIdAndMfSchemeNavEntities_NavDate(Long schemeId, LocalDate navDate);
+
+    @EntityGraph(attributePaths = "mfSchemeNavEntities")
+    Optional<MFSchemeEntity> findBySchemeId(Long schemeId);
 }

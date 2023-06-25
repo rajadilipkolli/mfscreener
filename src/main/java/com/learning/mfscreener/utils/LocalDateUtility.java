@@ -14,4 +14,9 @@ public class LocalDateUtility {
         }
         return adjustedDate;
     }
+
+    public LocalDate getAdjustedDateForNAV(String inputDate) {
+        LocalDate adjustedDate = LocalDate.parse(inputDate, AppConstants.FORMATTER);
+        return getAdjustedDate(adjustedDate);
+    }
 }
