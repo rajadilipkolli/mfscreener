@@ -25,7 +25,7 @@ class SchemeControllerIT extends AbstractIntegrationTest {
     @Test
     void fetchSchemesByFundName() throws Exception {
         this.mockMvc
-                .perform(get("/api/scheme//fund/{fundName}", "Mirae Asset Mutual fund"))
+                .perform(get("/api/scheme/fund/{fundName}", "Mirae Asset Mutual fund"))
                 .andExpect(status().isOk())
                 .andExpect(header().string("Content-Type", is("application/json")))
                 .andExpect(jsonPath("$.size()", is(0)));
