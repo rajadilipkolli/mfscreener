@@ -9,9 +9,11 @@ import com.learning.mfscreener.utils.LocalDateUtility;
 import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class NavService {
 
     private final MFSchemeRepository mfSchemesRepository;
@@ -20,7 +22,8 @@ public class NavService {
     @Loggable
     public MFSchemeDTO getNav(Long schemeCode) {
         return mfSchemesRepository
-                .findBySchemeIdAndNavDate(schemeCode, LocalDateUtility.getAdjustedDate(LocalDate.now()))
+                .findBySchemeIdAndMfSchemeNavEntities_NavDate(
+                        schemeCode, LocalDateUtility.getAdjustedDate(LocalDate.now()))
                 .map(conversionServiceAdapter::mapMFSchemeEntityToMFSchemeDTO)
                 .orElseThrow(() -> new SchemeNotFoundException(String.format("Scheme %s Not Found", schemeCode)));
     }
