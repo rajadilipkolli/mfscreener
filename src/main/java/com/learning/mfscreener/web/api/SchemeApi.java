@@ -17,4 +17,13 @@ public interface SchemeApi {
                             in = ParameterIn.PATH,
                             example = "sbi small cap")
                     String schemeName);
+
+    @Operation(summary = "Fetches the schemes matching fund House.")
+    ResponseEntity<List<FundDetailProjection>> fetchSchemesByFundName(
+            @Parameter(
+                            description = "fund house name for mutual funds",
+                            name = "fundName",
+                            in = ParameterIn.PATH,
+                            example = "Mirae Asset Mutual fund")
+                    String fundName);
 }

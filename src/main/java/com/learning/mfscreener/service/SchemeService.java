@@ -16,7 +16,6 @@ import com.learning.mfscreener.utils.AppConstants;
 import java.net.URI;
 import java.util.List;
 import java.util.Locale;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpMethod;
@@ -87,6 +86,13 @@ public class SchemeService {
     public List<FundDetailProjection> fetchSchemes(String schemeName) {
         String sName = "%" + schemeName.toUpperCase(Locale.ROOT) + "%";
         log.info("Fetching schemes with :{}", sName);
-        return this.mfSchemesRepository.findBySchemeNameLikeIgnoreCase(sName);
+        return this.mfSchemesRepository.findBySchemeNameLikeIgnoreCaseOrderBySchemeIdAsc(sName);
+    }
+
+    @Loggable
+    public List<FundDetailProjection> fetchSchemesByFundName(String fundName) {
+        String fName = "%" + fundName.toUpperCase(Locale.ROOT) + "%";
+        log.info("Fetching schemes available for fundHouse :{}", fName);
+        return this.mfSchemesRepository.findByFundHouseLikeIgnoringCaseOrderBySchemeIdAsc(fName);
     }
 }

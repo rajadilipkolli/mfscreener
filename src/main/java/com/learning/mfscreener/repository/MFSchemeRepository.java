@@ -15,9 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 public interface MFSchemeRepository extends JpaRepository<MFSchemeEntity, Long> {
 
     @Transactional(readOnly = true)
-    List<FundDetailProjection> findBySchemeNameLikeIgnoreCase(String schemeName);
-
-    @Transactional(readOnly = true)
     @Query("select o.schemeId from MFSchemeEntity o")
     List<Long> findAllSchemeIds();
 
@@ -37,4 +34,10 @@ public interface MFSchemeRepository extends JpaRepository<MFSchemeEntity, Long> 
             """)
     @Transactional(readOnly = true)
     Optional<MFSchemeEntity> findBySchemeId(@Param("schemeId") Long schemeId);
+
+    @Transactional(readOnly = true)
+    List<FundDetailProjection> findBySchemeNameLikeIgnoreCaseOrderBySchemeIdAsc(String schemeName);
+
+    @Transactional(readOnly = true)
+    List<FundDetailProjection> findByFundHouseLikeIgnoringCaseOrderBySchemeIdAsc(String fName);
 }
