@@ -47,7 +47,7 @@ class NavControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.schemeCode", is(120503L), Long.class))
                 .andExpect(jsonPath("$.payout", is("INF846K01EW2")))
                 .andExpect(jsonPath("$.schemeName", is("Axis Long Term Equity Fund - Direct Plan - Growth Option")))
-                .andExpect(jsonPath("$.nav", is("77.6483")))
-                .andExpect(jsonPath("$.date", is("2023-06-23")));
+                .andExpect(jsonPath("$.nav", is("73.6085")))
+                .andExpect(jsonPath("$.date", is("2022-12-20")));
     }
 }

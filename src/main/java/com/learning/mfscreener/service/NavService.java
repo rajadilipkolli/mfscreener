@@ -8,6 +8,8 @@ import com.learning.mfscreener.models.MFSchemeDTO;
 import com.learning.mfscreener.repository.MFSchemeRepository;
 import com.learning.mfscreener.utils.LocalDateUtility;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -23,9 +25,16 @@ public class NavService {
 
     @Loggable
     public MFSchemeDTO getNav(Long schemeCode) {
+        LocalDateTime currentDateTime = LocalDateTime.now();
+        // NAVs are refreshed only after 11:30 PM so reduce the day by 1
+        if (currentDateTime.toLocalTime().isBefore(LocalTime.of(23, 30))) {
+            currentDateTime = currentDateTime.minusDays(1);
+        }
+
+        LocalDate currentDate = currentDateTime.toLocalDate();
+
         return mfSchemesRepository
-                .findBySchemeIdAndMfSchemeNavEntities_NavDate(
-                        schemeCode, LocalDateUtility.getAdjustedDate(LocalDate.now()))
+                .findBySchemeIdAndMfSchemeNavEntities_NavDate(schemeCode, LocalDateUtility.getAdjustedDate(currentDate))
                 .map(conversionServiceAdapter::mapMFSchemeEntityToMFSchemeDTO)
                 .orElseThrow(() -> new SchemeNotFoundException(String.format("Scheme %s Not Found", schemeCode)));
     }
