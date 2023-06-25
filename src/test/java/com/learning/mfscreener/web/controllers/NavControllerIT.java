@@ -9,13 +9,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.learning.mfscreener.common.AbstractIntegrationTest;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.MediaType;
 
 class NavControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldThrowExceptionWhenSchemeNotFound() throws Exception {
         this.mockMvc
-                .perform(get("/api/nav/{schemeCode}", 1))
+                .perform(get("/api/nav/{schemeCode}", 1).accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound())
                 .andExpect(header().string("Content-Type", is("application/problem+json")))
                 .andExpect(jsonPath("$.type", is("about:blank")))
@@ -28,7 +29,7 @@ class NavControllerIT extends AbstractIntegrationTest {
     @Test
     void shouldLoadDataWhenSchemeFound() throws Exception {
         this.mockMvc
-                .perform(get("/api/nav/{schemeCode}", 120503L))
+                .perform(get("/api/nav/{schemeCode}", 120503L).accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(header().string("Content-Type", is("application/json")))
                 .andExpect(jsonPath("$.schemeCode", is(120503L), Long.class))
@@ -41,7 +42,8 @@ class NavControllerIT extends AbstractIntegrationTest {
     @Test
     void shouldLoadDataWhenSchemeFoundAndLoadHistoricalData() throws Exception {
         this.mockMvc
-                .perform(get("/api/nav/{schemeCode}/{date}", 120503L, "2022-12-20"))
+                .perform(get("/api/nav/{schemeCode}/{date}", 120503L, "2022-12-20")
+                        .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(header().string("Content-Type", is("application/json")))
                 .andExpect(jsonPath("$.schemeCode", is(120503L), Long.class))

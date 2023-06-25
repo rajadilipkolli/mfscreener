@@ -9,13 +9,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.learning.mfscreener.common.AbstractIntegrationTest;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.MediaType;
 
 class SchemeControllerIT extends AbstractIntegrationTest {
 
     @Test
     void fetchSchemes() throws Exception {
         this.mockMvc
-                .perform(get("/api/scheme/{schemeName}", "sbi small cap"))
+                .perform(get("/api/scheme/{schemeName}", "sbi small cap").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(header().string("Content-Type", is("application/json")))
                 .andExpect(jsonPath("$.size()", is(4)))
@@ -25,7 +26,8 @@ class SchemeControllerIT extends AbstractIntegrationTest {
     @Test
     void fetchSchemesByFundName() throws Exception {
         this.mockMvc
-                .perform(get("/api/scheme/fund/{fundName}", "Mirae Asset Mutual fund"))
+                .perform(get("/api/scheme/fund/{fundName}", "Mirae Asset Mutual fund")
+                        .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(header().string("Content-Type", is("application/json")))
                 .andExpect(jsonPath("$.size()", is(0)));
