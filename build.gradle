@@ -68,6 +68,7 @@ dependencies {
     testImplementation "org.awaitility:awaitility"
     testImplementation "org.testcontainers:junit-jupiter"
     testImplementation "org.testcontainers:postgresql"
+    testImplementation 'com.tngtech.archunit:archunit-junit5:1.0.1'
     testAnnotationProcessor "org.projectlombok:lombok"
     // If you are using mapstruct in test code
     testAnnotationProcessor("org.mapstruct:mapstruct-processor:1.5.5.Final")
@@ -157,6 +158,7 @@ task integrationTest(type: Test) {
 }
 
 check.dependsOn integrationTest
+check.dependsOn jacocoTestReport
 
 task testReport(type: TestReport) {
     destinationDir = file("$buildDir/reports/tests")
