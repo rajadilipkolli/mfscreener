@@ -1,5 +1,6 @@
 package com.learning.mfscreener.config;
 
+import com.learning.mfscreener.exception.SchemeNotFoundException;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -33,6 +34,15 @@ public class GlobalExceptionHandler {
                 .sorted(Comparator.comparing(ApiValidationError::field))
                 .toList();
         problemDetail.setProperty("violations", validationErrorsList);
+        return problemDetail;
+    }
+
+    @ExceptionHandler(SchemeNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    ProblemDetail onException(SchemeNotFoundException schemeNotFoundException) {
+        ProblemDetail problemDetail =
+                ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(404), schemeNotFoundException.getMessage());
+        problemDetail.setTitle("Scheme NotFound");
         return problemDetail;
     }
 

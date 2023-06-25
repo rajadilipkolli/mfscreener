@@ -8,4 +8,5 @@ vscode:
   extensions:
     - Pivotal.vscode-boot-dev-pack
 
+    - vscjava.vscode-java-pack
 
