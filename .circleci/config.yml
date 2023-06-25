@@ -1,0 +1,15 @@
+version: 2.1
+orbs:
+  gradle: circleci/gradle@3.0.0
+executors:
+  machine_executor_amd64:
+    machine:
+      image: ubuntu-2023:current
+    environment:
+      architecture: "amd64"
+      platform: "linux/amd64"
+workflows:
+  gradle_test:
+    jobs:
+      - gradle/test:
+          executor: machine_executor_amd64

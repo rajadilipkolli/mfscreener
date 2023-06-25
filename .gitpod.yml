@@ -10,3 +10,4 @@ vscode:
     - vscjava.vscode-java-pack
     - GabrielBB.vscode-lombok
     - richardwillis.vscode-gradle
+    - Pivotal.vscode-spring-boot
