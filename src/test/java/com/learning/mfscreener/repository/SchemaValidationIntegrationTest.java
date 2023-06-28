@@ -1,6 +1,10 @@
 package com.learning.mfscreener.repository;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
@@ -12,6 +16,11 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 class SchemaValidationIntegrationTest {
 
+    @Autowired
+    EntityManager entityManager;
+
     @Test
-    public void testSchemaValidity() {}
+    void testSchemaValidity() {
+        assertThat(entityManager).isNotNull();
+    }
 }
