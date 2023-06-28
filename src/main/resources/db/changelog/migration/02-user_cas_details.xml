@@ -1,12 +1,12 @@
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
-                                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+                                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
 
     <property  name="string.type"  value="varchar(255)"  dbms="!postgresql"/>
     <property  name="string.type"  value="text"  dbms="postgresql"/>
 
-    <changeSet author="appUser" id="create-sequence">
+    <changeSet author="appUser" id="create-sequence-user_cas_details_seq">
         <preConditions onFail="MARK_RAN">
             <not>
                 <sequenceExists sequenceName="user_cas_details_seq"/>
@@ -17,7 +17,7 @@
                         incrementBy="50"/>
     </changeSet>
 
-    <changeSet author="appUser" id="create-table">
+    <changeSet author="appUser" id="create-table-user_cas_details">
         <preConditions onFail="MARK_RAN">
             <not>
                 <tableExists tableName="user_cas_details"/>

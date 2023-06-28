@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <property  name="string.type"  value="VARCHAR(255)"  dbms="!postgresql"/>
+    <property  name="string.type"  value="text"  dbms="postgresql"/>
+
+    <changeSet id="createTable_investor_info" author="appUser">
+        <createTable tableName="investor_info">
+            <column name="email" type="${string.type}"/>
+            <column name="name" type="${string.type}"/>
+            <column name="mobile" type="${string.type}"/>
+            <column name="address" type="${string.type}"/>
+            <column name="user_cas_details_id" type="BIGINT">
+                <constraints primaryKey="true" primaryKeyName="pk_investor_info"/>
+            </column>
+            <column name="created_by" type="${string.type}"/>
+            <column name="created_date" type="timestamp"/>
+            <column name="last_modified_by" type="${string.type}"/>
+            <column name="last_modified_date" type="timestamp"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="addForeignKeyConstraint_investor_info" author="appUser">
+        <addForeignKeyConstraint baseTableName="investor_info"
+                                 baseColumnNames="user_cas_details_id"
+                                 constraintName="FK_INVESTOR_INFO_ON_USER_CAS_DETAILS"
+                                 referencedTableName="user_cas_details"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
+</databaseChangeLog>

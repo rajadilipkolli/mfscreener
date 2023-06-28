@@ -28,13 +28,13 @@ public class UserFolioDetailsEntity extends AuditableEntity<String> implements S
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @Column(name = "folio")
+    @Column(name = "folio", nullable = false)
     private String folio;
 
-    @Column(name = "amc")
+    @Column(name = "amc", nullable = false)
     private String amc;
 
-    @Column(name = "pan")
+    @Column(name = "pan", nullable = false)
     private String pan;
 
     @Column(name = "kyc")
@@ -47,7 +47,7 @@ public class UserFolioDetailsEntity extends AuditableEntity<String> implements S
     private List<UserSchemeDetailsEntity> schemeEntities = new ArrayList<>();
 
     @ManyToOne
-    @JoinColumn(name = "user_cas_details_id")
+    @JoinColumn(name = "user_cas_details_id", nullable = false)
     private UserCASDetailsEntity userCasDetailsEntity;
 
     public void addSchemeEntity(UserSchemeDetailsEntity userSchemeDetailsEntity) {
