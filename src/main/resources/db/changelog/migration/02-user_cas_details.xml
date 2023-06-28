@@ -1,0 +1,43 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <property  name="string.type"  value="varchar(255)"  dbms="!postgresql"/>
+    <property  name="string.type"  value="text"  dbms="postgresql"/>
+
+    <changeSet author="appUser" id="create-sequence">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <sequenceExists sequenceName="user_cas_details_seq"/>
+            </not>
+        </preConditions>
+        <createSequence sequenceName="user_cas_details_seq"
+                        startValue="1"
+                        incrementBy="50"/>
+    </changeSet>
+
+    <changeSet author="appUser" id="create-table">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="user_cas_details"/>
+            </not>
+        </preConditions>
+        <createTable tableName="user_cas_details">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="cas_type" type="${string.type}" >
+                <constraints nullable="false"/>
+            </column>
+            <column name="file_type" type="${string.type}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="${string.type}"/>
+            <column name="created_date" type="timestamp"/>
+            <column name="last_modified_by" type="${string.type}"/>
+            <column name="last_modified_date" type="timestamp"/>
+        </createTable>
+    </changeSet>
+
+</databaseChangeLog>

@@ -164,13 +164,13 @@ check.dependsOn integrationTest
 check.dependsOn jacocoTestReport
 
 tasks.register('testReport', TestReport) {
-    destinationDir = file("$buildDir/reports/tests")
-    reportOn test
+    destinationDirectory = file("$buildDir/reports/tests")
+    testResults.from(test)
 }
 
 tasks.register('integrationTestReport', TestReport) {
-    destinationDir = file("$buildDir/reports/tests")
-    reportOn integrationTest
+    destinationDirectory = file("$buildDir/reports/tests")
+    testResults.from(integrationTest)
 }
 
 sourceSets {
@@ -184,7 +184,7 @@ eclipse {
     classpath {
         containers 'org.eclipse.buildship.core.gradleclasspathcontainer'
         file.whenMerged { cp ->
-            def entries = cp.entries;
+            def entries = cp.entries
             def src = new SourceFolder('build/generated/sources/annotationProcessor/java/main/', null)
             entries.add(src)
         }
