@@ -14,7 +14,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
             "spring.datasource.url=jdbc:tc:postgresql:15.3-alpine:///integration-tests-db"
         })
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-class SchemaValidationIntegrationTest {
+class SchemaValidationPostgresIntegrationTest {
 
     @Autowired
     EntityManager entityManager;
