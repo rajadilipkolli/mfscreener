@@ -1,0 +1,61 @@
+<databaseChangeLog
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <property name="string.type" value="VARCHAR(255)" dbms="!postgresql"/>
+    <property name="string.type" value="text" dbms="postgresql"/>
+
+    <changeSet id="create_sequence_user_scheme_details_seq" author="appUser">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <sequenceExists sequenceName="user_scheme_details_seq"/>
+            </not>
+        </preConditions>
+        <createSequence sequenceName="user_scheme_details_seq"
+                        startValue="1"
+                        incrementBy="50"/>
+    </changeSet>
+
+    <changeSet id="create-table-user_scheme_details" author="appUser">
+        <createTable tableName="user_scheme_details">
+            <column name="id" type="BIGINT" defaultValueSequenceNext="user_scheme_details_seq">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_scheme_info"/>
+            </column>
+            <column name="scheme" type="${string.type}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="isin" type="${string.type}"/>
+            <column name="advisor" type="${string.type}"/>
+            <column name="rta_code" type="${string.type}"/>
+            <column name="rta" type="${string.type}"/>
+            <column name="TYPE" type="${string.type}"/>
+            <column name="amfi" type="BIGINT"/>
+            <column name="OPEN" type="${string.type}"/>
+            <column name="CLOSE" type="${string.type}"/>
+            <column name="close_calculated" type="${string.type}"/>
+            <column name="user_folio_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="${string.type}"/>
+            <column name="created_date" type="timestamp"/>
+            <column name="last_modified_by" type="${string.type}"/>
+            <column name="last_modified_date" type="timestamp"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="addForeignKeyConstraint_user_scheme_details" author="appUser">
+        <preConditions>
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="FK_USER_SCHEME_DETAILS_ON_USER_FOLIO"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseTableName="user_scheme_details"
+                                 baseColumnNames="user_folio_id"
+                                 constraintName="FK_USER_SCHEME_DETAILS_ON_USER_FOLIO"
+                                 referencedTableName="user_folio_details"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
+</databaseChangeLog>

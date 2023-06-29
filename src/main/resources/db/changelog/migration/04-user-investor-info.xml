@@ -1,12 +1,11 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <databaseChangeLog
-        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
 
-    <property  name="string.type"  value="VARCHAR(255)"  dbms="!postgresql"/>
-    <property  name="string.type"  value="text"  dbms="postgresql"/>
+    <property name="string.type" value="VARCHAR(255)" dbms="!postgresql"/>
+    <property name="string.type" value="text" dbms="postgresql"/>
 
     <changeSet id="createTable_investor_info" author="appUser">
         <createTable tableName="investor_info">
@@ -25,6 +24,11 @@
     </changeSet>
 
     <changeSet id="addForeignKeyConstraint_investor_info" author="appUser">
+        <preConditions>
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="FK_INVESTOR_INFO_ON_USER_CAS_DETAILS"/>
+            </not>
+        </preConditions>
         <addForeignKeyConstraint baseTableName="investor_info"
                                  baseColumnNames="user_cas_details_id"
                                  constraintName="FK_INVESTOR_INFO_ON_USER_CAS_DETAILS"

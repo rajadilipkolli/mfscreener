@@ -1,0 +1,57 @@
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <property name="string.type" value="VARCHAR(255)" dbms="!postgresql"/>
+    <property name="string.type" value="text" dbms="postgresql"/>
+
+    <changeSet id="createSequence-user_transaction_details_seq" author="appUser">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <sequenceExists sequenceName="user_transaction_details_seq"/>
+            </not>
+        </preConditions>
+        <createSequence sequenceName="user_transaction_details_seq" startValue="1" incrementBy="50"/>
+    </changeSet>
+
+    <changeSet id="createTable-user_transaction_details" author="appUser">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="user_transaction_details"/>
+            </not>
+        </preConditions>
+        <createTable tableName="user_transaction_details">
+            <column name="id" type="BIGINT" defaultValueSequenceNext="user_transaction_details_seq">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="transaction_date" type="DATE"/>
+            <column name="description" type="${string.type}"/>
+            <column name="amount" type="FLOAT(4)"/>
+            <column name="units" type="FLOAT(4)"/>
+            <column name="nav" type="FLOAT(4)"/>
+            <column name="balance" type="FLOAT(4)"/>
+            <column name="type" type="${string.type}"/>
+            <column name="dividend_rate" type="${string.type}"/>
+            <column name="user_scheme_detail_id" type="BIGINT"/>
+            <column name="created_by" type="${string.type}"/>
+            <column name="created_date" type="TIMESTAMP"/>
+            <column name="last_modified_by" type="${string.type}"/>
+            <column name="last_modified_date" type="TIMESTAMP"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="addForeignKeyConstraint-user_transaction_details" author="appUser">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="FK_USER_TRANSACTION_DETAILS_ON_USER_SCHEME_DETAIL"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseTableName="user_transaction_details"
+                                 constraintName="FK_USER_TRANSACTION_DETAILS_ON_USER_SCHEME_DETAIL"
+                                 referencedTableName="user_scheme_details"
+                                 referencedColumnNames="id"
+                                 baseColumnNames="user_scheme_detail_id"/>
+    </changeSet>
+
+</databaseChangeLog>
