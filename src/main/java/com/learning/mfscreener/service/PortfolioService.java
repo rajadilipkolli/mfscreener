@@ -12,6 +12,7 @@ import com.learning.mfscreener.utils.LocalDateUtility;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -35,17 +36,13 @@ public class PortfolioService {
     }
 
     public PortfolioResponse getPortfolioByPAN(String panNumber, LocalDate asOfDate) {
-        if (asOfDate.isAfter(LocalDate.now())) {
-            asOfDate = LocalDate.now().minusDays(1);
-        }
 
-        LocalDate finalAsOfDate = asOfDate;
-        List<PortfolioDetailsDTO> portfolioDetailsDTOS =
+        List<CompletableFuture<PortfolioDetailsDTO>> completableFutureList =
                 casDetailsEntityRepository.getPortfolioDetails(panNumber, asOfDate).stream()
                         .filter(portfolioDetailsProjection -> portfolioDetailsProjection.getSchemeId() != null)
-                        .map(portfolioDetails -> {
+                        .map(portfolioDetails -> CompletableFuture.supplyAsync(() -> {
                             MFSchemeDTO scheme = navService.getNavByDateWithRetry(
-                                    portfolioDetails.getSchemeId(), LocalDateUtility.getAdjustedDate(finalAsOfDate));
+                                    portfolioDetails.getSchemeId(), LocalDateUtility.getAdjustedDate(asOfDate));
                             float totalValue = portfolioDetails.getBalanceUnits() * Float.parseFloat(scheme.nav());
 
                             return new PortfolioDetailsDTO(
@@ -53,11 +50,11 @@ public class PortfolioService {
                                     portfolioDetails.getSchemeName(),
                                     portfolioDetails.getFolioNumber(),
                                     scheme.date());
-                        })
+                        }))
                         .toList();
 
-        //        List<PortfolioDetailsDTO> portfolioDetailsDTOS =
-        //                completableFutureList.stream().map(CompletableFuture::join).toList();
+        List<PortfolioDetailsDTO> portfolioDetailsDTOS =
+                completableFutureList.stream().map(CompletableFuture::join).toList();
 
         return new PortfolioResponse(
                 portfolioDetailsDTOS.stream()

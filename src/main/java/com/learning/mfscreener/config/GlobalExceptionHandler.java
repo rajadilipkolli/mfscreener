@@ -2,6 +2,7 @@ package com.learning.mfscreener.config;
 
 import com.learning.mfscreener.exception.NavNotFoundException;
 import com.learning.mfscreener.exception.SchemeNotFoundException;
+import jakarta.validation.ConstraintViolationException;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -53,6 +54,15 @@ public class GlobalExceptionHandler {
         ProblemDetail problemDetail =
                 ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(404), navNotFoundException.getMessage());
         problemDetail.setTitle("Scheme NotFound");
+        return problemDetail;
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    ProblemDetail onException(ConstraintViolationException constraintViolationException) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+                HttpStatusCode.valueOf(400), constraintViolationException.getMessage());
+        problemDetail.setTitle("Constraint Violation");
         return problemDetail;
     }
 

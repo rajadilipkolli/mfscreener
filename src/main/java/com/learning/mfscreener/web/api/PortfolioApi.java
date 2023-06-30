@@ -4,6 +4,7 @@ import com.learning.mfscreener.models.response.PortfolioResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import jakarta.validation.constraints.PastOrPresent;
 import java.io.IOException;
 import java.time.LocalDate;
 import org.springframework.http.ResponseEntity;
@@ -26,5 +27,6 @@ public interface PortfolioApi {
                             in = ParameterIn.QUERY,
                             example = "2022-12-31",
                             required = true)
+                    @PastOrPresent(message = "Date should be past or today")
                     LocalDate date);
 }

@@ -59,4 +59,20 @@ class PortfolioControllerIT extends AbstractIntegrationTest {
                 .andExpect(header().string("Content-Type", is("application/json")))
                 .andExpect(jsonPath("$.portfolioDetailsDTOS.size()", is(1)));
     }
+
+    @Test
+    @Order(3)
+    void getPortfolioForAfterDate() throws Exception {
+        this.mockMvc
+                .perform(get("/api/portfolio/{pan}", "ABCDE1234F")
+                        .param("date", LocalDate.now().plusDays(10).toString())
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andExpect(header().string("Content-Type", is("application/problem+json")))
+                .andExpect(jsonPath("$.type", is("about:blank")))
+                .andExpect(jsonPath("$.title", is("Constraint Violation")))
+                .andExpect(jsonPath("$.status", is(400)))
+                .andExpect(jsonPath("$.detail", is("getPortfolio.date: Date should be past or today")))
+                .andExpect(jsonPath("$.instance", is("/api/portfolio/ABCDE1234F")));
+    }
 }
