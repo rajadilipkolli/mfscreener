@@ -7,7 +7,6 @@ import com.learning.mfscreener.entities.MFSchemeNavEntity;
 import com.learning.mfscreener.entities.MFSchemeTypeEntity;
 import com.learning.mfscreener.exception.SchemeNotFoundException;
 import com.learning.mfscreener.models.MetaDTO;
-import com.learning.mfscreener.models.NAVDataDTO;
 import com.learning.mfscreener.models.projection.FundDetailProjection;
 import com.learning.mfscreener.models.response.NavResponse;
 import com.learning.mfscreener.repository.MFSchemeRepository;
@@ -21,6 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -36,6 +36,7 @@ public class SchemeService {
     private final ConversionServiceAdapter conversionServiceAdapter;
 
     @Loggable
+    @Transactional
     void fetchSchemeDetails(Long schemeCode) {
         log.info("Fetching SchemeDetails for AMFISchemeCode :{} ", schemeCode);
         URI uri = UriComponentsBuilder.fromHttpUrl(AppConstants.MFAPI_WEBSITE_BASE_URL + schemeCode)
@@ -51,15 +52,17 @@ public class SchemeService {
                     .findBySchemeId(schemeCode)
                     .orElseThrow(
                             () -> new SchemeNotFoundException("Fund with schemeCode " + schemeCode + " Not Found"));
-            mergeList(entityBody, mfSchemeEntity);
+            mergeList(entityBody, mfSchemeEntity, schemeCode);
         }
     }
 
-    void mergeList(NavResponse navResponse, MFSchemeEntity mfSchemeEntity) {
-        List<NAVDataDTO> navList = navResponse.getData();
+    void mergeList(NavResponse navResponse, MFSchemeEntity mfSchemeEntity, Long schemeCode) {
+        List<MFSchemeNavEntity> navList = navResponse.getData().stream()
+                .map(navDataDTO -> navDataDTO.setSchemeId(schemeCode))
+                .map(conversionServiceAdapter::mapNAVDataDTOToMFSchemeNavEntity)
+                .toList();
 
         List<MFSchemeNavEntity> newNavs = navList.stream()
-                .map(conversionServiceAdapter::mapNAVDataDTOToMFSchemeNavEntity)
                 .filter(nav -> !mfSchemeEntity.getMfSchemeNavEntities().contains(nav))
                 .toList();
 

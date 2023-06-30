@@ -4,6 +4,7 @@ package com.learning.mfscreener.entities;
 import jakarta.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.util.Objects;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -37,7 +38,9 @@ public class MFSchemeNavEntity extends AuditableEntity<String> implements Serial
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof MFSchemeNavEntity)) return false;
-        return nav.equals(((MFSchemeNavEntity) o).getNav()) && navDate.equals(((MFSchemeNavEntity) o).getNavDate());
+        return nav.equals(((MFSchemeNavEntity) o).getNav())
+                && navDate.equals(((MFSchemeNavEntity) o).getNavDate())
+                && Objects.equals(mfSchemeEntity.getSchemeId(), ((MFSchemeNavEntity) o).mfSchemeEntity.getSchemeId());
     }
 
     @Override

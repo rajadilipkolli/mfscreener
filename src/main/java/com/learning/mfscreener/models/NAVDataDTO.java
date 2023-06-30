@@ -3,4 +3,8 @@ package com.learning.mfscreener.models;
 
 import java.io.Serializable;
 
-public record NAVDataDTO(String date, String nav) implements Serializable {}
+public record NAVDataDTO(String date, String nav, Long schemeId) implements Serializable {
+    public NAVDataDTO setSchemeId(Long schemeCode) {
+        return new NAVDataDTO(date(), nav(), schemeCode);
+    }
+}

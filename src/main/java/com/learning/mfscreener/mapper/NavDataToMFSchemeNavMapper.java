@@ -18,6 +18,7 @@ public interface NavDataToMFSchemeNavMapper extends Converter<NAVDataDTO, MFSche
     @Mapping(target = "createdDate", ignore = true)
     @Mapping(target = "createdBy", ignore = true)
     @Mapping(target = "navDate", source = "date", dateFormat = AppConstants.DATE_PATTERN_DD_MM_YYYY)
+    @Mapping(source = "schemeId", target = "mfSchemeEntity.schemeId")
     @Override
     MFSchemeNavEntity convert(NAVDataDTO navDataDTO);
 }
