@@ -44,7 +44,7 @@ public class PortfolioService {
                 casDetailsEntityRepository.getPortfolioDetails(panNumber, asOfDate).stream()
                         .filter(portfolioDetailsProjection -> portfolioDetailsProjection.getSchemeId() != null)
                         .map(portfolioDetails -> {
-                            MFSchemeDTO scheme = navService.getNavByDate(
+                            MFSchemeDTO scheme = navService.getNavByDateWithRetry(
                                     portfolioDetails.getSchemeId(), LocalDateUtility.getAdjustedDate(finalAsOfDate));
                             float totalValue = portfolioDetails.getBalanceUnits() * Float.parseFloat(scheme.nav());
 

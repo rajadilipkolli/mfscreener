@@ -3,7 +3,6 @@ package com.learning.mfscreener.service;
 import com.learning.mfscreener.adapter.ConversionServiceAdapter;
 import com.learning.mfscreener.config.logging.Loggable;
 import com.learning.mfscreener.exception.NavNotFoundException;
-import com.learning.mfscreener.exception.SchemeNotFoundException;
 import com.learning.mfscreener.models.MFSchemeDTO;
 import com.learning.mfscreener.repository.MFSchemeRepository;
 import com.learning.mfscreener.utils.LocalDateUtility;
@@ -33,20 +32,17 @@ public class NavService {
 
         LocalDate currentDate = currentDateTime.toLocalDate();
 
-        return mfSchemesRepository
-                .findBySchemeIdAndMfSchemeNavEntities_NavDate(schemeCode, LocalDateUtility.getAdjustedDate(currentDate))
-                .map(conversionServiceAdapter::mapMFSchemeEntityToMFSchemeDTO)
-                .orElseThrow(() -> new SchemeNotFoundException(String.format("Scheme %s Not Found", schemeCode)));
+        return getNavByDateWithRetry(schemeCode, currentDate);
     }
 
     @Loggable
     public MFSchemeDTO getNavOnDate(Long schemeCode, LocalDate inputDate) {
         LocalDate adjustedDate = LocalDateUtility.getAdjustedDate(inputDate);
-        return getNavByDate(schemeCode, adjustedDate);
+        return getNavByDateWithRetry(schemeCode, adjustedDate);
     }
 
     @Loggable
-    public MFSchemeDTO getNavByDate(Long schemeCode, LocalDate navDate) {
+    public MFSchemeDTO getNavByDateWithRetry(Long schemeCode, LocalDate navDate) {
         log.info("Fetching Nav for AMFISchemeCode: {} for date: {} from Database", schemeCode, navDate);
         MFSchemeDTO mfSchemeDTO;
         int retryCount = 0;
