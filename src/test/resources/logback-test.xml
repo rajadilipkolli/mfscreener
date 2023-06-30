@@ -10,5 +10,7 @@
     </root>
 
     <logger name="org.testcontainers" level="INFO"/>
-    <logger name="com.github.dockerjava" level="WARN"/>
+    <logger name="com.learning.mfscreener" level="DEBUG"/>
+    <logger name="net.ttddyy.dsproxy.listener" level="DEBUG"/>
+    <logger name="org.springframework" level="INFO"/>
 </configuration>

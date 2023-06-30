@@ -1,5 +1,6 @@
 package com.learning.mfscreener.config;
 
+import com.learning.mfscreener.exception.NavNotFoundException;
 import com.learning.mfscreener.exception.SchemeNotFoundException;
 import java.util.Comparator;
 import java.util.List;
@@ -42,6 +43,15 @@ public class GlobalExceptionHandler {
     ProblemDetail onException(SchemeNotFoundException schemeNotFoundException) {
         ProblemDetail problemDetail =
                 ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(404), schemeNotFoundException.getMessage());
+        problemDetail.setTitle("Scheme NotFound");
+        return problemDetail;
+    }
+
+    @ExceptionHandler(NavNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    ProblemDetail onException(NavNotFoundException navNotFoundException) {
+        ProblemDetail problemDetail =
+                ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(404), navNotFoundException.getMessage());
         problemDetail.setTitle("Scheme NotFound");
         return problemDetail;
     }

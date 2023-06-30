@@ -45,8 +45,33 @@ public class NavService {
         return getNavByDate(schemeCode, adjustedDate);
     }
 
-    MFSchemeDTO getNavByDate(Long schemeCode, LocalDate navDate) {
-        log.info("Fetching Nav for AMFISchemeCode : {} for date : {} from Database", schemeCode, navDate);
+    @Loggable
+    public MFSchemeDTO getNavByDate(Long schemeCode, LocalDate navDate) {
+        log.info("Fetching Nav for AMFISchemeCode: {} for date: {} from Database", schemeCode, navDate);
+        MFSchemeDTO mfSchemeDTO;
+        int retryCount = 0;
+
+        while (true) {
+            try {
+                mfSchemeDTO = getNavForDate(schemeCode, navDate);
+                break; // Exit the loop if successful
+            } catch (NavNotFoundException navNotFoundException) {
+                log.error("NavNotFoundException occurred: {}", navNotFoundException.getMessage());
+
+                if (retryCount >= 4) {
+                    throw navNotFoundException;
+                }
+
+                retryCount++;
+                navDate = navNotFoundException.getDate().minusDays(1);
+                log.info("Retrying for date: {} for scheme: {}", navDate, schemeCode);
+            }
+        }
+
+        return mfSchemeDTO;
+    }
+
+    MFSchemeDTO getNavForDate(Long schemeCode, LocalDate navDate) {
         return this.mfSchemesRepository
                 .findBySchemeIdAndMfSchemeNavEntities_NavDate(schemeCode, navDate)
                 .map(conversionServiceAdapter::mapMFSchemeEntityToMFSchemeDTO)
@@ -60,6 +85,6 @@ public class NavService {
         return this.mfSchemesRepository
                 .findBySchemeIdAndMfSchemeNavEntities_NavDate(schemeCode, navDate)
                 .map(conversionServiceAdapter::mapMFSchemeEntityToMFSchemeDTO)
-                .orElseThrow(() -> new NavNotFoundException("Nav Not Found for given Date"));
+                .orElseThrow(() -> new NavNotFoundException("Nav Not Found for schemeCode - " + schemeCode, navDate));
     }
 }

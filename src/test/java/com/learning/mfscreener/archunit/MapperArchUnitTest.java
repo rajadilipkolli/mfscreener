@@ -3,6 +3,7 @@ package com.learning.mfscreener.archunit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.learning.mfscreener.mapper.CasDetailsMapper;
 import com.learning.mfscreener.mapper.MfSchemeDtoToEntityMapper;
 import com.learning.mfscreener.mapper.MfSchemeEntityToDtoMapper;
 import com.learning.mfscreener.mapper.NavDataToMFSchemeNavMapper;
@@ -22,7 +23,10 @@ class MapperArchUnitTest {
                         .count();
 
         final List<Object> mappers = List.of(
-                MfSchemeDtoToEntityMapper.class, MfSchemeEntityToDtoMapper.class, NavDataToMFSchemeNavMapper.class);
+                MfSchemeDtoToEntityMapper.class,
+                MfSchemeEntityToDtoMapper.class,
+                NavDataToMFSchemeNavMapper.class,
+                CasDetailsMapper.class);
 
         assertThat(mappers)
                 .withFailMessage("Scanned number of mappers doesn't match the provided amount")

@@ -39,3 +39,6 @@ out/
 ### Misc ###
 *.log
 .DS_Store
+mf.pdf
+pdf_parsed.json
+/logs/
