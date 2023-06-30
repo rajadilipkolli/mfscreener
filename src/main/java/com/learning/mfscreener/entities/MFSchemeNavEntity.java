@@ -7,20 +7,26 @@ import java.time.LocalDate;
 import lombok.Getter;
 import lombok.Setter;
 
-@Table(name = "mf_scheme_nav")
+@Table(
+        name = "mf_scheme_nav",
+        uniqueConstraints = {
+            @UniqueConstraint(
+                    name = "uc_mf_scheme_nav",
+                    columnNames = {"nav", "nav_date", "mf_scheme_id"})
+        })
 @Entity
 @Getter
 @Setter
 public class MFSchemeNavEntity extends AuditableEntity<String> implements Serializable {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "scheme_id_generator")
-    @SequenceGenerator(name = "scheme_id_generator", sequenceName = "scheme_id_seq", allocationSize = 100)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     @Column(name = "id", nullable = false)
     private Long id;
 
     private Double nav;
 
+    @Column(name = "nav_date")
     private LocalDate navDate;
 
     @ManyToOne(fetch = FetchType.LAZY)

@@ -13,6 +13,7 @@
         <createSequence incrementBy="100" sequenceName="scheme_id_seq" startValue="1"/>
         <createSequence incrementBy="2" sequenceName="scheme_type_id_seq" startValue="1"/>
         <createSequence incrementBy="50" sequenceName="error_message_seq" startValue="1"/>
+        <createSequence sequenceName="mf_scheme_nav_seq" incrementBy="50" startValue="1"/>
     </changeSet>
 
     <changeSet id="create_tables" author="rajad (generated)">
@@ -35,7 +36,7 @@
         </createTable>
 
         <createTable tableName="mf_scheme_nav">
-            <column name="id" type="BIGINT">
+            <column name="id" type="BIGINT" defaultValueSequenceNext="mf_scheme_nav_seq">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="pk_mf_scheme_nav"/>
             </column>
             <column name="nav" type="float(4)"/>
@@ -88,6 +89,9 @@
                 columnNames="scheme_type, scheme_category"
                 constraintName="UK_MF_SCHEME_CATEGORY_MF_SCHEME_TYPE"
                 tableName="mf_scheme_types"/>
+
+        <addUniqueConstraint tableName="mf_scheme_nav" columnNames="nav, nav_date, mf_scheme_id"
+                             constraintName="uc_mf_scheme_nav"/>
     </changeSet>
 
 </databaseChangeLog>
