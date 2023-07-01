@@ -37,7 +37,7 @@ public class SchemeService {
 
     @Loggable
     @Transactional
-    void fetchSchemeDetails(Long schemeCode) {
+    public void fetchSchemeDetails(Long schemeCode) {
         log.info("Fetching SchemeDetails for AMFISchemeCode :{} ", schemeCode);
         URI uri = UriComponentsBuilder.fromHttpUrl(AppConstants.MFAPI_WEBSITE_BASE_URL + schemeCode)
                 .build()
