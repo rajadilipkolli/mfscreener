@@ -11,3 +11,8 @@ vscode:
     - GabrielBB.vscode-lombok
     - richardwillis.vscode-gradle
     - Pivotal.vscode-spring-boot
+
+ports:
+  - port: 8080
+    visibility: public
+    onOpen: open-browser
