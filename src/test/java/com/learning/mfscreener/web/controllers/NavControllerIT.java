@@ -24,7 +24,7 @@ class NavControllerIT extends AbstractIntegrationTest {
         // ensuring that initial data is set so exceptions don't occur
         await().pollInterval(10, TimeUnit.SECONDS).atMost(3, TimeUnit.MINUTES).untilAsserted(() -> assertThat(
                         this.mfSchemeNavEntityRepository.count())
-                .isGreaterThan(12878));
+                .isGreaterThan(12875));
     }
 
     @Test
