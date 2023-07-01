@@ -61,10 +61,12 @@ public class SchemeService {
                     .map(navDataDTO -> navDataDTO.setSchemeId(schemeCode))
                     .map(conversionServiceAdapter::mapNAVDataDTOToMFSchemeNavEntity)
                     .toList();
-
+            log.info("No of entries from Server :{}", navList.size());
             List<MFSchemeNavEntity> newNavs = navList.stream()
                     .filter(nav -> !mfSchemeEntity.getMfSchemeNavEntities().contains(nav))
                     .toList();
+
+            log.info("No of entities to insert :{}", newNavs.size());
 
             if (!newNavs.isEmpty()) {
                 for (MFSchemeNavEntity newSchemeNav : newNavs) {
