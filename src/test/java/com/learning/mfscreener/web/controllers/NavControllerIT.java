@@ -1,5 +1,7 @@
 package com.learning.mfscreener.web.controllers;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -8,10 +10,22 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.learning.mfscreener.common.AbstractIntegrationTest;
+import java.util.concurrent.TimeUnit;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.springframework.http.MediaType;
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class NavControllerIT extends AbstractIntegrationTest {
+
+    @BeforeAll
+    void setUp() {
+        // ensuring that initial data is set so exceptions don't occur
+        await().pollInterval(10, TimeUnit.SECONDS).atMost(3, TimeUnit.MINUTES).untilAsserted(() -> assertThat(
+                        this.mfSchemeNavEntityRepository.count())
+                .isGreaterThan(12878));
+    }
 
     @Test
     void shouldThrowExceptionWhenSchemeNotFound() throws Exception {

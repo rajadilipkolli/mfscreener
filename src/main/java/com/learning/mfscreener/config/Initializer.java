@@ -73,7 +73,7 @@ public class Initializer implements CommandLineRunner {
             stopWatch.start("saving fundNames");
             List<MFSchemeEntity> list = new ArrayList<>();
             List<Long> schemeCodesList = mfSchemesRepository.findAllSchemeIds();
-            chopArrayList.removeIf(s -> schemeCodesList.contains(Long.valueOf(s.schemeCode())));
+            chopArrayList.removeIf(s -> schemeCodesList.contains(s.schemeCode()));
             chopArrayList.forEach(scheme -> {
                 MFSchemeEntity mfSchemeEntity = conversionServiceAdapter.mapMFSchemeDTOToMFSchemeEntity(scheme);
                 list.add(mfSchemeEntity);

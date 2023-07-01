@@ -7,6 +7,7 @@ import java.time.LocalDate;
 import java.util.Objects;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.proxy.HibernateProxy;
 
 @Table(
         name = "mf_scheme_nav",
@@ -35,17 +36,26 @@ public class MFSchemeNavEntity extends AuditableEntity<String> implements Serial
     private MFSchemeEntity mfSchemeEntity;
 
     @Override
-    public boolean equals(Object o) {
+    public final boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof MFSchemeNavEntity)) return false;
-        return nav.equals(((MFSchemeNavEntity) o).getNav())
-                && navDate.toString()
-                        .equals(((MFSchemeNavEntity) o).getNavDate().toString())
-                && Objects.equals(mfSchemeEntity.getSchemeId(), ((MFSchemeNavEntity) o).mfSchemeEntity.getSchemeId());
+        if (o == null) return false;
+        Class<?> oEffectiveClass = o instanceof HibernateProxy
+                ? ((HibernateProxy) o).getHibernateLazyInitializer().getPersistentClass()
+                : o.getClass();
+        Class<?> thisEffectiveClass = this instanceof HibernateProxy
+                ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass()
+                : this.getClass();
+        if (thisEffectiveClass != oEffectiveClass) return false;
+        MFSchemeNavEntity that = (MFSchemeNavEntity) o;
+        return Objects.equals(getNav(), that.getNav())
+                && Objects.equals(
+                        getMfSchemeEntity().getSchemeId(),
+                        that.getMfSchemeEntity().getSchemeId())
+                && Objects.equals(getNavDate(), that.getNavDate());
     }
 
     @Override
-    public int hashCode() {
+    public final int hashCode() {
         return getClass().hashCode();
     }
 }
