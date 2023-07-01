@@ -3,7 +3,6 @@ package com.learning.mfscreener.mapper;
 
 import com.learning.mfscreener.entities.MFSchemeNavEntity;
 import com.learning.mfscreener.models.NAVDataDTO;
-import com.learning.mfscreener.utils.AppConstants;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.springframework.core.convert.converter.Converter;
@@ -17,7 +16,7 @@ public interface NavDataToMFSchemeNavMapper extends Converter<NAVDataDTO, MFSche
     @Mapping(target = "lastModifiedBy", ignore = true)
     @Mapping(target = "createdDate", ignore = true)
     @Mapping(target = "createdBy", ignore = true)
-    @Mapping(target = "navDate", source = "date", dateFormat = AppConstants.DATE_PATTERN_DD_MM_YYYY)
+    @Mapping(target = "navDate", source = "date")
     @Mapping(source = "schemeId", target = "mfSchemeEntity.schemeId")
     @Override
     MFSchemeNavEntity convert(NAVDataDTO navDataDTO);

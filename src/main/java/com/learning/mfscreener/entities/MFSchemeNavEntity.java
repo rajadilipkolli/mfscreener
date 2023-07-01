@@ -39,7 +39,8 @@ public class MFSchemeNavEntity extends AuditableEntity<String> implements Serial
         if (this == o) return true;
         if (!(o instanceof MFSchemeNavEntity)) return false;
         return nav.equals(((MFSchemeNavEntity) o).getNav())
-                && navDate.equals(((MFSchemeNavEntity) o).getNavDate())
+                && navDate.toString()
+                        .equals(((MFSchemeNavEntity) o).getNavDate().toString())
                 && Objects.equals(mfSchemeEntity.getSchemeId(), ((MFSchemeNavEntity) o).mfSchemeEntity.getSchemeId());
     }
 
