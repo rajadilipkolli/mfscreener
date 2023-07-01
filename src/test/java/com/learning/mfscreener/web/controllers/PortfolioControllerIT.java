@@ -67,7 +67,7 @@ class PortfolioControllerIT extends AbstractIntegrationTest {
                 .perform(get("/api/portfolio/{pan}", "ABCDE1234F")
                         .param("date", LocalDate.now().plusDays(10).toString())
                         .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNotFound())
+                .andExpect(status().isBadRequest())
                 .andExpect(header().string("Content-Type", is("application/problem+json")))
                 .andExpect(jsonPath("$.type", is("about:blank")))
                 .andExpect(jsonPath("$.title", is("Constraint Violation")))
