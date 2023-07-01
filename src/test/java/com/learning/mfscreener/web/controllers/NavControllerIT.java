@@ -1,7 +1,5 @@
 package com.learning.mfscreener.web.controllers;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -10,25 +8,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.learning.mfscreener.common.AbstractIntegrationTest;
-import java.util.concurrent.TimeUnit;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.*;
 import org.springframework.http.MediaType;
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@TestMethodOrder(value = MethodOrderer.class)
 class NavControllerIT extends AbstractIntegrationTest {
 
-    @BeforeAll
-    void setUp() {
-        // ensuring that initial data is set so exceptions don't occur
-        await().pollInterval(10, TimeUnit.SECONDS).atMost(3, TimeUnit.MINUTES).untilAsserted(() -> assertThat(
-                        this.mfSchemeNavEntityRepository.count())
-                .isGreaterThan(12875));
-    }
-
     @Test
+    @Order(1)
     void shouldThrowExceptionWhenSchemeNotFound() throws Exception {
         this.mockMvc
                 .perform(get("/api/nav/{schemeCode}", 1).accept(MediaType.APPLICATION_JSON))
@@ -42,6 +29,7 @@ class NavControllerIT extends AbstractIntegrationTest {
     }
 
     @Test
+    @Order(2)
     void shouldLoadDataWhenSchemeFound() throws Exception {
         this.mockMvc
                 .perform(get("/api/nav/{schemeCode}", 120503L).accept(MediaType.APPLICATION_JSON))
@@ -55,7 +43,7 @@ class NavControllerIT extends AbstractIntegrationTest {
     }
 
     @Test
-    @Disabled
+    @Order(3)
     void shouldLoadDataWhenSchemeFoundAndLoadHistoricalData() throws Exception {
         this.mockMvc
                 .perform(get("/api/nav/{schemeCode}/{date}", 120503L, "2022-12-20")
@@ -70,6 +58,7 @@ class NavControllerIT extends AbstractIntegrationTest {
     }
 
     @Test
+    @Order(4)
     void shouldNotLoadDataWhenSchemeFoundAndLoadHistoricalDataNotFound() throws Exception {
         this.mockMvc
                 .perform(get("/api/nav/{schemeCode}/{date}", 151113, "2022-10-20")
