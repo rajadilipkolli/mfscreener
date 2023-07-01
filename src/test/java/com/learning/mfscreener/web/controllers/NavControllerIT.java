@@ -52,4 +52,18 @@ class NavControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.nav", is("73.6085")))
                 .andExpect(jsonPath("$.date", is("2022-12-20")));
     }
+
+    @Test
+    void shouldNotLoadDataWhenSchemeFoundAndLoadHistoricalDataNotFound() throws Exception {
+        this.mockMvc
+                .perform(get("/api/nav/{schemeCode}/{date}", 151113, "2022-10-20")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andExpect(header().string("Content-Type", is("application/problem+json")))
+                .andExpect(jsonPath("$.type", is("about:blank")))
+                .andExpect(jsonPath("$.title", is("Scheme NotFound")))
+                .andExpect(jsonPath("$.status", is(404)))
+                .andExpect(jsonPath("$.detail", is("Nav Not Found for schemeCode - 151113 on 2022-10-16")))
+                .andExpect(jsonPath("$.instance", is("/api/nav/151113/2022-10-20")));
+    }
 }
