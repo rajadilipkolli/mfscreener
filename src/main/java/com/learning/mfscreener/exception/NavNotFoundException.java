@@ -7,7 +7,7 @@ import lombok.Getter;
 public class NavNotFoundException extends RuntimeException {
 
     @Getter
-    private LocalDate date;
+    private final LocalDate date;
 
     public NavNotFoundException(String message, LocalDate date) {
         super(message + " on " + date.toString());
