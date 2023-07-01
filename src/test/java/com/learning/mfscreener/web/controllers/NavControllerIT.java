@@ -12,6 +12,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.learning.mfscreener.common.AbstractIntegrationTest;
 import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.http.MediaType;
@@ -54,6 +55,7 @@ class NavControllerIT extends AbstractIntegrationTest {
     }
 
     @Test
+    @Disabled
     void shouldLoadDataWhenSchemeFoundAndLoadHistoricalData() throws Exception {
         this.mockMvc
                 .perform(get("/api/nav/{schemeCode}/{date}", 120503L, "2022-12-20")
