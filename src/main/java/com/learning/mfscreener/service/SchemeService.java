@@ -57,31 +57,36 @@ public class SchemeService {
     }
 
     void mergeList(NavResponse navResponse, MFSchemeEntity mfSchemeEntity, Long schemeCode) {
-        List<MFSchemeNavEntity> navList = navResponse.getData().stream()
-                .map(navDataDTO -> navDataDTO.setSchemeId(schemeCode))
-                .map(conversionServiceAdapter::mapNAVDataDTOToMFSchemeNavEntity)
-                .toList();
+        if (navResponse.getData().size()
+                != mfSchemeEntity.getMfSchemeNavEntities().size()) {
+            List<MFSchemeNavEntity> navList = navResponse.getData().stream()
+                    .map(navDataDTO -> navDataDTO.setSchemeId(schemeCode))
+                    .map(conversionServiceAdapter::mapNAVDataDTOToMFSchemeNavEntity)
+                    .toList();
 
-        List<MFSchemeNavEntity> newNavs = navList.stream()
-                .filter(nav -> !mfSchemeEntity.getMfSchemeNavEntities().contains(nav))
-                .toList();
+            List<MFSchemeNavEntity> newNavs = navList.stream()
+                    .filter(nav -> !mfSchemeEntity.getMfSchemeNavEntities().contains(nav))
+                    .toList();
 
-        if (!newNavs.isEmpty()) {
-            for (MFSchemeNavEntity newSchemeNav : newNavs) {
-                mfSchemeEntity.addSchemeNav(newSchemeNav);
+            if (!newNavs.isEmpty()) {
+                for (MFSchemeNavEntity newSchemeNav : newNavs) {
+                    mfSchemeEntity.addSchemeNav(newSchemeNav);
+                }
+                final MetaDTO meta = navResponse.getMeta();
+                MFSchemeTypeEntity mfschemeTypeEntity = this.mfSchemeTypeRepository
+                        .findBySchemeCategoryAndSchemeType(meta.schemeCategory(), meta.schemeType())
+                        .orElseGet(() -> {
+                            MFSchemeTypeEntity entity = new MFSchemeTypeEntity();
+                            entity.setSchemeType(meta.schemeType());
+                            entity.setSchemeCategory(meta.schemeCategory());
+                            return this.mfSchemeTypeRepository.save(entity);
+                        });
+                mfSchemeEntity.setFundHouse(meta.fundHouse());
+                mfschemeTypeEntity.addMFScheme(mfSchemeEntity);
+                this.mfSchemesRepository.save(mfSchemeEntity);
             }
-            final MetaDTO meta = navResponse.getMeta();
-            MFSchemeTypeEntity mfschemeTypeEntity = this.mfSchemeTypeRepository
-                    .findBySchemeCategoryAndSchemeType(meta.schemeCategory(), meta.schemeType())
-                    .orElseGet(() -> {
-                        MFSchemeTypeEntity entity = new MFSchemeTypeEntity();
-                        entity.setSchemeType(meta.schemeType());
-                        entity.setSchemeCategory(meta.schemeCategory());
-                        return this.mfSchemeTypeRepository.save(entity);
-                    });
-            mfSchemeEntity.setFundHouse(meta.fundHouse());
-            mfschemeTypeEntity.addMFScheme(mfSchemeEntity);
-            this.mfSchemesRepository.save(mfSchemeEntity);
+        } else {
+            log.info("data in db and from service is same hence ignoring");
         }
     }
 
