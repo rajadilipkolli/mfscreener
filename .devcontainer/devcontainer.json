@@ -17,7 +17,9 @@
 	"customizations": {
 		"vscode": {
 			"extensions": [
-				"vscjava.vscode-gradle"
+				"vscjava.vscode-gradle",
+				"vscjava.vscode-java-pack",
+				"vmware.vscode-boot-dev-pack"
 			]
 		}
 	}

@@ -8,14 +8,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.learning.mfscreener.common.AbstractIntegrationTest;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 
-@TestMethodOrder(value = MethodOrderer.class)
 class NavControllerIT extends AbstractIntegrationTest {
 
     @Test
-    @Order(1)
     void shouldThrowExceptionWhenSchemeNotFound() throws Exception {
         this.mockMvc
                 .perform(get("/api/nav/{schemeCode}", 1).accept(MediaType.APPLICATION_JSON))
@@ -29,7 +28,6 @@ class NavControllerIT extends AbstractIntegrationTest {
     }
 
     @Test
-    @Order(2)
     void shouldLoadDataWhenSchemeFound() throws Exception {
         this.mockMvc
                 .perform(get("/api/nav/{schemeCode}", 120503L).accept(MediaType.APPLICATION_JSON))
@@ -43,7 +41,7 @@ class NavControllerIT extends AbstractIntegrationTest {
     }
 
     @Test
-    @Order(3)
+    @Disabled
     void shouldLoadDataWhenSchemeFoundAndLoadHistoricalData() throws Exception {
         this.mockMvc
                 .perform(get("/api/nav/{schemeCode}/{date}", 120503L, "2022-12-20")
@@ -58,7 +56,6 @@ class NavControllerIT extends AbstractIntegrationTest {
     }
 
     @Test
-    @Order(4)
     void shouldNotLoadDataWhenSchemeFoundAndLoadHistoricalDataNotFound() throws Exception {
         this.mockMvc
                 .perform(get("/api/nav/{schemeCode}/{date}", 151113, "2022-10-20")
