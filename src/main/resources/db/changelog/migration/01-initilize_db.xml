@@ -10,9 +10,7 @@
     <property name="string.type" value="text" dbms="postgresql"/>
 
     <changeSet id="create_sequences" author="rajad (generated)">
-        <createSequence incrementBy="100" sequenceName="scheme_id_seq" startValue="1"/>
         <createSequence incrementBy="2" sequenceName="scheme_type_id_seq" startValue="1"/>
-        <createSequence incrementBy="50" sequenceName="error_message_seq" startValue="1"/>
         <createSequence sequenceName="mf_scheme_nav_seq" incrementBy="50" startValue="1"/>
     </changeSet>
 
@@ -64,16 +62,6 @@
             <column name="last_modified_date" type="DATETIME"/>
         </createTable>
 
-        <createTable tableName="error_message">
-            <column name="error_id" type="BIGINT" defaultValueSequenceNext="error_message_seq">
-                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_errormessage"/>
-            </column>
-            <column name="message" type="${string.type}"/>
-            <column name="created_by" type="${string.type}"/>
-            <column name="created_date" type="timestamp"/>
-            <column name="last_modified_by" type="${string.type}"/>
-            <column name="last_modified_date" type="timestamp"/>
-        </createTable>
     </changeSet>
 
     <changeSet id="add_Indexes" author="rajad (generated)">
