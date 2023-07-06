@@ -2,7 +2,7 @@
 image: gitpod/workspace-java-17
 
 tasks:
-  - init: ./gradlew build
+  - init: ./gradlew build -x test
 
 vscode:
   extensions:
