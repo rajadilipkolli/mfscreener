@@ -7,7 +7,7 @@ public interface PortfolioDetailsProjection {
 
     String getFolioNumber();
 
-    Float getBalanceUnits();
+    Double getBalanceUnits();
 
     Long getSchemeId();
 }

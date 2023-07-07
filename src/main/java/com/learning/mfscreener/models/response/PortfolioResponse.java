@@ -5,5 +5,5 @@ import com.learning.mfscreener.models.PortfolioDetailsDTO;
 import java.io.Serializable;
 import java.util.List;
 
-public record PortfolioResponse(Float totalPortfolioValue, List<PortfolioDetailsDTO> portfolioDetailsDTOS)
+public record PortfolioResponse(Double totalPortfolioValue, List<PortfolioDetailsDTO> portfolioDetailsDTOS)
         implements Serializable {}

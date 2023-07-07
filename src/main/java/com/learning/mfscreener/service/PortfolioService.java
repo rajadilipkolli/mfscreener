@@ -43,7 +43,7 @@ public class PortfolioService {
                         .map(portfolioDetails -> CompletableFuture.supplyAsync(() -> {
                             MFSchemeDTO scheme = navService.getNavByDateWithRetry(
                                     portfolioDetails.getSchemeId(), LocalDateUtility.getAdjustedDate(asOfDate));
-                            float totalValue = portfolioDetails.getBalanceUnits() * Float.parseFloat(scheme.nav());
+                            Double totalValue = portfolioDetails.getBalanceUnits() * Double.parseDouble(scheme.nav());
 
                             return new PortfolioDetailsDTO(
                                     totalValue,
@@ -59,7 +59,7 @@ public class PortfolioService {
         return new PortfolioResponse(
                 portfolioDetailsDTOS.stream()
                         .map(PortfolioDetailsDTO::totalValue)
-                        .reduce(0f, Float::sum),
+                        .reduce(0D, Double::sum),
                 portfolioDetailsDTOS);
     }
 }

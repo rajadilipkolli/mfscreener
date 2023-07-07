@@ -3,5 +3,5 @@ package com.learning.mfscreener.models;
 
 import java.io.Serializable;
 
-public record PortfolioDetailsDTO(Float totalValue, String schemeName, String folioNumber, String date)
+public record PortfolioDetailsDTO(Double totalValue, String schemeName, String folioNumber, String date)
         implements Serializable {}
