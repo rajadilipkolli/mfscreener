@@ -25,16 +25,16 @@ scrape_configs:
     # metrics_path defaults to '/metrics'
     # scheme defaults to 'http'.
     static_configs:
-    - targets: ['localhost:9090', 'host.docker.internal:9090']
+    - targets: ['host.docker.internal:9090', 'localhost:9090', 'prometheus:9090']
       labels:
         application: 'prometheus'
 
-  - job_name: 'mfdcreener'
+  - job_name: 'mfscreener'
 
     metrics_path: '/actuator/prometheus'
     scrape_interval: 5s
     static_configs:
-    - targets: ['mfdcreener:8080', 'host.docker.internal:8080' ]
+    - targets: ['host.docker.internal:8080', 'mfscreener:8080', 'localhost:8080' ]
       labels:
-        application: 'mfdcreener'
+        application: 'mfscreener'
         
