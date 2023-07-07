@@ -21,15 +21,15 @@ public class NAVController implements NAVApi {
 
     @Override
     @GetMapping(path = "/{schemeCode}")
-    public ResponseEntity<MFSchemeDTO> getScheme(@PathVariable(value = "schemeCode") Long schemeCode) {
+    public ResponseEntity<MFSchemeDTO> getScheme(@PathVariable(name = "schemeCode") Long schemeCode) {
         return ResponseEntity.ok(navService.getNav(schemeCode));
     }
 
     @Override
     @GetMapping(path = "/{schemeCode}/{date}")
     public ResponseEntity<MFSchemeDTO> getSchemeNavOnDate(
-            @PathVariable Long schemeCode,
-            @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+            @PathVariable(name = "schemeCode") Long schemeCode,
+            @PathVariable(name = "date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
         return ResponseEntity.ok(navService.getNavOnDate(schemeCode, date));
     }
 }
