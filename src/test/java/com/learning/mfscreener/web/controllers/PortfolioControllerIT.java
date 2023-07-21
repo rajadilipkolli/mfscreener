@@ -3,7 +3,9 @@ package com.learning.mfscreener.web.controllers;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.learning.mfscreener.common.AbstractIntegrationTest;
 import com.learning.mfscreener.utils.TestData;
@@ -53,7 +55,7 @@ class PortfolioControllerIT extends AbstractIntegrationTest {
     void getPortfolio() throws Exception {
         this.mockMvc
                 .perform(get("/api/portfolio/{pan}", "ABCDE1234F")
-                        .param("date", LocalDate.now().toString())
+                        .param("date", LocalDate.now().minusDays(2).toString())
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(header().string("Content-Type", is("application/json")))

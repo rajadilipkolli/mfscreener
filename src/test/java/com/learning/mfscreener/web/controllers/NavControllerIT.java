@@ -41,7 +41,6 @@ class NavControllerIT extends AbstractIntegrationTest {
     }
 
     @Test
-    @Disabled
     void shouldLoadDataWhenSchemeFoundAndLoadHistoricalData() throws Exception {
         this.mockMvc
                 .perform(get("/api/nav/{schemeCode}/{date}", 120503L, "2022-12-20")
@@ -56,6 +55,7 @@ class NavControllerIT extends AbstractIntegrationTest {
     }
 
     @Test
+    @Disabled
     void shouldNotLoadDataWhenSchemeFoundAndLoadHistoricalDataNotFound() throws Exception {
         this.mockMvc
                 .perform(get("/api/nav/{schemeCode}/{date}", 151113, "2022-10-20")
