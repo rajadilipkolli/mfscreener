@@ -16,7 +16,7 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(get("/actuator").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$._links.size()", is(13)))
+                .andExpect(jsonPath("$._links.size()", is(12)))
                 .andExpect(jsonPath("$._links.self.href").value("http://localhost/actuator"))
                 .andExpect(jsonPath("$._links.health.href").value("http://localhost/actuator/health"))
                 .andExpect(jsonPath("$._links.health-path.href").value("http://localhost/actuator/health/{*path}"))
@@ -26,7 +26,6 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
                         .value("http://localhost/actuator/configprops/{prefix}"))
                 .andExpect(jsonPath("$._links.env.href").value("http://localhost/actuator/env"))
                 .andExpect(jsonPath("$._links.env-toMatch.href").value("http://localhost/actuator/env/{toMatch}"))
-                .andExpect(jsonPath("$._links.logfile.href").value("http://localhost/actuator/logfile"))
                 .andExpect(jsonPath("$._links.loggers.href").value("http://localhost/actuator/loggers"))
                 .andExpect(jsonPath("$._links.loggers-name.href").value("http://localhost/actuator/loggers/{name}"))
                 .andExpect(jsonPath("$._links.metrics.href").value("http://localhost/actuator/metrics"))
