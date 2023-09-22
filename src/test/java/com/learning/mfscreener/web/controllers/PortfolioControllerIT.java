@@ -21,7 +21,7 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 
-@TestMethodOrder(value = MethodOrderer.class)
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class PortfolioControllerIT extends AbstractIntegrationTest {
 
     @Test
