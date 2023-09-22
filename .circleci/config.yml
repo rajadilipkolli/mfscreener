@@ -13,9 +13,17 @@ jobs:
     executor: machine_executor_amd64
     steps:
       - checkout # Checkout your source code
+      - restore_cache:
+          keys:
+            - gradle-cache-v1-{{ checksum "build.gradle" }}
+            - gradle-cache-v1-
       - run:
           name: Run Gradle Integration Test
           command: ./gradlew integrationTest
+      - save_cache:
+          paths:
+            - ~/.gradle/caches
+          key: gradle-cache-v1-{{ checksum "build.gradle" }}
 workflows:
   gradle_test:
     jobs:
