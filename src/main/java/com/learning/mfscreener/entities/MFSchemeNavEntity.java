@@ -1,13 +1,6 @@
 /* Licensed under Apache-2.0 2021-2023. */
 package com.learning.mfscreener.entities;
 
-import java.io.Serializable;
-import java.time.LocalDate;
-import java.util.Objects;
-import lombok.Getter;
-import lombok.Setter;
-import org.hibernate.proxy.HibernateProxy;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -18,6 +11,12 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+import java.io.Serializable;
+import java.time.LocalDate;
+import java.util.Objects;
+import lombok.Getter;
+import lombok.Setter;
+import org.hibernate.proxy.HibernateProxy;
 
 @Table(
         name = "mf_scheme_nav",
