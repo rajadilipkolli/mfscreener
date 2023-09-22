@@ -37,6 +37,20 @@ services:
     networks:
       - mfscreener-network
 
+  zipkin-server:
+    image: openzipkin/zipkin
+    container_name: zipkin-server
+    extra_hosts: [ 'host.docker.internal:host-gateway' ]
+    deploy:
+      resources:
+        limits:
+          memory: 512m
+    expose:
+      - "9411"
+    ports:
+      - "9411:9411"
+    networks:
+      - mfscreener-network
 
 networks:
   mfscreener-network:

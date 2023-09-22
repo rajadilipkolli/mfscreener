@@ -1,13 +1,23 @@
-/* Licensed under Apache-2.0 2021-2022. */
+/* Licensed under Apache-2.0 2021-2023. */
 package com.learning.mfscreener.entities;
 
-import jakarta.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.Objects;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.proxy.HibernateProxy;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 
 @Table(
         name = "mf_scheme_nav",
@@ -26,7 +36,7 @@ public class MFSchemeNavEntity extends AuditableEntity<String> implements Serial
     @Column(name = "id", nullable = false)
     private Long id;
 
-    private Double nav;
+    private double nav;
 
     @Column(name = "nav_date")
     private LocalDate navDate;
@@ -56,6 +66,11 @@ public class MFSchemeNavEntity extends AuditableEntity<String> implements Serial
 
     @Override
     public final int hashCode() {
-        return getClass().hashCode();
+        return this instanceof HibernateProxy
+                ? ((HibernateProxy) this)
+                        .getHibernateLazyInitializer()
+                        .getPersistentClass()
+                        .hashCode()
+                : getClass().hashCode();
     }
 }

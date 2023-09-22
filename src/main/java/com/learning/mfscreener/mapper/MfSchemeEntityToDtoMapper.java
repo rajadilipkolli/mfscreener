@@ -1,8 +1,9 @@
-/* Licensed under Apache-2.0 2022. */
+/* Licensed under Apache-2.0 2022-2023. */
 package com.learning.mfscreener.mapper;
 
 import com.learning.mfscreener.entities.MFSchemeEntity;
 import com.learning.mfscreener.models.MFSchemeDTO;
+import java.time.LocalDate;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -22,12 +23,9 @@ public interface MfSchemeEntityToDtoMapper extends Converter<MFSchemeEntity, MFS
     @AfterMapping
     default MFSchemeDTO updateMFScheme(MFSchemeEntity mfSchemeEntity, @MappingTarget MFSchemeDTO mfSchemeDTO) {
         if (!mfSchemeEntity.getMfSchemeNavEntities().isEmpty()) {
-            var navDouble = mfSchemeEntity.getMfSchemeNavEntities().get(0).getNav();
-            var localDate = mfSchemeEntity.getMfSchemeNavEntities().get(0).getNavDate();
-            String nav = null;
-            if (null != navDouble) {
-                nav = String.valueOf(navDouble);
-            }
+            double navDouble = mfSchemeEntity.getMfSchemeNavEntities().get(0).getNav();
+            LocalDate localDate = mfSchemeEntity.getMfSchemeNavEntities().get(0).getNavDate();
+            String nav = String.valueOf(navDouble);
             String date = null;
             if (null != localDate) {
                 date = localDate.toString();

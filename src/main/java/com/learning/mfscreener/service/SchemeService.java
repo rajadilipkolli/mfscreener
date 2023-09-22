@@ -17,6 +17,8 @@ import java.util.List;
 import java.util.Locale;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.exception.ConstraintViolationException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -83,7 +85,11 @@ public class SchemeService {
                         });
                 mfSchemeEntity.setFundHouse(meta.fundHouse());
                 mfschemeTypeEntity.addMFScheme(mfSchemeEntity);
-                this.mfSchemesRepository.save(mfSchemeEntity);
+                try {
+                    this.mfSchemesRepository.save(mfSchemeEntity);
+                } catch (ConstraintViolationException | DataIntegrityViolationException exception) {
+                    log.error("ConstraintViolationException or DataIntegrityViolationException ", exception);
+                }
             }
         } else {
             log.info("data in db and from service is same hence ignoring");

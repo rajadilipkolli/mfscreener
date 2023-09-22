@@ -30,6 +30,4 @@ services:
 volumes:
   prometheus_data: {}
   grafana_data: {}
-  esdata1:
-    driver: local
 
