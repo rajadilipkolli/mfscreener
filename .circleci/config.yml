@@ -13,3 +13,7 @@ workflows:
     jobs:
       - gradle/test:
           executor: machine_executor_amd64
+  gradle_int_test:
+    jobs:
+      - gradle/integrationTest:
+          executor: machine_executor_amd64
