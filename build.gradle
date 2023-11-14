@@ -74,7 +74,7 @@ dependencies {
     testImplementation "org.awaitility:awaitility"
     testImplementation "org.testcontainers:junit-jupiter"
     testImplementation "org.testcontainers:postgresql"
-    testImplementation 'com.tngtech.archunit:archunit-junit5:1.1.0'
+    testImplementation 'com.tngtech.archunit:archunit-junit5:1.2.0'
     testAnnotationProcessor "org.projectlombok:lombok"
     // If you are using mapstruct in test code
     testAnnotationProcessor("org.mapstruct:mapstruct-processor:1.5.5.Final")
