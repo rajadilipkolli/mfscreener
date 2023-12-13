@@ -20,15 +20,13 @@ public class SchemeController implements SchemeApi {
 
     @Override
     @GetMapping(path = "/{schemeName}")
-    public ResponseEntity<List<FundDetailProjection>> fetchSchemes(
-            @PathVariable(name = "schemeName") String schemeName) {
+    public ResponseEntity<List<FundDetailProjection>> fetchSchemes(@PathVariable String schemeName) {
         return ResponseEntity.ok(schemeService.fetchSchemes(schemeName));
     }
 
     @Override
     @GetMapping(path = "/fund/{fundName}")
-    public ResponseEntity<List<FundDetailProjection>> fetchSchemesByFundName(
-            @PathVariable(name = "fundName") String fundName) {
+    public ResponseEntity<List<FundDetailProjection>> fetchSchemesByFundName(@PathVariable String fundName) {
         return ResponseEntity.ok(schemeService.fetchSchemesByFundName(fundName));
     }
 }

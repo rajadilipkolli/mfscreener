@@ -20,7 +20,7 @@ class SchemaValidationPostgresIntegrationTest {
     EntityManager entityManager;
 
     @Test
-    void testSchemaValidity() {
+    void schemaValidity() {
         assertThat(entityManager).isNotNull();
     }
 }

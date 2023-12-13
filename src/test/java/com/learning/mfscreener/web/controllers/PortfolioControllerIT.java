@@ -26,7 +26,7 @@ class PortfolioControllerIT extends AbstractIntegrationTest {
 
     @Test
     @Order(1)
-    void testUploadFile() throws Exception {
+    void uploadFile() throws Exception {
 
         File tempFile = File.createTempFile("file", ".json");
         FileWriter fileWriter = new FileWriter(tempFile);

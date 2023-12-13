@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test;
 class MapperArchUnitTest {
 
     @Test
-    void testMappers() {
+    void mappers() {
 
         // we have some built other ArchUnit-checks that make sure we can rely on this filter
         final long mapperCount = new ClassFileImporter()
