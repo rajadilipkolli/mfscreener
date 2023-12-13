@@ -29,7 +29,7 @@ public class EntityRulesTest {
             .beAnnotatedWith(Entity.class)
             .andShould()
             .beAnnotatedWith(Table.class)
-            .because(String.format(ANNOTATED_EXPLANATION, ENTITY_SUFFIX, "@Entity"));
+            .because(ANNOTATED_EXPLANATION.formatted(ENTITY_SUFFIX, "@Entity"));
 
     @ArchTest
     static final ArchRule CLASSES_SHOULD_END_WITH_NAME_RULE =

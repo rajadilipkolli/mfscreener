@@ -66,11 +66,8 @@ public class CustomConditions {
                 String getter = calculateGetterPrefix(field.reflect().getType().getName()) + capitalize(name);
 
                 if (!publicMethods.contains(getter)) {
-                    String message = String.format(
-                            GETTER_OR_SETTER_NOT_PRESENT_ERROR_MESSAGE,
-                            field.getName(),
-                            field.getOwner().getName(),
-                            GETTER_PREFIX);
+                    String message = GETTER_OR_SETTER_NOT_PRESENT_ERROR_MESSAGE.formatted(
+                            field.getName(), field.getOwner().getName(), GETTER_PREFIX);
                     events.add(SimpleConditionEvent.violated(field, message));
                 }
 
@@ -78,11 +75,8 @@ public class CustomConditions {
                     String setter = SETTER_PREFIX + capitalize(name);
 
                     if (!publicMethods.contains(setter)) {
-                        String message = String.format(
-                                GETTER_OR_SETTER_NOT_PRESENT_ERROR_MESSAGE,
-                                field.getName(),
-                                field.getOwner().getName(),
-                                SETTER_PREFIX);
+                        String message = GETTER_OR_SETTER_NOT_PRESENT_ERROR_MESSAGE.formatted(
+                                field.getName(), field.getOwner().getName(), SETTER_PREFIX);
                         events.add(SimpleConditionEvent.violated(field, message));
                     }
                 }
@@ -98,22 +92,18 @@ public class CustomConditions {
                 Optional<JavaMethod> equalsMethod = findPublicMethodFromClass(javaClass, EQUALS_METHOD);
                 Optional<JavaMethod> hashCodeMethod = findPublicMethodFromClass(javaClass, HASH_CODE_METHOD);
 
-                if (!equalsMethod.isPresent()) {
+                if (equalsMethod.isEmpty()) {
                     events.add(SimpleConditionEvent.violated(
                             javaClass,
-                            String.format(
-                                    EQUALS_OR_HASH_CODE_NOT_PRESENT_ERROR_MESSAGE,
-                                    EQUALS_METHOD,
-                                    javaClass.getName())));
+                            EQUALS_OR_HASH_CODE_NOT_PRESENT_ERROR_MESSAGE.formatted(
+                                    EQUALS_METHOD, javaClass.getName())));
                 }
 
-                if (!hashCodeMethod.isPresent()) {
+                if (hashCodeMethod.isEmpty()) {
                     events.add(SimpleConditionEvent.violated(
                             javaClass,
-                            String.format(
-                                    EQUALS_OR_HASH_CODE_NOT_PRESENT_ERROR_MESSAGE,
-                                    HASH_CODE_METHOD,
-                                    javaClass.getName())));
+                            EQUALS_OR_HASH_CODE_NOT_PRESENT_ERROR_MESSAGE.formatted(
+                                    HASH_CODE_METHOD, javaClass.getName())));
                 }
             }
         };
@@ -128,8 +118,7 @@ public class CustomConditions {
                         .filter(m -> m.getModifiers().contains(JavaModifier.STATIC))
                         .forEach(m -> SimpleConditionEvent.violated(
                                 javaClass,
-                                String.format(
-                                        "Static method %s in %s is not allowed", m.getName(), javaClass.getName())));
+                                "Static method %s in %s is not allowed".formatted(m.getName(), javaClass.getName())));
             }
         };
     }

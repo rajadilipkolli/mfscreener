@@ -36,7 +36,7 @@ class ServiceRulesTest {
             .doNotHaveSimpleName("package-info")
             .should()
             .beAnnotatedWith(Service.class)
-            .because(String.format(ANNOTATED_EXPLANATION, SERVICE_SUFFIX, "@Service"));
+            .because(ANNOTATED_EXPLANATION.formatted(SERVICE_SUFFIX, "@Service"));
 
     // Fields
     @ArchTest

@@ -44,7 +44,7 @@ class ControllerRulesTest {
             .beAnnotatedWith(RestController.class)
             .andShould()
             .notBeAnnotatedWith(Controller.class)
-            .because(String.format(ANNOTATED_EXPLANATION, CONTROLLER_SUFFIX, "@RestController")
+            .because(ANNOTATED_EXPLANATION.formatted(CONTROLLER_SUFFIX, "@RestController")
                     + ", and not with @Controller");
 
     // Fields
@@ -97,6 +97,9 @@ class ControllerRulesTest {
             .beAnnotatedWith(PatchMapping.class)
             .orShould()
             .beAnnotatedWith(PutMapping.class)
-            .because("Controller methods should be annotated only with valid options of REST"
-                    + " (POST, PUT, PATCH, GET, and DELETE)");
+            .because(
+                    """
+                    Controller methods should be annotated only with valid options of REST\
+                     (POST, PUT, PATCH, GET, and DELETE)\
+                    """);
 }

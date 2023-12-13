@@ -33,7 +33,7 @@ public class CommonRules {
                 .resideOutsideOfPackages(excludedPackages)
                 .should()
                 .beInterfaces()
-                .because(String.format("Resources should be interfaces in %s", packageName));
+                .because("Resources should be interfaces in %s".formatted(packageName));
     }
 
     static ArchRule componentAnnotationIsNotAllowedRule(String packageName) {
@@ -44,7 +44,7 @@ public class CommonRules {
                 .haveSimpleNameNotEndingWith("BeanDefinitions")
                 .should()
                 .notBeAnnotatedWith(Component.class)
-                .because(String.format("Component annotation is not allowed in %s", packageName));
+                .because("Component annotation is not allowed in %s".formatted(packageName));
     }
 
     static ArchRule springAnnotationsClassesAreNotAllowedRule(String... packageNames) {
@@ -65,9 +65,8 @@ public class CommonRules {
                 .notBeAnnotatedWith(Controller.class)
                 .andShould()
                 .notBeAnnotatedWith(RestController.class)
-                .because(String.format(
-                        "Classes in %s should not be annotated with Spring annotations",
-                        Arrays.toString(packageNames)));
+                .because("Classes in %s should not be annotated with Spring annotations"
+                        .formatted(Arrays.toString(packageNames)));
     }
 
     // Fields
@@ -94,7 +93,7 @@ public class CommonRules {
                 .resideInAPackage(packageName)
                 .should()
                 .notBePublic()
-                .because(String.format("Public fields are not allowed in %s", packageName));
+                .because("Public fields are not allowed in %s".formatted(packageName));
     }
 
     static ArchRule publicAndFinalFieldsAreNotAllowedRule(String... packageNames) {
@@ -107,8 +106,8 @@ public class CommonRules {
                 .notBeFinal()
                 .andShould()
                 .notBePublic()
-                .because(String.format(
-                        "Fields with public and final modifiers are not allowed in %s", Arrays.toString(packageNames)));
+                .because("Fields with public and final modifiers are not allowed in %s"
+                        .formatted(Arrays.toString(packageNames)));
     }
 
     static ArchRule fieldsShouldHaveGetterRule(String... packageNames) {
@@ -128,10 +127,12 @@ public class CommonRules {
                 .doNotHaveModifier(JavaModifier.SYNTHETIC)
                 .should()
                 .beFinal()
-                .because(String.format(
-                        "Private attributes should be instanced by constructor classes, or"
-                                + " it should be static in %s",
-                        packageName));
+                .because(
+                        ("""
+                Private attributes should be instanced by constructor classes, or\
+                 it should be static in %s\
+                """)
+                                .formatted(packageName));
     }
 
     // Constructors
@@ -145,7 +146,7 @@ public class CommonRules {
                 .areNotAnonymousClasses()
                 .should()
                 .bePublic()
-                .because(String.format("Public constructors are only allowed in %s", packageName));
+                .because("Public constructors are only allowed in %s".formatted(packageName));
     }
 
     // Methods
@@ -156,7 +157,7 @@ public class CommonRules {
                 .resideInAPackage(packageName)
                 .should()
                 .notBeAnnotatedWith(Bean.class)
-                .because(String.format("Bean methods are not allowed in %s", packageName));
+                .because("Bean methods are not allowed in %s".formatted(packageName));
     }
 
     static ArchRule privateMethodsAreNotAllowedRule(String packageName) {
@@ -168,7 +169,7 @@ public class CommonRules {
                 .haveNameNotEndingWith("InstanceSupplier")
                 .should()
                 .notBePrivate()
-                .because(String.format("Private methods are not allowed in %s", packageName));
+                .because("Private methods are not allowed in %s".formatted(packageName));
     }
 
     static ArchRule staticMethodsAreNotAllowedRule(String packageName) {
@@ -182,7 +183,7 @@ public class CommonRules {
                 .haveNameNotEndingWith("InstanceSupplier")
                 .should()
                 .notBeStatic()
-                .because(String.format("Static methods are not allowed in %s", packageName));
+                .because("Static methods are not allowed in %s".formatted(packageName));
     }
 
     static ArchRule methodsShouldBePublicRule(String... packageNames) {
@@ -202,6 +203,6 @@ public class CommonRules {
                 .resideInAPackage(packageName)
                 .should()
                 .beStatic()
-                .because(String.format("Static methods are only allowed in %s", packageName));
+                .because("Static methods are only allowed in %s".formatted(packageName));
     }
 }
