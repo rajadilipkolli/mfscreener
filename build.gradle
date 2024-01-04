@@ -64,7 +64,7 @@ dependencies {
     implementation ("org.mapstruct.extensions.spring:mapstruct-spring-annotations:1.1.1")
 
     annotationProcessor ("org.mapstruct:mapstruct-processor:1.5.5.Final")
-    annotationProcessor ("org.mapstruct.extensions.spring:mapstruct-spring-extensions:1.1.0")
+    annotationProcessor ("org.mapstruct.extensions.spring:mapstruct-spring-extensions:1.1.1")
 
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     
@@ -78,7 +78,7 @@ dependencies {
     testAnnotationProcessor "org.projectlombok:lombok"
     // If you are using mapstruct in test code
     testAnnotationProcessor("org.mapstruct:mapstruct-processor:1.5.5.Final")
-    testAnnotationProcessor("org.mapstruct.extensions.spring:mapstruct-spring-extensions:1.1.0")
+    testAnnotationProcessor("org.mapstruct.extensions.spring:mapstruct-spring-extensions:1.1.1")
 }
 
 dependencyManagement {
