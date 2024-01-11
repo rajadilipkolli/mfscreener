@@ -60,7 +60,7 @@ public class SchemeService {
         if (navResponse.getData().size()
                 != mfSchemeEntity.getMfSchemeNavEntities().size()) {
             List<MFSchemeNavEntity> navList = navResponse.getData().stream()
-                    .map(navDataDTO -> navDataDTO.setSchemeId(schemeCode))
+                    .map(navDataDTO -> navDataDTO.withSchemeId(schemeCode))
                     .map(conversionServiceAdapter::mapNAVDataDTOToMFSchemeNavEntity)
                     .toList();
             log.info("No of entries from Server :{}", navList.size());
