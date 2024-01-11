@@ -8,8 +8,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.learning.mfscreener.common.AbstractIntegrationTest;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 
 class NavControllerIT extends AbstractIntegrationTest {
@@ -19,7 +19,7 @@ class NavControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(get("/api/nav/{schemeCode}", 1).accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound())
-                .andExpect(header().string("Content-Type", is("application/problem+json")))
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                 .andExpect(jsonPath("$.type", is("about:blank")))
                 .andExpect(jsonPath("$.title", is("Scheme NotFound")))
                 .andExpect(jsonPath("$.status", is(404)))
@@ -32,7 +32,7 @@ class NavControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(get("/api/nav/{schemeCode}", 120503L).accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(header().string("Content-Type", is("application/json")))
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_JSON_VALUE)))
                 .andExpect(jsonPath("$.schemeCode", is(120503L), Long.class))
                 .andExpect(jsonPath("$.payout", is("INF846K01EW2")))
                 .andExpect(jsonPath("$.schemeName", is("Axis ELSS Tax Saver Fund - Direct Plan - Growth Option")))
@@ -46,7 +46,7 @@ class NavControllerIT extends AbstractIntegrationTest {
                 .perform(get("/api/nav/{schemeCode}/{date}", 120503L, "2022-12-20")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(header().string("Content-Type", is("application/json")))
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_JSON_VALUE)))
                 .andExpect(jsonPath("$.schemeCode", is(120503L), Long.class))
                 .andExpect(jsonPath("$.payout", is("INF846K01EW2")))
                 .andExpect(jsonPath("$.schemeName", is("Axis ELSS Tax Saver Fund - Direct Plan - Growth Option")))
@@ -55,13 +55,12 @@ class NavControllerIT extends AbstractIntegrationTest {
     }
 
     @Test
-    @Disabled
     void shouldNotLoadDataWhenSchemeFoundAndLoadHistoricalDataNotFound() throws Exception {
         this.mockMvc
                 .perform(get("/api/nav/{schemeCode}/{date}", 151113, "2022-10-20")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound())
-                .andExpect(header().string("Content-Type", is("application/problem+json")))
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                 .andExpect(jsonPath("$.type", is("about:blank")))
                 .andExpect(jsonPath("$.title", is("Scheme NotFound")))
                 .andExpect(jsonPath("$.status", is(404)))

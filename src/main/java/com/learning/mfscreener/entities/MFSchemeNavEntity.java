@@ -1,4 +1,4 @@
-/* Licensed under Apache-2.0 2021-2023. */
+/* Licensed under Apache-2.0 2021-2024. */
 package com.learning.mfscreener.entities;
 
 import jakarta.persistence.Column;
@@ -33,7 +33,7 @@ public class MFSchemeNavEntity extends AuditableEntity<String> implements Serial
     @Column(name = "id", nullable = false)
     private Long id;
 
-    private double nav;
+    private Float nav;
 
     @Column(name = "nav_date")
     private LocalDate navDate;

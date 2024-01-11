@@ -1,4 +1,4 @@
-/* Licensed under Apache-2.0 2021-2022. */
+/* Licensed under Apache-2.0 2021-2024. */
 package com.learning.mfscreener.mapper;
 
 import com.learning.mfscreener.entities.MFSchemeEntity;
@@ -34,7 +34,7 @@ public interface MfSchemeDtoToEntityMapper extends Converter<MFSchemeDTO, MFSche
     @AfterMapping
     default void updateMFScheme(MFSchemeDTO scheme, @MappingTarget MFSchemeEntity mfSchemeEntity) {
         MFSchemeNavEntity mfSchemenavEntity = new MFSchemeNavEntity();
-        mfSchemenavEntity.setNav("N.A.".equals(scheme.nav()) ? 0D : Double.parseDouble(scheme.nav()));
+        mfSchemenavEntity.setNav("N.A.".equals(scheme.nav()) ? 0F : Float.parseFloat(scheme.nav()));
         mfSchemenavEntity.setNavDate(LocalDate.parse(scheme.date(), DATE_FORMATTER));
         mfSchemeEntity.addSchemeNav(mfSchemenavEntity);
     }
