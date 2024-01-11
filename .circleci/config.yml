@@ -2,9 +2,12 @@ version: 2.1
 orbs:
   gradle: circleci/gradle@3.0.0
 executors:
+  jdk:
+    docker:
+      - image: 'cimg/openjdk:21.0.0'
   machine_executor_amd64:
     machine:
-      image: ubuntu-2404:current
+      image: ubuntu-2204:current
     environment:
       architecture: "amd64"
       platform: "linux/amd64"
