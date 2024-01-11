@@ -13,7 +13,7 @@ public interface MFSchemeTypeRepository extends JpaRepository<MFSchemeTypeEntity
 
     @Query(
             """
-            select o from MFSchemeTypeEntity o JOIN FETCH o.mfSchemeEntities ms
+            select o from MFSchemeTypeEntity o LEFT JOIN FETCH o.mfSchemeEntities ms
             where o.schemeCategory = :schemeCategory and o.schemeType = :schemeType
             """)
     @Transactional(readOnly = true)
