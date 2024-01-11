@@ -15,6 +15,9 @@ import org.springframework.transaction.annotation.Transactional;
 public interface MFSchemeRepository extends JpaRepository<MFSchemeEntity, Long> {
 
     @Transactional(readOnly = true)
+    Optional<MFSchemeEntity> findByPayOut(String payOut);
+
+    @Transactional(readOnly = true)
     @Query("select o.schemeId from MFSchemeEntity o")
     List<Long> findAllSchemeIds();
 

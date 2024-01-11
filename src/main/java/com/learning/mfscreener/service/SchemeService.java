@@ -5,16 +5,19 @@ import com.learning.mfscreener.config.logging.Loggable;
 import com.learning.mfscreener.entities.MFSchemeEntity;
 import com.learning.mfscreener.entities.MFSchemeNavEntity;
 import com.learning.mfscreener.entities.MFSchemeTypeEntity;
+import com.learning.mfscreener.entities.UserSchemeDetailsEntity;
 import com.learning.mfscreener.exception.SchemeNotFoundException;
 import com.learning.mfscreener.models.MetaDTO;
 import com.learning.mfscreener.models.projection.FundDetailProjection;
 import com.learning.mfscreener.models.response.NavResponse;
 import com.learning.mfscreener.repository.MFSchemeRepository;
 import com.learning.mfscreener.repository.MFSchemeTypeRepository;
+import com.learning.mfscreener.repository.UserSchemeDetailsEntityRepository;
 import com.learning.mfscreener.utils.AppConstants;
 import java.net.URI;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.exception.ConstraintViolationException;
@@ -23,6 +26,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -32,8 +36,9 @@ import org.springframework.web.util.UriComponentsBuilder;
 public class SchemeService {
 
     private final RestTemplate restTemplate;
-    private final MFSchemeRepository mfSchemesRepository;
+    private final MFSchemeRepository mfSchemeRepository;
     private final MFSchemeTypeRepository mfSchemeTypeRepository;
+    private final UserSchemeDetailsEntityRepository userSchemeDetailsEntityRepository;
     private final ConversionServiceAdapter conversionServiceAdapter;
 
     @Loggable
@@ -48,7 +53,7 @@ public class SchemeService {
         if (navResponseResponseEntity.getStatusCode().is2xxSuccessful()) {
             NavResponse entityBody = navResponseResponseEntity.getBody();
             Assert.notNull(entityBody, () -> "Body Can't be Null");
-            MFSchemeEntity mfSchemeEntity = mfSchemesRepository
+            MFSchemeEntity mfSchemeEntity = mfSchemeRepository
                     .findBySchemeId(schemeCode)
                     .orElseThrow(
                             () -> new SchemeNotFoundException("Fund with schemeCode " + schemeCode + " Not Found"));
@@ -86,7 +91,7 @@ public class SchemeService {
                 mfSchemeEntity.setFundHouse(meta.fundHouse());
                 mfschemeTypeEntity.addMFScheme(mfSchemeEntity);
                 try {
-                    this.mfSchemesRepository.save(mfSchemeEntity);
+                    this.mfSchemeRepository.save(mfSchemeEntity);
                 } catch (ConstraintViolationException | DataIntegrityViolationException exception) {
                     log.error("ConstraintViolationException or DataIntegrityViolationException ", exception);
                 }
@@ -100,13 +105,30 @@ public class SchemeService {
     public List<FundDetailProjection> fetchSchemes(String schemeName) {
         String sName = "%" + schemeName.toUpperCase(Locale.ROOT) + "%";
         log.info("Fetching schemes with :{}", sName);
-        return this.mfSchemesRepository.findBySchemeNameLikeIgnoreCaseOrderBySchemeIdAsc(sName);
+        return this.mfSchemeRepository.findBySchemeNameLikeIgnoreCaseOrderBySchemeIdAsc(sName);
     }
 
     @Loggable
     public List<FundDetailProjection> fetchSchemesByFundName(String fundName) {
         String fName = "%" + fundName.toUpperCase(Locale.ROOT) + "%";
         log.info("Fetching schemes available for fundHouse :{}", fName);
-        return this.mfSchemesRepository.findByFundHouseLikeIgnoringCaseOrderBySchemeIdAsc(fName);
+        return this.mfSchemeRepository.findByFundHouseLikeIgnoringCaseOrderBySchemeIdAsc(fName);
+    }
+
+    public void setAMFIIfNull() {
+        List<UserSchemeDetailsEntity> userSchemeDetailsEntities = userSchemeDetailsEntityRepository.findByAmfiIsNull();
+        userSchemeDetailsEntities.forEach(userSchemeDetailsEntity -> {
+            String scheme = userSchemeDetailsEntity.getScheme();
+            log.info("amfi is Null for scheme :{}", scheme);
+            // attempting to find ISIN
+            if (scheme.indexOf("ISIN:") != 0) {
+                String isin = scheme.substring(scheme.indexOf("ISIN:") + 5).strip();
+                if (StringUtils.hasText(isin)) {
+                    Optional<MFSchemeEntity> mfSchemeEntity = mfSchemeRepository.findByPayOut(isin);
+                    mfSchemeEntity.ifPresent(schemeEntity -> userSchemeDetailsEntityRepository.updateAmfiAndIsinById(
+                            schemeEntity.getSchemeId(), isin, userSchemeDetailsEntity.getId()));
+                }
+            }
+        });
     }
 }

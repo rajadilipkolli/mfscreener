@@ -25,13 +25,13 @@ public class PortfolioService {
     private final ConversionServiceAdapter conversionServiceAdapter;
     private final UserCASDetailsEntityRepository casDetailsEntityRepository;
     private final NavService navService;
+    private final SchemeService schemeService;
 
     public String upload(MultipartFile multipartFile) throws IOException {
         CasDTO casDTO = this.objectMapper.readValue(multipartFile.getBytes(), CasDTO.class);
-        UserCASDetailsEntity casDetailsEntity;
-        casDetailsEntity = this.conversionServiceAdapter.mapCasDTOToUserCASDetailsEntity(casDTO);
+        UserCASDetailsEntity casDetailsEntity = this.conversionServiceAdapter.mapCasDTOToUserCASDetailsEntity(casDTO);
         var persistedCasDetailsEntity = this.casDetailsEntityRepository.save(casDetailsEntity);
-
+        CompletableFuture.runAsync(schemeService::setAMFIIfNull);
         return "Uploaded with id " + persistedCasDetailsEntity.getId();
     }
 
