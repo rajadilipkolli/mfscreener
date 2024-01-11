@@ -13,10 +13,8 @@ import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import java.io.Serializable;
 import java.time.LocalDate;
-import java.util.Objects;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.proxy.HibernateProxy;
 
 @Table(
         name = "mf_scheme_nav",
@@ -46,27 +44,50 @@ public class MFSchemeNavEntity extends AuditableEntity<String> implements Serial
 
     @Override
     public final boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null) return false;
-        Class<?> oEffectiveClass = o instanceof HibernateProxy hp
-                ? hp.getHibernateLazyInitializer().getPersistentClass()
-                : o.getClass();
-        Class<?> thisEffectiveClass = this instanceof HibernateProxy hp
-                ? hp.getHibernateLazyInitializer().getPersistentClass()
-                : this.getClass();
-        if (thisEffectiveClass != oEffectiveClass) return false;
-        MFSchemeNavEntity that = (MFSchemeNavEntity) o;
-        return Objects.equals(getNav(), that.getNav())
-                && Objects.equals(
-                        getMfSchemeEntity().getSchemeId(),
-                        that.getMfSchemeEntity().getSchemeId())
-                && Objects.equals(getNavDate(), that.getNavDate());
+        if (o == this) {
+            return true;
+        } else if (!(o instanceof MFSchemeNavEntity other)) {
+            return false;
+        } else {
+            if (!other.canEqual(this)) {
+                return false;
+            } else if (Double.compare(this.getNav(), other.getNav()) != 0) {
+                return false;
+            } else {
+                Object this$navDate = this.getNavDate();
+                Object other$navDate = other.getNavDate();
+                if (this$navDate == null) {
+                    if (other$navDate != null) {
+                        return false;
+                    }
+                } else if (!this$navDate.equals(other$navDate)) {
+                    return false;
+                }
+                MFSchemeEntity this$mfSchemeEntity = this.getMfSchemeEntity();
+                MFSchemeEntity other$mfSchemeEntity = other.getMfSchemeEntity();
+                if (this$mfSchemeEntity == null) {
+                    return other$mfSchemeEntity == null;
+                } else {
+                    return this$mfSchemeEntity.getSchemeId().equals(other$mfSchemeEntity.getSchemeId());
+                }
+            }
+        }
+    }
+
+    private boolean canEqual(final Object other) {
+        return other instanceof MFSchemeNavEntity;
     }
 
     @Override
     public final int hashCode() {
-        return this instanceof HibernateProxy hp
-                ? hp.getHibernateLazyInitializer().getPersistentClass().hashCode()
-                : getClass().hashCode();
+        int result = 1;
+        long $nav = Double.doubleToLongBits(this.getNav());
+        result = result * 59 + (int) ($nav >>> 32 ^ $nav);
+        Object $navDate = this.getNavDate();
+        result = result * 59 + ($navDate == null ? 43 : $navDate.hashCode());
+        MFSchemeEntity $mfSchemeEntity = this.getMfSchemeEntity();
+        result = result * 59
+                + ($mfSchemeEntity == null ? 43 : $mfSchemeEntity.getSchemeId().hashCode());
+        return result;
     }
 }

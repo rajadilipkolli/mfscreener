@@ -4,14 +4,14 @@ import com.learning.mfscreener.config.logging.Loggable;
 import com.learning.mfscreener.models.MFSchemeDTO;
 import com.learning.mfscreener.models.projection.UserFolioDetailsProjection;
 import com.learning.mfscreener.models.projection.UserTransactionDetailsProjection;
+import com.learning.mfscreener.models.response.XIRRResponse;
 import com.learning.mfscreener.repository.UserFolioDetailsEntityRepository;
 import com.learning.mfscreener.repository.UserTransactionDetailsEntityRepository;
 import com.learning.mfscreener.utils.LocalDateUtility;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -37,14 +37,14 @@ public class CalculatorService {
     }
 
     // method to calculate the total XIRR for a given PAN number
-    public Map<Long, Double> calculateTotalXIRRByPan(String pan) {
+    public List<XIRRResponse> calculateTotalXIRRByPan(String pan) {
         // get the map of fund id and XIRR value for all funds
         // TODO : return schemeName as well
-        Map<Long, Double> xirrMap = calculateXIRRForAllFundsByPAN(pan);
+        List<XIRRResponse> xirrResponseList = calculateXIRRForAllFundsByPAN(pan);
         // initialize the total XIRR to zero
         //        double totalXirr = 0.0;
         //        // loop through the map
-        //        for (Map.Entry<Long, Double> entry : xirrMap.entrySet()) {
+        //        for (Map.Entry<Long, Double> entry : xirrResponseList.entrySet()) {
         //            // get the fund id and XIRR value
         //            Long fundId = entry.getKey();
         //            Double xirr = entry.getValue();
@@ -54,34 +54,36 @@ public class CalculatorService {
         //        }
         //        // return the total XIRR
         //        return totalXirr;
-        return xirrMap;
+        return xirrResponseList;
     }
 
     // method to calculate XIRR for all funds
-    Map<Long, Double> calculateXIRRForAllFundsByPAN(String pan) {
+    List<XIRRResponse> calculateXIRRForAllFundsByPAN(String pan) {
         // get all the funds
         List<UserFolioDetailsProjection> funds = userFolioDetailsEntityRepository.findByPan(pan);
         //        Iterable<Fund> funds = getFunds();
         // create a map to store the fund id and XIRR value
-        Map<Long, Double> xirrMap = new HashMap<>();
+        List<XIRRResponse> xirrResponseList = new ArrayList<>();
         // loop through the funds
         for (UserFolioDetailsProjection fund : funds) {
             // get the fund id
-            Long fundId = fund.getSchemeEntities().get(0).getAmfi();
-            if (fundId == null) {
+            Long amfiId = fund.getSchemeEntities().get(0).getAmfi();
+            if (amfiId == null) {
                 LOGGER.error("FundID not available for fund :{} hence skipping", fund);
                 continue;
             }
             // TODO calculate individually and at overall level as well
             Long schemeIdInDb = fund.getSchemeEntities().get(0).getId();
             // calculate the XIRR for the fund
-            Double xirr = calculateXIRR(fundId, schemeIdInDb);
-            LOGGER.debug("adding XIRR for schemeId : {}", fundId);
+            Double xirr = calculateXIRR(amfiId, schemeIdInDb);
+            LOGGER.debug("adding XIRR for schemeId : {}", amfiId);
+
             // put the fund id and XIRR value in the map
-            xirrMap.put(fundId, xirr * 100);
+            xirrResponseList.add(new XIRRResponse(
+                    fund.getFolio(), amfiId, fund.getSchemeEntities().get(0).getScheme(), xirr * 100));
         }
         // return the map
-        return xirrMap;
+        return xirrResponseList;
     }
 
     Double calculateXIRR(Long fundId, Long schemeIdInDb) {
@@ -136,7 +138,7 @@ public class CalculatorService {
     // method to implement Newton's method to find the root of the polynomial equation for XIRR
     double newtonsMethod(double guess, double[] payments, LocalDate[] days) {
         double x0 = guess;
-        double x1 = 0.0;
+        double x1;
         double err = 1e+100;
 
         while (err > TOLERANCE) {
