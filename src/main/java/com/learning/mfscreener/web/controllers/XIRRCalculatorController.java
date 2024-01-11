@@ -6,11 +6,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-public class CalculatorController {
+public class XIRRCalculatorController {
 
     private final CalculatorService calculatorService;
 
-    public CalculatorController(CalculatorService calculatorService) {
+    public XIRRCalculatorController(CalculatorService calculatorService) {
         this.calculatorService = calculatorService;
     }
 
