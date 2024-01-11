@@ -1,11 +1,11 @@
-/* Licensed under Apache-2.0 2021-2022. */
+/* Licensed under Apache-2.0 2021-2024. */
 package com.learning.mfscreener.models;
 
 import java.io.Serializable;
 
-public record MFSchemeDTO(Long schemeCode, String payout, String schemeName, String nav, String date)
+public record MFSchemeDTO(String amc, Long schemeCode, String payout, String schemeName, String nav, String date)
         implements Serializable {
     public MFSchemeDTO withNavAndDate(String navValue, String navDate) {
-        return new MFSchemeDTO(schemeCode(), payout(), schemeName(), navValue, navDate);
+        return new MFSchemeDTO(amc(), schemeCode(), payout(), schemeName(), navValue, navDate);
     }
 }

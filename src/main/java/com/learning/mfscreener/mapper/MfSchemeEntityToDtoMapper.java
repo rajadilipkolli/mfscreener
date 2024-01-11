@@ -17,6 +17,7 @@ public interface MfSchemeEntityToDtoMapper extends Converter<MFSchemeEntity, MFS
     @Mapping(target = "nav", ignore = true)
     @Mapping(target = "schemeCode", source = "schemeId")
     @Mapping(target = "payout", source = "payOut")
+    @Mapping(target = "amc", source = "fundHouse")
     @Override
     MFSchemeDTO convert(MFSchemeEntity mfSchemeEntity);
 

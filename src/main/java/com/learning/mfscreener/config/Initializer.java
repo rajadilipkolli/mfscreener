@@ -17,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StopWatch;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
 @Component
@@ -36,15 +37,17 @@ public class Initializer implements CommandLineRunner {
         String allNAVs = restTemplate.getForObject(AppConstants.AMFI_WEBSITE_LINK, String.class);
         Reader inputString = new StringReader(Objects.requireNonNull(allNAVs));
         try (BufferedReader br = new BufferedReader(inputString)) {
-            String fileRead = br.readLine();
+            String lineValue = br.readLine();
             for (int i = 0; i < 4; ++i) {
-                fileRead = br.readLine();
+                lineValue = br.readLine();
             }
-            while (fileRead != null) {
+            String amc = lineValue;
+            while (lineValue != null) {
                 int check = 0;
-                final String[] tokenize = fileRead.split(AppConstants.SEPARATOR);
+                final String[] tokenize = lineValue.split(AppConstants.SEPARATOR);
                 if (tokenize.length == 1) {
                     check = 1;
+                    amc = lineValue;
                 }
                 if (check == 0) {
                     final String schemecode = tokenize[0];
@@ -54,12 +57,12 @@ public class Initializer implements CommandLineRunner {
                     final String nav = tokenize[4];
                     final String date = tokenize[5];
                     final MFSchemeDTO tempObj =
-                            new MFSchemeDTO(Long.valueOf(schemecode), payout, schemename, nav, date);
+                            new MFSchemeDTO(amc, Long.valueOf(schemecode), payout, schemename, nav, date);
                     chopArrayList.add(tempObj);
                 }
-                fileRead = br.readLine();
-                if ("".equals(fileRead)) {
-                    fileRead = br.readLine();
+                lineValue = br.readLine();
+                if (!StringUtils.hasText(lineValue)) {
+                    lineValue = br.readLine();
                 }
             }
         }

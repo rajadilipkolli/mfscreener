@@ -26,7 +26,7 @@ public interface PortfolioApi {
             @Parameter(description = "Pan of the end User", name = "pan", in = ParameterIn.PATH, example = "ABCDE1234F")
                     String panNumber,
             @Parameter(
-                            description = "get portfolio value for given date",
+                            description = "get portfolio value for given date (yyyy-MM-dd) format",
                             in = ParameterIn.QUERY,
                             example = "2022-12-31",
                             required = true)

@@ -88,7 +88,8 @@ public class SchemeService {
                             entity.setSchemeCategory(meta.schemeCategory());
                             return this.mfSchemeTypeRepository.save(entity);
                         });
-                mfSchemeEntity.setFundHouse(meta.fundHouse());
+                // As fund house is set at initializing, removing from here
+                //                mfSchemeEntity.setFundHouse(meta.fundHouse());
                 mfschemeTypeEntity.addMFScheme(mfSchemeEntity);
                 try {
                     this.mfSchemeRepository.save(mfSchemeEntity);

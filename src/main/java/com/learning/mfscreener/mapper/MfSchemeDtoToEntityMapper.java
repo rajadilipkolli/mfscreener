@@ -22,7 +22,7 @@ public interface MfSchemeDtoToEntityMapper extends Converter<MFSchemeDTO, MFSche
     @Mapping(target = "schemeNameAlias", ignore = true)
     @Mapping(target = "lastModifiedDate", ignore = true)
     @Mapping(target = "lastModifiedBy", ignore = true)
-    @Mapping(target = "fundHouse", ignore = true)
+    @Mapping(target = "fundHouse", source = "amc")
     @Mapping(target = "createdDate", ignore = true)
     @Mapping(target = "createdBy", ignore = true)
     @Mapping(target = "payOut", source = "payout")
