@@ -60,7 +60,7 @@ public class MFSchemeNavEntity extends AuditableEntity<String> implements Serial
                 && Objects.equals(
                         getMfSchemeEntity().getSchemeId(),
                         that.getMfSchemeEntity().getSchemeId())
-                && Objects.equals(getNavDate(), that.getNavDate());
+                && Objects.deepEquals(getNavDate(), that.getNavDate());
     }
 
     @Override
