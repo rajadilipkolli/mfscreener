@@ -21,7 +21,7 @@ import org.springframework.stereotype.Service;
 public class CalculatorService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CalculatorService.class);
-    private static final double tol = 0.001; // tolerance for Newton's method
+    private static final double TOLERANCE = 0.001; // tolerance for Newton's method
 
     private final UserFolioDetailsEntityRepository userFolioDetailsEntityRepository;
     private final UserTransactionDetailsEntityRepository userTransactionDetailsEntityRepository;
@@ -58,7 +58,7 @@ public class CalculatorService {
     }
 
     // method to calculate XIRR for all funds
-    private Map<Long, Double> calculateXIRRForAllFundsByPAN(String pan) {
+    Map<Long, Double> calculateXIRRForAllFundsByPAN(String pan) {
         // get all the funds
         List<UserFolioDetailsProjection> funds = userFolioDetailsEntityRepository.findByPan(pan);
         //        Iterable<Fund> funds = getFunds();
@@ -84,7 +84,7 @@ public class CalculatorService {
         return xirrMap;
     }
 
-    private Double calculateXIRR(Long fundId, Long schemeIdInDb) {
+    Double calculateXIRR(Long fundId, Long schemeIdInDb) {
         LOGGER.debug("Calculating XIRR for fund ID : {} & schemeIdInDB :{}", fundId, schemeIdInDb);
         List<UserTransactionDetailsProjection> byUserSchemeDetailsEntityId =
                 userTransactionDetailsEntityRepository
@@ -108,7 +108,7 @@ public class CalculatorService {
     }
 
     // ensures that balance will never be null
-    private Double getBalance(List<UserTransactionDetailsProjection> byUserSchemeDetailsEntityId) {
+    Double getBalance(List<UserTransactionDetailsProjection> byUserSchemeDetailsEntityId) {
         Double balance = byUserSchemeDetailsEntityId.getLast().getBalance();
         if (balance == null) {
             LOGGER.debug("Balance units Not found hence, attempting for 2nd last row");
@@ -119,25 +119,25 @@ public class CalculatorService {
         return balance;
     }
 
-    private double getCurrentValuation(Long fundId, Double balance) {
+    double getCurrentValuation(Long fundId, Double balance) {
         MFSchemeDTO scheme =
                 navService.getNavByDateWithRetry(fundId, LocalDateUtility.getAdjustedDate(LocalDate.now()));
         return balance * Double.parseDouble(scheme.nav());
     }
 
     // method to calculate XIRR for a given set of payments and dates
-    private double calculateXIRR(double[] payments, LocalDate[] dates) {
+    double calculateXIRR(double[] payments, LocalDate[] dates) {
         // use Newton's method with an initial guess of 0.1
         return newtonsMethod(0.1, payments, dates);
     }
 
     // method to implement Newton's method to find the root of the polynomial equation for XIRR
-    private double newtonsMethod(double guess, double[] payments, LocalDate[] days) {
+    double newtonsMethod(double guess, double[] payments, LocalDate[] days) {
         double x0 = guess;
         double x1 = 0.0;
         double err = 1e+100;
 
-        while (err > tol) {
+        while (err > TOLERANCE) {
             x1 = x0 - total_f_xirr(payments, days, x0) / total_df_xirr(payments, days, x0);
             err = Math.abs(x1 - x0);
             x0 = x1;
@@ -147,7 +147,7 @@ public class CalculatorService {
     }
 
     // helper method to calculate the sum of the derivative of the polynomial equation for XIRR
-    private double total_df_xirr(double[] payments, LocalDate[] days, double x) {
+    double total_df_xirr(double[] payments, LocalDate[] days, double x) {
         double resf = 0.0;
         for (int i = 0; i < payments.length; i++) {
             resf = resf + df_xirr(payments[i], days[i], days[0], x);
@@ -156,7 +156,7 @@ public class CalculatorService {
     }
 
     // helper method to calculate the derivative of the polynomial equation for XIRR
-    private double df_xirr(double payment, LocalDate day, LocalDate day1, double x) {
+    double df_xirr(double payment, LocalDate day, LocalDate day1, double x) {
         return (1.0 / 365.0)
                 * dateDiff(day, day1)
                 * payment
@@ -164,7 +164,7 @@ public class CalculatorService {
     }
 
     // helper method to calculate the sum of the polynomial equation for XIRR
-    private double total_f_xirr(double[] payments, LocalDate[] days, double x) {
+    double total_f_xirr(double[] payments, LocalDate[] days, double x) {
         double resf = 0.0;
         for (int i = 0; i < payments.length; i++) {
             resf = resf + f_xirr(payments[i], days[i], days[0], x);
@@ -173,12 +173,12 @@ public class CalculatorService {
     }
 
     // helper method to calculate the value of the polynomial equation for XIRR
-    private double f_xirr(double payment, LocalDate day, LocalDate day1, double x) {
+    double f_xirr(double payment, LocalDate day, LocalDate day1, double x) {
         return payment * Math.pow((1.0 + x), (dateDiff(day, day1) / 365.0));
     }
 
     // helper method to calculate the difference between two dates in days
-    private double dateDiff(LocalDate day, LocalDate day1) {
+    double dateDiff(LocalDate day, LocalDate day1) {
         return ChronoUnit.DAYS.between(day, day1);
     }
 }
