@@ -133,7 +133,7 @@ spotless {
     java {
         importOrder()
         removeUnusedImports()
-        palantirJavaFormat("2.30.0")
+        palantirJavaFormat("2.39.0")
         formatAnnotations()
     }
 }
