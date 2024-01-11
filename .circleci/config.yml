@@ -2,9 +2,6 @@ version: 2.1
 orbs:
   gradle: circleci/gradle@3.0.0
 executors:
-  jdk:
-    docker:
-      - image: 'cimg/openjdk:21.0.0'
   machine_executor_amd64:
     machine:
       image: ubuntu-2204:current
@@ -13,8 +10,7 @@ executors:
       platform: "linux/amd64"
 jobs:
   gradle_integration_test:
-    # executor: machine_executor_amd64
-    executor: jdk
+    executor: machine_executor_amd64
     steps:
       - checkout # Checkout your source code
       - restore_cache:
@@ -32,5 +28,5 @@ workflows:
   gradle_test:
     jobs:
       - gradle/test:
-          executor: jdk
+          executor: machine_executor_amd64
       - gradle_integration_test

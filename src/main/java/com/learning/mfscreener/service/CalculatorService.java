@@ -67,13 +67,13 @@ public class CalculatorService {
         // loop through the funds
         for (UserFolioDetailsProjection fund : funds) {
             // get the fund id
-            Long fundId = fund.getSchemeEntities().getFirst().getAmfi();
+            Long fundId = fund.getSchemeEntities().get(0).getAmfi();
             if (fundId == null) {
                 LOGGER.error("FundID not available for fund :{} hence skipping", fund);
                 continue;
             }
             // TODO calculate individually and at overall level as well
-            Long schemeIdInDb = fund.getSchemeEntities().getFirst().getId();
+            Long schemeIdInDb = fund.getSchemeEntities().get(0).getId();
             // calculate the XIRR for the fund
             Double xirr = calculateXIRR(fundId, schemeIdInDb);
             LOGGER.debug("adding XIRR for schemeId : {}", fundId);
@@ -109,7 +109,9 @@ public class CalculatorService {
 
     // ensures that balance will never be null
     Double getBalance(List<UserTransactionDetailsProjection> byUserSchemeDetailsEntityId) {
-        Double balance = byUserSchemeDetailsEntityId.getLast().getBalance();
+        Double balance = byUserSchemeDetailsEntityId
+                .get(byUserSchemeDetailsEntityId.size())
+                .getBalance();
         if (balance == null) {
             LOGGER.debug("Balance units Not found hence, attempting for 2nd last row");
             balance = byUserSchemeDetailsEntityId
