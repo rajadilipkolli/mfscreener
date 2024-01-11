@@ -13,7 +13,8 @@ executors:
       platform: "linux/amd64"
 jobs:
   gradle_integration_test:
-    executor: machine_executor_amd64
+    # executor: machine_executor_amd64
+    executor: jdk
     steps:
       - checkout # Checkout your source code
       - restore_cache:
