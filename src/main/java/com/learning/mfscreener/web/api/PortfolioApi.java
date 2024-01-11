@@ -28,7 +28,7 @@ public interface PortfolioApi {
             @Parameter(
                             description = "get portfolio value for given date (yyyy-MM-dd) format",
                             in = ParameterIn.QUERY,
-                            example = "2022-12-31",
+                            example = "2023-12-31",
                             required = true)
                     @PastOrPresent(message = "Date should be past or today")
                     LocalDate date);

@@ -30,7 +30,7 @@ class SchemeControllerIT extends AbstractIntegrationTest {
                 .perform(get("/api/scheme/fund/{fundName}", "Mirae Asset Mutual fund")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(header().string("Content-Type", is("application/json")))
-                .andExpect(jsonPath("$.size()", is(0)));
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_JSON_VALUE)))
+                .andExpect(jsonPath("$.size()", is(162)));
     }
 }

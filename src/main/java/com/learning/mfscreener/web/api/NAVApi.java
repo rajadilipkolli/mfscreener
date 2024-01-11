@@ -22,5 +22,5 @@ public interface NAVApi {
     public ResponseEntity<MFSchemeDTO> getSchemeNavOnDate(
             @Parameter(description = "scheme Code for mutual fund", in = ParameterIn.PATH, example = "120503")
                     Long schemeCode,
-            @Parameter(description = "date", in = ParameterIn.PATH, example = "2022-12-31") LocalDate date);
+            @Parameter(description = "date", in = ParameterIn.PATH, example = "2023-12-31") LocalDate date);
 }
