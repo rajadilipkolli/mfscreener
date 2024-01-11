@@ -1,6 +1,7 @@
 package com.learning.mfscreener.web.controllers;
 
 import com.learning.mfscreener.service.CalculatorService;
+import java.util.Map;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
@@ -16,7 +17,7 @@ public class XIRRCalculatorController {
 
     // endpoint to calculate XIRR for a given pan
     @GetMapping("/xirr/{pan}")
-    public double getXIRR(@PathVariable String pan) {
+    public Map<Long, Double> getXIRR(@PathVariable String pan) {
         return calculatorService.calculateTotalXIRRByPan(pan);
     }
 }

@@ -9,4 +9,6 @@ public interface UserTransactionDetailsProjection {
     LocalDate getTransactionDate();
 
     Double getAmount();
+
+    Double getBalance();
 }
