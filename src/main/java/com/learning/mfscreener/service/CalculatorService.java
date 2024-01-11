@@ -110,12 +110,12 @@ public class CalculatorService {
     // ensures that balance will never be null
     Double getBalance(List<UserTransactionDetailsProjection> byUserSchemeDetailsEntityId) {
         Double balance = byUserSchemeDetailsEntityId
-                .get(byUserSchemeDetailsEntityId.size())
+                .get(byUserSchemeDetailsEntityId.size() - 1)
                 .getBalance();
         if (balance == null) {
             LOGGER.debug("Balance units Not found hence, attempting for 2nd last row");
             balance = byUserSchemeDetailsEntityId
-                    .get(byUserSchemeDetailsEntityId.size() - 1)
+                    .get(byUserSchemeDetailsEntityId.size() - 2)
                     .getBalance();
         }
         return balance;
