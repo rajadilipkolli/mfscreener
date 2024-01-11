@@ -1,4 +1,4 @@
-/* Licensed under Apache-2.0 2022-2023. */
+/* Licensed under Apache-2.0 2022-2024. */
 package com.learning.mfscreener.mapper;
 
 import com.learning.mfscreener.entities.MFSchemeEntity;
@@ -23,7 +23,7 @@ public interface MfSchemeEntityToDtoMapper extends Converter<MFSchemeEntity, MFS
     @AfterMapping
     default MFSchemeDTO updateMFScheme(MFSchemeEntity mfSchemeEntity, @MappingTarget MFSchemeDTO mfSchemeDTO) {
         if (!mfSchemeEntity.getMfSchemeNavEntities().isEmpty()) {
-            double navDouble = mfSchemeEntity.getMfSchemeNavEntities().get(0).getNav();
+            Float navDouble = mfSchemeEntity.getMfSchemeNavEntities().get(0).getNav();
             LocalDate localDate = mfSchemeEntity.getMfSchemeNavEntities().get(0).getNavDate();
             String nav = String.valueOf(navDouble);
             String date = null;
