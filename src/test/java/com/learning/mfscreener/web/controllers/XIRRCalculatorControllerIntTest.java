@@ -15,10 +15,11 @@ class XIRRCalculatorControllerIntTest extends AbstractIntegrationTest {
 
     @Test
     void getXIRR() throws Exception {
+        // Body = {"119544":9.902533730446047}
         this.mockMvc
                 .perform(get("/api/xirr/{pan}", "ABCDE1234F").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_JSON_VALUE)))
-                .andExpect(jsonPath("$.size()", is(0)));
+                .andExpect(jsonPath("$.size()", is(1)));
     }
 }
