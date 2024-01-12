@@ -123,7 +123,7 @@ public class SchemeService {
             log.info("amfi is Null for scheme :{}", scheme);
             // attempting to find ISIN
             if (scheme.indexOf("ISIN:") != 0) {
-                String isin = scheme.substring(scheme.indexOf("ISIN:") + 5).strip();
+                String isin = scheme.substring(scheme.lastIndexOf("ISIN:") + 5).strip();
                 if (StringUtils.hasText(isin)) {
                     Optional<MFSchemeEntity> mfSchemeEntity = mfSchemeRepository.findByPayOut(isin);
                     mfSchemeEntity.ifPresent(schemeEntity -> userSchemeDetailsEntityRepository.updateAmfiAndIsinById(

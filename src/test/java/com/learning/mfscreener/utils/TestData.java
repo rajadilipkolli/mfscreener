@@ -29,9 +29,9 @@ public class TestData {
                 null);
         transactions.add(userTransactionDTO);
         UserSchemeDTO userSchemeDTO = new UserSchemeDTO(
-                "Aditya Birla Sun Life Tax Relief'96 Fund- (ELSS U/S 80C of IT ACT) - Growth-Direct Plan",
+                "Aditya Birla Sun Life Tax Relief'96 Fund- (ELSS U/S 80C of IT ACT) - Growth-Direct Plan - ISIN: INF209K01UN8",
                 "INF209K01UN8",
-                119544L,
+                null,
                 "DIRECT",
                 "B02GZ",
                 "EQUITY",
