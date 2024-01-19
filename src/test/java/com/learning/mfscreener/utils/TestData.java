@@ -17,6 +17,20 @@ public class TestData {
     public CasDTO getCasDTO() {
         List<UserFolioDTO> foliosList = new ArrayList<>();
         List<UserSchemeDTO> schemasList = new ArrayList<>();
+        UserSchemeDTO userSchemeDTO = getUserSchemeDTO();
+        schemasList.add(userSchemeDTO);
+        UserFolioDTO userFolioDTO = new UserFolioDTO(
+                "101998485", "Aditya Birla Sun Life Mutual Fund", "ABCDE1234F", "OK", "OK", schemasList);
+        foliosList.add(userFolioDTO);
+        return new CasDTO(
+                new StatementPeriodDTO("01-Jan-1990", "20-Jun-2023"),
+                "CAMS",
+                "DETAILED",
+                new InvestorInfoDTO("junit@email.com", "Junit", "9848022338", "address"),
+                foliosList);
+    }
+
+    private static UserSchemeDTO getUserSchemeDTO() {
         List<UserTransactionDTO> transactions = new ArrayList<>();
         UserTransactionDTO userTransactionDTO = new UserTransactionDTO(
                 LocalDate.parse("2017-09-15"),
@@ -28,7 +42,7 @@ public class TestData {
                 "PURCHASE",
                 null);
         transactions.add(userTransactionDTO);
-        UserSchemeDTO userSchemeDTO = new UserSchemeDTO(
+        return new UserSchemeDTO(
                 "Aditya Birla Sun Life Tax Relief'96 Fund- (ELSS U/S 80C of IT ACT) - Growth-Direct Plan - ISIN: INF209K01UN8",
                 "INF209K01UN8",
                 null,
@@ -41,15 +55,5 @@ public class TestData {
                 "16.662",
                 null,
                 transactions);
-        schemasList.add(userSchemeDTO);
-        UserFolioDTO userFolioDTO1 = new UserFolioDTO(
-                "101998485", "Aditya Birla Sun Life Mutual Fund", "ABCDE1234F", "OK", "OK", schemasList);
-        foliosList.add(userFolioDTO1);
-        return new CasDTO(
-                new StatementPeriodDTO("01-Jan-1990", "20-Jun-2023"),
-                "CAMS",
-                "DETAILED",
-                new InvestorInfoDTO("junit@email.com", "Junit", "9848022338", "address"),
-                foliosList);
     }
 }

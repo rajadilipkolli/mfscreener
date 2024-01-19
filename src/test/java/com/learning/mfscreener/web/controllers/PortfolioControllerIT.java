@@ -54,6 +54,33 @@ class PortfolioControllerIT extends AbstractIntegrationTest {
 
     @Test
     @Order(2)
+    void uploadFileWithNoChanges() throws Exception {
+
+        File tempFile = File.createTempFile("file", ".json");
+        FileWriter fileWriter = new FileWriter(tempFile);
+        fileWriter.write(objectMapper.writeValueAsString(TestData.getCasDTO()));
+        fileWriter.close();
+
+        try (FileInputStream fileInputStream = new FileInputStream(tempFile)) {
+
+            // Create a MockMultipartFile object
+            MockMultipartFile multipartFile = new MockMultipartFile(
+                    "file", // parameter name expected by the controller
+                    "file.json", // original file name
+                    MediaType.APPLICATION_JSON_VALUE, // content type
+                    fileInputStream);
+
+            // Perform the file upload request
+            mockMvc.perform(multipart("/api/portfolio/upload").file(multipartFile))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string("Nothing to Update"));
+        } finally {
+            tempFile.deleteOnExit();
+        }
+    }
+
+    @Test
+    @Order(101)
     void getPortfolio() throws Exception {
         this.mockMvc
                 .perform(get("/api/portfolio/{pan}", "ABCDE1234F")
@@ -65,7 +92,7 @@ class PortfolioControllerIT extends AbstractIntegrationTest {
     }
 
     @Test
-    @Order(3)
+    @Order(102)
     void getPortfolioForAfterDate() throws Exception {
         this.mockMvc
                 .perform(get("/api/portfolio/{pan}", "ABCDE1234F")
