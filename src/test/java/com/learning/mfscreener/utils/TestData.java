@@ -14,7 +14,7 @@ import lombok.experimental.UtilityClass;
 @UtilityClass
 public class TestData {
 
-    public CasDTO getCasDTO() {
+    public CasDTO getCasDTO(boolean addFolio) {
         List<UserFolioDTO> foliosList = new ArrayList<>();
         List<UserSchemeDTO> schemasList = new ArrayList<>();
         UserSchemeDTO userSchemeDTO = getUserSchemeDTO();
@@ -22,12 +22,37 @@ public class TestData {
         UserFolioDTO userFolioDTO = new UserFolioDTO(
                 "101998485", "Aditya Birla Sun Life Mutual Fund", "ABCDE1234F", "OK", "OK", schemasList);
         foliosList.add(userFolioDTO);
+        if (addFolio) {
+            userFolioDTO = new UserFolioDTO(
+                    "91095687154 / 0", "AXIS Mutual Fund", "ABCDE1234F", "OK", "OK", List.of(axisSchemeDTO()));
+            foliosList.add(userFolioDTO);
+        }
         return new CasDTO(
                 new StatementPeriodDTO("01-Jan-1990", "20-Jun-2023"),
                 "CAMS",
                 "DETAILED",
                 new InvestorInfoDTO("junit@email.com", "Junit", "9848022338", "address"),
                 foliosList);
+    }
+
+    private static UserSchemeDTO axisSchemeDTO() {
+        List<UserTransactionDTO> transactions = new ArrayList<>();
+        UserTransactionDTO userTransactionDTO = new UserTransactionDTO(
+                LocalDate.parse("2017-09-20"), "Purchase", 1000.0d, 23.711d, 42.1747d, 23.711d, "PURCHASE", null);
+        transactions.add(userTransactionDTO);
+        return new UserSchemeDTO(
+                "Axis ELSS Tax Saver Fund - Direct Growth - ISIN: INF846K01EW2",
+                "INF846K01EW2",
+                120503L,
+                "INA000006651",
+                "128TSDGG",
+                "EQUITY",
+                "KFINTECH",
+                "0.0",
+                "206.719",
+                "206.719",
+                null,
+                transactions);
     }
 
     private static UserSchemeDTO getUserSchemeDTO() {

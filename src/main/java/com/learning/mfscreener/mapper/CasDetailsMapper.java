@@ -1,4 +1,4 @@
-/* Licensed under Apache-2.0 2022. */
+/* Licensed under Apache-2.0 2022-2024. */
 package com.learning.mfscreener.mapper;
 
 import com.learning.mfscreener.entities.UserCASDetailsEntity;
@@ -41,7 +41,7 @@ public interface CasDetailsMapper extends Converter<CasDTO, UserCASDetailsEntity
     @Mapping(source = "kyc", target = "kyc")
     @Mapping(source = "pan", target = "pan")
     @Mapping(source = "panKyc", target = "panKyc")
-    UserFolioDetailsEntity folioDTOToFolioEntity(UserFolioDTO folioDTO);
+    UserFolioDetailsEntity mapUserFolioDTOToUserFolioDetailsEntity(UserFolioDTO folioDTO);
 
     @Mapping(target = "transactionEntities", ignore = true)
     @Mapping(target = "userFolioDetailsEntity", ignore = true)
@@ -64,7 +64,7 @@ public interface CasDetailsMapper extends Converter<CasDTO, UserCASDetailsEntity
     @AfterMapping
     default void addFolioEntityToCaseDetails(CasDTO casDTO, @MappingTarget UserCASDetailsEntity userCasDetailsEntity) {
         Consumer<UserFolioDTO> addFolioEntityConsumer =
-                folioDTO -> userCasDetailsEntity.addFolioEntity(folioDTOToFolioEntity(folioDTO));
+                folioDTO -> userCasDetailsEntity.addFolioEntity(mapUserFolioDTOToUserFolioDetailsEntity(folioDTO));
         casDTO.folios().forEach(addFolioEntityConsumer);
     }
 

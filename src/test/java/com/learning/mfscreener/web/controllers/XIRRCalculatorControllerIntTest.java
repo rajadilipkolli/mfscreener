@@ -15,11 +15,14 @@ class XIRRCalculatorControllerIntTest extends AbstractIntegrationTest {
 
     @Test
     void getXIRR() throws Exception {
-        // Body = {"119544":9.902533730446047}
+        // Body = [{"folio":"101998485","amfiId":119544,"scheme":"Aditya Birla Sun Life Tax Relief'96 Fund- (ELSS U/S
+        // 80C of IT ACT) - Growth-Direct Plan - ISIN: INF209K01UN8","xirr":9.82595386856364},{"folio":"91095687154 /
+        // 0","amfiId":120503,"scheme":"Axis ELSS Tax Saver Fund - Direct Growth - ISIN:
+        // INF846K01EW2","xirr":12.265001803383841}]
         this.mockMvc
                 .perform(get("/api/xirr/{pan}", "ABCDE1234F").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_JSON_VALUE)))
-                .andExpect(jsonPath("$.size()", is(1)));
+                .andExpect(jsonPath("$.size()", is(2)));
     }
 }

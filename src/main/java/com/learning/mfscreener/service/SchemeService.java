@@ -68,12 +68,12 @@ public class SchemeService {
                     .map(navDataDTO -> navDataDTO.withSchemeId(schemeCode))
                     .map(conversionServiceAdapter::mapNAVDataDTOToMFSchemeNavEntity)
                     .toList();
-            log.info("No of entries from Server :{}", navList.size());
+            log.info("No of entries from Server :{} for schemeCode/amfi :{}", navList.size(), schemeCode);
             List<MFSchemeNavEntity> newNavs = navList.stream()
                     .filter(nav -> !mfSchemeEntity.getMfSchemeNavEntities().contains(nav))
                     .toList();
 
-            log.info("No of entities to insert :{}", newNavs.size());
+            log.info("No of entities to insert :{} for schemeCode/amfi :{}", newNavs.size(), schemeCode);
 
             if (!newNavs.isEmpty()) {
                 for (MFSchemeNavEntity newSchemeNav : newNavs) {
@@ -131,5 +131,9 @@ public class SchemeService {
                 }
             }
         });
+    }
+
+    public List<UserSchemeDetailsEntity> getSchemesByEmailAndName(String email, String name) {
+        return this.userSchemeDetailsEntityRepository.findByUserEmailAndName(email, name);
     }
 }

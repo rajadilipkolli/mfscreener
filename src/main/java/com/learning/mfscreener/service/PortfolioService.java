@@ -6,12 +6,15 @@ import com.learning.mfscreener.entities.UserCASDetailsEntity;
 import com.learning.mfscreener.entities.UserFolioDetailsEntity;
 import com.learning.mfscreener.entities.UserSchemeDetailsEntity;
 import com.learning.mfscreener.entities.UserTransactionDetailsEntity;
+import com.learning.mfscreener.mapper.CasDetailsMapper;
 import com.learning.mfscreener.models.MFSchemeDTO;
 import com.learning.mfscreener.models.PortfolioDetailsDTO;
 import com.learning.mfscreener.models.portfolio.CasDTO;
+import com.learning.mfscreener.models.portfolio.UserFolioDTO;
 import com.learning.mfscreener.models.portfolio.UserSchemeDTO;
 import com.learning.mfscreener.models.portfolio.UserTransactionDTO;
 import com.learning.mfscreener.models.response.PortfolioResponse;
+import com.learning.mfscreener.models.response.UploadResponseHolder;
 import com.learning.mfscreener.repository.InvestorInfoEntityRepository;
 import com.learning.mfscreener.repository.UserCASDetailsEntityRepository;
 import com.learning.mfscreener.repository.UserTransactionDetailsEntityRepository;
@@ -20,6 +23,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicInteger;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -30,6 +34,7 @@ public class PortfolioService {
 
     private final ObjectMapper objectMapper;
     private final ConversionServiceAdapter conversionServiceAdapter;
+    private final CasDetailsMapper casDetailsMapper;
     private final UserCASDetailsEntityRepository casDetailsEntityRepository;
     private final InvestorInfoEntityRepository investorInfoEntityRepository;
     private final UserTransactionDetailsEntityRepository userTransactionDetailsEntityRepository;
@@ -41,30 +46,41 @@ public class PortfolioService {
         // check if user and email exits
         String email = casDTO.investorInfo().email();
         String name = casDTO.investorInfo().name();
-        UserCASDetailsEntity casDetailsEntity;
+        UserCASDetailsEntity casDetailsEntity = null;
+        int folios = 0;
+        int transactions = 0;
         if (this.investorInfoEntityRepository.existsByEmailAndName(email, name)) {
-            casDetailsEntity = findDelta(email, name, casDTO);
+            var holder = findDelta(email, name, casDTO);
+            if (holder != null) {
+                casDetailsEntity = holder.userCASDetailsEntity();
+                folios = holder.folioCount();
+                transactions = holder.transactionsCount();
+            }
         } else {
             casDetailsEntity = this.conversionServiceAdapter.mapCasDTOToUserCASDetailsEntity(casDTO);
-        }
-        if (casDetailsEntity != null) {
-            UserCASDetailsEntity persistedCasDetailsEntity = this.casDetailsEntityRepository.save(casDetailsEntity);
-            CompletableFuture.runAsync(schemeService::setAMFIIfNull);
-            int transactions = persistedCasDetailsEntity.getFolioEntities().stream()
+            List<UserFolioDetailsEntity> folioEntities = casDetailsEntity.getFolioEntities();
+            transactions = folioEntities.stream()
                     .map(UserFolioDetailsEntity::getSchemeEntities)
                     .flatMap(List::stream)
                     .map(UserSchemeDetailsEntity::getTransactionEntities)
                     .toList()
                     .size();
-            return "Imported %d folios and %d transactions"
-                    .formatted(persistedCasDetailsEntity.getFolioEntities().size(), transactions);
+            folios = folioEntities.size();
+        }
+        if (casDetailsEntity != null) {
+            this.casDetailsEntityRepository.save(casDetailsEntity);
+            CompletableFuture.runAsync(schemeService::setAMFIIfNull);
+            return "Imported %d folios and %d transactions".formatted(folios, transactions);
         } else {
             return "Nothing to Update";
         }
     }
 
-    UserCASDetailsEntity findDelta(String email, String name, CasDTO casDTO) {
-        List<UserTransactionDTO> userTransactionDTOList = casDTO.folios().stream()
+    UploadResponseHolder findDelta(String email, String name, CasDTO casDTO) {
+        AtomicInteger folioCounter = new AtomicInteger();
+        AtomicInteger transactionsCounter = new AtomicInteger();
+        List<UserFolioDTO> folios = casDTO.folios();
+        List<UserTransactionDTO> userTransactionDTOList = folios.stream()
                 .map(userFolioDTO -> userFolioDTO.schemes().stream()
                         .map(UserSchemeDTO::transactions)
                         .flatMap(List::stream)
@@ -76,7 +92,52 @@ public class PortfolioService {
         if (userTransactionDTOList.size() == userTransactionDetailsEntityList.size()) {
             return null;
         } else {
-            return new UserCASDetailsEntity();
+            // verify if new folio is added
+            UserCASDetailsEntity userCASDetailsEntity =
+                    casDetailsEntityRepository.findByInvestorEmailAndName(email, name);
+
+            if (folios.size() == userCASDetailsEntity.getFolioEntities().size()) {
+                // Either Scheme or transaction is added
+                List<UserSchemeDTO> userSchemeDTOList = folios.stream()
+                        .map(UserFolioDTO::schemes)
+                        .flatMap(List::stream)
+                        .toList();
+
+                List<UserSchemeDetailsEntity> userSchemeDetailsEntityList =
+                        schemeService.getSchemesByEmailAndName(email, name);
+
+                if (userSchemeDTOList.size() == userSchemeDetailsEntityList.size()) {
+                    // TODO new transaction added
+                } else {
+                    List<String> isinList = userSchemeDetailsEntityList.stream()
+                            .map(UserSchemeDetailsEntity::getIsin)
+                            .toList();
+                    userSchemeDTOList.forEach(userSchemeDTO -> {
+                        if (!isinList.contains(userSchemeDTO.isin())) {
+                            // newly added scheme
+                        }
+                    });
+                }
+            } else {
+                List<String> folioList = userCASDetailsEntity.getFolioEntities().stream()
+                        .map(UserFolioDetailsEntity::getFolio)
+                        .toList();
+                folios.forEach(userFolioDTO -> {
+                    if (!folioList.contains(userFolioDTO.folio())) {
+                        // adding new folio
+                        userCASDetailsEntity.addFolioEntity(
+                                casDetailsMapper.mapUserFolioDTOToUserFolioDetailsEntity(userFolioDTO));
+                        folioCounter.getAndIncrement();
+                        int newTransactions = userFolioDTO.schemes().stream()
+                                .map(UserSchemeDTO::transactions)
+                                .flatMap(List::stream)
+                                .toList()
+                                .size();
+                        transactionsCounter.addAndGet(newTransactions);
+                    }
+                });
+            }
+            return new UploadResponseHolder(userCASDetailsEntity, folioCounter.get(), transactionsCounter.get());
         }
     }
 
