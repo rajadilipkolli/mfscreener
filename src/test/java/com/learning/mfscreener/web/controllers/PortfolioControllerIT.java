@@ -18,6 +18,7 @@ import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 
@@ -45,7 +46,7 @@ class PortfolioControllerIT extends AbstractIntegrationTest {
             // Perform the file upload request
             mockMvc.perform(multipart("/api/portfolio/upload").file(multipartFile))
                     .andExpect(status().isOk())
-                    .andExpect(content().string("Uploaded with id 1"));
+                    .andExpect(content().string("Imported 1 folios and 1 transactions"));
         } finally {
             tempFile.deleteOnExit();
         }
@@ -59,7 +60,7 @@ class PortfolioControllerIT extends AbstractIntegrationTest {
                         .param("date", LocalDate.now().minusDays(2).toString())
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(header().string("Content-Type", is("application/json")))
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_JSON_VALUE)))
                 .andExpect(jsonPath("$.portfolioDetailsDTOS.size()", is(1)));
     }
 
@@ -71,7 +72,7 @@ class PortfolioControllerIT extends AbstractIntegrationTest {
                         .param("date", LocalDate.now().plusDays(10).toString())
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
-                .andExpect(header().string("Content-Type", is("application/problem+json")))
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                 .andExpect(jsonPath("$.type", is("about:blank")))
                 .andExpect(jsonPath("$.title", is("Constraint Violation")))
                 .andExpect(jsonPath("$.status", is(400)))
