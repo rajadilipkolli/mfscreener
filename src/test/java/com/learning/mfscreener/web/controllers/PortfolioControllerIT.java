@@ -31,7 +31,7 @@ class PortfolioControllerIT extends AbstractIntegrationTest {
 
         File tempFile = File.createTempFile("file", ".json");
         FileWriter fileWriter = new FileWriter(tempFile);
-        fileWriter.write(objectMapper.writeValueAsString(TestData.getCasDTO(false, false)));
+        fileWriter.write(objectMapper.writeValueAsString(TestData.getCasDTO(false, false, false)));
         fileWriter.close();
 
         try (FileInputStream fileInputStream = new FileInputStream(tempFile)) {
@@ -58,7 +58,7 @@ class PortfolioControllerIT extends AbstractIntegrationTest {
 
         File tempFile = File.createTempFile("file", ".json");
         FileWriter fileWriter = new FileWriter(tempFile);
-        fileWriter.write(objectMapper.writeValueAsString(TestData.getCasDTO(false, false)));
+        fileWriter.write(objectMapper.writeValueAsString(TestData.getCasDTO(false, false, false)));
         fileWriter.close();
 
         try (FileInputStream fileInputStream = new FileInputStream(tempFile)) {
@@ -85,7 +85,7 @@ class PortfolioControllerIT extends AbstractIntegrationTest {
 
         File tempFile = File.createTempFile("file", ".json");
         FileWriter fileWriter = new FileWriter(tempFile);
-        fileWriter.write(objectMapper.writeValueAsString(TestData.getCasDTO(true, false)));
+        fileWriter.write(objectMapper.writeValueAsString(TestData.getCasDTO(true, false, false)));
         fileWriter.close();
 
         try (FileInputStream fileInputStream = new FileInputStream(tempFile)) {
@@ -112,7 +112,34 @@ class PortfolioControllerIT extends AbstractIntegrationTest {
 
         File tempFile = File.createTempFile("file", ".json");
         FileWriter fileWriter = new FileWriter(tempFile);
-        fileWriter.write(objectMapper.writeValueAsString(TestData.getCasDTO(true, true)));
+        fileWriter.write(objectMapper.writeValueAsString(TestData.getCasDTO(true, true, false)));
+        fileWriter.close();
+
+        try (FileInputStream fileInputStream = new FileInputStream(tempFile)) {
+
+            // Create a MockMultipartFile object
+            MockMultipartFile multipartFile = new MockMultipartFile(
+                    "file", // parameter name expected by the controller
+                    "file.json", // original file name
+                    MediaType.APPLICATION_JSON_VALUE, // content type
+                    fileInputStream);
+
+            // Perform the file upload request
+            mockMvc.perform(multipart("/api/portfolio/upload").file(multipartFile))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string("Imported 0 folios and 1 transactions"));
+        } finally {
+            tempFile.deleteOnExit();
+        }
+    }
+
+    @Test
+    @Order(5)
+    void uploadFileWithNewTransaction() throws Exception {
+
+        File tempFile = File.createTempFile("file", ".json");
+        FileWriter fileWriter = new FileWriter(tempFile);
+        fileWriter.write(objectMapper.writeValueAsString(TestData.getCasDTO(true, true, true)));
         fileWriter.close();
 
         try (FileInputStream fileInputStream = new FileInputStream(tempFile)) {

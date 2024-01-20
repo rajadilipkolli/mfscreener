@@ -14,7 +14,7 @@ import lombok.experimental.UtilityClass;
 @UtilityClass
 public class TestData {
 
-    public CasDTO getCasDTO(boolean addFolio, boolean addScheme) {
+    public CasDTO getCasDTO(boolean addFolio, boolean addScheme, boolean addTransaction) {
         List<UserFolioDTO> foliosList = new ArrayList<>();
         List<UserSchemeDTO> schemasList = new ArrayList<>();
         schemasList.add(getIciciSchemeDTO());
@@ -26,7 +26,12 @@ public class TestData {
         foliosList.add(userFolioDTO);
         if (addFolio) {
             userFolioDTO = new UserFolioDTO(
-                    "91095687154 / 0", "AXIS Mutual Fund", "ABCDE1234F", "OK", "OK", List.of(axisSchemeDTO()));
+                    "91095687154 / 0",
+                    "AXIS Mutual Fund",
+                    "ABCDE1234F",
+                    "OK",
+                    "OK",
+                    List.of(axisSchemeDTO(addTransaction)));
             foliosList.add(userFolioDTO);
         }
         return new CasDTO(
@@ -64,11 +69,15 @@ public class TestData {
                 transactions);
     }
 
-    private static UserSchemeDTO axisSchemeDTO() {
+    private static UserSchemeDTO axisSchemeDTO(boolean addTransaction) {
         List<UserTransactionDTO> transactions = new ArrayList<>();
         UserTransactionDTO userTransactionDTO = new UserTransactionDTO(
                 LocalDate.parse("2017-09-20"), "Purchase", 1000.0d, 23.711d, 42.1747d, 23.711d, "PURCHASE", null);
         transactions.add(userTransactionDTO);
+        if (addTransaction) {
+            transactions.add(new UserTransactionDTO(
+                    LocalDate.parse("2017-09-22"), "Purchase", 500.0d, 12.031d, 41.5579d, 35.742d, "PURCHASE", null));
+        }
         return new UserSchemeDTO(
                 "Axis ELSS Tax Saver Fund - Direct Growth - ISIN: INF846K01EW2",
                 "INF846K01EW2",

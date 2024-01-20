@@ -17,10 +17,7 @@ import com.learning.mfscreener.models.portfolio.UserSchemeDTO;
 import com.learning.mfscreener.models.portfolio.UserTransactionDTO;
 import com.learning.mfscreener.models.response.PortfolioResponse;
 import com.learning.mfscreener.models.response.UploadResponseHolder;
-import com.learning.mfscreener.repository.InvestorInfoEntityRepository;
-import com.learning.mfscreener.repository.UserCASDetailsEntityRepository;
-import com.learning.mfscreener.repository.UserFolioDetailsEntityRepository;
-import com.learning.mfscreener.repository.UserTransactionDetailsEntityRepository;
+import com.learning.mfscreener.repository.*;
 import com.learning.mfscreener.utils.LocalDateUtility;
 import java.io.IOException;
 import java.time.LocalDate;
@@ -37,6 +34,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Slf4j
 @RequiredArgsConstructor
 public class PortfolioService {
+    private final UserSchemeDetailsEntityRepository userSchemeDetailsEntityRepository;
 
     private final ObjectMapper objectMapper;
     private final ConversionServiceAdapter conversionServiceAdapter;
@@ -184,6 +182,65 @@ public class PortfolioService {
                         == (userTransactionDetailsEntityList.size() + transactionsCounter.get())) {
                     log.info(
                             "All new transactions are added as part of adding folioDTOList or schemes or both, hence skipping");
+                } else {
+                    log.info("adding new transactions not present in db");
+                    // Use flatMapping directly to flatten schemes in the groupingBy collector
+                    Map<String, List<UserTransactionDTO>> userSchemaTransactionMap = folioDTOList.stream()
+                            .map(UserFolioDTO::schemes)
+                            .flatMap(List::stream)
+                            .collect(groupingBy(
+                                    UserSchemeDTO::isin,
+                                    flatMapping(schemeDTO -> schemeDTO.transactions().stream(), toList())));
+
+                    List<UserSchemeDetailsEntity> userSchemeDetailsEntityList =
+                            schemeService.getSchemesByEmailAndName(email, name);
+
+                    Map<String, List<UserTransactionDetailsEntity>> userSchemaTransactionMapFromDB =
+                            userSchemeDetailsEntityList.stream()
+                                    .collect(groupingBy(
+                                            UserSchemeDetailsEntity::getIsin,
+                                            flatMapping(
+                                                    userSchemeDetailsEntity ->
+                                                            userSchemeDetailsEntity.getTransactionEntities().stream(),
+                                                    toList())));
+
+                    for (Map.Entry<String, List<UserTransactionDTO>> requestEntry :
+                            userSchemaTransactionMap.entrySet()) {
+                        for (Map.Entry<String, List<UserTransactionDetailsEntity>> dbEntry :
+                                userSchemaTransactionMapFromDB.entrySet()) {
+                            String isINFromDB = dbEntry.getKey();
+                            if (requestEntry.getKey().equals(isINFromDB)
+                                    && requestEntry.getValue().size()
+                                            != dbEntry.getValue().size()) {
+                                // new transaction added to scheme
+                                List<LocalDate> transactionDateListDB = dbEntry.getValue().stream()
+                                        .map(UserTransactionDetailsEntity::getTransactionDate)
+                                        .toList();
+                                requestEntry.getValue().forEach(userTransactionDTO -> {
+                                    LocalDate newTransactionDate = userTransactionDTO.date();
+                                    if (!transactionDateListDB.contains(newTransactionDate)) {
+                                        // newly added with transactions
+                                        log.info(
+                                                "new transaction on date :{} created that is not present in database",
+                                                newTransactionDate);
+                                        UserTransactionDetailsEntity userTransactionDetailsEntity =
+                                                casDetailsMapper.transactionDTOToTransactionEntity(userTransactionDTO);
+
+                                        userSchemeDetailsEntityList.forEach(userSchemeDetailsEntity -> {
+                                            if (isINFromDB.equals(userSchemeDetailsEntity.getIsin())) {
+                                                userSchemeDetailsEntity.addTransactionEntity(
+                                                        userTransactionDetailsEntity);
+                                                // TODO convert to bulkInsert
+                                                userSchemeDetailsEntityRepository.save(userSchemeDetailsEntity);
+                                                transactionsCounter.incrementAndGet();
+                                            }
+                                        });
+                                    }
+                                });
+                                break;
+                            }
+                        }
+                    }
                 }
             }
         }
