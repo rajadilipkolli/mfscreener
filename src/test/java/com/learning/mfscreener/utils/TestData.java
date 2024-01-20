@@ -119,4 +119,86 @@ public class TestData {
                 null,
                 transactions);
     }
+
+    public static CasDTO getCasDTO() {
+        CasDTO casDTO = getCasDTO(true, true, true);
+        casDTO.folios()
+                .add(new UserFolioDTO(
+                        "17755325221 / 0",
+                        "Canara Robeco Mutual Fund",
+                        "ABCDE1234F",
+                        "OK",
+                        "OK",
+                        List.of(getCanaraScheme())));
+        casDTO.folios().get(0).schemes().add(getICICIUSBlueChipScheme());
+        casDTO.folios()
+                .get(0)
+                .schemes()
+                .get(0)
+                .transactions()
+                .add(new UserTransactionDTO(
+                        LocalDate.parse("2021-02-04"),
+                        "Switch In - From Multicap Fund - DP - Growth-BSE - - INA200005166",
+                        100d,
+                        3.221d,
+                        31.0496d,
+                        19.186d,
+                        "SWITCH_IN",
+                        null));
+        return casDTO;
+    }
+
+    private static UserSchemeDTO getICICIUSBlueChipScheme() {
+        List<UserTransactionDTO> transactions = new ArrayList<>();
+        UserTransactionDTO userTransactionDTO = new UserTransactionDTO(
+                LocalDate.parse("2020-06-22"),
+                "SIP Purchase Appln : 72611 - INA100006898",
+                100d,
+                2.796d,
+                35.76d,
+                2.796d,
+                "PURCHASE_SIP",
+                null);
+        transactions.add(userTransactionDTO);
+        return new UserSchemeDTO(
+                "ICICI Prudential US Bluechip Equity Fund - Direct Plan - Growth (Non-Demat) - ISIN: INF109K01Z71",
+                "INF109K01Z71",
+                120186L,
+                "INA200005166",
+                "P8133",
+                "EQUITY",
+                "CAMS",
+                "0.0",
+                "109.583",
+                "109.583",
+                null,
+                transactions);
+    }
+
+    private static UserSchemeDTO getCanaraScheme() {
+        List<UserTransactionDTO> transactions = new ArrayList<>();
+        UserTransactionDTO userTransactionDTO = new UserTransactionDTO(
+                LocalDate.parse("2023-06-15"),
+                "Systematic Investment (1)",
+                2999.85d,
+                10.359d,
+                289.6d,
+                10.359d,
+                "PURCHASE_SIP",
+                null);
+        transactions.add(userTransactionDTO);
+        return new UserSchemeDTO(
+                "Canara Robeco Equity Hybrid Fund - Direct Growth - ISIN: INF760K01EZ8",
+                "INF760K01EZ8",
+                118272L,
+                "INA200005166",
+                "101GBDGG",
+                "EQUITY",
+                "KFINTECH",
+                "0.0",
+                "192.868",
+                "192.868",
+                null,
+                transactions);
+    }
 }

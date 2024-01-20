@@ -161,6 +161,33 @@ class PortfolioControllerIT extends AbstractIntegrationTest {
     }
 
     @Test
+    @Order(6)
+    void uploadFileWithNewFolioAndSchemeAndTransaction() throws Exception {
+
+        File tempFile = File.createTempFile("file", ".json");
+        FileWriter fileWriter = new FileWriter(tempFile);
+        fileWriter.write(objectMapper.writeValueAsString(TestData.getCasDTO()));
+        fileWriter.close();
+
+        try (FileInputStream fileInputStream = new FileInputStream(tempFile)) {
+
+            // Create a MockMultipartFile object
+            MockMultipartFile multipartFile = new MockMultipartFile(
+                    "file", // parameter name expected by the controller
+                    "file.json", // original file name
+                    MediaType.APPLICATION_JSON_VALUE, // content type
+                    fileInputStream);
+
+            // Perform the file upload request
+            mockMvc.perform(multipart("/api/portfolio/upload").file(multipartFile))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string("Imported 1 folios and 3 transactions"));
+        } finally {
+            tempFile.deleteOnExit();
+        }
+    }
+
+    @Test
     @Order(101)
     void getPortfolio() throws Exception {
         this.mockMvc
@@ -169,7 +196,7 @@ class PortfolioControllerIT extends AbstractIntegrationTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_JSON_VALUE)))
-                .andExpect(jsonPath("$.portfolioDetailsDTOS.size()", is(3)));
+                .andExpect(jsonPath("$.portfolioDetailsDTOS.size()", is(4)));
     }
 
     @Test

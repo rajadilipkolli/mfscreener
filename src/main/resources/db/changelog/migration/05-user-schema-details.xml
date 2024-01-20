@@ -43,6 +43,10 @@
             <column name="last_modified_by" type="${string.type}"/>
             <column name="last_modified_date" type="timestamp"/>
         </createTable>
+
+        <addUniqueConstraint tableName="user_scheme_details" columnNames="user_folio_id,isin"
+                             constraintName="uc_userschemedetailsentity"
+                             validate="true"/>
     </changeSet>
 
     <changeSet id="addForeignKeyConstraint_user_scheme_details" author="appUser">
