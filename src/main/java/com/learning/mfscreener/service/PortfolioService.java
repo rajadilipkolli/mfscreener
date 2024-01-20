@@ -27,13 +27,14 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class PortfolioService {
 
@@ -85,8 +86,8 @@ public class PortfolioService {
     UploadResponseHolder findDelta(String email, String name, CasDTO casDTO) {
         AtomicInteger folioCounter = new AtomicInteger();
         AtomicInteger transactionsCounter = new AtomicInteger();
-        List<UserFolioDTO> folios = casDTO.folios();
-        List<UserTransactionDTO> userTransactionDTOList = folios.stream()
+        List<UserFolioDTO> folioDTOList = casDTO.folios();
+        List<UserTransactionDTO> userTransactionDTOList = folioDTOList.stream()
                 .map(userFolioDTO -> userFolioDTO.schemes().stream()
                         .map(UserSchemeDTO::transactions)
                         .flatMap(List::stream)
@@ -95,16 +96,42 @@ public class PortfolioService {
                 .toList();
         List<UserTransactionDetailsEntity> userTransactionDetailsEntityList =
                 this.userTransactionDetailsEntityRepository.findAllTransactionsByEmailAndName(email, name);
+        UserCASDetailsEntity userCASDetailsEntity;
         if (userTransactionDTOList.size() == userTransactionDetailsEntityList.size()) {
+            log.info("No new transactions are added");
             return null;
         } else {
-            // verify if new folio is added
-            UserCASDetailsEntity userCASDetailsEntity =
-                    casDetailsEntityRepository.findByInvestorEmailAndName(email, name);
+            userCASDetailsEntity = casDetailsEntityRepository.findByInvestorEmailAndName(email, name);
 
-            if (folios.size() == userCASDetailsEntity.getFolioEntities().size()) {
+            // verify if new folio is added
+            if (folioDTOList.size() != userCASDetailsEntity.getFolioEntities().size()) {
+                List<String> folioList = userCASDetailsEntity.getFolioEntities().stream()
+                        .map(UserFolioDetailsEntity::getFolio)
+                        .toList();
+                folioDTOList.forEach(userFolioDTO -> {
+                    if (!folioList.contains(userFolioDTO.folio())) {
+                        // adding new folio along with scheme and transactions
+                        log.info("new folio :{} created that is not present in database", userFolioDTO.folio());
+                        userCASDetailsEntity.addFolioEntity(
+                                casDetailsMapper.mapUserFolioDTOToUserFolioDetailsEntity(userFolioDTO));
+                        folioCounter.getAndIncrement();
+                        int newTransactions = userFolioDTO.schemes().stream()
+                                .map(UserSchemeDTO::transactions)
+                                .flatMap(List::stream)
+                                .toList()
+                                .size();
+                        transactionsCounter.addAndGet(newTransactions);
+                    }
+                });
+            }
+            if (userTransactionDTOList.size()
+                    == (userTransactionDetailsEntityList.size() + transactionsCounter.get())) {
+                // added all new transactions as part of adding folioDTOList, hence skipping
+                log.info("Added all new transactions as part of adding folioDTOList, hence skipping");
+            } else {
                 // Either Scheme or transaction is added
-                Map<String, List<UserSchemeDTO>> userFolioSchemaMap = folios.stream()
+                // Use flatMapping directly to flatten schemes in the groupingBy collector
+                Map<String, List<UserSchemeDTO>> userFolioSchemaMap = folioDTOList.stream()
                         .collect(groupingBy(
                                 UserFolioDTO::folio, flatMapping(folio -> folio.schemes().stream(), toList())));
 
@@ -118,7 +145,6 @@ public class PortfolioService {
                                                 userFolioDetailsEntity ->
                                                         userFolioDetailsEntity.getSchemeEntities().stream(),
                                                 toList())));
-                AtomicBoolean schemesAdded = new AtomicBoolean(false);
                 for (Map.Entry<String, List<UserSchemeDTO>> requestEntry : userFolioSchemaMap.entrySet()) {
                     for (Map.Entry<String, List<UserSchemeDetailsEntity>> dbEntry :
                             userSchemeDetailsEntityMap.entrySet()) {
@@ -132,7 +158,10 @@ public class PortfolioService {
                                     .toList();
                             requestEntry.getValue().forEach(userSchemeDTO -> {
                                 if (!isInListDB.contains(userSchemeDTO.isin())) {
-                                    // newly added scheme
+                                    // newly added scheme along with transactions
+                                    log.info(
+                                            "new ISIN :{} created that is not present in database",
+                                            userSchemeDTO.isin());
                                     UserSchemeDetailsEntity userSchemeDetailsEntity =
                                             casDetailsMapper.schemeDTOToSchemeEntity(userSchemeDTO);
 
@@ -142,7 +171,6 @@ public class PortfolioService {
                                             int newTransactions =
                                                     userSchemeDTO.transactions().size();
                                             transactionsCounter.addAndGet(newTransactions);
-                                            schemesAdded.set(true);
                                         }
                                     });
                                 }
@@ -152,30 +180,14 @@ public class PortfolioService {
                     }
                 }
                 userCASDetailsEntity.setFolioEntities(userFolioDetailsEntityList);
-                if (!schemesAdded.get()) {
-                    // check for new transactions
+                if (userTransactionDTOList.size()
+                        == (userTransactionDetailsEntityList.size() + transactionsCounter.get())) {
+                    log.info(
+                            "All new transactions are added as part of adding folioDTOList or schemes or both, hence skipping");
                 }
-            } else {
-                List<String> folioList = userCASDetailsEntity.getFolioEntities().stream()
-                        .map(UserFolioDetailsEntity::getFolio)
-                        .toList();
-                folios.forEach(userFolioDTO -> {
-                    if (!folioList.contains(userFolioDTO.folio())) {
-                        // adding new folio
-                        userCASDetailsEntity.addFolioEntity(
-                                casDetailsMapper.mapUserFolioDTOToUserFolioDetailsEntity(userFolioDTO));
-                        folioCounter.getAndIncrement();
-                        int newTransactions = userFolioDTO.schemes().stream()
-                                .map(UserSchemeDTO::transactions)
-                                .flatMap(List::stream)
-                                .toList()
-                                .size();
-                        transactionsCounter.addAndGet(newTransactions);
-                    }
-                });
             }
-            return new UploadResponseHolder(userCASDetailsEntity, folioCounter.get(), transactionsCounter.get());
         }
+        return new UploadResponseHolder(userCASDetailsEntity, folioCounter.get(), transactionsCounter.get());
     }
 
     public PortfolioResponse getPortfolioByPAN(String panNumber, LocalDate asOfDate) {
