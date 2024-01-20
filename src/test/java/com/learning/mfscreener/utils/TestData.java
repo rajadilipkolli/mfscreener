@@ -14,13 +14,15 @@ import lombok.experimental.UtilityClass;
 @UtilityClass
 public class TestData {
 
-    public CasDTO getCasDTO(boolean addFolio) {
+    public CasDTO getCasDTO(boolean addFolio, boolean addScheme) {
         List<UserFolioDTO> foliosList = new ArrayList<>();
         List<UserSchemeDTO> schemasList = new ArrayList<>();
-        UserSchemeDTO userSchemeDTO = getUserSchemeDTO();
-        schemasList.add(userSchemeDTO);
+        schemasList.add(getIciciSchemeDTO());
+        if (addScheme) {
+            schemasList.add(getIciciTechnologyScheme());
+        }
         UserFolioDTO userFolioDTO = new UserFolioDTO(
-                "101998485", "Aditya Birla Sun Life Mutual Fund", "ABCDE1234F", "OK", "OK", schemasList);
+                "15936342 / 43", "ICICI Prudential Mutual Fund", "ABCDE1234F", "OK", "OK", schemasList);
         foliosList.add(userFolioDTO);
         if (addFolio) {
             userFolioDTO = new UserFolioDTO(
@@ -33,6 +35,33 @@ public class TestData {
                 "DETAILED",
                 new InvestorInfoDTO("junit@email.com", "Junit", "9848022338", "address"),
                 foliosList);
+    }
+
+    private static UserSchemeDTO getIciciTechnologyScheme() {
+        List<UserTransactionDTO> transactions = new ArrayList<>();
+        UserTransactionDTO userTransactionDTO = new UserTransactionDTO(
+                LocalDate.parse("2021-03-31"),
+                "SIP Purchase - INA100009859",
+                100.0d,
+                0.859d,
+                116.4d,
+                0.859d,
+                "PURCHASE_SIP",
+                null);
+        transactions.add(userTransactionDTO);
+        return new UserSchemeDTO(
+                "ICICI Prudential Technology Fund - Direct Plan - Growth (Non-Demat) - ISIN: INF109K01Z48",
+                "INF109K01Z48",
+                120594L,
+                "INA200005166",
+                "P8019",
+                "EQUITY",
+                "CAMS",
+                "0.0",
+                "86.696",
+                "86.696",
+                null,
+                transactions);
     }
 
     private static UserSchemeDTO axisSchemeDTO() {
@@ -55,29 +84,29 @@ public class TestData {
                 transactions);
     }
 
-    private static UserSchemeDTO getUserSchemeDTO() {
+    private static UserSchemeDTO getIciciSchemeDTO() {
         List<UserTransactionDTO> transactions = new ArrayList<>();
         UserTransactionDTO userTransactionDTO = new UserTransactionDTO(
-                LocalDate.parse("2017-09-15"),
-                "Purchase - Event Trigger",
-                500.0d,
-                16.595d,
-                30.13d,
-                16.569d,
-                "PURCHASE",
+                LocalDate.parse("2021-01-14"),
+                "SIP Purchase-BSE - - INA200005166",
+                499.98d,
+                15.965d,
+                31.3182d,
+                15.965d,
+                "PURCHASE_SIP",
                 null);
         transactions.add(userTransactionDTO);
         return new UserSchemeDTO(
-                "Aditya Birla Sun Life Tax Relief'96 Fund- (ELSS U/S 80C of IT ACT) - Growth-Direct Plan - ISIN: INF209K01UN8",
-                "INF209K01UN8",
+                "ICICI Prudential Nifty Next 50 Index Fund - Direct Plan - Growth (Non-Demat) - ISIN: INF109K01Y80",
+                "INF109K01Y80",
                 null,
-                "DIRECT",
-                "B02GZ",
+                "INA200005166",
+                "P8107",
                 "EQUITY",
                 "CAMS",
                 "0.0",
-                "16.662",
-                "16.662",
+                "3801.107",
+                "3801.107",
                 null,
                 transactions);
     }

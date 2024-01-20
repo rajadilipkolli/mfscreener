@@ -1,5 +1,7 @@
 package com.learning.mfscreener.service;
 
+import static java.util.stream.Collectors.*;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.learning.mfscreener.adapter.ConversionServiceAdapter;
 import com.learning.mfscreener.entities.UserCASDetailsEntity;
@@ -17,12 +19,15 @@ import com.learning.mfscreener.models.response.PortfolioResponse;
 import com.learning.mfscreener.models.response.UploadResponseHolder;
 import com.learning.mfscreener.repository.InvestorInfoEntityRepository;
 import com.learning.mfscreener.repository.UserCASDetailsEntityRepository;
+import com.learning.mfscreener.repository.UserFolioDetailsEntityRepository;
 import com.learning.mfscreener.repository.UserTransactionDetailsEntityRepository;
 import com.learning.mfscreener.utils.LocalDateUtility;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -37,6 +42,7 @@ public class PortfolioService {
     private final CasDetailsMapper casDetailsMapper;
     private final UserCASDetailsEntityRepository casDetailsEntityRepository;
     private final InvestorInfoEntityRepository investorInfoEntityRepository;
+    private final UserFolioDetailsEntityRepository userFolioDetailsEntityRepository;
     private final UserTransactionDetailsEntityRepository userTransactionDetailsEntityRepository;
     private final NavService navService;
     private final SchemeService schemeService;
@@ -98,25 +104,56 @@ public class PortfolioService {
 
             if (folios.size() == userCASDetailsEntity.getFolioEntities().size()) {
                 // Either Scheme or transaction is added
-                List<UserSchemeDTO> userSchemeDTOList = folios.stream()
-                        .map(UserFolioDTO::schemes)
-                        .flatMap(List::stream)
-                        .toList();
+                Map<String, List<UserSchemeDTO>> userFolioSchemaMap = folios.stream()
+                        .collect(groupingBy(
+                                UserFolioDTO::folio, flatMapping(folio -> folio.schemes().stream(), toList())));
 
-                List<UserSchemeDetailsEntity> userSchemeDetailsEntityList =
-                        schemeService.getSchemesByEmailAndName(email, name);
+                List<UserFolioDetailsEntity> userFolioDetailsEntityList =
+                        userFolioDetailsEntityRepository.findByUserEmailAndName(email, name);
+                Map<String, List<UserSchemeDetailsEntity>> userSchemeDetailsEntityMap =
+                        userFolioDetailsEntityList.stream()
+                                .collect(groupingBy(
+                                        UserFolioDetailsEntity::getFolio,
+                                        flatMapping(
+                                                userFolioDetailsEntity ->
+                                                        userFolioDetailsEntity.getSchemeEntities().stream(),
+                                                toList())));
+                AtomicBoolean schemesAdded = new AtomicBoolean(false);
+                for (Map.Entry<String, List<UserSchemeDTO>> requestEntry : userFolioSchemaMap.entrySet()) {
+                    for (Map.Entry<String, List<UserSchemeDetailsEntity>> dbEntry :
+                            userSchemeDetailsEntityMap.entrySet()) {
+                        String folioFromDB = dbEntry.getKey();
+                        if (requestEntry.getKey().equals(folioFromDB)
+                                && requestEntry.getValue().size()
+                                        != dbEntry.getValue().size()) {
+                            // new scheme added to folio
+                            List<String> isInListDB = dbEntry.getValue().stream()
+                                    .map(UserSchemeDetailsEntity::getIsin)
+                                    .toList();
+                            requestEntry.getValue().forEach(userSchemeDTO -> {
+                                if (!isInListDB.contains(userSchemeDTO.isin())) {
+                                    // newly added scheme
+                                    UserSchemeDetailsEntity userSchemeDetailsEntity =
+                                            casDetailsMapper.schemeDTOToSchemeEntity(userSchemeDTO);
 
-                if (userSchemeDTOList.size() == userSchemeDetailsEntityList.size()) {
-                    // TODO new transaction added
-                } else {
-                    List<String> isinList = userSchemeDetailsEntityList.stream()
-                            .map(UserSchemeDetailsEntity::getIsin)
-                            .toList();
-                    userSchemeDTOList.forEach(userSchemeDTO -> {
-                        if (!isinList.contains(userSchemeDTO.isin())) {
-                            // newly added scheme
+                                    userFolioDetailsEntityList.forEach(userFolioDetailsEntity -> {
+                                        if (folioFromDB.equals(userFolioDetailsEntity.getFolio())) {
+                                            userFolioDetailsEntity.addSchemeEntity(userSchemeDetailsEntity);
+                                            int newTransactions =
+                                                    userSchemeDTO.transactions().size();
+                                            transactionsCounter.addAndGet(newTransactions);
+                                            schemesAdded.set(true);
+                                        }
+                                    });
+                                }
+                            });
+                            break;
                         }
-                    });
+                    }
+                }
+                userCASDetailsEntity.setFolioEntities(userFolioDetailsEntityList);
+                if (!schemesAdded.get()) {
+                    // check for new transactions
                 }
             } else {
                 List<String> folioList = userCASDetailsEntity.getFolioEntities().stream()

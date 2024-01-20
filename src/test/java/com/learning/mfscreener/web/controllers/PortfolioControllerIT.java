@@ -31,7 +31,7 @@ class PortfolioControllerIT extends AbstractIntegrationTest {
 
         File tempFile = File.createTempFile("file", ".json");
         FileWriter fileWriter = new FileWriter(tempFile);
-        fileWriter.write(objectMapper.writeValueAsString(TestData.getCasDTO(false)));
+        fileWriter.write(objectMapper.writeValueAsString(TestData.getCasDTO(false, false)));
         fileWriter.close();
 
         try (FileInputStream fileInputStream = new FileInputStream(tempFile)) {
@@ -58,7 +58,7 @@ class PortfolioControllerIT extends AbstractIntegrationTest {
 
         File tempFile = File.createTempFile("file", ".json");
         FileWriter fileWriter = new FileWriter(tempFile);
-        fileWriter.write(objectMapper.writeValueAsString(TestData.getCasDTO(false)));
+        fileWriter.write(objectMapper.writeValueAsString(TestData.getCasDTO(false, false)));
         fileWriter.close();
 
         try (FileInputStream fileInputStream = new FileInputStream(tempFile)) {
@@ -85,7 +85,7 @@ class PortfolioControllerIT extends AbstractIntegrationTest {
 
         File tempFile = File.createTempFile("file", ".json");
         FileWriter fileWriter = new FileWriter(tempFile);
-        fileWriter.write(objectMapper.writeValueAsString(TestData.getCasDTO(true)));
+        fileWriter.write(objectMapper.writeValueAsString(TestData.getCasDTO(true, false)));
         fileWriter.close();
 
         try (FileInputStream fileInputStream = new FileInputStream(tempFile)) {
@@ -107,6 +107,33 @@ class PortfolioControllerIT extends AbstractIntegrationTest {
     }
 
     @Test
+    @Order(4)
+    void uploadFileWithNewScheme() throws Exception {
+
+        File tempFile = File.createTempFile("file", ".json");
+        FileWriter fileWriter = new FileWriter(tempFile);
+        fileWriter.write(objectMapper.writeValueAsString(TestData.getCasDTO(true, true)));
+        fileWriter.close();
+
+        try (FileInputStream fileInputStream = new FileInputStream(tempFile)) {
+
+            // Create a MockMultipartFile object
+            MockMultipartFile multipartFile = new MockMultipartFile(
+                    "file", // parameter name expected by the controller
+                    "file.json", // original file name
+                    MediaType.APPLICATION_JSON_VALUE, // content type
+                    fileInputStream);
+
+            // Perform the file upload request
+            mockMvc.perform(multipart("/api/portfolio/upload").file(multipartFile))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string("Imported 0 folios and 1 transactions"));
+        } finally {
+            tempFile.deleteOnExit();
+        }
+    }
+
+    @Test
     @Order(101)
     void getPortfolio() throws Exception {
         this.mockMvc
@@ -115,7 +142,7 @@ class PortfolioControllerIT extends AbstractIntegrationTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_JSON_VALUE)))
-                .andExpect(jsonPath("$.portfolioDetailsDTOS.size()", is(2)));
+                .andExpect(jsonPath("$.portfolioDetailsDTOS.size()", is(3)));
     }
 
     @Test
