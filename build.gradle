@@ -53,6 +53,13 @@ dependencies {
     runtimeOnly "com.h2database:h2"
     runtimeOnly "org.postgresql:postgresql"
     implementation "org.liquibase:liquibase-core"
+    implementation 'io.hypersistence:hypersistence-utils-hibernate-63:3.7.0'
+
+    // Blaze Persistance
+    implementation('com.blazebit:blaze-persistence-integration-spring-data-3.1')
+    implementation('com.blazebit:blaze-persistence-integration-hibernate-6.2')
+    implementation('com.blazebit:blaze-persistence-integration-entity-view-spring-6.0')
+
     implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:${springdoc_openapi_version}"
     implementation "org.apache.commons:commons-lang3"
     implementation "commons-io:commons-io:${commons_io_version}"
@@ -82,7 +89,7 @@ dependencies {
 
 dependencyManagement {
     imports {
-        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${spring_cloud_version}"
+        mavenBom "com.blazebit:blaze-persistence-bom:${blaze_persistence_version}"
     }
 }
 
