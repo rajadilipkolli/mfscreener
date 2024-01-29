@@ -5,6 +5,8 @@
 
     <property name="string.type" value="varchar(255)" dbms="!postgresql"/>
     <property name="string.type" value="text" dbms="postgresql"/>
+    <property name="timestamp.type" value="timestamp" dbms="!postgresql"/>
+    <property name="timestamp.type" value="timestamptz" dbms="postgresql"/>
 
     <changeSet author="appUser" id="create-sequence-user_cas_details_seq">
         <preConditions onFail="MARK_RAN">
@@ -34,9 +36,9 @@
                 <constraints nullable="false"/>
             </column>
             <column name="created_by" type="${string.type}"/>
-            <column name="created_date" type="timestamp"/>
+            <column name="created_date" type="${timestamp.type}"/>
             <column name="last_modified_by" type="${string.type}"/>
-            <column name="last_modified_date" type="timestamp"/>
+            <column name="last_modified_date" type="${timestamp.type}"/>
         </createTable>
     </changeSet>
 

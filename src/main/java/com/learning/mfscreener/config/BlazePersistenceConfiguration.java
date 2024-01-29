@@ -31,7 +31,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @EnableEntityViews(basePackages = {"com.learning.mfscreener.models.entityviews"})
 @EnableBlazeRepositories(basePackages = "com.learning.mfscreener.repository")
 public class BlazePersistenceConfiguration {
@@ -42,7 +42,7 @@ public class BlazePersistenceConfiguration {
     @Bean
     @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
     @Lazy(false)
-    public CriteriaBuilderFactory createCriteriaBuilderFactory() {
+    CriteriaBuilderFactory createCriteriaBuilderFactory() {
         CriteriaBuilderConfiguration config = Criteria.getDefault();
         return config.createCriteriaBuilderFactory(entityManagerFactory);
     }
@@ -50,7 +50,7 @@ public class BlazePersistenceConfiguration {
     @Bean
     @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
     @Lazy(false)
-    public EntityViewManager createEntityViewManager(
+    EntityViewManager createEntityViewManager(
             CriteriaBuilderFactory cbf, EntityViewConfiguration entityViewConfiguration) {
         return entityViewConfiguration.createEntityViewManager(cbf);
     }

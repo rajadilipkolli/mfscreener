@@ -5,6 +5,8 @@
 
     <property name="string.type" value="VARCHAR(255)" dbms="!postgresql"/>
     <property name="string.type" value="text" dbms="postgresql"/>
+    <property name="timestamp.type" value="timestamp" dbms="!postgresql"/>
+    <property name="timestamp.type" value="timestamptz" dbms="postgresql"/>
 
     <changeSet id="createSequence-user_transaction_details_seq" author="appUser">
         <preConditions onFail="MARK_RAN">
@@ -35,9 +37,9 @@
             <column name="dividend_rate" type="${string.type}"/>
             <column name="user_scheme_detail_id" type="BIGINT"/>
             <column name="created_by" type="${string.type}"/>
-            <column name="created_date" type="TIMESTAMP"/>
+            <column name="created_date" type="${timestamp.type}"/>
             <column name="last_modified_by" type="${string.type}"/>
-            <column name="last_modified_date" type="TIMESTAMP"/>
+            <column name="last_modified_date" type="${timestamp.type}"/>
         </createTable>
     </changeSet>
 

@@ -70,10 +70,10 @@ class GeneralCodingRulesTest {
             .allowEmptyShould(true);
     // Methods
     @ArchTest
-    static final ArchRule beanMethodsShouldBePublic = methods()
+    static final ArchRule beanMethodsShouldBePackagePrivate = methods()
             .that()
             .areAnnotatedWith(Bean.class)
             .should()
-            .bePublic()
-            .because("@Bean annotation does not work in non public methods");
+            .bePackagePrivate()
+            .because("@Bean annotation should be on PackagePrivate methods only");
 }

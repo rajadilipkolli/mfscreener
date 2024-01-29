@@ -6,6 +6,8 @@
 
     <property name="string.type" value="VARCHAR(255)" dbms="!postgresql"/>
     <property name="string.type" value="text" dbms="postgresql"/>
+    <property name="timestamp.type" value="timestamp" dbms="!postgresql"/>
+    <property name="timestamp.type" value="timestamptz" dbms="postgresql"/>
 
     <changeSet id="create_sequence_user_scheme_details_seq" author="appUser">
         <preConditions onFail="MARK_RAN">
@@ -39,9 +41,9 @@
                 <constraints nullable="false"/>
             </column>
             <column name="created_by" type="${string.type}"/>
-            <column name="created_date" type="timestamp"/>
+            <column name="created_date" type="${timestamp.type}"/>
             <column name="last_modified_by" type="${string.type}"/>
-            <column name="last_modified_date" type="timestamp"/>
+            <column name="last_modified_date" type="${timestamp.type}"/>
         </createTable>
 
         <addUniqueConstraint tableName="user_scheme_details" columnNames="user_folio_id,isin"

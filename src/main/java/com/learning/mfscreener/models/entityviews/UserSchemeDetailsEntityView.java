@@ -1,7 +1,9 @@
 package com.learning.mfscreener.models.entityviews;
 
 import com.blazebit.persistence.view.EntityView;
+import com.blazebit.persistence.view.FetchStrategy;
 import com.blazebit.persistence.view.IdMapping;
+import com.blazebit.persistence.view.Mapping;
 import com.learning.mfscreener.entities.UserSchemeDetailsEntity;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -42,5 +44,6 @@ public interface UserSchemeDetailsEntityView {
 
     String getCloseCalculated();
 
+    @Mapping(fetch = FetchStrategy.MULTISET)
     List<UserTransactionDetailsEntityView> getTransactionEntities();
 }

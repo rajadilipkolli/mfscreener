@@ -1,7 +1,9 @@
 package com.learning.mfscreener.models.entityviews;
 
 import com.blazebit.persistence.view.EntityView;
+import com.blazebit.persistence.view.FetchStrategy;
 import com.blazebit.persistence.view.IdMapping;
+import com.blazebit.persistence.view.Mapping;
 import com.learning.mfscreener.entities.CasTypeEnum;
 import com.learning.mfscreener.entities.FileTypeEnum;
 import com.learning.mfscreener.entities.UserCASDetailsEntity;
@@ -30,5 +32,6 @@ public interface UserCASDetailsEntityView {
 
     InvestorInfoEntityView getInvestorInfoEntity();
 
+    @Mapping(fetch = FetchStrategy.MULTISET)
     List<UserFolioDetailsEntityView> getFolioEntities();
 }
