@@ -54,7 +54,7 @@ public class PortfolioService {
         String name = casDTO.investorInfo().name();
         UserCASDetailsEntity casDetailsEntity = null;
         int folios = 0;
-        int transactions = 0;
+        long transactions = 0;
         if (this.investorInfoEntityRepository.existsByEmailAndName(email, name)) {
             var holder = findDelta(email, name, casDTO);
             if (holder != null) {
@@ -69,8 +69,7 @@ public class PortfolioService {
                     .map(UserFolioDetailsEntity::getSchemeEntities)
                     .flatMap(List::stream)
                     .map(UserSchemeDetailsEntity::getTransactionEntities)
-                    .toList()
-                    .size();
+                    .count();
             folios = folioEntities.size();
         }
         if (casDetailsEntity != null) {
@@ -86,17 +85,17 @@ public class PortfolioService {
         List<UserFolioDTO> folioDTOList = casDTO.folios();
 
         // Extract all transactions from folios
-        List<UserTransactionDTO> userTransactionDTOList = folioDTOList.stream()
+        long userTransactionDTOListCount = folioDTOList.stream()
                 .flatMap(userFolioDTO -> userFolioDTO.schemes().stream())
-                .flatMap(userSchemeDTO -> userSchemeDTO.transactions().stream())
-                .toList();
+                .mapToLong(userSchemeDTO -> userSchemeDTO.transactions().size())
+                .sum();
 
         List<UserTransactionDetailsEntity> userTransactionDetailsEntityList =
                 this.userTransactionDetailsEntityRepository.findAllTransactionsByEmailAndName(email, name);
 
         UserCASDetailsEntity userCASDetailsEntity = casDetailsEntityRepository.findByInvestorEmailAndName(email, name);
 
-        if (userTransactionDTOList.size() == userTransactionDetailsEntityList.size()) {
+        if (userTransactionDTOListCount == userTransactionDetailsEntityList.size()) {
             log.info("No new transactions are added");
             return null;
         }
@@ -126,7 +125,7 @@ public class PortfolioService {
         });
 
         // Check if all new transactions are added as part of adding folios
-        if (userTransactionDTOList.size() == (userTransactionDetailsEntityList.size() + transactionsCounter.get())) {
+        if (userTransactionDTOListCount == (userTransactionDetailsEntityList.size() + transactionsCounter.get())) {
             log.info("All new transactions are added as part of adding folios, hence skipping");
         } else {
             // New schemes or transactions are added
@@ -180,8 +179,7 @@ public class PortfolioService {
             userCASDetailsEntity.setFolioEntities(existingUserFolioDetailsEntityList);
 
             // Check if all new transactions are added as part of adding schemes
-            if (userTransactionDTOList.size()
-                    == (userTransactionDetailsEntityList.size() + transactionsCounter.get())) {
+            if (userTransactionDTOListCount == (userTransactionDetailsEntityList.size() + transactionsCounter.get())) {
                 log.info("All new transactions are added as part of adding schemes, hence skipping");
             } else {
                 // New transactions are added
