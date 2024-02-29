@@ -1,0 +1,330 @@
+repo_name: rajadilipkolli/mfscreener
+report_id: cb730e7ae9edf923765de323db8ffde1
+version: 0.1
+repo_type: Public
+timestamp: '2024-02-29T20:08:10+00:00'
+requested_by: renovate[bot]
+provider: github
+branch: main
+detected_tools_count: 26
+tools:
+- name: Java
+  description: A concurrent, class-based, object-oriented, language specifically designed
+    to have as few implementation dependencies as possible
+  website_url: https://www.java.com
+  open_source: true
+  hosted_saas: false
+  category: Languages & Frameworks
+  sub_category: Languages
+  image_url: https://img.stackshare.io/service/995/K85ZWV2F.png
+  detection_source_url: https://github.com/rajadilipkolli/mfscreener
+  detection_source: Repo Metadata
+- name: Spring Framework
+  description: An application framework and inversion of control container for the
+    Java platform
+  website_url: https://spring.io/projects/spring-framework
+  license: Apache-2.0
+  open_source: true
+  hosted_saas: false
+  category: Languages & Frameworks
+  sub_category: Frameworks (Full Stack)
+  image_url: https://img.stackshare.io/service/2006/spring-framework-project-logo.png
+  detection_source_url: https://github.com/rajadilipkolli/mfscreener/blob/main/build.gradle
+  detection_source: build.gradle
+  last_updated_by: Raja Kolli
+  last_updated_on: 2024-01-29 18:51:26.000000000 Z
+- name: H2 Database
+  description: A relational database management system written in Java
+  website_url: http://www.h2database.com/
+  open_source: false
+  hosted_saas: false
+  category: Data Stores
+  sub_category: Databases
+  image_url: https://img.stackshare.io/service/3105/h2-logo_square_400x400.png
+  detection_source_url: https://github.com/rajadilipkolli/mfscreener/blob/main/build.gradle
+  detection_source: build.gradle
+  last_updated_by: Raja Kolli
+  last_updated_on: 2023-06-25 08:08:55.000000000 Z
+- name: Liquibase
+  description: Easily track, version &amp; deploy database changes
+  website_url: https://www.liquibase.com
+  license: Apache-2.0
+  open_source: true
+  hosted_saas: false
+  category: Data Stores
+  sub_category: Database Tools
+  image_url: https://img.stackshare.io/service/1398/y1As8_s5_400x400.jpg
+  detection_source_url: https://github.com/rajadilipkolli/mfscreener/blob/main/build.gradle
+  detection_source: build.gradle
+  last_updated_by: Raja Kolli
+  last_updated_on: 2023-06-25 08:08:55.000000000 Z
+- name: PostgreSQL
+  description: A powerful, open source object-relational database system
+  website_url: http://www.postgresql.org/
+  open_source: true
+  hosted_saas: false
+  category: Data Stores
+  sub_category: Databases
+  image_url: https://img.stackshare.io/service/1028/ASOhU5xJ.png
+  detection_source_url: https://github.com/rajadilipkolli/mfscreener/blob/main/build.gradle
+  detection_source: build.gradle
+  last_updated_by: Raja Kolli
+  last_updated_on: 2023-06-25 08:08:55.000000000 Z
+- name: CircleCI
+  description: Automate your development process quickly, safely, and at scale
+  website_url: https://circleci.com/
+  open_source: false
+  hosted_saas: true
+  category: Build, Test, Deploy
+  sub_category: Continuous Integration
+  image_url: https://img.stackshare.io/service/190/CvqrSSFs_400x400.jpg
+  detection_source_url: https://github.com/rajadilipkolli/mfscreener/blob/main/.circleci/config.yml
+  detection_source: ".circleci/config.yml"
+  last_updated_by: Raja Kolli
+  last_updated_on: 2023-06-25 14:24:02.000000000 Z
+- name: Docker
+  description: Enterprise Container Platform for High-Velocity Innovation.
+  website_url: https://www.docker.com/
+  license: Apache-2.0
+  open_source: true
+  hosted_saas: false
+  category: Build, Test, Deploy
+  sub_category: Virtual Machine Platforms & Containers
+  image_url: https://img.stackshare.io/service/586/n4u37v9t_400x400.png
+  detection_source_url: https://github.com/rajadilipkolli/mfscreener
+  detection_source: Repo Metadata
+- name: Git
+  description: Fast, scalable, distributed revision control system
+  website_url: http://git-scm.com/
+  open_source: true
+  hosted_saas: false
+  category: Build, Test, Deploy
+  sub_category: Version Control System
+  image_url: https://img.stackshare.io/service/1046/git.png
+  detection_source_url: https://github.com/rajadilipkolli/mfscreener
+  detection_source: Repo Metadata
+- name: GitHub Actions
+  description: Automate your workflow from idea to production
+  website_url: https://github.com/features/actions
+  open_source: false
+  hosted_saas: true
+  category: Build, Test, Deploy
+  sub_category: Continuous Integration
+  image_url: https://img.stackshare.io/service/11563/actions.png
+  detection_source_url: https://github.com/rajadilipkolli/mfscreener/blob/main/.github/workflows/gradle.yml
+  detection_source: ".github/workflows/gradle.yml"
+  last_updated_by: renovate[bot]
+  last_updated_on: 2023-12-13 17:38:27.000000000 Z
+- name: Gradle
+  description: A powerful build system for the JVM
+  website_url: https://www.gradle.org/
+  license: Apache-2.0
+  open_source: true
+  hosted_saas: false
+  category: Build, Test, Deploy
+  sub_category: Java Build Tools
+  image_url: https://img.stackshare.io/service/975/gradlephant-social-black-bg.png
+  detection_source_url: https://github.com/rajadilipkolli/mfscreener/blob/main/build.gradle
+  detection_source: build.gradle
+  last_updated_by: Raja Kolli
+  last_updated_on: 2023-06-25 09:17:11.000000000 Z
+- name: Logback
+  description: A logging framework for Java applications
+  website_url: https://logback.qos.ch/
+  open_source: false
+  hosted_saas: false
+  category: Monitoring
+  sub_category: Log Management
+  image_url: https://img.stackshare.io/service/2923/05518ecaa42841e834421e9d6987b04f_400x400.png
+  detection_source_url: https://github.com/rajadilipkolli/mfscreener/blob/main/src/test/resources/logback-test.xml
+  detection_source: src/test/resources/logback-test.xml
+  last_updated_by: Raja Kolli
+  last_updated_on: 2023-06-25 08:08:55.000000000 Z
+- name: Prometheus
+  description: An open-source service monitoring system and time series database,
+    developed by SoundCloud
+  website_url: http://prometheus.io/
+  license: Apache-2.0
+  open_source: true
+  hosted_saas: false
+  category: Monitoring
+  sub_category: Monitoring Tools
+  image_url: https://img.stackshare.io/service/2501/default_3cf1b307194b26782be5cb209d30360580ae5b3c.png
+  detection_source_url: https://github.com/rajadilipkolli/mfscreener/blob/main/config/prometheus/prometheus.yml
+  detection_source: config/prometheus/prometheus.yml
+  last_updated_by: Raja Kolli
+  last_updated_on: 2023-07-07 01:59:06.000000000 Z
+- name: Zipkin
+  description: A distributed tracing system
+  website_url: https://zipkin.io/
+  license: Apache-2.0
+  open_source: true
+  hosted_saas: false
+  category: Monitoring
+  sub_category: Monitoring Tools
+  image_url: https://img.stackshare.io/service/2494/8leuukuhknbc8fj0eg42_400x400.png
+  detection_source_url: https://github.com/rajadilipkolli/mfscreener/blob/main/docker/docker-compose.yml
+  detection_source: docker/docker-compose.yml
+  last_updated_by: Raja Kolli
+  last_updated_on: 2023-09-22 07:40:20.000000000 Z
+- name: Apache Camel
+  description: A versatile open source integration framework
+  website_url: https://camel.apache.org/
+  license: Apache-2.0
+  open_source: true
+  hosted_saas: false
+  category: Application Hosting
+  sub_category: Platform as a Service
+  image_url: https://img.stackshare.io/service/3276/xWt1RFo6_400x400.jpg
+  detection_source_url: https://github.com/rajadilipkolli/mfscreener/blob/main/src/main/resources/application.properties
+  detection_source: src/main/resources/application.properties
+  last_updated_by: Raja Kolli
+  last_updated_on: 2023-06-25 08:08:55.000000000 Z
+- name: Alpine Linux
+  description: Security-oriented, lightweight Linux distribution based on musl libc
+    and busybox
+  website_url: https://www.alpinelinux.org/
+  open_source: false
+  hosted_saas: false
+  category: Languages & Frameworks
+  sub_category: Operating Systems
+  image_url: https://img.stackshare.io/service/6429/alpine_linux.png
+  detection_source_url: https://github.com/rajadilipkolli/mfscreener/blob/main/docker/docker-compose.yml
+  detection_source: docker/docker-compose.yml
+  last_updated_by: Raja Kolli
+  last_updated_on: 2024-01-11 11:55:46.000000000 Z
+- name: com.h2database:h2
+  description: H2 Database Engine
+  license: MIT-feh
+  open_source: true
+  hosted_saas: false
+  category: Libraries
+  sub_category: Maven Packages
+  image_url: https://img.stackshare.io/package/maven/image.png
+  detection_source_url: https://github.com/rajadilipkolli/mfscreener/blob/main/build.gradle
+  detection_source: build.gradle
+  last_updated_by: Raja Kolli
+  last_updated_on: 2024-01-29 18:51:26.000000000 Z
+- name: io.micrometer:micrometer-registry-prometheus
+  description: Application monitoring instrumentation facade
+  license: Apache-2.0
+  open_source: true
+  hosted_saas: false
+  category: Libraries
+  sub_category: Maven Packages
+  image_url: https://img.stackshare.io/package/maven/image.png
+  detection_source_url: https://github.com/rajadilipkolli/mfscreener/blob/main/build.gradle
+  detection_source: build.gradle
+  last_updated_by: renovate[bot]
+  last_updated_on: 2023-12-27 09:36:25.000000000 Z
+- name: org.liquibase:liquibase-core
+  description: Liquibase is a tool for managing and executing database changes
+  license: Apache-2.0
+  open_source: true
+  hosted_saas: false
+  category: Libraries
+  sub_category: Maven Packages
+  image_url: https://img.stackshare.io/package/maven/image.png
+  detection_source_url: https://github.com/rajadilipkolli/mfscreener/blob/main/build.gradle
+  detection_source: build.gradle
+  last_updated_by: renovate[bot]
+  last_updated_on: 2024-01-04 04:21:00.000000000 Z
+- name: org.postgresql:postgresql
+  description: The PostgreSQL Driver JDBC4
+  license: BSD-2-Clause
+  open_source: true
+  hosted_saas: false
+  category: Libraries
+  sub_category: Maven Packages
+  image_url: https://img.stackshare.io/package/maven/image.png
+  detection_source_url: https://github.com/rajadilipkolli/mfscreener/blob/main/build.gradle
+  detection_source: build.gradle
+  last_updated_by: renovate[bot]
+  last_updated_on: 2024-01-04 04:21:00.000000000 Z
+- name: org.projectlombok:lombok
+  description: 'Spice up your java: Automatic Resource Management'
+  license: MIT
+  open_source: true
+  hosted_saas: false
+  category: Libraries
+  sub_category: Maven Packages
+  image_url: https://img.stackshare.io/package/maven/image.png
+  detection_source_url: https://github.com/rajadilipkolli/mfscreener/blob/main/build.gradle
+  detection_source: build.gradle
+  last_updated_by: renovate[bot]
+  last_updated_on: 2024-01-04 04:21:00.000000000 Z
+- name: org.springframework.boot:spring-boot-starter-actuator
+  description: Starter for using Spring Boot's Actuator which provides production
+    ready features to help you monitor and manage your application
+  license: Apache-2.0
+  open_source: true
+  hosted_saas: false
+  category: Libraries
+  sub_category: Maven Packages
+  image_url: https://img.stackshare.io/package/maven/image.png
+  detection_source_url: https://github.com/rajadilipkolli/mfscreener/blob/main/build.gradle
+  detection_source: build.gradle
+  last_updated_by: Raja Kolli
+  last_updated_on: 2024-01-29 18:51:26.000000000 Z
+- name: org.springframework.boot:spring-boot-starter-data-jpa
+  description: Starter for using Spring Data JPA with Hibernate
+  license: Apache-2.0
+  open_source: true
+  hosted_saas: false
+  category: Libraries
+  sub_category: Maven Packages
+  image_url: https://img.stackshare.io/package/maven/image.png
+  detection_source_url: https://github.com/rajadilipkolli/mfscreener/blob/main/build.gradle
+  detection_source: build.gradle
+  last_updated_by: Raja Kolli
+  last_updated_on: 2024-01-29 18:51:26.000000000 Z
+- name: org.springframework.boot:spring-boot-starter-test
+  description: Starter for testing Spring Boot applications with libraries including
+    JUnit
+  license: Apache-2.0
+  open_source: true
+  hosted_saas: false
+  category: Libraries
+  sub_category: Maven Packages
+  image_url: https://img.stackshare.io/package/maven/image.png
+  detection_source_url: https://github.com/rajadilipkolli/mfscreener/blob/main/build.gradle
+  detection_source: build.gradle
+  last_updated_by: Raja Kolli
+  last_updated_on: 2024-01-29 18:51:26.000000000 Z
+- name: org.springframework.boot:spring-boot-starter-validation
+  description: Starter for using Java Bean Validation with Hibernate Validator
+  license: Apache-2.0
+  open_source: true
+  hosted_saas: false
+  category: Libraries
+  sub_category: Maven Packages
+  image_url: https://img.stackshare.io/package/maven/image.png
+  detection_source_url: https://github.com/rajadilipkolli/mfscreener/blob/main/build.gradle
+  detection_source: build.gradle
+  last_updated_by: Raja Kolli
+  last_updated_on: 2024-01-29 18:51:26.000000000 Z
+- name: org.springframework.boot:spring-boot-starter-web
+  description: Starter for building web, including RESTful, applications using Spring
+    MVC
+  license: Apache-2.0
+  open_source: true
+  hosted_saas: false
+  category: Libraries
+  sub_category: Maven Packages
+  image_url: https://img.stackshare.io/package/maven/image.png
+  detection_source_url: https://github.com/rajadilipkolli/mfscreener/blob/main/build.gradle
+  detection_source: build.gradle
+  last_updated_by: Raja Kolli
+  last_updated_on: 2024-01-29 18:51:26.000000000 Z
+- name: org.testcontainers:postgresql
+  description: Testcontainers is a Java library that supports JUnit tests
+  license: MIT
+  open_source: true
+  hosted_saas: false
+  category: Libraries
+  sub_category: Maven Packages
+  image_url: https://img.stackshare.io/package/maven/image.png
+  detection_source_url: https://github.com/rajadilipkolli/mfscreener/blob/main/build.gradle
+  detection_source: build.gradle
+  last_updated_by: renovate[bot]
+  last_updated_on: 2024-01-04 04:21:00.000000000 Z
