@@ -1,7 +1,7 @@
 package com.learning.mfscreener.repository;
 
 import com.learning.mfscreener.entities.UserSchemeDetailsEntity;
-import com.learning.mfscreener.models.projection.Schemeisin;
+import com.learning.mfscreener.models.projection.SchemeNameAndISIN;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -30,5 +30,5 @@ public interface UserSchemeDetailsEntityRepository extends JpaRepository<UserSch
             """)
     List<UserSchemeDetailsEntity> findByUserEmailAndName(@Param("email") String email, @Param("name") String name);
 
-    Optional<Schemeisin> findFirstByAmfi(Long amfi);
+    Optional<SchemeNameAndISIN> findFirstByAmfi(Long amfi);
 }

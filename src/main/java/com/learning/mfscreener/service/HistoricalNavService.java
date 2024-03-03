@@ -7,7 +7,7 @@ import com.learning.mfscreener.entities.MFSchemeEntity;
 import com.learning.mfscreener.exception.NavNotFoundException;
 import com.learning.mfscreener.exception.SchemeNotFoundException;
 import com.learning.mfscreener.models.MFSchemeDTO;
-import com.learning.mfscreener.models.projection.Schemeisin;
+import com.learning.mfscreener.models.projection.SchemeNameAndISIN;
 import com.learning.mfscreener.repository.MFSchemeRepository;
 import com.learning.mfscreener.repository.UserSchemeDetailsEntityRepository;
 import com.learning.mfscreener.utils.AppConstants;
@@ -56,9 +56,10 @@ public class HistoricalNavService {
         Optional<MFSchemeEntity> bySchemeId = mfSchemeRepository.findBySchemeId(schemeCode);
         String payOut;
         boolean persistSchemeInfo = false;
+        SchemeNameAndISIN firstByAmfi = null;
         if (bySchemeId.isEmpty()) {
             // discontinued Scheme
-            Schemeisin firstByAmfi = userSchemeDetailsEntityRepository
+            firstByAmfi = userSchemeDetailsEntityRepository
                     .findFirstByAmfi(schemeCode)
                     .orElseThrow(
                             () -> new SchemeNotFoundException("Fund with schemeCode " + schemeCode + " Not Found"));
@@ -110,6 +111,15 @@ public class HistoricalNavService {
         } catch (IOException e) {
             log.error("Exception Occurred while reading response", e);
             throw new NavNotFoundException("Unable to parse for %s".formatted(schemeCode), navDate);
+        }
+        if (!StringUtils.hasText(oldSchemeId)) {
+            // Manually creating entry in mf_scheme table as no entry found in historical link
+            MFSchemeEntity mfSchemeEntity = new MFSchemeEntity();
+            mfSchemeEntity.setPayOut(payOut);
+            mfSchemeEntity.setSchemeId(schemeCode);
+            mfSchemeEntity.setSchemeName(firstByAmfi.getScheme());
+            mfSchemeRepository.save(mfSchemeEntity);
+            oldSchemeId = String.valueOf(schemeCode);
         }
         return oldSchemeId;
     }

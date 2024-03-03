@@ -57,7 +57,7 @@ public class NavService {
 
                 if (retryCount >= 3) {
                     // make a call to get historical Data and persist
-                    var oldSchemecode = historicalNavService.getHistoricalNav(schemeCode, navDate);
+                    String oldSchemecode = historicalNavService.getHistoricalNav(schemeCode, navDate);
                     schemeService.fetchSchemeDetails(oldSchemecode, schemeCode);
                 }
 

@@ -9,7 +9,7 @@ import com.learning.mfscreener.entities.UserSchemeDetailsEntity;
 import com.learning.mfscreener.exception.SchemeNotFoundException;
 import com.learning.mfscreener.models.MetaDTO;
 import com.learning.mfscreener.models.projection.FundDetailProjection;
-import com.learning.mfscreener.models.projection.Schemeisin;
+import com.learning.mfscreener.models.projection.SchemeNameAndISIN;
 import com.learning.mfscreener.models.response.NavResponse;
 import com.learning.mfscreener.repository.MFSchemeRepository;
 import com.learning.mfscreener.repository.MFSchemeTypeRepository;
@@ -52,8 +52,8 @@ public class SchemeService {
     void processResponseEntity(Long schemeCode, NavResponse navResponse) {
         Optional<MFSchemeEntity> bySchemeId = mfSchemeRepository.findBySchemeId(schemeCode);
         if (bySchemeId.isEmpty()) {
-            // Scenario where scheme is discontinued
-            Schemeisin firstByAmfi = userSchemeDetailsEntityRepository
+            // Scenario where scheme is discontinued or merged with other
+            SchemeNameAndISIN firstByAmfi = userSchemeDetailsEntityRepository
                     .findFirstByAmfi(schemeCode)
                     .orElseThrow(
                             () -> new SchemeNotFoundException("Fund with schemeCode " + schemeCode + " Not Found"));
@@ -102,8 +102,12 @@ public class SchemeService {
                             entity.setSchemeCategory(meta.schemeCategory());
                             return this.mfSchemeTypeRepository.save(entity);
                         });
-                // As fund house is set at initializing, removing from here
-                //                mfSchemeEntity.setFundHouse(meta.fundHouse());
+                // As fund house is set at initializing, set only if it is not set
+                if (mfSchemeEntity.getFundHouse() == null) {
+                    // case where entity is manually created instead of load
+                    mfSchemeEntity.setFundHouse(meta.fundHouse());
+                    mfSchemeEntity.setSchemeName(meta.schemeName());
+                }
                 mfschemeTypeEntity.addMFScheme(mfSchemeEntity);
                 try {
                     this.mfSchemeRepository.save(mfSchemeEntity);
