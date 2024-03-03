@@ -1,6 +1,8 @@
 package com.learning.mfscreener.service;
 
-import static java.util.stream.Collectors.*;
+import static java.util.stream.Collectors.flatMapping;
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.toList;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.learning.mfscreener.adapter.ConversionServiceAdapter;
@@ -17,7 +19,11 @@ import com.learning.mfscreener.models.portfolio.UserSchemeDTO;
 import com.learning.mfscreener.models.portfolio.UserTransactionDTO;
 import com.learning.mfscreener.models.response.PortfolioResponse;
 import com.learning.mfscreener.models.response.UploadResponseHolder;
-import com.learning.mfscreener.repository.*;
+import com.learning.mfscreener.repository.InvestorInfoEntityRepository;
+import com.learning.mfscreener.repository.UserCASDetailsEntityRepository;
+import com.learning.mfscreener.repository.UserFolioDetailsEntityRepository;
+import com.learning.mfscreener.repository.UserSchemeDetailsEntityRepository;
+import com.learning.mfscreener.repository.UserTransactionDetailsEntityRepository;
 import com.learning.mfscreener.utils.LocalDateUtility;
 import java.io.IOException;
 import java.time.LocalDate;
@@ -246,10 +252,9 @@ public class PortfolioService {
                         .map(portfolioDetails -> CompletableFuture.supplyAsync(() -> {
                             MFSchemeDTO scheme = navService.getNavByDateWithRetry(
                                     portfolioDetails.getSchemeId(), LocalDateUtility.getAdjustedDate(asOfDate));
-                            Double totalValue = portfolioDetails.getBalanceUnits() * Double.parseDouble(scheme.nav());
-
+                            double totalValue = portfolioDetails.getBalanceUnits() * Double.parseDouble(scheme.nav());
                             return new PortfolioDetailsDTO(
-                                    totalValue,
+                                    Math.round(totalValue * 100.0) / 100.0,
                                     portfolioDetails.getSchemeName(),
                                     portfolioDetails.getFolioNumber(),
                                     scheme.date());
@@ -262,7 +267,7 @@ public class PortfolioService {
         return new PortfolioResponse(
                 portfolioDetailsDTOS.stream()
                         .map(PortfolioDetailsDTO::totalValue)
-                        .reduce(0d, Double::sum),
+                        .reduce(0D, Double::sum),
                 portfolioDetailsDTOS);
     }
 }
