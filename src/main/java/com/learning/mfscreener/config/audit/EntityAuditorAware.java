@@ -1,4 +1,4 @@
-/* Licensed under Apache-2.0 2021-2022. */
+/* Licensed under Apache-2.0 2021-2024. */
 package com.learning.mfscreener.config.audit;
 
 import java.util.Optional;
@@ -8,6 +8,6 @@ public class EntityAuditorAware implements AuditorAware<String> {
 
     @Override
     public Optional<String> getCurrentAuditor() {
-        return Optional.of("Raja");
+        return Optional.of("Application");
     }
 }
