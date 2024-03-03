@@ -56,7 +56,7 @@ public class NavService {
             } catch (NavNotFoundException navNotFoundException) {
                 log.error("NavNotFoundException occurred: {}", navNotFoundException.getMessage());
 
-                if (retryCount == 1 || retryCount == 4) {
+                if (retryCount == 1 || retryCount == 3) {
                     // make a call to get historical Data and persist
                     String oldSchemecode = historicalNavService.getHistoricalNav(schemeCode, navDate);
                     if (StringUtils.hasText(oldSchemecode)) {
