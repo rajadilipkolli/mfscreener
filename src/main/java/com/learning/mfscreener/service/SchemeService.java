@@ -9,6 +9,7 @@ import com.learning.mfscreener.entities.UserSchemeDetailsEntity;
 import com.learning.mfscreener.exception.SchemeNotFoundException;
 import com.learning.mfscreener.models.MetaDTO;
 import com.learning.mfscreener.models.projection.FundDetailProjection;
+import com.learning.mfscreener.models.projection.Schemeisin;
 import com.learning.mfscreener.models.response.NavResponse;
 import com.learning.mfscreener.repository.MFSchemeRepository;
 import com.learning.mfscreener.repository.MFSchemeTypeRepository;
@@ -22,12 +23,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.RestClient;
 import org.springframework.web.util.UriComponentsBuilder;
 
 @Service
@@ -35,7 +33,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 @Slf4j
 public class SchemeService {
 
-    private final RestTemplate restTemplate;
+    private final RestClient restClient;
     private final MFSchemeRepository mfSchemeRepository;
     private final MFSchemeTypeRepository mfSchemeTypeRepository;
     private final UserSchemeDetailsEntityRepository userSchemeDetailsEntityRepository;
@@ -43,22 +41,38 @@ public class SchemeService {
 
     @Loggable
     public void fetchSchemeDetails(Long schemeCode) {
-        log.info("Fetching SchemeDetails for AMFISchemeCode :{} ", schemeCode);
-        URI uri = UriComponentsBuilder.fromHttpUrl(AppConstants.MFAPI_WEBSITE_BASE_URL + schemeCode)
-                .build()
-                .toUri();
+        processResponseEntity(schemeCode, getNavResponseResponseEntity(schemeCode));
+    }
 
-        ResponseEntity<NavResponse> navResponseResponseEntity =
-                this.restTemplate.exchange(uri, HttpMethod.GET, null, NavResponse.class);
-        if (navResponseResponseEntity.getStatusCode().is2xxSuccessful()) {
-            NavResponse entityBody = navResponseResponseEntity.getBody();
-            Assert.notNull(entityBody, () -> "Body Can't be Null");
-            MFSchemeEntity mfSchemeEntity = mfSchemeRepository
-                    .findBySchemeId(schemeCode)
+    @Loggable
+    public void fetchSchemeDetails(String oldSchemeCode, Long newSchemeCode) {
+        processResponseEntity(newSchemeCode, getNavResponseResponseEntity(Long.valueOf(oldSchemeCode)));
+    }
+
+    void processResponseEntity(Long schemeCode, NavResponse navResponse) {
+        Optional<MFSchemeEntity> bySchemeId = mfSchemeRepository.findBySchemeId(schemeCode);
+        if (bySchemeId.isEmpty()) {
+            // Scenario where scheme is discontinued
+            Schemeisin firstByAmfi = userSchemeDetailsEntityRepository
+                    .findFirstByAmfi(schemeCode)
                     .orElseThrow(
                             () -> new SchemeNotFoundException("Fund with schemeCode " + schemeCode + " Not Found"));
-            mergeList(entityBody, mfSchemeEntity, schemeCode);
+            String isin = firstByAmfi.getIsin();
+            log.error("Found Isin :{}", isin);
+        } else {
+            mergeList(navResponse, bySchemeId.get(), schemeCode);
         }
+    }
+
+    NavResponse getNavResponseResponseEntity(Long schemeCode) {
+        return this.restClient.get().uri(getUri(schemeCode)).retrieve().body(NavResponse.class);
+    }
+
+    URI getUri(Long schemeCode) {
+        log.info("Fetching SchemeDetails for AMFISchemeCode :{} ", schemeCode);
+        return UriComponentsBuilder.fromHttpUrl(AppConstants.MFAPI_WEBSITE_BASE_URL + schemeCode)
+                .build()
+                .toUri();
     }
 
     void mergeList(NavResponse navResponse, MFSchemeEntity mfSchemeEntity, Long schemeCode) {
