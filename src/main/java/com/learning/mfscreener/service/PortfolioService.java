@@ -10,6 +10,7 @@ import com.learning.mfscreener.entities.UserCASDetailsEntity;
 import com.learning.mfscreener.entities.UserFolioDetailsEntity;
 import com.learning.mfscreener.entities.UserSchemeDetailsEntity;
 import com.learning.mfscreener.entities.UserTransactionDetailsEntity;
+import com.learning.mfscreener.exception.NavNotFoundException;
 import com.learning.mfscreener.mapper.CasDetailsMapper;
 import com.learning.mfscreener.models.MFSchemeDTO;
 import com.learning.mfscreener.models.PortfolioDetailsDTO;
@@ -250,8 +251,20 @@ public class PortfolioService {
         List<CompletableFuture<PortfolioDetailsDTO>> completableFutureList =
                 casDetailsEntityRepository.getPortfolioDetails(panNumber, asOfDate).stream()
                         .map(portfolioDetails -> CompletableFuture.supplyAsync(() -> {
-                            MFSchemeDTO scheme = navService.getNavByDateWithRetry(
-                                    portfolioDetails.getSchemeId(), LocalDateUtility.getAdjustedDate(asOfDate));
+                            MFSchemeDTO scheme;
+                            LocalDate adjustedDate = asOfDate;
+                            try {
+                                adjustedDate = LocalDateUtility.getAdjustedDate(asOfDate);
+                                scheme = navService.getNavByDateWithRetry(portfolioDetails.getSchemeId(), adjustedDate);
+                            } catch (NavNotFoundException navNotFoundException) {
+                                // Will happen in case of NFO where units are allocated but not ready for subscription
+                                log.error(
+                                        "NavNotFoundException occurred for scheme : {} on adjusted date :{}",
+                                        portfolioDetails.getSchemeId(),
+                                        adjustedDate,
+                                        navNotFoundException);
+                                scheme = new MFSchemeDTO(null, null, null, null, "10", adjustedDate.toString());
+                            }
                             double totalValue = portfolioDetails.getBalanceUnits() * Double.parseDouble(scheme.nav());
                             return new PortfolioDetailsDTO(
                                     Math.round(totalValue * 100.0) / 100.0,
@@ -267,7 +280,7 @@ public class PortfolioService {
         return new PortfolioResponse(
                 portfolioDetailsDTOS.stream()
                         .map(PortfolioDetailsDTO::totalValue)
-                        .reduce(0D, Double::sum),
+                        .reduce((double) 0, Double::sum),
                 portfolioDetailsDTOS);
     }
 }

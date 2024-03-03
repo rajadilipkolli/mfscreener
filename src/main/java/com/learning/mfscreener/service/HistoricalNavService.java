@@ -112,7 +112,7 @@ public class HistoricalNavService {
             log.error("Exception Occurred while reading response", e);
             throw new NavNotFoundException("Unable to parse for %s".formatted(schemeCode), navDate);
         }
-        if (!StringUtils.hasText(oldSchemeId)) {
+        if (!StringUtils.hasText(oldSchemeId) && firstByAmfi != null) {
             // Manually creating entry in mf_scheme table as no entry found in historical link
             MFSchemeEntity mfSchemeEntity = new MFSchemeEntity();
             mfSchemeEntity.setPayOut(payOut);
@@ -120,6 +120,8 @@ public class HistoricalNavService {
             mfSchemeEntity.setSchemeName(firstByAmfi.getScheme());
             mfSchemeRepository.save(mfSchemeEntity);
             oldSchemeId = String.valueOf(schemeCode);
+        } else {
+            log.info("No Nav found for the given day");
         }
         return oldSchemeId;
     }

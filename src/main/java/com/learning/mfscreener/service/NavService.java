@@ -12,6 +12,7 @@ import java.time.LocalTime;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 @Service
 @RequiredArgsConstructor
@@ -55,10 +56,15 @@ public class NavService {
             } catch (NavNotFoundException navNotFoundException) {
                 log.error("NavNotFoundException occurred: {}", navNotFoundException.getMessage());
 
-                if (retryCount >= 3) {
+                if (retryCount == 1 || retryCount == 4) {
                     // make a call to get historical Data and persist
                     String oldSchemecode = historicalNavService.getHistoricalNav(schemeCode, navDate);
-                    schemeService.fetchSchemeDetails(oldSchemecode, schemeCode);
+                    if (StringUtils.hasText(oldSchemecode)) {
+                        schemeService.fetchSchemeDetails(oldSchemecode, schemeCode);
+                    } else {
+                        // NFO scenario where data is not present in historical data, hence load all available data
+                        schemeService.fetchSchemeDetails(String.valueOf(schemeCode), schemeCode);
+                    }
                 }
 
                 if (retryCount >= 4) {
