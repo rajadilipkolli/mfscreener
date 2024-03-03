@@ -58,7 +58,7 @@ public class SchemeService {
                     .orElseThrow(
                             () -> new SchemeNotFoundException("Fund with schemeCode " + schemeCode + " Not Found"));
             String isin = firstByAmfi.getIsin();
-            log.error("Found Isin :{}", isin);
+            log.error("Found Discontinued IsIn : {}", isin);
         } else {
             mergeList(navResponse, bySchemeId.get(), schemeCode);
         }
