@@ -42,7 +42,7 @@ public class SchemeService {
     private final ConversionServiceAdapter conversionServiceAdapter;
 
     @Loggable
-    public MFSchemeEntity fetchSchemeDetails(Long schemeCode) {
+    public void fetchSchemeDetails(Long schemeCode) {
         log.info("Fetching SchemeDetails for AMFISchemeCode :{} ", schemeCode);
         URI uri = UriComponentsBuilder.fromHttpUrl(AppConstants.MFAPI_WEBSITE_BASE_URL + schemeCode)
                 .build()
@@ -50,17 +50,15 @@ public class SchemeService {
 
         ResponseEntity<NavResponse> navResponseResponseEntity =
                 this.restTemplate.exchange(uri, HttpMethod.GET, null, NavResponse.class);
-        MFSchemeEntity mfSchemeEntity = new MFSchemeEntity();
         if (navResponseResponseEntity.getStatusCode().is2xxSuccessful()) {
             NavResponse entityBody = navResponseResponseEntity.getBody();
             Assert.notNull(entityBody, () -> "Body Can't be Null");
-            mfSchemeEntity = mfSchemeRepository
+            MFSchemeEntity mfSchemeEntity = mfSchemeRepository
                     .findBySchemeId(schemeCode)
                     .orElseThrow(
                             () -> new SchemeNotFoundException("Fund with schemeCode " + schemeCode + " Not Found"));
             mergeList(entityBody, mfSchemeEntity, schemeCode);
         }
-        return mfSchemeEntity;
     }
 
     void mergeList(NavResponse navResponse, MFSchemeEntity mfSchemeEntity, Long schemeCode) {
