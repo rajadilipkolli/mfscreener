@@ -277,10 +277,9 @@ public class PortfolioService {
         List<PortfolioDetailsDTO> portfolioDetailsDTOS =
                 completableFutureList.stream().map(CompletableFuture::join).toList();
 
-        return new PortfolioResponse(
-                portfolioDetailsDTOS.stream()
-                        .map(PortfolioDetailsDTO::totalValue)
-                        .reduce((double) 0, Double::sum),
-                portfolioDetailsDTOS);
+        Double totalPortfolioValue = portfolioDetailsDTOS.stream()
+                .map(PortfolioDetailsDTO::totalValue)
+                .reduce((double) 0, Double::sum);
+        return new PortfolioResponse(Math.round(totalPortfolioValue * 100.0) / 100.0, portfolioDetailsDTOS);
     }
 }

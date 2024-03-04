@@ -60,7 +60,7 @@ public interface UserCASDetailsEntityRepository extends JpaRepository<UserCASDet
                         schemeId,
                         folioNumber
                     FROM finalView fv
-                    LEFT JOIN mf_scheme mf ON fv.schemeid = mf.scheme_id
+                    LEFT JOIN mf_scheme mf ON fv.schemeId = mf.scheme_id
                     """)
     List<PortfolioDetailsProjection> getPortfolioDetails(
             @Param("pan") String panNumber, @Param("asOfDate") LocalDate asOfDate);
