@@ -18,44 +18,54 @@ public interface UserCASDetailsEntityRepository extends JpaRepository<UserCASDet
             nativeQuery = true,
             value =
                     """
-                    with tempView as (
+                    WITH finalView
+                    AS (
+                        with tempView as (
+                            select
+                              utd.balance,
+                              utd.user_scheme_detail_id,
+                              usd.scheme as schemeName,
+                              usd.amfi as schemeId,
+                              ufd.folio as folioNumber,
+                              row_number() over (
+                                partition by utd.user_scheme_detail_id
+                                order by
+                                  utd.transaction_date desc
+                              ) as row_number
+                            from
+                              user_transaction_details utd
+                              join user_scheme_details usd on utd.user_scheme_detail_id = usd.id
+                              join user_folio_details ufd on usd.user_folio_id = ufd.id
+                            where
+                              utd.type NOT IN ('STAMP_DUTY_TAX', 'STT_TAX')
+                              and ufd.pan = :pan
+                              and utd.transaction_date <= :asOfDate
+                          )
                         select
-                          utd.balance,
-                          utd.user_scheme_detail_id,
-                          usd.scheme as schemeName,
-                          usd.amfi as schemeId,
-                          ufd.folio as folioNumber,
-                          row_number() over (
-                            partition by utd.user_scheme_detail_id
-                            order by
-                              utd.transaction_date desc
-                          ) as row_number
-                        from
-                          user_transaction_details utd
-                          join user_scheme_details usd on utd.user_scheme_detail_id = usd.id
-                          join user_folio_details ufd on usd.user_folio_id = ufd.id
+                          sum(balance) as balanceUnits,
+                          schemeName,
+                          schemeId,
+                          folioNumber
+                          from tempView
                         where
-                          utd.type NOT IN ('STAMP_DUTY_TAX', 'STT_TAX')
-                          and ufd.pan = :pan
-                          and utd.transaction_date <= :asOfDate
-                      )
-                    select
-                      sum(balance) as balanceUnits,
-                      schemeName,
-                      schemeId,
-                      folioNumber
-                      from tempView
-                    where
-                      row_number = 1
-                      and balance <> 0
-                    group by
-                      schemeName,
-                      schemeId,
-                      folioNumber
+                          row_number = 1
+                          and balance <> 0
+                        group by
+                          schemeName,
+                          schemeId,
+                          folioNumber
+                    )
+                    SELECT balanceUnits,
+                        COALESCE(mf.scheme_name, schemeName)  as schemeName,
+                        schemeId,
+                        folioNumber
+                    FROM finalView fv
+                    LEFT JOIN mf_scheme mf ON fv.schemeid = mf.scheme_id
                     """)
     List<PortfolioDetailsProjection> getPortfolioDetails(
             @Param("pan") String panNumber, @Param("asOfDate") LocalDate asOfDate);
 
+    @Transactional(readOnly = true)
     @Query(
             """
               select u from UserCASDetailsEntity u join fetch u.folioEntities join fetch u.investorInfoEntity as i
