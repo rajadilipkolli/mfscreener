@@ -8,6 +8,6 @@ public class EntityAuditorAware implements AuditorAware<String> {
 
     @Override
     public Optional<String> getCurrentAuditor() {
-        return Optional.of("Application");
+        return Optional.of("App");
     }
 }
