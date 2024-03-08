@@ -2,7 +2,10 @@ package com.learning.mfscreener.service;
 
 import com.learning.mfscreener.adapter.ConversionServiceAdapter;
 import com.learning.mfscreener.config.logging.Loggable;
-import com.learning.mfscreener.entities.*;
+import com.learning.mfscreener.entities.MFSchemeEntity;
+import com.learning.mfscreener.entities.MFSchemeNavEntity;
+import com.learning.mfscreener.entities.MFSchemeTypeEntity;
+import com.learning.mfscreener.entities.UserSchemeDetailsEntity;
 import com.learning.mfscreener.exception.SchemeNotFoundException;
 import com.learning.mfscreener.models.MetaDTO;
 import com.learning.mfscreener.models.projection.FundDetailProjection;
