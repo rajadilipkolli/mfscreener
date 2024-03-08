@@ -21,47 +21,41 @@ public interface UserCASDetailsEntityRepository extends JpaRepository<UserCASDet
                     WITH tempView AS (
                         SELECT
                             utd.balance,
-                            usd.scheme AS schemeName,
+                            COALESCE(mf.scheme_name, usd.scheme) AS schemeName,
                             usd.amfi AS schemeId,
                             ufd.folio AS folioNumber,
                             ROW_NUMBER() OVER (
                                 PARTITION BY utd.user_scheme_detail_id
-                                ORDER BY utd.transaction_date DESC
+                                ORDER BY utd.transaction_date DESC,
+                                CASE
+                                    WHEN utd.type = 'REDEMPTION' THEN balance
+                                    ELSE balance * -1 -- Negate balance for descending order happens when 2 entries on same date
+                                END ASC -- Ascending order for redemption, descending otherwise
                             ) AS row_number
                         FROM
                             user_transaction_details utd
                             JOIN user_scheme_details usd ON utd.user_scheme_detail_id = usd.id
                             JOIN user_folio_details ufd ON usd.user_folio_id = ufd.id
+                            LEFT JOIN mf_scheme mf ON usd.amfi = mf.scheme_id
                         WHERE
                             utd.type NOT IN ('STAMP_DUTY_TAX', '*** Stamp Duty ***', 'STT_TAX')
                             AND ufd.pan = :pan
                             AND utd.transaction_date <= :asOfDate
-                    ),
-                    finalView AS (
-                        SELECT
-                            SUM(balance) AS balanceUnits,
-                            schemeName,
-                            schemeId,
-                            folioNumber
-                        FROM
-                            tempView
-                        WHERE
-                            row_number = 1
-                            AND balance <> 0
-                        GROUP BY
-                            schemeName,
-                            schemeId,
-                            folioNumber
                     )
                     SELECT
-                        balanceUnits,
-                        COALESCE(mf.scheme_name, schemeName) AS schemeName,
+                        SUM(balance) AS balanceUnits,
+                        schemeName,
                         schemeId,
                         folioNumber
                     FROM
-                        finalView fv
-                    LEFT JOIN
-                        mf_scheme mf ON fv.schemeId = mf.scheme_id;
+                        tempView
+                    WHERE
+                        row_number = 1
+                        AND balance <> 0
+                    GROUP BY
+                        schemeName,
+                        schemeId,
+                        folioNumber
                     """)
     List<PortfolioDetailsProjection> getPortfolioDetails(
             @Param("pan") String panNumber, @Param("asOfDate") LocalDate asOfDate);
