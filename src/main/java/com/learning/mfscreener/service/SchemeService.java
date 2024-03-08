@@ -2,17 +2,16 @@ package com.learning.mfscreener.service;
 
 import com.learning.mfscreener.adapter.ConversionServiceAdapter;
 import com.learning.mfscreener.config.logging.Loggable;
-import com.learning.mfscreener.entities.MFSchemeEntity;
-import com.learning.mfscreener.entities.MFSchemeNavEntity;
-import com.learning.mfscreener.entities.MFSchemeTypeEntity;
-import com.learning.mfscreener.entities.UserSchemeDetailsEntity;
+import com.learning.mfscreener.entities.*;
 import com.learning.mfscreener.exception.SchemeNotFoundException;
 import com.learning.mfscreener.models.MetaDTO;
 import com.learning.mfscreener.models.projection.FundDetailProjection;
 import com.learning.mfscreener.models.projection.SchemeNameAndISIN;
+import com.learning.mfscreener.models.projection.UserFolioDetailsPanProjection;
 import com.learning.mfscreener.models.response.NavResponse;
 import com.learning.mfscreener.repository.MFSchemeRepository;
 import com.learning.mfscreener.repository.MFSchemeTypeRepository;
+import com.learning.mfscreener.repository.UserFolioDetailsEntityRepository;
 import com.learning.mfscreener.repository.UserSchemeDetailsEntityRepository;
 import com.learning.mfscreener.utils.AppConstants;
 import java.net.URI;
@@ -36,6 +35,7 @@ public class SchemeService {
     private final RestClient restClient;
     private final MFSchemeRepository mfSchemeRepository;
     private final MFSchemeTypeRepository mfSchemeTypeRepository;
+    private final UserFolioDetailsEntityRepository userFolioDetailsEntityRepository;
     private final UserSchemeDetailsEntityRepository userSchemeDetailsEntityRepository;
     private final ConversionServiceAdapter conversionServiceAdapter;
 
@@ -153,5 +153,13 @@ public class SchemeService {
 
     public List<UserSchemeDetailsEntity> getSchemesByEmailAndName(String email, String name) {
         return this.userSchemeDetailsEntityRepository.findByUserEmailAndName(email, name);
+    }
+
+    // if panKYC is NOT OK then PAN is not set. hence manually setting it.
+    public void setPANIfNotSet(Long userCasID) {
+        // find pan by id
+        UserFolioDetailsPanProjection panProjection =
+                userFolioDetailsEntityRepository.findFirstByUserCasDetailsEntity_IdAndPanKyc(userCasID, "OK");
+        userFolioDetailsEntityRepository.updatePanByCasId(panProjection.getPan(), userCasID);
     }
 }

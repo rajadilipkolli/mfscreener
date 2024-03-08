@@ -33,7 +33,7 @@ public interface UserCASDetailsEntityRepository extends JpaRepository<UserCASDet
                             JOIN user_scheme_details usd ON utd.user_scheme_detail_id = usd.id
                             JOIN user_folio_details ufd ON usd.user_folio_id = ufd.id
                         WHERE
-                            utd.type NOT IN ('STAMP_DUTY_TAX', 'STT_TAX')
+                            utd.type NOT IN ('STAMP_DUTY_TAX', '*** Stamp Duty ***', 'STT_TAX')
                             AND ufd.pan = :pan
                             AND utd.transaction_date <= :asOfDate
                     ),

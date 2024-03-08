@@ -80,7 +80,8 @@ public class PortfolioService {
             folios = folioEntities.size();
         }
         if (casDetailsEntity != null) {
-            this.casDetailsEntityRepository.save(casDetailsEntity);
+            UserCASDetailsEntity savedCasDetailsEntity = this.casDetailsEntityRepository.save(casDetailsEntity);
+            CompletableFuture.runAsync(() -> schemeService.setPANIfNotSet(savedCasDetailsEntity.getId()));
             CompletableFuture.runAsync(schemeService::setAMFIIfNull);
             return "Imported %d folios and %d transactions".formatted(folios, transactions);
         } else {
