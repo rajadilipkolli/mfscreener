@@ -26,12 +26,7 @@ public class TestData {
         foliosList.add(userFolioDTO);
         if (addFolio) {
             userFolioDTO = new UserFolioDTO(
-                    "91095687154 / 0",
-                    "AXIS Mutual Fund",
-                    "ABCDE1234F",
-                    "OK",
-                    "OK",
-                    List.of(axisSchemeDTO(addTransaction)));
+                    "91095687154 / 0", "AXIS Mutual Fund", "", "OK", "NOT OK", List.of(axisSchemeDTO(addTransaction)));
             foliosList.add(userFolioDTO);
         }
         return new CasDTO(
