@@ -23,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -70,58 +71,63 @@ public class HistoricalNavService {
         }
 
         URI uri = UriComponentsBuilder.fromHttpUrl(historicalUrl).build().toUri();
-        String allNAVs = restClient.get().uri(uri).retrieve().body(String.class);
-        Reader inputString = new StringReader(Objects.requireNonNull(allNAVs));
         String oldSchemeId = null;
-        try (BufferedReader br = new BufferedReader(inputString)) {
-            String lineValue = br.readLine();
-            for (int i = 0; i < 4; ++i) {
-                lineValue = br.readLine();
-            }
-            String amc = lineValue;
-            while (lineValue != null && !StringUtils.hasText(oldSchemeId)) {
-                int check = 0;
-                final String[] tokenize = lineValue.split(AppConstants.SEPARATOR);
-                if (tokenize.length == 1) {
-                    check = 1;
-                    amc = lineValue;
-                }
-                if (check == 0) {
-                    final String schemecode = tokenize[0];
-                    final String payout = tokenize[2];
-                    if (payOut.equalsIgnoreCase(payout)) {
-                        oldSchemeId = schemecode;
-                        if (persistSchemeInfo) {
-                            String schemename = tokenize[1];
-                            String nav = tokenize[4];
-                            String date = tokenize[7];
-                            final MFSchemeDTO mfSchemeDTO =
-                                    new MFSchemeDTO(amc, Long.valueOf(schemecode), payout, schemename, nav, date);
-                            MFSchemeEntity mfSchemeEntity =
-                                    conversionServiceAdapter.mapMFSchemeDTOToMFSchemeEntity(mfSchemeDTO);
-                            mfSchemeRepository.save(mfSchemeEntity);
-                        }
-                    }
-                }
-                lineValue = br.readLine();
-                if (!StringUtils.hasText(lineValue)) {
+        try {
+            String allNAVs = restClient.get().uri(uri).retrieve().body(String.class);
+            Reader inputString = new StringReader(Objects.requireNonNull(allNAVs));
+            try (BufferedReader br = new BufferedReader(inputString)) {
+                String lineValue = br.readLine();
+                for (int i = 0; i < 4; ++i) {
                     lineValue = br.readLine();
                 }
+                String amc = lineValue;
+                while (lineValue != null && !StringUtils.hasText(oldSchemeId)) {
+                    int check = 0;
+                    final String[] tokenize = lineValue.split(AppConstants.SEPARATOR);
+                    if (tokenize.length == 1) {
+                        check = 1;
+                        amc = lineValue;
+                    }
+                    if (check == 0) {
+                        final String schemecode = tokenize[0];
+                        final String payout = tokenize[2];
+                        if (payOut.equalsIgnoreCase(payout)) {
+                            oldSchemeId = schemecode;
+                            if (persistSchemeInfo) {
+                                String schemename = tokenize[1];
+                                String nav = tokenize[4];
+                                String date = tokenize[7];
+                                final MFSchemeDTO mfSchemeDTO =
+                                        new MFSchemeDTO(amc, Long.valueOf(schemecode), payout, schemename, nav, date);
+                                MFSchemeEntity mfSchemeEntity =
+                                        conversionServiceAdapter.mapMFSchemeDTOToMFSchemeEntity(mfSchemeDTO);
+                                mfSchemeRepository.save(mfSchemeEntity);
+                            }
+                        }
+                    }
+                    lineValue = br.readLine();
+                    if (!StringUtils.hasText(lineValue)) {
+                        lineValue = br.readLine();
+                    }
+                }
+            } catch (IOException e) {
+                log.error("Exception Occurred while reading response", e);
+                throw new NavNotFoundException("Unable to parse for %s".formatted(schemeCode), navDate);
             }
-        } catch (IOException e) {
-            log.error("Exception Occurred while reading response", e);
-            throw new NavNotFoundException("Unable to parse for %s".formatted(schemeCode), navDate);
-        }
-        if (!StringUtils.hasText(oldSchemeId) && firstByAmfi != null) {
-            // Manually creating entry in mf_scheme table as no entry found in historical link
-            MFSchemeEntity mfSchemeEntity = new MFSchemeEntity();
-            mfSchemeEntity.setPayOut(payOut);
-            mfSchemeEntity.setSchemeId(schemeCode);
-            mfSchemeEntity.setSchemeName(firstByAmfi.getScheme());
-            mfSchemeRepository.save(mfSchemeEntity);
-            oldSchemeId = String.valueOf(schemeCode);
-        } else {
-            log.info("No Nav found for the given day");
+            if (!StringUtils.hasText(oldSchemeId) && firstByAmfi != null) {
+                // Manually creating entry in mf_scheme table as no entry found in historical link
+                MFSchemeEntity mfSchemeEntity = new MFSchemeEntity();
+                mfSchemeEntity.setPayOut(payOut);
+                mfSchemeEntity.setSchemeId(schemeCode);
+                mfSchemeEntity.setSchemeName(firstByAmfi.getScheme());
+                mfSchemeRepository.save(mfSchemeEntity);
+                oldSchemeId = String.valueOf(schemeCode);
+            } else {
+                log.info("No Nav found for the given day");
+            }
+        } catch (ResourceAccessException exception) {
+            // eating as we can't do much, and it should be set when available
+            log.error("Unable to load Historical Data, downstream service is down ", exception);
         }
         return oldSchemeId;
     }

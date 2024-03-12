@@ -64,7 +64,7 @@ class NavControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.type", is("about:blank")))
                 .andExpect(jsonPath("$.title", is("Scheme NotFound")))
                 .andExpect(jsonPath("$.status", is(404)))
-                .andExpect(jsonPath("$.detail", is("Nav Not Found for schemeCode - 141565 on 2017-09-25")))
+                .andExpect(jsonPath("$.detail", is("Nav Not Found for schemeCode - 141565 on 2017-09-24")))
                 .andExpect(jsonPath("$.instance", is("/api/nav/141565/2017-10-01")));
     }
 
