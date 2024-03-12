@@ -25,6 +25,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestClient;
@@ -68,7 +69,14 @@ public class SchemeService {
     }
 
     NavResponse getNavResponseResponseEntity(Long schemeCode) {
-        return this.restClient.get().uri(getUri(schemeCode)).retrieve().body(NavResponse.class);
+        return this.restClient
+                .get()
+                .uri(getUri(schemeCode))
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, (request, response) -> {
+                    throw new SchemeNotFoundException("scheme with id %d not found".formatted(schemeCode));
+                })
+                .body(NavResponse.class);
     }
 
     URI getUri(Long schemeCode) {
