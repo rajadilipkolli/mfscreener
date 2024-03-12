@@ -18,6 +18,6 @@ public class SchedulerConfiguration {
 
     @EventListener(ApplicationStartedEvent.class)
     void setSchemeIfNotSetJob() {
-        BackgroundJob.scheduleRecurrently(Cron.every5minutes(), () -> schemeService.setAMFIIfNull());
+        BackgroundJob.scheduleRecurrently(Cron.every5minutes(), schemeService::setAMFIIfNull);
     }
 }
