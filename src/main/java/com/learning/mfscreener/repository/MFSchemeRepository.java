@@ -32,7 +32,7 @@ public interface MFSchemeRepository extends JpaRepository<MFSchemeEntity, Long> 
 
     @Query(
             """
-            select o from MFSchemeEntity o JOIN FETCH o.mfSchemeNavEntities msn
+            select o from MFSchemeEntity o LEFT JOIN FETCH o.mfSchemeNavEntities msn
             where o.schemeId = :schemeId
             """)
     @Transactional(readOnly = true)

@@ -1,0 +1,25 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot-Application<mfscreener>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.learning.mfscreener.Application",
+            "projectName": "mfscreener",
+            "args": "--spring.profiles.active=local",
+            "envFile": "${workspaceFolder}/.env",
+            "vmArgs": " -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=40371 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dspring.jmx.enabled=true -Djava.rmi.server.hostname=localhost -Dspring.application.admin.enabled=true -Dspring.boot.project.name=mfscreener"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-TestApplication<mfscreener>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.learning.mfscreener.TestApplication",
+            "projectName": "mfscreener",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]
+}

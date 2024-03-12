@@ -57,14 +57,28 @@ class NavControllerIT extends AbstractIntegrationTest {
     @Test
     void shouldNotLoadDataWhenSchemeFoundAndLoadHistoricalDataNotFound() throws Exception {
         this.mockMvc
-                .perform(get("/api/nav/{schemeCode}/{date}", 151113, "2022-10-20")
+                .perform(get("/api/nav/{schemeCode}/{date}", 141565, "2017-10-01")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound())
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                 .andExpect(jsonPath("$.type", is("about:blank")))
                 .andExpect(jsonPath("$.title", is("Scheme NotFound")))
                 .andExpect(jsonPath("$.status", is(404)))
-                .andExpect(jsonPath("$.detail", is("Nav Not Found for schemeCode - 151113 on 2022-10-16")))
-                .andExpect(jsonPath("$.instance", is("/api/nav/151113/2022-10-20")));
+                .andExpect(jsonPath("$.detail", is("Nav Not Found for schemeCode - 141565 on 2017-09-25")))
+                .andExpect(jsonPath("$.instance", is("/api/nav/141565/2017-10-01")));
+    }
+
+    @Test
+    void shouldLoadDataWhenSchemeMergedWithOtherFundHouse() throws Exception {
+        this.mockMvc
+                .perform(get("/api/nav/{schemeCode}/{date}", 151113, "2022-10-20")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_JSON_VALUE)))
+                .andExpect(jsonPath("$.schemeCode", is(151113L), Long.class))
+                .andExpect(jsonPath("$.payout", is("INF917K01HD4")))
+                .andExpect(jsonPath("$.schemeName", is("HSBC Value Fund - Direct Growth")))
+                .andExpect(jsonPath("$.nav", is("63.18")))
+                .andExpect(jsonPath("$.date", is("2022-10-18")));
     }
 }

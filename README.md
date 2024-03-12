@@ -30,7 +30,7 @@ You can also run the application using Gradle as follows:
 * Swagger UI: http://localhost:8080/swagger-ui.html
 * Actuator Endpoint: http://localhost:8080/actuator
 * PgAdmin (UI for Postgres Database) : http://localhost:5050 (pgadmin4@pgadmin.org/admin)
-* Grafana : http://localhost:3000
+* Grafana : http://localhost:3000 (admin/admin)
 
 ### how to read CAS Data using [casparser](https://pypi.org/project/casparser/)
  * Install phyton

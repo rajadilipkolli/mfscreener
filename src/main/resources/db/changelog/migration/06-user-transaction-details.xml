@@ -54,6 +54,9 @@
                                  referencedTableName="user_scheme_details"
                                  referencedColumnNames="id"
                                  baseColumnNames="user_scheme_detail_id"/>
+        <createIndex tableName="user_transaction_details" indexName="IDX_TRANSACTION_DETAILS">
+            <column name="transaction_date" />
+        </createIndex>
     </changeSet>
 
 </databaseChangeLog>

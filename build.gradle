@@ -25,8 +25,11 @@ if (project.hasProperty("ci")) {
 
 group = "com.learning.mfscreener"
 version = "0.0.1-SNAPSHOT"
-sourceCompatibility = 17
-targetCompatibility = 17
+
+java {
+  sourceCompatibility = '17'
+  targetCompatibility = '17'
+}
 
 configurations {
     compileOnly {
@@ -136,7 +139,7 @@ spotless {
     java {
         importOrder()
         removeUnusedImports()
-        palantirJavaFormat("2.39.0")
+        palantirJavaFormat("2.40.0")
         formatAnnotations()
     }
 }

@@ -19,41 +19,52 @@ public interface UserCASDetailsEntityRepository
             nativeQuery = true,
             value =
                     """
-                    with tempView as (
-                        select
-                          utd.balance,
-                          utd.user_scheme_detail_id,
-                          usd.scheme as schemeName,
-                          usd.amfi as schemeId,
-                          ufd.folio as folioNumber,
-                          row_number() over (
-                            partition by utd.user_scheme_detail_id
-                            order by
-                              utd.transaction_date desc
-                          ) as row_number
-                        from
-                          user_transaction_details utd
-                          join user_scheme_details usd on utd.user_scheme_detail_id = usd.id
-                          join user_folio_details ufd on usd.user_folio_id = ufd.id
-                        where
-                          utd.type NOT IN ('STAMP_DUTY_TAX', 'STT_TAX')
-                          and ufd.pan = :pan
-                          and utd.transaction_date <= :asOfDate
-                      )
-                    select
-                      sum(balance) as balanceUnits,
-                      schemeName,
-                      schemeId,
-                      folioNumber
-                      from tempView
-                    where
-                      row_number = 1
-                      and balance <> 0
-                    group by
-                      schemeName,
-                      schemeId,
-                      folioNumber
+                    WITH tempView
+                    AS (
+                        SELECT utd.balance,
+                            COALESCE(mf.scheme_name, usd.scheme) AS schemeName,
+                            usd.amfi AS schemeId,
+                            ufd.folio AS folioNumber,
+                            ROW_NUMBER() OVER (
+                                PARTITION BY utd.user_scheme_detail_id ORDER BY utd.transaction_date DESC,
+                                    CASE
+                                        WHEN utd.type = 'REDEMPTION'
+                                            THEN balance
+                                        ELSE balance * - 1 -- Negate balance for descending order happens when 2 entries on same date
+                                        END ASC -- Ascending order for redemption, descending otherwise
+                                ) AS row_number
+                        FROM user_transaction_details utd
+                        JOIN user_scheme_details usd ON utd.user_scheme_detail_id = usd.id
+                        JOIN user_folio_details ufd ON usd.user_folio_id = ufd.id
+                        LEFT JOIN mf_scheme mf ON usd.amfi = mf.scheme_id
+                        WHERE utd.type NOT IN (
+                                'STAMP_DUTY_TAX',
+                                '*** Stamp Duty ***',
+                                'STT_TAX'
+                                )
+                            AND ufd.pan = :pan
+                            AND utd.transaction_date <= :asOfDate
+                        )
+                    SELECT SUM(balance) AS balanceUnits,
+                        schemeName,
+                        schemeId,
+                        folioNumber
+                    FROM tempView
+                    WHERE row_number = 1
+                        AND balance <> 0
+                    GROUP BY schemeName,
+                        schemeId,
+                        folioNumber
                     """)
     List<PortfolioDetailsProjection> getPortfolioDetails(
             @Param("pan") String panNumber, @Param("asOfDate") LocalDate asOfDate);
+
+
+    @Transactional(readOnly = true)
+    @Query(
+            """
+              select u from UserCASDetailsEntity u join fetch u.folioEntities join fetch u.investorInfoEntity as i
+              where i.email = :email and i.name = :name
+              """)
+    UserCASDetailsEntity findByInvestorEmailAndName(@Param("email") String email, @Param("name") String name);
 }

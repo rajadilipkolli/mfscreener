@@ -1,6 +1,7 @@
 package com.learning.mfscreener.utils;
 
 import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 
 public final class AppConstants {
     public static final String PROFILE_PROD = "prod";
@@ -14,7 +15,8 @@ public final class AppConstants {
 
     public static final String AMFI_WEBSITE_LINK = "https://www.amfiindia.com/spages/NAVAll.txt";
     public static final String SEPARATOR = ";";
-    public static final String DATE_PATTERN_DD_MM_YYYY = "dd-MM-yyyy";
-    public static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern(DATE_PATTERN_DD_MM_YYYY);
+    private static final String DATE_PATTERN_DD_MMM_YYYY = "dd-MMM-yyyy";
+    public static final DateTimeFormatter FORMATTER_DD_MMM_YYYY =
+            DateTimeFormatter.ofPattern(DATE_PATTERN_DD_MMM_YYYY, Locale.ENGLISH);
     public static final String MFAPI_WEBSITE_BASE_URL = "https://api.mfapi.in/mf/";
 }

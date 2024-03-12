@@ -9,9 +9,12 @@ import com.learning.mfscreener.entities.UserSchemeDetailsEntity;
 import com.learning.mfscreener.exception.SchemeNotFoundException;
 import com.learning.mfscreener.models.MetaDTO;
 import com.learning.mfscreener.models.projection.FundDetailProjection;
+import com.learning.mfscreener.models.projection.SchemeNameAndISIN;
+import com.learning.mfscreener.models.projection.UserFolioDetailsPanProjection;
 import com.learning.mfscreener.models.response.NavResponse;
 import com.learning.mfscreener.repository.MFSchemeRepository;
 import com.learning.mfscreener.repository.MFSchemeTypeRepository;
+import com.learning.mfscreener.repository.UserFolioDetailsEntityRepository;
 import com.learning.mfscreener.repository.UserSchemeDetailsEntityRepository;
 import com.learning.mfscreener.utils.AppConstants;
 import java.net.URI;
@@ -22,12 +25,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.RestClient;
 import org.springframework.web.util.UriComponentsBuilder;
 
 @Service
@@ -35,30 +35,47 @@ import org.springframework.web.util.UriComponentsBuilder;
 @Slf4j
 public class SchemeService {
 
-    private final RestTemplate restTemplate;
+    private final RestClient restClient;
     private final MFSchemeRepository mfSchemeRepository;
     private final MFSchemeTypeRepository mfSchemeTypeRepository;
+    private final UserFolioDetailsEntityRepository userFolioDetailsEntityRepository;
     private final UserSchemeDetailsEntityRepository userSchemeDetailsEntityRepository;
     private final ConversionServiceAdapter conversionServiceAdapter;
 
     @Loggable
     public void fetchSchemeDetails(Long schemeCode) {
-        log.info("Fetching SchemeDetails for AMFISchemeCode :{} ", schemeCode);
-        URI uri = UriComponentsBuilder.fromHttpUrl(AppConstants.MFAPI_WEBSITE_BASE_URL + schemeCode)
-                .build()
-                .toUri();
+        processResponseEntity(schemeCode, getNavResponseResponseEntity(schemeCode));
+    }
 
-        ResponseEntity<NavResponse> navResponseResponseEntity =
-                this.restTemplate.exchange(uri, HttpMethod.GET, null, NavResponse.class);
-        if (navResponseResponseEntity.getStatusCode().is2xxSuccessful()) {
-            NavResponse entityBody = navResponseResponseEntity.getBody();
-            Assert.notNull(entityBody, () -> "Body Can't be Null");
-            MFSchemeEntity mfSchemeEntity = mfSchemeRepository
-                    .findBySchemeId(schemeCode)
+    @Loggable
+    public void fetchSchemeDetails(String oldSchemeCode, Long newSchemeCode) {
+        processResponseEntity(newSchemeCode, getNavResponseResponseEntity(Long.valueOf(oldSchemeCode)));
+    }
+
+    void processResponseEntity(Long schemeCode, NavResponse navResponse) {
+        Optional<MFSchemeEntity> bySchemeId = mfSchemeRepository.findBySchemeId(schemeCode);
+        if (bySchemeId.isEmpty()) {
+            // Scenario where scheme is discontinued or merged with other
+            SchemeNameAndISIN firstByAmfi = userSchemeDetailsEntityRepository
+                    .findFirstByAmfi(schemeCode)
                     .orElseThrow(
                             () -> new SchemeNotFoundException("Fund with schemeCode " + schemeCode + " Not Found"));
-            mergeList(entityBody, mfSchemeEntity, schemeCode);
+            String isin = firstByAmfi.getIsin();
+            log.error("Found Discontinued IsIn : {}", isin);
+        } else {
+            mergeList(navResponse, bySchemeId.get(), schemeCode);
         }
+    }
+
+    NavResponse getNavResponseResponseEntity(Long schemeCode) {
+        return this.restClient.get().uri(getUri(schemeCode)).retrieve().body(NavResponse.class);
+    }
+
+    URI getUri(Long schemeCode) {
+        log.info("Fetching SchemeDetails for AMFISchemeCode :{} ", schemeCode);
+        return UriComponentsBuilder.fromHttpUrl(AppConstants.MFAPI_WEBSITE_BASE_URL + schemeCode)
+                .build()
+                .toUri();
     }
 
     void mergeList(NavResponse navResponse, MFSchemeEntity mfSchemeEntity, Long schemeCode) {
@@ -88,8 +105,12 @@ public class SchemeService {
                             entity.setSchemeCategory(meta.schemeCategory());
                             return this.mfSchemeTypeRepository.save(entity);
                         });
-                // As fund house is set at initializing, removing from here
-                //                mfSchemeEntity.setFundHouse(meta.fundHouse());
+                // As fund house is set at initializing, set only if it is not set
+                if (mfSchemeEntity.getFundHouse() == null) {
+                    // case where entity is manually created instead of load
+                    mfSchemeEntity.setFundHouse(meta.fundHouse());
+                    mfSchemeEntity.setSchemeName(meta.schemeName());
+                }
                 mfschemeTypeEntity.addMFScheme(mfSchemeEntity);
                 try {
                     this.mfSchemeRepository.save(mfSchemeEntity);
@@ -135,5 +156,13 @@ public class SchemeService {
 
     public List<UserSchemeDetailsEntity> getSchemesByEmailAndName(String email, String name) {
         return this.userSchemeDetailsEntityRepository.findByUserEmailAndName(email, name);
+    }
+
+    // if panKYC is NOT OK then PAN is not set. hence manually setting it.
+    public void setPANIfNotSet(Long userCasID) {
+        // find pan by id
+        UserFolioDetailsPanProjection panProjection =
+                userFolioDetailsEntityRepository.findFirstByUserCasDetailsEntity_IdAndPanKyc(userCasID, "OK");
+        userFolioDetailsEntityRepository.updatePanByCasId(panProjection.getPan(), userCasID);
     }
 }
