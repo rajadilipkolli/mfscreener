@@ -33,6 +33,17 @@ You can also run the application using Gradle as follows:
 * Grafana : http://localhost:3000 (admin/admin)
 * JobRunr Dashboard: http://localhost:8000/dashboard/overview
 
+### Check redis keys
+
+* To check redis keys from docker issue below command
+```shell
+docker exec -it docker-redis-1 redis-cli
+```
+
+```shell
+127.0.0.1:6379> keys *
+```
+
 ### how to read CAS Data using [casparser](https://pypi.org/project/casparser/)
  * Install phyton
  * install casparser using command
