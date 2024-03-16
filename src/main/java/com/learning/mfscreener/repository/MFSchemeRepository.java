@@ -38,9 +38,19 @@ public interface MFSchemeRepository extends JpaRepository<MFSchemeEntity, Long> 
     @Transactional(readOnly = true)
     Optional<MFSchemeEntity> findBySchemeId(@Param("schemeId") Long schemeId);
 
+    @Query(
+            """
+            select new com.learning.mfscreener.models.projection.FundDetailProjection(m.schemeId, m.schemeName) from MFSchemeEntity m
+             where upper(m.schemeName) like upper(:schemeName) order by m.schemeId
+            """)
     @Transactional(readOnly = true)
-    List<FundDetailProjection> findBySchemeNameLikeIgnoreCaseOrderBySchemeIdAsc(String schemeName);
+    List<FundDetailProjection> findBySchemeNameLikeIgnoreCaseOrderBySchemeIdAsc(@Param("schemeName") String schemeName);
 
+    @Query(
+            """
+            select new com.learning.mfscreener.models.projection.FundDetailProjection(m.schemeId, m.schemeName) from MFSchemeEntity m
+             where upper(m.fundHouse) like upper(:fName) order by m.schemeId
+            """)
     @Transactional(readOnly = true)
-    List<FundDetailProjection> findByFundHouseLikeIgnoringCaseOrderBySchemeIdAsc(String fName);
+    List<FundDetailProjection> findByFundHouseLikeIgnoringCaseOrderBySchemeIdAsc(@Param("fName") String fName);
 }
