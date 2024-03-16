@@ -34,11 +34,14 @@ public class MFSchemeTypeEntity extends AuditableEntity<String> implements Seria
     @Column(name = "scheme_type_id", nullable = false)
     private Integer schemeTypeId;
 
-    @Column(name = "scheme_type", nullable = false)
-    private String schemeType;
+    @Column(name = "type", nullable = false)
+    private String type;
 
-    @Column(name = "scheme_category", nullable = false)
-    private String schemeCategory;
+    @Column(name = "category", nullable = false)
+    private String category;
+
+    @Column(name = "sub_category")
+    private String subCategory;
 
     @Version
     private Short version;

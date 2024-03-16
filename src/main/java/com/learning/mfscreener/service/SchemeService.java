@@ -4,10 +4,8 @@ import com.learning.mfscreener.adapter.ConversionServiceAdapter;
 import com.learning.mfscreener.config.logging.Loggable;
 import com.learning.mfscreener.entities.MFSchemeEntity;
 import com.learning.mfscreener.entities.MFSchemeNavEntity;
-import com.learning.mfscreener.entities.MFSchemeTypeEntity;
 import com.learning.mfscreener.entities.UserSchemeDetailsEntity;
 import com.learning.mfscreener.exception.SchemeNotFoundException;
-import com.learning.mfscreener.models.MetaDTO;
 import com.learning.mfscreener.models.projection.FundDetailProjection;
 import com.learning.mfscreener.models.projection.SchemeNameAndISIN;
 import com.learning.mfscreener.models.projection.UserFolioDetailsPanProjection;
@@ -104,22 +102,6 @@ public class SchemeService {
                 for (MFSchemeNavEntity newSchemeNav : newNavs) {
                     mfSchemeEntity.addSchemeNav(newSchemeNav);
                 }
-                final MetaDTO meta = navResponse.getMeta();
-                MFSchemeTypeEntity mfschemeTypeEntity = this.mfSchemeTypeRepository
-                        .findBySchemeCategoryAndSchemeType(meta.schemeCategory(), meta.schemeType())
-                        .orElseGet(() -> {
-                            MFSchemeTypeEntity entity = new MFSchemeTypeEntity();
-                            entity.setSchemeType(meta.schemeType());
-                            entity.setSchemeCategory(meta.schemeCategory());
-                            return this.mfSchemeTypeRepository.save(entity);
-                        });
-                // As fund house is set at initializing, set only if it is not set
-                if (mfSchemeEntity.getFundHouse() == null) {
-                    // case where entity is manually created instead of load
-                    mfSchemeEntity.setFundHouse(meta.fundHouse());
-                    mfSchemeEntity.setSchemeName(meta.schemeName());
-                }
-                mfschemeTypeEntity.addMFScheme(mfSchemeEntity);
                 try {
                     this.mfSchemeRepository.save(mfSchemeEntity);
                 } catch (ConstraintViolationException | DataIntegrityViolationException exception) {
