@@ -1,21 +1,26 @@
 package com.learning.mfscreener.config;
 
-import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-@Configuration
-@RequiredArgsConstructor
+@Configuration(proxyBeanMethods = false)
+@EnableCaching
 public class WebMvcConfig implements WebMvcConfigurer {
-    private final ApplicationProperties properties;
+    private final ApplicationProperties applicationProperties;
+
+    public WebMvcConfig(ApplicationProperties applicationProperties) {
+        this.applicationProperties = applicationProperties;
+    }
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping(properties.getCors().getPathPattern())
-                .allowedMethods(properties.getCors().getAllowedMethods())
-                .allowedHeaders(properties.getCors().getAllowedHeaders())
-                .allowedOriginPatterns(properties.getCors().getAllowedOriginPatterns())
-                .allowCredentials(properties.getCors().isAllowCredentials());
+        ApplicationProperties.Cors propertiesCors = applicationProperties.getCors();
+        registry.addMapping(propertiesCors.getPathPattern())
+                .allowedMethods(propertiesCors.getAllowedMethods())
+                .allowedHeaders(propertiesCors.getAllowedHeaders())
+                .allowedOriginPatterns(propertiesCors.getAllowedOriginPatterns())
+                .allowCredentials(propertiesCors.isAllowCredentials());
     }
 }
