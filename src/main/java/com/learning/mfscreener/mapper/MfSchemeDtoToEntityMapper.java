@@ -3,19 +3,31 @@ package com.learning.mfscreener.mapper;
 
 import com.learning.mfscreener.entities.MFSchemeEntity;
 import com.learning.mfscreener.entities.MFSchemeNavEntity;
+import com.learning.mfscreener.entities.MFSchemeTypeEntity;
 import com.learning.mfscreener.models.MFSchemeDTO;
+import com.learning.mfscreener.repository.MFSchemeTypeRepository;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import lombok.extern.slf4j.Slf4j;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
-import org.springframework.core.convert.converter.Converter;
+import org.springframework.beans.factory.annotation.Autowired;
 
+@Slf4j
 @Mapper(config = MapperSpringConfig.class)
-public interface MfSchemeDtoToEntityMapper extends Converter<MFSchemeDTO, MFSchemeEntity> {
+public abstract class MfSchemeDtoToEntityMapper {
 
-    DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd-MMM-yyyy");
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd-MMM-yyyy");
+    // Define the regular expressions
+    private static final Pattern TYPE_CATEGORY_SUBCATEGORY_PATTERN =
+            Pattern.compile("^(.*?)\\((.*?)\\s*-\\s*(.*?)\\)$");
+
+    @Autowired
+    private MFSchemeTypeRepository mfSchemeTypeRepository;
 
     @Mapping(target = "mfSchemeTypeEntity", ignore = true)
     @Mapping(target = "mfSchemeNavEntities", ignore = true)
@@ -28,14 +40,54 @@ public interface MfSchemeDtoToEntityMapper extends Converter<MFSchemeDTO, MFSche
     @Mapping(target = "payOut", source = "payout")
     @Mapping(target = "schemeId", source = "schemeCode")
     @Mapping(target = "version", ignore = true)
-    @Override
-    MFSchemeEntity convert(MFSchemeDTO scheme);
+    public abstract MFSchemeEntity mapMFSchemeDTOToMFSchemeEntity(MFSchemeDTO scheme);
 
     @AfterMapping
-    default void updateMFScheme(MFSchemeDTO scheme, @MappingTarget MFSchemeEntity mfSchemeEntity) {
+    void updateMFScheme(MFSchemeDTO scheme, @MappingTarget MFSchemeEntity mfSchemeEntity) {
         MFSchemeNavEntity mfSchemenavEntity = new MFSchemeNavEntity();
         mfSchemenavEntity.setNav("N.A.".equals(scheme.nav()) ? 0F : Float.parseFloat(scheme.nav()));
         mfSchemenavEntity.setNavDate(LocalDate.parse(scheme.date(), DATE_FORMATTER));
         mfSchemeEntity.addSchemeNav(mfSchemenavEntity);
+
+        MFSchemeTypeEntity mfSchemeTypeEntity = null;
+        String schemeType = scheme.schemeType();
+        Matcher matcher = TYPE_CATEGORY_SUBCATEGORY_PATTERN.matcher(schemeType);
+        if (matcher.find()) {
+            String type = matcher.group(1).strip();
+            String category = matcher.group(2).strip();
+            // Check if "-" is present
+            String subCategory;
+            if (matcher.group(3) != null) {
+                subCategory = matcher.group(3).strip();
+            } else {
+                subCategory = null;
+            }
+            mfSchemeTypeEntity = mfSchemeTypeRepository
+                    .findByTypeAndCategoryAndSubCategory(type, category, subCategory)
+                    .orElseGet(() -> {
+                        MFSchemeTypeEntity mfSchemeType = new MFSchemeTypeEntity();
+                        mfSchemeType.setType(type);
+                        mfSchemeType.setCategory(category);
+                        mfSchemeType.setSubCategory(subCategory);
+                        return mfSchemeTypeRepository.save(mfSchemeType);
+                    });
+        } else {
+            if (!schemeType.contains("-")) {
+                String type = schemeType.substring(0, schemeType.indexOf('('));
+                String category = schemeType.substring(schemeType.indexOf('(') + 1, schemeType.length() - 1);
+                mfSchemeTypeEntity = mfSchemeTypeRepository
+                        .findByTypeAndCategoryAndSubCategory(type, category, null)
+                        .orElseGet(() -> {
+                            MFSchemeTypeEntity mfSchemeType = new MFSchemeTypeEntity();
+                            mfSchemeType.setType(type);
+                            mfSchemeType.setCategory(category);
+                            mfSchemeType.setSubCategory(null);
+                            return mfSchemeTypeRepository.save(mfSchemeType);
+                        });
+            } else {
+                log.error("Unable to parse schemeType :{}", schemeType);
+            }
+        }
+        mfSchemeEntity.setMfSchemeTypeEntity(mfSchemeTypeEntity);
     }
 }

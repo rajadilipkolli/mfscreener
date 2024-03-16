@@ -1,7 +1,7 @@
 package com.learning.mfscreener.config;
 
-import com.learning.mfscreener.adapter.ConversionServiceAdapter;
 import com.learning.mfscreener.entities.MFSchemeEntity;
+import com.learning.mfscreener.mapper.MfSchemeDtoToEntityMapper;
 import com.learning.mfscreener.models.MFSchemeDTO;
 import com.learning.mfscreener.repository.MFSchemeRepository;
 import com.learning.mfscreener.utils.AppConstants;
@@ -12,8 +12,8 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StopWatch;
@@ -23,13 +23,22 @@ import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 
 @Component
-@RequiredArgsConstructor
-@Slf4j
 public class Initializer implements CommandLineRunner {
 
+    private static final Logger log = LoggerFactory.getLogger(Initializer.class);
+
     private final MFSchemeRepository mfSchemesRepository;
-    private final ConversionServiceAdapter conversionServiceAdapter;
+    private final MfSchemeDtoToEntityMapper mfSchemeDtoToEntityMapper;
     private final RestTemplate restTemplate;
+
+    public Initializer(
+            MFSchemeRepository mfSchemesRepository,
+            MfSchemeDtoToEntityMapper mfSchemeDtoToEntityMapper,
+            RestTemplate restTemplate) {
+        this.mfSchemesRepository = mfSchemesRepository;
+        this.mfSchemeDtoToEntityMapper = mfSchemeDtoToEntityMapper;
+        this.restTemplate = restTemplate;
+    }
 
     @Override
     public void run(String... args) throws IOException {
@@ -41,26 +50,40 @@ public class Initializer implements CommandLineRunner {
             List<MFSchemeDTO> chopArrayList = new ArrayList<>();
             try (BufferedReader br = new BufferedReader(inputString)) {
                 String lineValue = br.readLine();
-                for (int i = 0; i < 4; ++i) {
+                for (int i = 0; i < 2; ++i) {
                     lineValue = br.readLine();
                 }
+                String schemeType = lineValue;
                 String amc = lineValue;
                 while (lineValue != null) {
-                    int check = 0;
-                    final String[] tokenize = lineValue.split(AppConstants.SEPARATOR);
+                    boolean nonAmcRow = true;
+                    String[] tokenize = lineValue.split(AppConstants.SEPARATOR);
+                    boolean processRowByForce = false;
                     if (tokenize.length == 1) {
-                        check = 1;
-                        amc = lineValue;
+                        nonAmcRow = false;
+                        String tempVal = lineValue;
+                        lineValue = br.readLine();
+                        if (!StringUtils.hasText(lineValue)) {
+                            lineValue = br.readLine();
+                            tokenize = lineValue.split(AppConstants.SEPARATOR);
+                            if (tokenize.length == 1) {
+                                schemeType = tempVal;
+                                amc = lineValue;
+                            } else {
+                                amc = tempVal;
+                                processRowByForce = true;
+                            }
+                        }
                     }
-                    if (check == 0) {
+                    if (nonAmcRow || processRowByForce) {
                         final String schemecode = tokenize[0];
                         final String payout = tokenize[1];
                         final String reinvestment = tokenize[2];
                         final String schemename = tokenize[3];
                         final String nav = tokenize[4];
                         final String date = tokenize[5];
-                        final MFSchemeDTO tempObj =
-                                new MFSchemeDTO(amc, Long.valueOf(schemecode), payout, schemename, nav, date);
+                        final MFSchemeDTO tempObj = new MFSchemeDTO(
+                                amc, Long.valueOf(schemecode), payout, schemename, nav, date, schemeType);
                         chopArrayList.add(tempObj);
                     }
                     lineValue = br.readLine();
@@ -81,7 +104,7 @@ public class Initializer implements CommandLineRunner {
                 List<Long> schemeCodesList = mfSchemesRepository.findAllSchemeIds();
                 chopArrayList.removeIf(s -> schemeCodesList.contains(s.schemeCode()));
                 chopArrayList.forEach(scheme -> {
-                    MFSchemeEntity mfSchemeEntity = conversionServiceAdapter.mapMFSchemeDTOToMFSchemeEntity(scheme);
+                    MFSchemeEntity mfSchemeEntity = mfSchemeDtoToEntityMapper.mapMFSchemeDTOToMFSchemeEntity(scheme);
                     list.add(mfSchemeEntity);
                 });
                 mfSchemesRepository.saveAll(list);
