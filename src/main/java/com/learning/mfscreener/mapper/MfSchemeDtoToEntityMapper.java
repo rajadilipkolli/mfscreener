@@ -54,12 +54,12 @@ public abstract class MfSchemeDtoToEntityMapper {
             String type = matcher.group(1).strip();
             String category = matcher.group(2).strip();
             String subCategory = matcher.group(3).strip();
-            mfSchemeTypeEntity = findByTypeAndCategoryAndSubCategory(type, category, subCategory);
+            mfSchemeTypeEntity = findOrCreateMFSchemeTypeEntity(type, category, subCategory);
         } else {
             if (!schemeType.contains("-")) {
                 String type = schemeType.substring(0, schemeType.indexOf('('));
                 String category = schemeType.substring(schemeType.indexOf('(') + 1, schemeType.length() - 1);
-                mfSchemeTypeEntity = findByTypeAndCategoryAndSubCategory(type, category, null);
+                mfSchemeTypeEntity = findOrCreateMFSchemeTypeEntity(type, category, null);
             } else {
                 log.error("Unable to parse schemeType :{}", schemeType);
             }
@@ -67,7 +67,7 @@ public abstract class MfSchemeDtoToEntityMapper {
         mfSchemeEntity.setMfSchemeTypeEntity(mfSchemeTypeEntity);
     }
 
-    MFSchemeTypeEntity findByTypeAndCategoryAndSubCategory(String type, String category, String subCategory) {
+    MFSchemeTypeEntity findOrCreateMFSchemeTypeEntity(String type, String category, String subCategory) {
         MFSchemeTypeEntity byTypeAndCategoryAndSubCategory =
                 mfSchemeTypeRepository.findByTypeAndCategoryAndSubCategory(type, category, subCategory);
         if (byTypeAndCategoryAndSubCategory == null) {
