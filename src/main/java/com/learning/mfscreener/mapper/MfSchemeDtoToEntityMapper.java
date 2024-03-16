@@ -5,7 +5,7 @@ import com.learning.mfscreener.entities.MFSchemeEntity;
 import com.learning.mfscreener.entities.MFSchemeNavEntity;
 import com.learning.mfscreener.entities.MFSchemeTypeEntity;
 import com.learning.mfscreener.models.MFSchemeDTO;
-import com.learning.mfscreener.service.MFSchemeTypeService;
+import com.learning.mfscreener.repository.MFSchemeTypeRepository;
 import com.learning.mfscreener.utils.AppConstants;
 import java.time.LocalDate;
 import java.util.regex.Matcher;
@@ -25,7 +25,7 @@ public abstract class MfSchemeDtoToEntityMapper {
             Pattern.compile("^(.*?)\\((.*?)\\s*-\\s*(.*?)\\)$");
 
     @Autowired
-    private MFSchemeTypeService mfSchemeTypeService;
+    private MFSchemeTypeRepository mfSchemeTypeRepository;
 
     @Mapping(target = "mfSchemeTypeEntity", ignore = true)
     @Mapping(target = "mfSchemeNavEntities", ignore = true)
@@ -53,23 +53,30 @@ public abstract class MfSchemeDtoToEntityMapper {
         if (matcher.find()) {
             String type = matcher.group(1).strip();
             String category = matcher.group(2).strip();
-            // Check if "-" is present
-            String subCategory;
-            if (matcher.group(3) != null) {
-                subCategory = matcher.group(3).strip();
-            } else {
-                subCategory = null;
-            }
-            mfSchemeTypeEntity = mfSchemeTypeService.findByTypeAndCategoryAndSubCategory(type, category, subCategory);
+            String subCategory = matcher.group(3).strip();
+            mfSchemeTypeEntity = findByTypeAndCategoryAndSubCategory(type, category, subCategory);
         } else {
             if (!schemeType.contains("-")) {
                 String type = schemeType.substring(0, schemeType.indexOf('('));
                 String category = schemeType.substring(schemeType.indexOf('(') + 1, schemeType.length() - 1);
-                mfSchemeTypeEntity = mfSchemeTypeService.findByTypeAndCategoryAndSubCategory(type, category, null);
+                mfSchemeTypeEntity = findByTypeAndCategoryAndSubCategory(type, category, null);
             } else {
                 log.error("Unable to parse schemeType :{}", schemeType);
             }
         }
         mfSchemeEntity.setMfSchemeTypeEntity(mfSchemeTypeEntity);
+    }
+
+    MFSchemeTypeEntity findByTypeAndCategoryAndSubCategory(String type, String category, String subCategory) {
+        MFSchemeTypeEntity byTypeAndCategoryAndSubCategory =
+                mfSchemeTypeRepository.findByTypeAndCategoryAndSubCategory(type, category, subCategory);
+        if (byTypeAndCategoryAndSubCategory == null) {
+            MFSchemeTypeEntity mfSchemeType = new MFSchemeTypeEntity();
+            mfSchemeType.setType(type);
+            mfSchemeType.setCategory(category);
+            mfSchemeType.setSubCategory(subCategory);
+            byTypeAndCategoryAndSubCategory = mfSchemeTypeRepository.save(mfSchemeType);
+        }
+        return byTypeAndCategoryAndSubCategory;
     }
 }
