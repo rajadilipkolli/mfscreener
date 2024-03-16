@@ -6,8 +6,8 @@ import com.learning.mfscreener.entities.MFSchemeNavEntity;
 import com.learning.mfscreener.entities.MFSchemeTypeEntity;
 import com.learning.mfscreener.models.MFSchemeDTO;
 import com.learning.mfscreener.repository.MFSchemeTypeRepository;
+import com.learning.mfscreener.utils.AppConstants;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import lombok.extern.slf4j.Slf4j;
@@ -20,8 +20,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 @Slf4j
 @Mapper(config = MapperSpringConfig.class)
 public abstract class MfSchemeDtoToEntityMapper {
-
-    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd-MMM-yyyy");
     // Define the regular expressions
     private static final Pattern TYPE_CATEGORY_SUBCATEGORY_PATTERN =
             Pattern.compile("^(.*?)\\((.*?)\\s*-\\s*(.*?)\\)$");
@@ -46,7 +44,7 @@ public abstract class MfSchemeDtoToEntityMapper {
     void updateMFScheme(MFSchemeDTO scheme, @MappingTarget MFSchemeEntity mfSchemeEntity) {
         MFSchemeNavEntity mfSchemenavEntity = new MFSchemeNavEntity();
         mfSchemenavEntity.setNav("N.A.".equals(scheme.nav()) ? 0F : Float.parseFloat(scheme.nav()));
-        mfSchemenavEntity.setNavDate(LocalDate.parse(scheme.date(), DATE_FORMATTER));
+        mfSchemenavEntity.setNavDate(LocalDate.parse(scheme.date(), AppConstants.FORMATTER_DD_MMM_YYYY));
         mfSchemeEntity.addSchemeNav(mfSchemenavEntity);
 
         MFSchemeTypeEntity mfSchemeTypeEntity = null;

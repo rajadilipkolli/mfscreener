@@ -86,7 +86,7 @@ public class HistoricalNavService {
                 String schemeType = lineValue;
                 String amc = lineValue;
                 while (lineValue != null && !StringUtils.hasText(oldSchemeId)) {
-                    String[] tokenize = lineValue.split(AppConstants.SEPARATOR);
+                    String[] tokenize = lineValue.split(AppConstants.NAV_SEPARATOR);
                     boolean nonAmcRow = true;
                     boolean processRowByForce = false;
                     if (tokenize.length == 1) {
@@ -95,7 +95,7 @@ public class HistoricalNavService {
                         lineValue = br.readLine();
                         if (!StringUtils.hasText(lineValue)) {
                             lineValue = br.readLine();
-                            tokenize = lineValue.split(AppConstants.SEPARATOR);
+                            tokenize = lineValue.split(AppConstants.NAV_SEPARATOR);
                             if (tokenize.length == 1) {
                                 schemeType = tempVal;
                                 amc = lineValue;

@@ -57,7 +57,7 @@ public class Initializer implements CommandLineRunner {
                 String amc = lineValue;
                 while (lineValue != null) {
                     boolean nonAmcRow = true;
-                    String[] tokenize = lineValue.split(AppConstants.SEPARATOR);
+                    String[] tokenize = lineValue.split(AppConstants.NAV_SEPARATOR);
                     boolean processRowByForce = false;
                     if (tokenize.length == 1) {
                         nonAmcRow = false;
@@ -65,7 +65,7 @@ public class Initializer implements CommandLineRunner {
                         lineValue = br.readLine();
                         if (!StringUtils.hasText(lineValue)) {
                             lineValue = br.readLine();
-                            tokenize = lineValue.split(AppConstants.SEPARATOR);
+                            tokenize = lineValue.split(AppConstants.NAV_SEPARATOR);
                             if (tokenize.length == 1) {
                                 schemeType = tempVal;
                                 amc = lineValue;

@@ -11,7 +11,6 @@ import com.learning.mfscreener.models.projection.SchemeNameAndISIN;
 import com.learning.mfscreener.models.projection.UserFolioDetailsPanProjection;
 import com.learning.mfscreener.models.response.NavResponse;
 import com.learning.mfscreener.repository.MFSchemeRepository;
-import com.learning.mfscreener.repository.MFSchemeTypeRepository;
 import com.learning.mfscreener.repository.UserFolioDetailsEntityRepository;
 import com.learning.mfscreener.repository.UserSchemeDetailsEntityRepository;
 import com.learning.mfscreener.utils.AppConstants;
@@ -36,7 +35,6 @@ public class SchemeService {
 
     private final RestClient restClient;
     private final MFSchemeRepository mfSchemeRepository;
-    private final MFSchemeTypeRepository mfSchemeTypeRepository;
     private final UserFolioDetailsEntityRepository userFolioDetailsEntityRepository;
     private final UserSchemeDetailsEntityRepository userSchemeDetailsEntityRepository;
     private final ConversionServiceAdapter conversionServiceAdapter;
