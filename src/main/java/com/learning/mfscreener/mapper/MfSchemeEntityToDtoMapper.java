@@ -2,6 +2,7 @@
 package com.learning.mfscreener.mapper;
 
 import com.learning.mfscreener.entities.MFSchemeEntity;
+import com.learning.mfscreener.entities.MFSchemeTypeEntity;
 import com.learning.mfscreener.models.MFSchemeDTO;
 import java.time.LocalDate;
 import org.mapstruct.AfterMapping;
@@ -34,6 +35,7 @@ public interface MfSchemeEntityToDtoMapper extends Converter<MFSchemeEntity, MFS
             }
             return mfSchemeDTO.withNavAndDate(nav, date);
         }
-        return mfSchemeDTO;
+        MFSchemeTypeEntity mfSchemeTypeEntity = mfSchemeEntity.getMfSchemeTypeEntity();
+        return mfSchemeDTO.withSchemeType(mfSchemeTypeEntity.getType() + "(" + mfSchemeTypeEntity.getCategory() + ")");
     }
 }

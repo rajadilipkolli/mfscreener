@@ -5,7 +5,7 @@ import com.learning.mfscreener.entities.MFSchemeEntity;
 import com.learning.mfscreener.entities.MFSchemeNavEntity;
 import com.learning.mfscreener.entities.MFSchemeTypeEntity;
 import com.learning.mfscreener.models.MFSchemeDTO;
-import com.learning.mfscreener.repository.MFSchemeTypeRepository;
+import com.learning.mfscreener.service.MFSchemeTypeService;
 import com.learning.mfscreener.utils.AppConstants;
 import java.time.LocalDate;
 import java.util.regex.Matcher;
@@ -25,7 +25,7 @@ public abstract class MfSchemeDtoToEntityMapper {
             Pattern.compile("^(.*?)\\((.*?)\\s*-\\s*(.*?)\\)$");
 
     @Autowired
-    private MFSchemeTypeRepository mfSchemeTypeRepository;
+    private MFSchemeTypeService mfSchemeTypeService;
 
     @Mapping(target = "mfSchemeTypeEntity", ignore = true)
     @Mapping(target = "mfSchemeNavEntities", ignore = true)
@@ -60,28 +60,12 @@ public abstract class MfSchemeDtoToEntityMapper {
             } else {
                 subCategory = null;
             }
-            mfSchemeTypeEntity = mfSchemeTypeRepository
-                    .findByTypeAndCategoryAndSubCategory(type, category, subCategory)
-                    .orElseGet(() -> {
-                        MFSchemeTypeEntity mfSchemeType = new MFSchemeTypeEntity();
-                        mfSchemeType.setType(type);
-                        mfSchemeType.setCategory(category);
-                        mfSchemeType.setSubCategory(subCategory);
-                        return mfSchemeTypeRepository.save(mfSchemeType);
-                    });
+            mfSchemeTypeEntity = mfSchemeTypeService.findByTypeAndCategoryAndSubCategory(type, category, subCategory);
         } else {
             if (!schemeType.contains("-")) {
                 String type = schemeType.substring(0, schemeType.indexOf('('));
                 String category = schemeType.substring(schemeType.indexOf('(') + 1, schemeType.length() - 1);
-                mfSchemeTypeEntity = mfSchemeTypeRepository
-                        .findByTypeAndCategoryAndSubCategory(type, category, null)
-                        .orElseGet(() -> {
-                            MFSchemeTypeEntity mfSchemeType = new MFSchemeTypeEntity();
-                            mfSchemeType.setType(type);
-                            mfSchemeType.setCategory(category);
-                            mfSchemeType.setSubCategory(null);
-                            return mfSchemeTypeRepository.save(mfSchemeType);
-                        });
+                mfSchemeTypeEntity = mfSchemeTypeService.findByTypeAndCategoryAndSubCategory(type, category, null);
             } else {
                 log.error("Unable to parse schemeType :{}", schemeType);
             }
