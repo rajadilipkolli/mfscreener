@@ -26,7 +26,7 @@
             <column name="pay_out" type="${string.type}"/>
             <column name="scheme_name_alias" type="${string.type}"/>
             <column name="mf_scheme_type_id" type="INT"/>
-            <column name="version" type="BIGINT"/>
+            <column name="version" type="tinyint"/>
             <column name="created_by" type="${string.type}"/>
             <column name="created_date" type="DATETIME"/>
             <column name="last_modified_by" type="${string.type}"/>
@@ -50,13 +50,14 @@
             <column name="scheme_type_id" type="INT">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="pk_mf_scheme_types"/>
             </column>
-            <column name="scheme_type" type="${string.type}">
+            <column name="type" type="${string.type}">
                 <constraints nullable="false"/>
             </column>
-            <column name="scheme_category" type="${string.type}">
+            <column name="category" type="${string.type}">
                 <constraints nullable="false"/>
             </column>
-            <column name="version" type="smallint" />
+            <column name="sub_category" type="${string.type}"/>
+            <column name="version" type="tinyint"/>
             <column name="created_by" type="${string.type}"/>
             <column name="created_date" type="DATETIME"/>
             <column name="last_modified_by" type="${string.type}"/>
@@ -75,7 +76,7 @@
                                  referencedTableName="mf_scheme_types"/>
 
         <addUniqueConstraint
-                columnNames="scheme_type, scheme_category"
+                columnNames="type, category, sub_category"
                 constraintName="UK_MF_SCHEME_CATEGORY_MF_SCHEME_TYPE"
                 tableName="mf_scheme_types"/>
 

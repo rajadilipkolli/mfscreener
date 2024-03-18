@@ -268,7 +268,7 @@ public class PortfolioService {
                                         portfolioDetails.getSchemeId(),
                                         adjustedDate,
                                         navNotFoundException);
-                                scheme = new MFSchemeDTO(null, null, null, null, "10", adjustedDate.toString());
+                                scheme = new MFSchemeDTO(null, null, null, null, "10", adjustedDate.toString(), null);
                             }
                             double totalValue = portfolioDetails.getBalanceUnits() * Double.parseDouble(scheme.nav());
                             return new PortfolioDetailsDTO(

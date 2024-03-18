@@ -4,16 +4,13 @@ import com.learning.mfscreener.adapter.ConversionServiceAdapter;
 import com.learning.mfscreener.config.logging.Loggable;
 import com.learning.mfscreener.entities.MFSchemeEntity;
 import com.learning.mfscreener.entities.MFSchemeNavEntity;
-import com.learning.mfscreener.entities.MFSchemeTypeEntity;
 import com.learning.mfscreener.entities.UserSchemeDetailsEntity;
 import com.learning.mfscreener.exception.SchemeNotFoundException;
-import com.learning.mfscreener.models.MetaDTO;
 import com.learning.mfscreener.models.projection.FundDetailProjection;
 import com.learning.mfscreener.models.projection.SchemeNameAndISIN;
 import com.learning.mfscreener.models.projection.UserFolioDetailsPanProjection;
 import com.learning.mfscreener.models.response.NavResponse;
 import com.learning.mfscreener.repository.MFSchemeRepository;
-import com.learning.mfscreener.repository.MFSchemeTypeRepository;
 import com.learning.mfscreener.repository.UserFolioDetailsEntityRepository;
 import com.learning.mfscreener.repository.UserSchemeDetailsEntityRepository;
 import com.learning.mfscreener.utils.AppConstants;
@@ -25,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestClient;
@@ -37,7 +35,6 @@ public class SchemeService {
 
     private final RestClient restClient;
     private final MFSchemeRepository mfSchemeRepository;
-    private final MFSchemeTypeRepository mfSchemeTypeRepository;
     private final UserFolioDetailsEntityRepository userFolioDetailsEntityRepository;
     private final UserSchemeDetailsEntityRepository userSchemeDetailsEntityRepository;
     private final ConversionServiceAdapter conversionServiceAdapter;
@@ -68,7 +65,14 @@ public class SchemeService {
     }
 
     NavResponse getNavResponseResponseEntity(Long schemeCode) {
-        return this.restClient.get().uri(getUri(schemeCode)).retrieve().body(NavResponse.class);
+        return this.restClient
+                .get()
+                .uri(getUri(schemeCode))
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, (request, response) -> {
+                    throw new SchemeNotFoundException("scheme with id %d not found".formatted(schemeCode));
+                })
+                .body(NavResponse.class);
     }
 
     URI getUri(Long schemeCode) {
@@ -96,22 +100,6 @@ public class SchemeService {
                 for (MFSchemeNavEntity newSchemeNav : newNavs) {
                     mfSchemeEntity.addSchemeNav(newSchemeNav);
                 }
-                final MetaDTO meta = navResponse.getMeta();
-                MFSchemeTypeEntity mfschemeTypeEntity = this.mfSchemeTypeRepository
-                        .findBySchemeCategoryAndSchemeType(meta.schemeCategory(), meta.schemeType())
-                        .orElseGet(() -> {
-                            MFSchemeTypeEntity entity = new MFSchemeTypeEntity();
-                            entity.setSchemeType(meta.schemeType());
-                            entity.setSchemeCategory(meta.schemeCategory());
-                            return this.mfSchemeTypeRepository.save(entity);
-                        });
-                // As fund house is set at initializing, set only if it is not set
-                if (mfSchemeEntity.getFundHouse() == null) {
-                    // case where entity is manually created instead of load
-                    mfSchemeEntity.setFundHouse(meta.fundHouse());
-                    mfSchemeEntity.setSchemeName(meta.schemeName());
-                }
-                mfschemeTypeEntity.addMFScheme(mfSchemeEntity);
                 try {
                     this.mfSchemeRepository.save(mfSchemeEntity);
                 } catch (ConstraintViolationException | DataIntegrityViolationException exception) {

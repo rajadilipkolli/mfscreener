@@ -44,7 +44,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 512m
+          memory: 2048m
     expose:
       - "9411"
     ports:
@@ -52,6 +52,22 @@ services:
     networks:
       - mfscreener-network
 
+  redis:
+    image: 'redis:7.2.4-alpine'
+    ports:
+      - '127.0.0.1:6379:6379/tcp'
+    volumes:
+      - 'redis_data:/data:rw'
+    healthcheck:
+      test: redis-cli ping
+      interval: 3s
+      timeout: 5s
+      retries: 5
+    networks:
+      - mfscreener-network
+
 networks:
   mfscreener-network:
     driver: bridge
+volumes:
+  redis_data:

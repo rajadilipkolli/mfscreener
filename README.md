@@ -31,6 +31,18 @@ You can also run the application using Gradle as follows:
 * Actuator Endpoint: http://localhost:8080/actuator
 * PgAdmin (UI for Postgres Database) : http://localhost:5050 (pgadmin4@pgadmin.org/admin)
 * Grafana : http://localhost:3000 (admin/admin)
+* JobRunr Dashboard: http://localhost:8000/dashboard/overview
+
+### Check redis keys
+
+* To check redis keys from docker issue below command
+```shell
+docker exec -it docker-redis-1 redis-cli
+```
+
+```shell
+127.0.0.1:6379> keys *
+```
 
 ### how to read CAS Data using [casparser](https://pypi.org/project/casparser/)
  * Install phyton

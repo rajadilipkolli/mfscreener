@@ -66,8 +66,8 @@ public class NavService {
                         schemeService.fetchSchemeDetails(String.valueOf(schemeCode), schemeCode);
                     }
                 }
-
-                if (retryCount >= 4) {
+                // retrying 5 times as there could be 3 consecutive holidays
+                if (retryCount >= 5) {
                     throw navNotFoundException;
                 }
 
