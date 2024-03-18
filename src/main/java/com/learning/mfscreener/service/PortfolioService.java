@@ -14,6 +14,8 @@ import com.learning.mfscreener.exception.NavNotFoundException;
 import com.learning.mfscreener.mapper.CasDetailsMapper;
 import com.learning.mfscreener.models.MFSchemeDTO;
 import com.learning.mfscreener.models.PortfolioDetailsDTO;
+import com.learning.mfscreener.models.entityviews.UserCASDetailsEntityView;
+import com.learning.mfscreener.models.entityviews.UserFolioDetailsEntityView;
 import com.learning.mfscreener.models.portfolio.CasDTO;
 import com.learning.mfscreener.models.portfolio.UserFolioDTO;
 import com.learning.mfscreener.models.portfolio.UserSchemeDTO;
@@ -101,7 +103,8 @@ public class PortfolioService {
         List<UserTransactionDetailsEntity> userTransactionDetailsEntityList =
                 this.userTransactionDetailsEntityRepository.findAllTransactionsByEmailAndName(email, name);
 
-        UserCASDetailsEntity userCASDetailsEntity = casDetailsEntityRepository.findByInvestorEmailAndName(email, name);
+        UserCASDetailsEntityView userCASDetailsEntityView =
+                casDetailsEntityRepository.findByInvestorEmailAndName(email, name);
 
         if (userTransactionDTOListCount == userTransactionDetailsEntityList.size()) {
             log.info("No new transactions are added");
@@ -112,16 +115,16 @@ public class PortfolioService {
         AtomicInteger transactionsCounter = new AtomicInteger();
 
         // Verify if new folios are added
-        List<String> existingFolios = userCASDetailsEntity.getFolioEntities().stream()
-                .map(UserFolioDetailsEntity::getFolio)
+        List<String> existingFolios = userCASDetailsEntityView.getFolioEntities().stream()
+                .map(UserFolioDetailsEntityView::getFolio)
                 .toList();
 
         folioDTOList.forEach(userFolioDTO -> {
             String folio = userFolioDTO.folio();
             if (!existingFolios.contains(folio)) {
                 log.info("New folio: {} created that is not present in the database", folio);
-                userCASDetailsEntity.addFolioEntity(
-                        casDetailsMapper.mapUserFolioDTOToUserFolioDetailsEntity(userFolioDTO));
+                // userCASDetailsEntityView.addFolioEntity(
+                //         casDetailsMapper.mapUserFolioDTOToUserFolioDetailsEntity(userFolioDTO));
                 folioCounter.incrementAndGet();
                 int newTransactions = userFolioDTO.schemes().stream()
                         .map(UserSchemeDTO::transactions)
@@ -184,7 +187,8 @@ public class PortfolioService {
                     });
                 }
             });
-            userCASDetailsEntity.setFolioEntities(existingUserFolioDetailsEntityList);
+            // TODO
+            //     userCASDetailsEntityView.setFolioEntities(existingUserFolioDetailsEntityList);
 
             // Check if all new transactions are added as part of adding schemes
             if (userTransactionDTOListCount == (userTransactionDetailsEntityList.size() + transactionsCounter.get())) {
@@ -244,7 +248,7 @@ public class PortfolioService {
                 });
             }
         }
-        return new UploadResponseHolder(userCASDetailsEntity, folioCounter.get(), transactionsCounter.get());
+        return new UploadResponseHolder(null, folioCounter.get(), transactionsCounter.get());
     }
 
     public PortfolioResponse getPortfolioByPAN(String panNumber, LocalDate asOfDate) {
