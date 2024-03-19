@@ -1,4 +1,4 @@
-/* Licensed under Apache-2.0 2022. */
+/* Licensed under Apache-2.0 2022-2024. */
 package com.learning.mfscreener.entities;
 
 import jakarta.persistence.Column;
@@ -11,12 +11,8 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.io.Serializable;
 import java.util.Objects;
-import lombok.Getter;
-import lombok.Setter;
 import org.hibernate.Hibernate;
 
-@Getter
-@Setter
 @Entity
 @Table(name = "investor_info")
 public class InvestorInfoEntity extends AuditableEntity<String> implements Serializable {
@@ -41,6 +37,60 @@ public class InvestorInfoEntity extends AuditableEntity<String> implements Seria
     @MapsId
     @JoinColumn(name = "user_cas_details_id")
     private UserCASDetailsEntity userCasDetailsEntity;
+
+    public Long getId() {
+        return id;
+    }
+
+    public InvestorInfoEntity setId(Long id) {
+        this.id = id;
+        return this;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public InvestorInfoEntity setEmail(String email) {
+        this.email = email;
+        return this;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public InvestorInfoEntity setName(String name) {
+        this.name = name;
+        return this;
+    }
+
+    public String getMobile() {
+        return mobile;
+    }
+
+    public InvestorInfoEntity setMobile(String mobile) {
+        this.mobile = mobile;
+        return this;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public InvestorInfoEntity setAddress(String address) {
+        this.address = address;
+        return this;
+    }
+
+    public UserCASDetailsEntity getUserCasDetailsEntity() {
+        return userCasDetailsEntity;
+    }
+
+    public InvestorInfoEntity setUserCasDetailsEntity(UserCASDetailsEntity userCasDetailsEntity) {
+        this.userCasDetailsEntity = userCasDetailsEntity;
+        return this;
+    }
 
     @Override
     public boolean equals(Object o) {
