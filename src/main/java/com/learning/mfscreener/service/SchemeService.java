@@ -96,9 +96,8 @@ public class SchemeService {
     }
 
     void mergeList(NavResponse navResponse, MFSchemeEntity mfSchemeEntity, Long schemeCode) {
-        if (navResponse.getData().size()
-                != mfSchemeEntity.getMfSchemeNavEntities().size()) {
-            List<MFSchemeNavEntity> navList = navResponse.getData().stream()
+        if (navResponse.data().size() != mfSchemeEntity.getMfSchemeNavEntities().size()) {
+            List<MFSchemeNavEntity> navList = navResponse.data().stream()
                     .map(navDataDTO -> navDataDTO.withSchemeId(schemeCode))
                     .map(conversionServiceAdapter::mapNAVDataDTOToMFSchemeNavEntity)
                     .toList();
