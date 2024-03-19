@@ -9,20 +9,31 @@ import com.learning.mfscreener.utils.LocalDateUtility;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 @Service
-@RequiredArgsConstructor
-@Slf4j
 public class NavService {
+
+    private static final Logger log = LoggerFactory.getLogger(NavService.class);
 
     private final MFSchemeRepository mfSchemesRepository;
     private final ConversionServiceAdapter conversionServiceAdapter;
     private final SchemeService schemeService;
     private final HistoricalNavService historicalNavService;
+
+    public NavService(
+            MFSchemeRepository mfSchemesRepository,
+            ConversionServiceAdapter conversionServiceAdapter,
+            SchemeService schemeService,
+            HistoricalNavService historicalNavService) {
+        this.mfSchemesRepository = mfSchemesRepository;
+        this.conversionServiceAdapter = conversionServiceAdapter;
+        this.schemeService = schemeService;
+        this.historicalNavService = historicalNavService;
+    }
 
     @Loggable
     public MFSchemeDTO getNav(Long schemeCode) {

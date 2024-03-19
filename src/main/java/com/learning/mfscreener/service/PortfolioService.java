@@ -33,15 +33,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 @Service
-@Slf4j
-@RequiredArgsConstructor
 public class PortfolioService {
+
+    private static final Logger log = LoggerFactory.getLogger(PortfolioService.class);
 
     private final ObjectMapper objectMapper;
     private final ConversionServiceAdapter conversionServiceAdapter;
@@ -53,6 +53,29 @@ public class PortfolioService {
     private final UserSchemeDetailsEntityRepository userSchemeDetailsEntityRepository;
     private final NavService navService;
     private final SchemeService schemeService;
+
+    public PortfolioService(
+            ObjectMapper objectMapper,
+            ConversionServiceAdapter conversionServiceAdapter,
+            CasDetailsMapper casDetailsMapper,
+            UserCASDetailsEntityRepository casDetailsEntityRepository,
+            InvestorInfoEntityRepository investorInfoEntityRepository,
+            UserFolioDetailsEntityRepository userFolioDetailsEntityRepository,
+            UserTransactionDetailsEntityRepository userTransactionDetailsEntityRepository,
+            UserSchemeDetailsEntityRepository userSchemeDetailsEntityRepository,
+            NavService navService,
+            SchemeService schemeService) {
+        this.objectMapper = objectMapper;
+        this.conversionServiceAdapter = conversionServiceAdapter;
+        this.casDetailsMapper = casDetailsMapper;
+        this.casDetailsEntityRepository = casDetailsEntityRepository;
+        this.investorInfoEntityRepository = investorInfoEntityRepository;
+        this.userFolioDetailsEntityRepository = userFolioDetailsEntityRepository;
+        this.userTransactionDetailsEntityRepository = userTransactionDetailsEntityRepository;
+        this.userSchemeDetailsEntityRepository = userSchemeDetailsEntityRepository;
+        this.navService = navService;
+        this.schemeService = schemeService;
+    }
 
     public String upload(MultipartFile multipartFile) throws IOException {
         CasDTO casDTO = this.objectMapper.readValue(multipartFile.getBytes(), CasDTO.class);

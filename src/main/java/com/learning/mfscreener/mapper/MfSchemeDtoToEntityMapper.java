@@ -10,16 +10,18 @@ import com.learning.mfscreener.utils.AppConstants;
 import java.time.LocalDate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import lombok.extern.slf4j.Slf4j;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-@Slf4j
 @Mapper(config = MapperSpringConfig.class)
 public abstract class MfSchemeDtoToEntityMapper {
+
+    private final Logger log = LoggerFactory.getLogger(this.getClass());
     // Define the regular expressions
     private static final Pattern TYPE_CATEGORY_SUBCATEGORY_PATTERN =
             Pattern.compile("^(.*?)\\((.*?)\\s*-\\s*(.*?)\\)$");
