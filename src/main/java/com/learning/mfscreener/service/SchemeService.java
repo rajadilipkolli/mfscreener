@@ -18,9 +18,9 @@ import java.net.URI;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.hibernate.exception.ConstraintViolationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
@@ -29,15 +29,28 @@ import org.springframework.web.client.RestClient;
 import org.springframework.web.util.UriComponentsBuilder;
 
 @Service
-@RequiredArgsConstructor
-@Slf4j
 public class SchemeService {
+
+    private final Logger log = LoggerFactory.getLogger(SchemeService.class);
 
     private final RestClient restClient;
     private final MFSchemeRepository mfSchemeRepository;
     private final UserFolioDetailsEntityRepository userFolioDetailsEntityRepository;
     private final UserSchemeDetailsEntityRepository userSchemeDetailsEntityRepository;
     private final ConversionServiceAdapter conversionServiceAdapter;
+
+    public SchemeService(
+            RestClient restClient,
+            MFSchemeRepository mfSchemeRepository,
+            UserFolioDetailsEntityRepository userFolioDetailsEntityRepository,
+            UserSchemeDetailsEntityRepository userSchemeDetailsEntityRepository,
+            ConversionServiceAdapter conversionServiceAdapter) {
+        this.restClient = restClient;
+        this.mfSchemeRepository = mfSchemeRepository;
+        this.userFolioDetailsEntityRepository = userFolioDetailsEntityRepository;
+        this.userSchemeDetailsEntityRepository = userSchemeDetailsEntityRepository;
+        this.conversionServiceAdapter = conversionServiceAdapter;
+    }
 
     @Loggable
     public void fetchSchemeDetails(Long schemeCode) {
