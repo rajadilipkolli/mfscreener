@@ -9,12 +9,10 @@ import com.learning.mfscreener.models.portfolio.UserTransactionDTO;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import lombok.experimental.UtilityClass;
 
-@UtilityClass
 public class TestData {
 
-    public CasDTO getCasDTO(boolean addFolio, boolean addScheme, boolean addTransaction) {
+    public static CasDTO getCasDTO(boolean addFolio, boolean addScheme, boolean addTransaction) {
         List<UserFolioDTO> foliosList = new ArrayList<>();
         List<UserSchemeDTO> schemasList = new ArrayList<>();
         schemasList.add(getIciciSchemeDTO());

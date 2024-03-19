@@ -6,9 +6,7 @@ import com.learning.mfscreener.models.MetaDTO;
 import com.learning.mfscreener.models.NAVDataDTO;
 import java.util.ArrayList;
 import java.util.List;
-import lombok.Data;
 
-@Data
 public class NavResponse {
     private String status;
     private MetaDTO meta;

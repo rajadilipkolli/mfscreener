@@ -57,8 +57,7 @@ dependencies {
 
     developmentOnly "org.springframework.boot:spring-boot-devtools"
     annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
-    compileOnly "org.projectlombok:lombok"
-    annotationProcessor "org.projectlombok:lombok"
+
     implementation "org.springframework.boot:spring-boot-starter-data-jpa"
     runtimeOnly "com.h2database:h2"
     runtimeOnly "org.postgresql:postgresql"
@@ -85,11 +84,9 @@ dependencies {
     
     testImplementation "org.springframework.boot:spring-boot-starter-test"
     testImplementation "org.springframework.boot:spring-boot-testcontainers"
-    testImplementation "org.projectlombok:lombok"
     testImplementation "org.testcontainers:junit-jupiter"
     testImplementation "org.testcontainers:postgresql"
     testImplementation 'com.tngtech.archunit:archunit-junit5:1.2.1'
-    testAnnotationProcessor "org.projectlombok:lombok"
     // If you are using mapstruct in test code
     testAnnotationProcessor("org.mapstruct:mapstruct-processor:1.5.5.Final")
     testAnnotationProcessor("org.mapstruct.extensions.spring:mapstruct-spring-extensions:1.1.1")
