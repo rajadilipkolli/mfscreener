@@ -9,6 +9,7 @@ import com.learning.mfscreener.mapper.MfSchemeDtoToEntityMapper;
 import com.learning.mfscreener.models.MFSchemeDTO;
 import com.learning.mfscreener.models.projection.SchemeNameAndISIN;
 import com.learning.mfscreener.repository.MFSchemeRepository;
+import com.learning.mfscreener.repository.MFSchemeTypeRepository;
 import com.learning.mfscreener.repository.UserSchemeDetailsEntityRepository;
 import com.learning.mfscreener.utils.AppConstants;
 import java.io.BufferedReader;
@@ -31,6 +32,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 public class HistoricalNavService {
 
     private final MFSchemeRepository mfSchemeRepository;
+    private final MFSchemeTypeRepository mfSchemeTypeRepository;
     private final UserSchemeDetailsEntityRepository userSchemeDetailsEntityRepository;
     private final RestClient restClient;
     private final MfSchemeDtoToEntityMapper mfSchemeDtoToEntityMapper;
@@ -39,10 +41,12 @@ public class HistoricalNavService {
 
     public HistoricalNavService(
             MFSchemeRepository mfSchemeRepository,
+            MFSchemeTypeRepository mfSchemeTypeRepository,
             RestClient restClient,
             UserSchemeDetailsEntityRepository userSchemeDetailsEntityRepository,
             MfSchemeDtoToEntityMapper mfSchemeDtoToEntityMapper) {
         this.mfSchemeRepository = mfSchemeRepository;
+        this.mfSchemeTypeRepository = mfSchemeTypeRepository;
         this.restClient = restClient;
         this.userSchemeDetailsEntityRepository = userSchemeDetailsEntityRepository;
         this.mfSchemeDtoToEntityMapper = mfSchemeDtoToEntityMapper;
@@ -117,7 +121,8 @@ public class HistoricalNavService {
                                 final MFSchemeDTO mfSchemeDTO = new MFSchemeDTO(
                                         amc, Long.valueOf(schemecode), payout, schemename, nav, date, schemeType);
                                 MFSchemeEntity mfSchemeEntity =
-                                        mfSchemeDtoToEntityMapper.mapMFSchemeDTOToMFSchemeEntity(mfSchemeDTO);
+                                        mfSchemeDtoToEntityMapper.mapMFSchemeDTOToMFSchemeEntity(
+                                                mfSchemeDTO, mfSchemeTypeRepository);
                                 mfSchemeRepository.save(mfSchemeEntity);
                             }
                         }
