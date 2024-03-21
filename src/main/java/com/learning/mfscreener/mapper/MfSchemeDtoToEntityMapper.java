@@ -7,6 +7,7 @@ import com.learning.mfscreener.entities.MFSchemeTypeEntity;
 import com.learning.mfscreener.models.MFSchemeDTO;
 import com.learning.mfscreener.repository.MFSchemeTypeRepository;
 import com.learning.mfscreener.utils.AppConstants;
+import jakarta.annotation.Nullable;
 import java.time.LocalDate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -71,7 +72,7 @@ public abstract class MfSchemeDtoToEntityMapper {
     }
 
     MFSchemeTypeEntity findOrCreateMFSchemeTypeEntity(
-            String type, String category, String subCategory, MFSchemeTypeRepository mfSchemeTypeRepository) {
+            String type, String category, @Nullable String subCategory, MFSchemeTypeRepository mfSchemeTypeRepository) {
         MFSchemeTypeEntity byTypeAndCategoryAndSubCategory =
                 mfSchemeTypeRepository.findByTypeAndCategoryAndSubCategory(type, category, subCategory);
         if (byTypeAndCategoryAndSubCategory == null) {
