@@ -43,7 +43,7 @@ public class NavService {
             currentDateTime = currentDateTime.minusDays(1);
         }
 
-        LocalDate currentDate = currentDateTime.toLocalDate();
+        LocalDate currentDate = LocalDateUtility.getAdjustedDate(currentDateTime.toLocalDate());
 
         return getNavByDateWithRetry(schemeCode, currentDate);
     }
@@ -83,7 +83,8 @@ public class NavService {
                 }
 
                 retryCount++;
-                navDate = navNotFoundException.getDate().minusDays(1);
+                navDate = LocalDateUtility.getAdjustedDate(
+                        navNotFoundException.getDate().minusDays(1));
                 log.info("Retrying for date: {} for scheme: {}", navDate, schemeCode);
             }
         }

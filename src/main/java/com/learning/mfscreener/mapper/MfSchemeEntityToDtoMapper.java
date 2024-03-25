@@ -26,15 +26,14 @@ public interface MfSchemeEntityToDtoMapper extends Converter<MFSchemeEntity, MFS
 
     @AfterMapping
     default MFSchemeDTO updateMFScheme(MFSchemeEntity mfSchemeEntity, @MappingTarget MFSchemeDTO mfSchemeDTO) {
+        String date = null;
+        String nav = null;
         if (!mfSchemeEntity.getMfSchemeNavEntities().isEmpty()) {
             LocalDate localDate = mfSchemeEntity.getMfSchemeNavEntities().get(0).getNavDate();
-            String nav = String.valueOf(
-                    mfSchemeEntity.getMfSchemeNavEntities().get(0).getNav());
-            String date = null;
+            nav = String.valueOf(mfSchemeEntity.getMfSchemeNavEntities().get(0).getNav());
             if (null != localDate) {
                 date = localDate.toString();
             }
-            return mfSchemeDTO.withNavAndDate(nav, date);
         }
         MFSchemeTypeEntity mfSchemeTypeEntity = mfSchemeEntity.getMfSchemeTypeEntity();
         String subCategory = mfSchemeTypeEntity.getSubCategory();
@@ -45,7 +44,7 @@ public interface MfSchemeEntityToDtoMapper extends Converter<MFSchemeEntity, MFS
         } else {
             categoryAndSubCategory = category;
         }
-
-        return mfSchemeDTO.withSchemeType(mfSchemeTypeEntity.getType() + "(" + categoryAndSubCategory + ")");
+        return mfSchemeDTO.withNavAndDateAndSchemeType(
+                mfSchemeTypeEntity.getType() + "(" + categoryAndSubCategory + ")", nav, date);
     }
 }
