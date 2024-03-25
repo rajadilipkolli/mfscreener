@@ -5,6 +5,7 @@ import com.learning.mfscreener.models.projection.FundDetailProjection;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -21,20 +22,12 @@ public interface MFSchemeRepository extends JpaRepository<MFSchemeEntity, Long> 
     @Query("select o.schemeId from MFSchemeEntity o")
     List<Long> findAllSchemeIds();
 
-    @Query(
-            """
-            select o from MFSchemeEntity o LEFT JOIN FETCH o.mfSchemeNavEntities msn
-            where o.schemeId =:schemeCode and msn.navDate =:date
-            """)
+    @EntityGraph(attributePaths = {"mfSchemeTypeEntity", "mfSchemeNavEntities"})
     @Transactional(readOnly = true)
     Optional<MFSchemeEntity> findBySchemeIdAndMfSchemeNavEntities_NavDate(
             @Param("schemeCode") Long schemeCode, @Param("date") LocalDate navDate);
 
-    @Query(
-            """
-            select o from MFSchemeEntity o LEFT JOIN FETCH o.mfSchemeNavEntities msn
-            where o.schemeId = :schemeId
-            """)
+    @EntityGraph(attributePaths = {"mfSchemeTypeEntity", "mfSchemeNavEntities"})
     @Transactional(readOnly = true)
     Optional<MFSchemeEntity> findBySchemeId(@Param("schemeId") Long schemeId);
 

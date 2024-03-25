@@ -96,10 +96,11 @@ public class PortfolioService {
             casDetailsEntity = this.conversionServiceAdapter.mapCasDTOToUserCASDetailsEntity(casDTO);
             List<UserFolioDetailsEntity> folioEntities = casDetailsEntity.getFolioEntities();
             transactions = folioEntities.stream()
-                    .map(UserFolioDetailsEntity::getSchemeEntities)
-                    .flatMap(List::stream)
-                    .map(UserSchemeDetailsEntity::getTransactionEntities)
-                    .count();
+                    .flatMap(userFolioDTO -> userFolioDTO.getSchemeEntities().stream())
+                    .mapToLong(userSchemeDTO ->
+                            userSchemeDTO.getTransactionEntities().size())
+                    .sum();
+
             folios = folioEntities.size();
         }
         if (casDetailsEntity != null) {
@@ -272,13 +273,12 @@ public class PortfolioService {
 
     public PortfolioResponse getPortfolioByPAN(String panNumber, LocalDate asOfDate) {
 
+        LocalDate adjustedDate = LocalDateUtility.getAdjustedDate(asOfDate);
         List<CompletableFuture<PortfolioDetailsDTO>> completableFutureList =
-                casDetailsEntityRepository.getPortfolioDetails(panNumber, asOfDate).stream()
+                casDetailsEntityRepository.getPortfolioDetails(panNumber, adjustedDate).stream()
                         .map(portfolioDetails -> CompletableFuture.supplyAsync(() -> {
                             MFSchemeDTO scheme;
-                            LocalDate adjustedDate = asOfDate;
                             try {
-                                adjustedDate = LocalDateUtility.getAdjustedDate(asOfDate);
                                 scheme = navService.getNavByDateWithRetry(portfolioDetails.getSchemeId(), adjustedDate);
                             } catch (NavNotFoundException navNotFoundException) {
                                 // Will happen in case of NFO where units are allocated but not ready for subscription
