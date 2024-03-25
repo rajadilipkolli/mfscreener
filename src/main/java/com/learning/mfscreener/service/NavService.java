@@ -5,8 +5,6 @@ import com.learning.mfscreener.exception.NavNotFoundException;
 import com.learning.mfscreener.models.MFSchemeDTO;
 import com.learning.mfscreener.utils.LocalDateUtility;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -30,15 +28,7 @@ public class NavService {
 
     @Loggable
     public MFSchemeDTO getNav(Long schemeCode) {
-        LocalDateTime currentDateTime = LocalDateTime.now();
-        // NAVs are refreshed only after 11:30 PM so reduce the day by 1
-        if (currentDateTime.toLocalTime().isBefore(LocalTime.of(23, 30))) {
-            currentDateTime = currentDateTime.minusDays(1);
-        }
-
-        LocalDate currentDate = LocalDateUtility.getAdjustedDate(currentDateTime.toLocalDate());
-
-        return getNavByDateWithRetry(schemeCode, currentDate);
+        return getNavByDateWithRetry(schemeCode, LocalDateUtility.getAdjustedDate());
     }
 
     @Loggable
