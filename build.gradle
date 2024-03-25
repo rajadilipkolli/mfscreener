@@ -49,6 +49,7 @@ dependencies {
     // caching
     implementation 'org.springframework.boot:spring-boot-starter-cache'
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    implementation 'org.apache.commons:commons-pool2'
 
     // Observability
     implementation 'io.micrometer:micrometer-tracing-bridge-otel'
