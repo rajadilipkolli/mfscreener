@@ -124,8 +124,7 @@ public class CalculatorService {
     }
 
     double getCurrentValuation(Long fundId, Double balance) {
-        MFSchemeDTO scheme =
-                navService.getNavByDateWithRetry(fundId, LocalDateUtility.getAdjustedDate(LocalDate.now()));
+        MFSchemeDTO scheme = navService.getNavByDateWithRetry(fundId, LocalDateUtility.getAdjustedDate());
         return balance * Double.parseDouble(scheme.nav());
     }
 

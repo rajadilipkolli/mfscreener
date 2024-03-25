@@ -1,14 +1,10 @@
 package com.learning.mfscreener.service;
 
-import com.learning.mfscreener.adapter.ConversionServiceAdapter;
 import com.learning.mfscreener.config.logging.Loggable;
 import com.learning.mfscreener.exception.NavNotFoundException;
 import com.learning.mfscreener.models.MFSchemeDTO;
-import com.learning.mfscreener.repository.MFSchemeRepository;
 import com.learning.mfscreener.utils.LocalDateUtility;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -19,33 +15,20 @@ public class NavService {
 
     private static final Logger log = LoggerFactory.getLogger(NavService.class);
 
-    private final MFSchemeRepository mfSchemesRepository;
-    private final ConversionServiceAdapter conversionServiceAdapter;
-    private final SchemeService schemeService;
     private final HistoricalNavService historicalNavService;
+    private final CachedNavService cachedNavService;
+    private final SchemeService schemeService;
 
     public NavService(
-            MFSchemeRepository mfSchemesRepository,
-            ConversionServiceAdapter conversionServiceAdapter,
-            SchemeService schemeService,
-            HistoricalNavService historicalNavService) {
-        this.mfSchemesRepository = mfSchemesRepository;
-        this.conversionServiceAdapter = conversionServiceAdapter;
-        this.schemeService = schemeService;
+            HistoricalNavService historicalNavService, CachedNavService cachedNavService, SchemeService schemeService) {
         this.historicalNavService = historicalNavService;
+        this.cachedNavService = cachedNavService;
+        this.schemeService = schemeService;
     }
 
     @Loggable
     public MFSchemeDTO getNav(Long schemeCode) {
-        LocalDateTime currentDateTime = LocalDateTime.now();
-        // NAVs are refreshed only after 11:30 PM so reduce the day by 1
-        if (currentDateTime.toLocalTime().isBefore(LocalTime.of(23, 30))) {
-            currentDateTime = currentDateTime.minusDays(1);
-        }
-
-        LocalDate currentDate = LocalDateUtility.getAdjustedDate(currentDateTime.toLocalDate());
-
-        return getNavByDateWithRetry(schemeCode, currentDate);
+        return getNavByDateWithRetry(schemeCode, LocalDateUtility.getAdjustedDate());
     }
 
     @Loggable
@@ -62,23 +45,23 @@ public class NavService {
 
         while (true) {
             try {
-                mfSchemeDTO = getNavForDate(schemeCode, navDate);
+                mfSchemeDTO = cachedNavService.getNavForDate(schemeCode, navDate);
                 break; // Exit the loop if successful
             } catch (NavNotFoundException navNotFoundException) {
                 log.error("NavNotFoundException occurred: {}", navNotFoundException.getMessage());
 
                 if (retryCount == 1 || retryCount == 3) {
                     // make a call to get historical Data and persist
-                    String oldSchemecode = historicalNavService.getHistoricalNav(schemeCode, navDate);
-                    if (StringUtils.hasText(oldSchemecode)) {
-                        schemeService.fetchSchemeDetails(oldSchemecode, schemeCode);
+                    String oldSchemeCode = historicalNavService.getHistoricalNav(schemeCode, navDate);
+                    if (StringUtils.hasText(oldSchemeCode)) {
+                        schemeService.fetchSchemeDetails(oldSchemeCode, schemeCode);
                     } else {
                         // NFO scenario where data is not present in historical data, hence load all available data
                         schemeService.fetchSchemeDetails(String.valueOf(schemeCode), schemeCode);
                     }
                 }
-                // retrying 5 times as there could be 3 consecutive holidays
-                if (retryCount >= 5) {
+                // retrying 4 times
+                if (retryCount >= 4) {
                     throw navNotFoundException;
                 }
 
@@ -90,22 +73,5 @@ public class NavService {
         }
 
         return mfSchemeDTO;
-    }
-
-    MFSchemeDTO getNavForDate(Long schemeCode, LocalDate navDate) {
-        return this.mfSchemesRepository
-                .findBySchemeIdAndMfSchemeNavEntities_NavDate(schemeCode, navDate)
-                .map(conversionServiceAdapter::mapMFSchemeEntityToMFSchemeDTO)
-                .orElseGet(() -> getSchemeDetails(schemeCode, navDate));
-    }
-
-    MFSchemeDTO getSchemeDetails(Long schemeCode, LocalDate navDate) {
-        log.info("Fetching Nav for SchemeCode :{} for date :{} from Server", schemeCode, navDate);
-        schemeService.fetchSchemeDetails(schemeCode);
-        log.info("Fetched Nav for SchemeCode :{} for date :{} from Server", schemeCode, navDate);
-        return this.mfSchemesRepository
-                .findBySchemeIdAndMfSchemeNavEntities_NavDate(schemeCode, navDate)
-                .map(conversionServiceAdapter::mapMFSchemeEntityToMFSchemeDTO)
-                .orElseThrow(() -> new NavNotFoundException("Nav Not Found for schemeCode - " + schemeCode, navDate));
     }
 }
