@@ -6,6 +6,7 @@ import com.learning.mfscreener.entities.MFSchemeEntity;
 import com.learning.mfscreener.entities.MFSchemeNavEntity;
 import com.learning.mfscreener.entities.UserSchemeDetailsEntity;
 import com.learning.mfscreener.exception.SchemeNotFoundException;
+import com.learning.mfscreener.models.MFSchemeDTO;
 import com.learning.mfscreener.models.projection.FundDetailProjection;
 import com.learning.mfscreener.models.projection.SchemeNameAndISIN;
 import com.learning.mfscreener.models.projection.UserFolioDetailsPanProjection;
@@ -15,6 +16,7 @@ import com.learning.mfscreener.repository.UserFolioDetailsEntityRepository;
 import com.learning.mfscreener.repository.UserSchemeDetailsEntityRepository;
 import com.learning.mfscreener.utils.AppConstants;
 import java.net.URI;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -164,5 +166,12 @@ public class SchemeService {
         UserFolioDetailsPanProjection panProjection =
                 userFolioDetailsEntityRepository.findFirstByUserCasDetailsEntity_IdAndPanKyc(userCasID, "OK");
         userFolioDetailsEntityRepository.updatePanByCasId(panProjection.getPan(), userCasID);
+    }
+
+    @Loggable
+    public Optional<MFSchemeDTO> getMfSchemeDTO(Long schemeCode, LocalDate navDate) {
+        return this.mfSchemeRepository
+                .findBySchemeIdAndMfSchemeNavEntities_NavDate(schemeCode, navDate)
+                .map(conversionServiceAdapter::mapMFSchemeEntityToMFSchemeDTO);
     }
 }
