@@ -6,6 +6,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
@@ -15,7 +16,9 @@ import java.util.Objects;
 import org.hibernate.Hibernate;
 
 @Entity
-@Table(name = "user_transaction_details")
+@Table(
+        name = "user_transaction_details",
+        indexes = {@Index(name = "user_details_idx_type_transaction_dat", columnList = "transaction_date, type")})
 public class UserTransactionDetailsEntity extends AuditableEntity<String> implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)

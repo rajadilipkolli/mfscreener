@@ -1,7 +1,7 @@
 <databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
-                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
 
     <property name="string.type" value="VARCHAR(255)" dbms="!postgresql"/>
     <property name="string.type" value="text" dbms="postgresql"/>
@@ -54,8 +54,10 @@
                                  referencedTableName="user_scheme_details"
                                  referencedColumnNames="id"
                                  baseColumnNames="user_scheme_detail_id"/>
-        <createIndex tableName="user_transaction_details" indexName="IDX_TRANSACTION_DETAILS">
+
+        <createIndex tableName="user_transaction_details" indexName="user_details_idx_type_transaction_dat">
             <column name="transaction_date" />
+            <column name="type" />
         </createIndex>
     </changeSet>
 

@@ -60,8 +60,10 @@
                                  constraintName="FK_USER_FOLIO_DETAILS_ON_USER_CAS_DETAILS"
                                  referencedTableName="user_cas_details"
                                  referencedColumnNames="id"/>
-        <createIndex tableName="user_folio_details" indexName="IDX_PAN">
+
+        <createIndex tableName="user_folio_details" indexName="user_details_idx_pan_id">
             <column name="pan"/>
+            <column name="id"/>
         </createIndex>
     </changeSet>
 
