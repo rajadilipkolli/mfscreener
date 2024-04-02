@@ -85,7 +85,7 @@ public class SchemeService {
             String scheme = userSchemeDetailsEntity.getScheme();
             log.info("amfi is Null for scheme :{}", scheme);
             // attempting to find ISIN
-            if (scheme.indexOf("ISIN:") != 0) {
+            if (scheme.contains("ISIN:")) {
                 String isin = scheme.substring(scheme.lastIndexOf("ISIN:") + 5).strip();
                 if (StringUtils.hasText(isin)) {
                     Optional<MFSchemeEntity> mfSchemeEntity = mfSchemeRepository.findByPayOut(isin);
