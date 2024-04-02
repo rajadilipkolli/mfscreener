@@ -64,9 +64,62 @@ public class SchemeService {
         processResponseEntity(newSchemeCode, getNavResponseResponseEntity(Long.valueOf(oldSchemeCode)));
     }
 
+    @Loggable
+    public List<FundDetailProjection> fetchSchemes(String schemeName) {
+        String sName = "%" + schemeName.toUpperCase(Locale.ROOT) + "%";
+        log.info("Fetching schemes with :{}", sName);
+        return this.mfSchemeRepository.findBySchemeNameLikeIgnoreCaseOrderBySchemeIdAsc(sName);
+    }
+
+    @Loggable
+    public List<FundDetailProjection> fetchSchemesByFundName(String fundName) {
+        String fName = "%" + fundName.toUpperCase(Locale.ROOT) + "%";
+        log.info("Fetching schemes available for fundHouse :{}", fName);
+        return this.mfSchemeRepository.findByFundHouseLikeIgnoringCaseOrderBySchemeIdAsc(fName);
+    }
+
+    @Loggable
+    public void setAMFIIfNull() {
+        List<UserSchemeDetailsEntity> userSchemeDetailsEntities = userSchemeDetailsEntityRepository.findByAmfiIsNull();
+        userSchemeDetailsEntities.forEach(userSchemeDetailsEntity -> {
+            String scheme = userSchemeDetailsEntity.getScheme();
+            log.info("amfi is Null for scheme :{}", scheme);
+            // attempting to find ISIN
+            if (scheme.indexOf("ISIN:") != 0) {
+                String isin = scheme.substring(scheme.lastIndexOf("ISIN:") + 5).strip();
+                if (StringUtils.hasText(isin)) {
+                    Optional<MFSchemeEntity> mfSchemeEntity = mfSchemeRepository.findByPayOut(isin);
+                    mfSchemeEntity.ifPresent(schemeEntity -> userSchemeDetailsEntityRepository.updateAmfiAndIsinById(
+                            schemeEntity.getSchemeId(), isin, userSchemeDetailsEntity.getId()));
+                }
+            }
+        });
+    }
+
+    @Loggable
+    public List<UserSchemeDetailsEntity> getSchemesByEmailAndName(String email, String name) {
+        return this.userSchemeDetailsEntityRepository.findByUserEmailAndName(email, name);
+    }
+
+    // if panKYC is NOT OK then PAN is not set. hence manually setting it.
+    @Loggable
+    public void setPANIfNotSet(Long userCasID) {
+        // find pan by id
+        UserFolioDetailsPanProjection panProjection =
+                userFolioDetailsEntityRepository.findFirstByUserCasDetailsEntity_IdAndPanKyc(userCasID, "OK");
+        userFolioDetailsEntityRepository.updatePanByCasId(panProjection.getPan(), userCasID);
+    }
+
+    @Loggable
+    public Optional<MFSchemeDTO> getMfSchemeDTO(Long schemeCode, LocalDate navDate) {
+        return this.mfSchemeRepository
+                .findBySchemeIdAndMfSchemeNavEntities_NavDate(schemeCode, navDate)
+                .map(conversionServiceAdapter::mapMFSchemeEntityToMFSchemeDTO);
+    }
+
     void processResponseEntity(Long schemeCode, NavResponse navResponse) {
-        Optional<MFSchemeEntity> bySchemeId = mfSchemeRepository.findBySchemeId(schemeCode);
-        if (bySchemeId.isEmpty()) {
+        Optional<MFSchemeEntity> entityBySchemeId = mfSchemeRepository.findBySchemeId(schemeCode);
+        if (entityBySchemeId.isEmpty()) {
             // Scenario where scheme is discontinued or merged with other
             SchemeNameAndISIN firstByAmfi = userSchemeDetailsEntityRepository
                     .findFirstByAmfi(schemeCode)
@@ -75,7 +128,7 @@ public class SchemeService {
             String isin = firstByAmfi.getIsin();
             log.error("Found Discontinued IsIn : {}", isin);
         } else {
-            mergeList(navResponse, bySchemeId.get(), schemeCode);
+            mergeList(navResponse, entityBySchemeId.get(), schemeCode);
         }
     }
 
@@ -123,55 +176,5 @@ public class SchemeService {
         } else {
             log.info("data in db and from service is same hence ignoring");
         }
-    }
-
-    @Loggable
-    public List<FundDetailProjection> fetchSchemes(String schemeName) {
-        String sName = "%" + schemeName.toUpperCase(Locale.ROOT) + "%";
-        log.info("Fetching schemes with :{}", sName);
-        return this.mfSchemeRepository.findBySchemeNameLikeIgnoreCaseOrderBySchemeIdAsc(sName);
-    }
-
-    @Loggable
-    public List<FundDetailProjection> fetchSchemesByFundName(String fundName) {
-        String fName = "%" + fundName.toUpperCase(Locale.ROOT) + "%";
-        log.info("Fetching schemes available for fundHouse :{}", fName);
-        return this.mfSchemeRepository.findByFundHouseLikeIgnoringCaseOrderBySchemeIdAsc(fName);
-    }
-
-    public void setAMFIIfNull() {
-        List<UserSchemeDetailsEntity> userSchemeDetailsEntities = userSchemeDetailsEntityRepository.findByAmfiIsNull();
-        userSchemeDetailsEntities.forEach(userSchemeDetailsEntity -> {
-            String scheme = userSchemeDetailsEntity.getScheme();
-            log.info("amfi is Null for scheme :{}", scheme);
-            // attempting to find ISIN
-            if (scheme.indexOf("ISIN:") != 0) {
-                String isin = scheme.substring(scheme.lastIndexOf("ISIN:") + 5).strip();
-                if (StringUtils.hasText(isin)) {
-                    Optional<MFSchemeEntity> mfSchemeEntity = mfSchemeRepository.findByPayOut(isin);
-                    mfSchemeEntity.ifPresent(schemeEntity -> userSchemeDetailsEntityRepository.updateAmfiAndIsinById(
-                            schemeEntity.getSchemeId(), isin, userSchemeDetailsEntity.getId()));
-                }
-            }
-        });
-    }
-
-    public List<UserSchemeDetailsEntity> getSchemesByEmailAndName(String email, String name) {
-        return this.userSchemeDetailsEntityRepository.findByUserEmailAndName(email, name);
-    }
-
-    // if panKYC is NOT OK then PAN is not set. hence manually setting it.
-    public void setPANIfNotSet(Long userCasID) {
-        // find pan by id
-        UserFolioDetailsPanProjection panProjection =
-                userFolioDetailsEntityRepository.findFirstByUserCasDetailsEntity_IdAndPanKyc(userCasID, "OK");
-        userFolioDetailsEntityRepository.updatePanByCasId(panProjection.getPan(), userCasID);
-    }
-
-    @Loggable
-    public Optional<MFSchemeDTO> getMfSchemeDTO(Long schemeCode, LocalDate navDate) {
-        return this.mfSchemeRepository
-                .findBySchemeIdAndMfSchemeNavEntities_NavDate(schemeCode, navDate)
-                .map(conversionServiceAdapter::mapMFSchemeEntityToMFSchemeDTO);
     }
 }

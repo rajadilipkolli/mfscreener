@@ -23,10 +23,12 @@ public class CachedNavService {
     @Cacheable(cacheNames = "getNavForDate", unless = "#result == null")
     @Loggable
     public MFSchemeDTO getNavForDate(Long schemeCode, LocalDate navDate) {
-        return schemeService.getMfSchemeDTO(schemeCode, navDate).orElseGet(() -> getSchemeDetails(schemeCode, navDate));
+        return schemeService
+                .getMfSchemeDTO(schemeCode, navDate)
+                .orElseGet(() -> fetchAndGetSchemeDetails(schemeCode, navDate));
     }
 
-    MFSchemeDTO getSchemeDetails(Long schemeCode, LocalDate navDate) {
+    MFSchemeDTO fetchAndGetSchemeDetails(Long schemeCode, LocalDate navDate) {
         log.info("Fetching Nav for SchemeCode :{} for date :{} from Server", schemeCode, navDate);
         schemeService.fetchSchemeDetails(schemeCode);
         log.info("Fetched Nav for SchemeCode :{} for date :{} from Server", schemeCode, navDate);

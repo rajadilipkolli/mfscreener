@@ -7,6 +7,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
@@ -18,7 +19,9 @@ import java.util.Objects;
 import org.hibernate.proxy.HibernateProxy;
 
 @Entity
-@Table(name = "user_folio_details")
+@Table(
+        name = "user_folio_details",
+        indexes = {@Index(name = "user_details_idx_pan_id", columnList = "id, pan")})
 public class UserFolioDetailsEntity extends AuditableEntity<String> implements Serializable {
 
     @Id
