@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class CachedNavService {
 
-    private static final Logger log = LoggerFactory.getLogger(CachedNavService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CachedNavService.class);
 
     private final SchemeService schemeService;
 
@@ -23,15 +23,16 @@ public class CachedNavService {
     @Cacheable(cacheNames = "getNavForDate", unless = "#result == null")
     @Loggable
     public MFSchemeDTO getNavForDate(Long schemeCode, LocalDate navDate) {
+        LOGGER.info("Fetching Nav for AMFISchemeCode: {} for date: {} from Database", schemeCode, navDate);
         return schemeService
                 .getMfSchemeDTO(schemeCode, navDate)
                 .orElseGet(() -> fetchAndGetSchemeDetails(schemeCode, navDate));
     }
 
     MFSchemeDTO fetchAndGetSchemeDetails(Long schemeCode, LocalDate navDate) {
-        log.info("Fetching Nav for SchemeCode :{} for date :{} from Server", schemeCode, navDate);
+        LOGGER.info("Fetching Nav for SchemeCode :{} for date :{} from Server", schemeCode, navDate);
         schemeService.fetchSchemeDetails(schemeCode);
-        log.info("Fetched Nav for SchemeCode :{} for date :{} from Server", schemeCode, navDate);
+        LOGGER.info("Fetched Nav for SchemeCode :{} for date :{} from Server", schemeCode, navDate);
         return schemeService
                 .getMfSchemeDTO(schemeCode, navDate)
                 .orElseThrow(() -> new NavNotFoundException("Nav Not Found for schemeCode - " + schemeCode, navDate));

@@ -13,7 +13,7 @@ import org.springframework.util.StringUtils;
 @Service
 public class NavService {
 
-    private static final Logger log = LoggerFactory.getLogger(NavService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(NavService.class);
 
     private final HistoricalNavService historicalNavService;
     private final CachedNavService cachedNavService;
@@ -39,7 +39,7 @@ public class NavService {
 
     @Loggable
     public MFSchemeDTO getNavByDateWithRetry(Long schemeCode, LocalDate navDate) {
-        log.info("Fetching Nav for AMFISchemeCode: {} for date: {} from Database", schemeCode, navDate);
+        LOGGER.info("Fetching Nav for AMFISchemeCode: {} for date: {} from Cache", schemeCode, navDate);
         MFSchemeDTO mfSchemeDTO;
         int retryCount = 0;
 
@@ -48,7 +48,7 @@ public class NavService {
                 mfSchemeDTO = cachedNavService.getNavForDate(schemeCode, navDate);
                 break; // Exit the loop if successful
             } catch (NavNotFoundException navNotFoundException) {
-                log.error("NavNotFoundException occurred: {}", navNotFoundException.getMessage());
+                LOGGER.error("NavNotFoundException occurred: {}", navNotFoundException.getMessage());
 
                 if (retryCount == 1 || retryCount == 3) {
                     // make a call to get historical Data and persist
@@ -68,7 +68,7 @@ public class NavService {
                 retryCount++;
                 navDate = LocalDateUtility.getAdjustedDate(
                         navNotFoundException.getDate().minusDays(1));
-                log.info("Retrying for date: {} for scheme: {}", navDate, schemeCode);
+                LOGGER.info("Retrying for date: {} for scheme: {}", navDate, schemeCode);
             }
         }
 

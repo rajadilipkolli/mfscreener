@@ -31,5 +31,17 @@ public interface UserSchemeDetailsEntityRepository extends JpaRepository<UserSch
     @Transactional(readOnly = true)
     List<UserSchemeDetailsEntity> findByUserEmailAndName(@Param("email") String email, @Param("name") String name);
 
+    @Transactional(readOnly = true)
     Optional<SchemeNameAndISIN> findFirstByAmfi(Long amfi);
+
+    @Query(
+            value =
+                    """
+                    select mf_scheme_id, count(msn.id) from public.user_scheme_details usd join mf_scheme_nav msn
+                    on usd.amfi = msn.mf_scheme_id
+                    group by mf_scheme_id having count(msn.id) < 3
+                    """,
+            nativeQuery = true)
+    @Transactional(readOnly = true)
+    List<Long> getHistoricalDataNotLoadedSchemeIdList();
 }
