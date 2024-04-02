@@ -28,6 +28,7 @@ public interface UserSchemeDetailsEntityRepository extends JpaRepository<UserSch
             where u.userFolioDetailsEntity.userCasDetailsEntity.investorInfoEntity.email = :email and
                   u.userFolioDetailsEntity.userCasDetailsEntity.investorInfoEntity.name = :name
             """)
+    @Transactional(readOnly = true)
     List<UserSchemeDetailsEntity> findByUserEmailAndName(@Param("email") String email, @Param("name") String name);
 
     Optional<SchemeNameAndISIN> findFirstByAmfi(Long amfi);
