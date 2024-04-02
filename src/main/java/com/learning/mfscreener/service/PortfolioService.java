@@ -41,7 +41,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Service
 public class PortfolioService {
 
-    private static final Logger log = LoggerFactory.getLogger(PortfolioService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PortfolioService.class);
 
     private final ObjectMapper objectMapper;
     private final ConversionServiceAdapter conversionServiceAdapter;
@@ -128,7 +128,7 @@ public class PortfolioService {
         UserCASDetailsEntity userCASDetailsEntity = casDetailsEntityRepository.findByInvestorEmailAndName(email, name);
 
         if (userTransactionDTOListCount == userTransactionDetailsEntityList.size()) {
-            log.info("No new transactions are added");
+            LOGGER.info("No new transactions are added");
             return null;
         }
 
@@ -143,7 +143,7 @@ public class PortfolioService {
         folioDTOList.forEach(userFolioDTO -> {
             String folio = userFolioDTO.folio();
             if (!existingFolios.contains(folio)) {
-                log.info("New folio: {} created that is not present in the database", folio);
+                LOGGER.info("New folio: {} created that is not present in the database", folio);
                 userCASDetailsEntity.addFolioEntity(
                         casDetailsMapper.mapUserFolioDTOToUserFolioDetailsEntity(userFolioDTO));
                 folioCounter.incrementAndGet();
@@ -158,7 +158,7 @@ public class PortfolioService {
 
         // Check if all new transactions are added as part of adding folios
         if (userTransactionDTOListCount == (userTransactionDetailsEntityList.size() + transactionsCounter.get())) {
-            log.info("All new transactions are added as part of adding folios, hence skipping");
+            LOGGER.info("All new transactions are added as part of adding folios, hence skipping");
         } else {
             // New schemes or transactions are added
 
@@ -189,7 +189,7 @@ public class PortfolioService {
                             .toList();
                     requestSchemes.forEach(userSchemeDTO -> {
                         if (!isInListDB.contains(userSchemeDTO.isin())) {
-                            log.info(
+                            LOGGER.info(
                                     "New ISIN: {} created for folio :{} that is not present in the database",
                                     userSchemeDTO.isin(),
                                     folioFromRequest);
@@ -212,7 +212,7 @@ public class PortfolioService {
 
             // Check if all new transactions are added as part of adding schemes
             if (userTransactionDTOListCount == (userTransactionDetailsEntityList.size() + transactionsCounter.get())) {
-                log.info("All new transactions are added as part of adding schemes, hence skipping");
+                LOGGER.info("All new transactions are added as part of adding schemes, hence skipping");
             } else {
                 // New transactions are added
 
@@ -248,7 +248,7 @@ public class PortfolioService {
                         requestTransactions.forEach(userTransactionDTO -> {
                             LocalDate newTransactionDate = userTransactionDTO.date();
                             if (!transactionDateListDB.contains(newTransactionDate)) {
-                                log.info(
+                                LOGGER.info(
                                         "New transaction on date: {} created for isin {} that is not present in the database",
                                         newTransactionDate,
                                         isinFromRequest);
@@ -282,7 +282,7 @@ public class PortfolioService {
                                 scheme = navService.getNavByDateWithRetry(portfolioDetails.getSchemeId(), adjustedDate);
                             } catch (NavNotFoundException navNotFoundException) {
                                 // Will happen in case of NFO where units are allocated but not ready for subscription
-                                log.error(
+                                LOGGER.error(
                                         "NavNotFoundException occurred for scheme : {} on adjusted date :{}",
                                         portfolioDetails.getSchemeId(),
                                         adjustedDate,

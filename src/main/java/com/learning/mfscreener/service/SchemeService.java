@@ -20,6 +20,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import org.hibernate.exception.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +34,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 @Service
 public class SchemeService {
 
-    private final Logger log = LoggerFactory.getLogger(SchemeService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SchemeService.class);
 
     private final RestClient restClient;
     private final MFSchemeRepository mfSchemeRepository;
@@ -67,14 +68,14 @@ public class SchemeService {
     @Loggable
     public List<FundDetailProjection> fetchSchemes(String schemeName) {
         String sName = "%" + schemeName.toUpperCase(Locale.ROOT) + "%";
-        log.info("Fetching schemes with :{}", sName);
+        LOGGER.info("Fetching schemes with :{}", sName);
         return this.mfSchemeRepository.findBySchemeNameLikeIgnoreCaseOrderBySchemeIdAsc(sName);
     }
 
     @Loggable
     public List<FundDetailProjection> fetchSchemesByFundName(String fundName) {
         String fName = "%" + fundName.toUpperCase(Locale.ROOT) + "%";
-        log.info("Fetching schemes available for fundHouse :{}", fName);
+        LOGGER.info("Fetching schemes available for fundHouse :{}", fName);
         return this.mfSchemeRepository.findByFundHouseLikeIgnoringCaseOrderBySchemeIdAsc(fName);
     }
 
@@ -83,7 +84,7 @@ public class SchemeService {
         List<UserSchemeDetailsEntity> userSchemeDetailsEntities = userSchemeDetailsEntityRepository.findByAmfiIsNull();
         userSchemeDetailsEntities.forEach(userSchemeDetailsEntity -> {
             String scheme = userSchemeDetailsEntity.getScheme();
-            log.info("amfi is Null for scheme :{}", scheme);
+            LOGGER.info("amfi is Null for scheme :{}", scheme);
             // attempting to find ISIN
             if (scheme.contains("ISIN:")) {
                 String isin = scheme.substring(scheme.lastIndexOf("ISIN:") + 5).strip();
@@ -117,6 +118,22 @@ public class SchemeService {
                 .map(conversionServiceAdapter::mapMFSchemeEntityToMFSchemeDTO);
     }
 
+    @Loggable
+    public void loadHistoricalDataIfNotExists() {
+        List<Long> historicalDataNotLoadedSchemeIdList =
+                userSchemeDetailsEntityRepository.getHistoricalDataNotLoadedSchemeIdList();
+        if (!historicalDataNotLoadedSchemeIdList.isEmpty()) {
+            List<CompletableFuture<Void>> allSchemesWhereHistoricalDetailsNotLoadedCf =
+                    historicalDataNotLoadedSchemeIdList.stream()
+                            .map(schemeId -> CompletableFuture.runAsync(() -> fetchSchemeDetails(schemeId)))
+                            .toList();
+            List<Void> voidList = allSchemesWhereHistoricalDetailsNotLoadedCf.stream()
+                    .map(CompletableFuture::join)
+                    .toList();
+            LOGGER.info("Loaded loadHistoricalDataIfNotExists");
+        }
+    }
+
     void processResponseEntity(Long schemeCode, NavResponse navResponse) {
         Optional<MFSchemeEntity> entityBySchemeId = mfSchemeRepository.findBySchemeId(schemeCode);
         if (entityBySchemeId.isEmpty()) {
@@ -126,7 +143,7 @@ public class SchemeService {
                     .orElseThrow(
                             () -> new SchemeNotFoundException("Fund with schemeCode " + schemeCode + " Not Found"));
             String isin = firstByAmfi.getIsin();
-            log.error("Found Discontinued IsIn : {}", isin);
+            LOGGER.error("Found Discontinued IsIn : {}", isin);
         } else {
             mergeList(navResponse, entityBySchemeId.get(), schemeCode);
         }
@@ -144,7 +161,7 @@ public class SchemeService {
     }
 
     URI getUri(Long schemeCode) {
-        log.info("Fetching SchemeDetails for AMFISchemeCode :{} ", schemeCode);
+        LOGGER.info("Fetching SchemeDetails for AMFISchemeCode :{} ", schemeCode);
         return UriComponentsBuilder.fromHttpUrl(AppConstants.MFAPI_WEBSITE_BASE_URL + schemeCode)
                 .build()
                 .toUri();
@@ -156,12 +173,12 @@ public class SchemeService {
                     .map(navDataDTO -> navDataDTO.withSchemeId(schemeCode))
                     .map(conversionServiceAdapter::mapNAVDataDTOToMFSchemeNavEntity)
                     .toList();
-            log.info("No of entries from Server :{} for schemeCode/amfi :{}", navList.size(), schemeCode);
+            LOGGER.info("No of entries from Server :{} for schemeCode/amfi :{}", navList.size(), schemeCode);
             List<MFSchemeNavEntity> newNavs = navList.stream()
                     .filter(nav -> !mfSchemeEntity.getMfSchemeNavEntities().contains(nav))
                     .toList();
 
-            log.info("No of entities to insert :{} for schemeCode/amfi :{}", newNavs.size(), schemeCode);
+            LOGGER.info("No of entities to insert :{} for schemeCode/amfi :{}", newNavs.size(), schemeCode);
 
             if (!newNavs.isEmpty()) {
                 for (MFSchemeNavEntity newSchemeNav : newNavs) {
@@ -170,11 +187,11 @@ public class SchemeService {
                 try {
                     this.mfSchemeRepository.save(mfSchemeEntity);
                 } catch (ConstraintViolationException | DataIntegrityViolationException exception) {
-                    log.error("ConstraintViolationException or DataIntegrityViolationException ", exception);
+                    LOGGER.error("ConstraintViolationException or DataIntegrityViolationException ", exception);
                 }
             }
         } else {
-            log.info("data in db and from service is same hence ignoring");
+            LOGGER.info("data in db and from service is same hence ignoring");
         }
     }
 }

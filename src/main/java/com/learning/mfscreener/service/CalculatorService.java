@@ -93,6 +93,16 @@ public class CalculatorService {
                         .findByUserSchemeDetailsEntity_IdAndTypeNotInOrderByTransactionDateAsc(
                                 schemeIdInDb, List.of("STT_TAX", "STAMP_DUTY_TAX", "MISC"));
 
+        double currentBalance = getBalance(byUserSchemeDetailsEntityId);
+        // Check if the current balance is 0
+        if (currentBalance == 0) {
+            LOGGER.info(
+                    "Current balance is 0 for fund ID : {} & schemeIdInDB :{}, XIRR cannot be calculated.",
+                    fundId,
+                    schemeIdInDb);
+            return 0D;
+        }
+
         int arraySize = byUserSchemeDetailsEntityId.size() + 1;
         double[] payments = new double[arraySize];
         LocalDate[] dates = new LocalDate[arraySize];
@@ -104,7 +114,7 @@ public class CalculatorService {
         }
 
         // Add current Value and current date
-        payments[arraySize - 1] = getCurrentValuation(fundId, getBalance(byUserSchemeDetailsEntityId));
+        payments[arraySize - 1] = getCurrentValuation(fundId, currentBalance);
         dates[arraySize - 1] = LocalDate.now();
         return calculateXIRR(payments, dates);
     }
