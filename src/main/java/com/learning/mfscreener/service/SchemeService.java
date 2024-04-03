@@ -127,9 +127,8 @@ public class SchemeService {
                     historicalDataNotLoadedSchemeIdList.stream()
                             .map(schemeId -> CompletableFuture.runAsync(() -> fetchSchemeDetails(schemeId)))
                             .toList();
-            List<Void> voidList = allSchemesWhereHistoricalDetailsNotLoadedCf.stream()
-                    .map(CompletableFuture::join)
-                    .toList();
+            CompletableFuture.allOf(allSchemesWhereHistoricalDetailsNotLoadedCf.toArray(new CompletableFuture<?>[0]))
+                    .join();
             LOGGER.info("Loaded loadHistoricalDataIfNotExists");
         }
     }
