@@ -11,6 +11,7 @@ import com.learning.mfscreener.utils.LocalDateUtility;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import org.decampo.xirr.NewtonRaphson;
 import org.decampo.xirr.Transaction;
 import org.decampo.xirr.Xirr;
 import org.slf4j.Logger;
@@ -60,28 +61,34 @@ public class CalculatorService {
 
     // method to calculate XIRR for all funds
     List<XIRRResponse> calculateXIRRForAllFundsByPAN(String pan) {
-        // get all the funds
-        List<UserFolioDetailsProjection> funds = userFolioDetailsEntityRepository.findByPan(pan);
-        //        Iterable<Fund> funds = getFunds();
+        // get all the userFolioDetailsProjections
+        List<UserFolioDetailsProjection> userFolioDetailsProjections = userFolioDetailsEntityRepository.findByPan(pan);
+        //        Iterable<Fund> userFolioDetailsProjections = getFunds();
         // create a map to store the fund id and XIRR value
         List<XIRRResponse> xirrResponseList = new ArrayList<>();
-        // loop through the funds
-        for (UserFolioDetailsProjection fund : funds) {
+        // loop through the userFolioDetailsProjections
+        for (UserFolioDetailsProjection fund : userFolioDetailsProjections) {
             // get the fund id
             Long amfiId = fund.getSchemeEntities().get(0).getAmfi();
             if (amfiId == null) {
                 LOGGER.error("FundID not available for fund :{} hence skipping", fund);
                 continue;
             }
-            // TODO calculate individually and at overall level as well
-            Long schemeIdInDb = fund.getSchemeEntities().get(0).getId();
-            // calculate the XIRR for the fund
-            double xirr = calculateXIRR(amfiId, schemeIdInDb);
-            LOGGER.debug("adding XIRR for schemeId : {}", amfiId);
 
-            // put the fund id and XIRR value in the map
-            xirrResponseList.add(new XIRRResponse(
-                    fund.getFolio(), amfiId, fund.getSchemeEntities().get(0).getScheme(), xirr * 100));
+            fund.getSchemeEntities().forEach(userSchemeDetailsEntityInfo -> {
+                Long schemeIdInDb = userSchemeDetailsEntityInfo.getId();
+                // calculate the XIRR for the fund
+                double xirr = calculateXIRR(amfiId, schemeIdInDb);
+
+                if (xirr != 0.0d) {
+                    LOGGER.debug("adding XIRR for schemeId : {}", amfiId);
+                    // put the fund id and XIRR value in the map
+                    xirrResponseList.add(new XIRRResponse(
+                            fund.getFolio(), amfiId, userSchemeDetailsEntityInfo.getScheme(), xirr * 100));
+                } else {
+                    LOGGER.info("Consolidated portfolio");
+                }
+            });
         }
         // return the map
         return xirrResponseList;
@@ -94,15 +101,28 @@ public class CalculatorService {
                         .findByUserSchemeDetailsEntity_IdAndTypeNotInOrderByTransactionDateAsc(
                                 schemeIdInDb, List.of("STT_TAX", "STAMP_DUTY_TAX", "MISC"));
 
-        double currentBalance = getBalance(byUserSchemeDetailsEntityId);
-        List<Transaction> transactionList = new ArrayList<>(byUserSchemeDetailsEntityId.stream()
-                .map(userTransactionDetailsProjection -> new Transaction(
-                        -(userTransactionDetailsProjection.getAmount()),
-                        userTransactionDetailsProjection.getTransactionDate()))
-                .toList());
-        // Add current Value and current date
-        transactionList.add(new Transaction(getCurrentValuation(fundId, currentBalance), LocalDate.now()));
-        return new Xirr(transactionList).xirr();
+        double xirrValue = 0.0d;
+        if (!byUserSchemeDetailsEntityId.isEmpty()) {
+            double currentBalance = getBalance(byUserSchemeDetailsEntityId);
+            // in case if Additional Allotment is done then amount will be null
+            List<Transaction> transactionList = new ArrayList<>(byUserSchemeDetailsEntityId.stream()
+                    .filter(userTransactionDetailsProjection -> userTransactionDetailsProjection.getAmount() != null)
+                    .map(userTransactionDetailsProjection -> new Transaction(
+                            -(userTransactionDetailsProjection.getAmount()),
+                            userTransactionDetailsProjection.getTransactionDate()))
+                    .toList());
+            if (currentBalance != 0.0) {
+                // Add current Value and current date
+                transactionList.add(new Transaction(getCurrentValuation(fundId, currentBalance), LocalDate.now()));
+            }
+            xirrValue = Xirr.builder()
+                    .withTransactions(transactionList)
+                    .withGuess(0.01)
+                    .withNewtonRaphsonBuilder(
+                            NewtonRaphson.builder().withFunction(x -> x).withIterations(1000))
+                    .xirr();
+        }
+        return xirrValue;
     }
 
     // ensures that balance will never be null
