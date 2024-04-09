@@ -51,7 +51,8 @@ class NavControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.payout", is("INF846K01EW2")))
                 .andExpect(jsonPath("$.schemeName", is("Axis ELSS Tax Saver Fund - Direct Plan - Growth Option")))
                 .andExpect(jsonPath("$.nav", is("73.6085")))
-                .andExpect(jsonPath("$.date", is("2022-12-20")));
+                .andExpect(jsonPath("$.date", is("2022-12-20")))
+                .andExpect(jsonPath("$.schemeType", is("Open Ended Schemes(Equity Scheme - ELSS)")));
     }
 
     @Test
@@ -64,7 +65,7 @@ class NavControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.type", is("about:blank")))
                 .andExpect(jsonPath("$.title", is("Scheme NotFound")))
                 .andExpect(jsonPath("$.status", is(404)))
-                .andExpect(jsonPath("$.detail", is("Nav Not Found for schemeCode - 141565 on 2017-09-24")))
+                .andExpect(jsonPath("$.detail", is("Nav Not Found for schemeCode - 141565 on 2017-09-25")))
                 .andExpect(jsonPath("$.instance", is("/api/nav/141565/2017-10-01")));
     }
 
@@ -79,6 +80,7 @@ class NavControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.payout", is("INF917K01HD4")))
                 .andExpect(jsonPath("$.schemeName", is("HSBC Value Fund - Direct Growth")))
                 .andExpect(jsonPath("$.nav", is("63.18")))
-                .andExpect(jsonPath("$.date", is("2022-10-18")));
+                .andExpect(jsonPath("$.date", is("2022-10-18")))
+                .andExpect(jsonPath("$.schemeType", is("Open Ended Schemes(Equity Scheme - Value Fund)")));
     }
 }

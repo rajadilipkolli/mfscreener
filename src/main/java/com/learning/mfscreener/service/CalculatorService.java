@@ -93,6 +93,16 @@ public class CalculatorService {
                         .findByUserSchemeDetailsEntity_IdAndTypeNotInOrderByTransactionDateAsc(
                                 schemeIdInDb, List.of("STT_TAX", "STAMP_DUTY_TAX", "MISC"));
 
+        double currentBalance = getBalance(byUserSchemeDetailsEntityId);
+        // Check if the current balance is 0
+        if (currentBalance == 0) {
+            LOGGER.info(
+                    "Current balance is 0 for fund ID : {} & schemeIdInDB :{}, XIRR cannot be calculated.",
+                    fundId,
+                    schemeIdInDb);
+            return 0D;
+        }
+
         int arraySize = byUserSchemeDetailsEntityId.size() + 1;
         double[] payments = new double[arraySize];
         LocalDate[] dates = new LocalDate[arraySize];
@@ -104,7 +114,7 @@ public class CalculatorService {
         }
 
         // Add current Value and current date
-        payments[arraySize - 1] = getCurrentValuation(fundId, getBalance(byUserSchemeDetailsEntityId));
+        payments[arraySize - 1] = getCurrentValuation(fundId, currentBalance);
         dates[arraySize - 1] = LocalDate.now();
         return calculateXIRR(payments, dates);
     }
@@ -124,8 +134,7 @@ public class CalculatorService {
     }
 
     double getCurrentValuation(Long fundId, Double balance) {
-        MFSchemeDTO scheme =
-                navService.getNavByDateWithRetry(fundId, LocalDateUtility.getAdjustedDate(LocalDate.now()));
+        MFSchemeDTO scheme = navService.getNavByDateWithRetry(fundId, LocalDateUtility.getAdjustedDate());
         return balance * Double.parseDouble(scheme.nav());
     }
 
@@ -142,7 +151,7 @@ public class CalculatorService {
         double err = 1e+100;
 
         while (err > TOLERANCE) {
-            x1 = x0 - total_f_xirr(payments, days, x0) / total_df_xirr(payments, days, x0);
+            x1 = x0 - totalFXirr(payments, days, x0) / totalDfXirr(payments, days, x0);
             err = Math.abs(x1 - x0);
             x0 = x1;
         }
@@ -151,16 +160,16 @@ public class CalculatorService {
     }
 
     // helper method to calculate the sum of the derivative of the polynomial equation for XIRR
-    double total_df_xirr(double[] payments, LocalDate[] days, double x) {
+    double totalDfXirr(double[] payments, LocalDate[] days, double x) {
         double resf = 0.0;
         for (int i = 0; i < payments.length; i++) {
-            resf = resf + df_xirr(payments[i], days[i], days[0], x);
+            resf = resf + dfXirr(payments[i], days[i], days[0], x);
         }
         return resf;
     }
 
     // helper method to calculate the derivative of the polynomial equation for XIRR
-    double df_xirr(double payment, LocalDate day, LocalDate day1, double x) {
+    double dfXirr(double payment, LocalDate day, LocalDate day1, double x) {
         return (1.0 / 365.0)
                 * dateDiff(day, day1)
                 * payment
@@ -168,16 +177,16 @@ public class CalculatorService {
     }
 
     // helper method to calculate the sum of the polynomial equation for XIRR
-    double total_f_xirr(double[] payments, LocalDate[] days, double x) {
+    double totalFXirr(double[] payments, LocalDate[] days, double x) {
         double resf = 0.0;
         for (int i = 0; i < payments.length; i++) {
-            resf = resf + f_xirr(payments[i], days[i], days[0], x);
+            resf = resf + fXirr(payments[i], days[i], days[0], x);
         }
         return resf;
     }
 
     // helper method to calculate the value of the polynomial equation for XIRR
-    double f_xirr(double payment, LocalDate day, LocalDate day1, double x) {
+    double fXirr(double payment, LocalDate day, LocalDate day1, double x) {
         return payment * Math.pow((1.0 + x), (dateDiff(day, day1) / 365.0));
     }
 

@@ -7,25 +7,25 @@ import com.learning.mfscreener.entities.MFSchemeTypeEntity;
 import com.learning.mfscreener.models.MFSchemeDTO;
 import com.learning.mfscreener.repository.MFSchemeTypeRepository;
 import com.learning.mfscreener.utils.AppConstants;
+import jakarta.annotation.Nullable;
 import java.time.LocalDate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import lombok.extern.slf4j.Slf4j;
 import org.mapstruct.AfterMapping;
+import org.mapstruct.Context;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-@Slf4j
 @Mapper(config = MapperSpringConfig.class)
 public abstract class MfSchemeDtoToEntityMapper {
+
+    private final Logger log = LoggerFactory.getLogger(this.getClass());
     // Define the regular expressions
     private static final Pattern TYPE_CATEGORY_SUBCATEGORY_PATTERN =
             Pattern.compile("^(.*?)\\((.*?)\\s*-\\s*(.*?)\\)$");
-
-    @Autowired
-    private MFSchemeTypeRepository mfSchemeTypeRepository;
 
     @Mapping(target = "mfSchemeTypeEntity", ignore = true)
     @Mapping(target = "mfSchemeNavEntities", ignore = true)
@@ -38,10 +38,14 @@ public abstract class MfSchemeDtoToEntityMapper {
     @Mapping(target = "payOut", source = "payout")
     @Mapping(target = "schemeId", source = "schemeCode")
     @Mapping(target = "version", ignore = true)
-    public abstract MFSchemeEntity mapMFSchemeDTOToMFSchemeEntity(MFSchemeDTO scheme);
+    public abstract MFSchemeEntity mapMFSchemeDTOToMFSchemeEntity(
+            MFSchemeDTO scheme, @Context MFSchemeTypeRepository mfSchemeTypeRepository);
 
     @AfterMapping
-    void updateMFScheme(MFSchemeDTO scheme, @MappingTarget MFSchemeEntity mfSchemeEntity) {
+    void updateMFScheme(
+            MFSchemeDTO scheme,
+            @MappingTarget MFSchemeEntity mfSchemeEntity,
+            @Context MFSchemeTypeRepository mfSchemeTypeRepository) {
         MFSchemeNavEntity mfSchemenavEntity = new MFSchemeNavEntity();
         mfSchemenavEntity.setNav("N.A.".equals(scheme.nav()) ? 0F : Float.parseFloat(scheme.nav()));
         mfSchemenavEntity.setNavDate(LocalDate.parse(scheme.date(), AppConstants.FORMATTER_DD_MMM_YYYY));
@@ -54,12 +58,12 @@ public abstract class MfSchemeDtoToEntityMapper {
             String type = matcher.group(1).strip();
             String category = matcher.group(2).strip();
             String subCategory = matcher.group(3).strip();
-            mfSchemeTypeEntity = findOrCreateMFSchemeTypeEntity(type, category, subCategory);
+            mfSchemeTypeEntity = findOrCreateMFSchemeTypeEntity(type, category, subCategory, mfSchemeTypeRepository);
         } else {
             if (!schemeType.contains("-")) {
                 String type = schemeType.substring(0, schemeType.indexOf('('));
                 String category = schemeType.substring(schemeType.indexOf('(') + 1, schemeType.length() - 1);
-                mfSchemeTypeEntity = findOrCreateMFSchemeTypeEntity(type, category, null);
+                mfSchemeTypeEntity = findOrCreateMFSchemeTypeEntity(type, category, null, mfSchemeTypeRepository);
             } else {
                 log.error("Unable to parse schemeType :{}", schemeType);
             }
@@ -67,7 +71,8 @@ public abstract class MfSchemeDtoToEntityMapper {
         mfSchemeEntity.setMfSchemeTypeEntity(mfSchemeTypeEntity);
     }
 
-    MFSchemeTypeEntity findOrCreateMFSchemeTypeEntity(String type, String category, String subCategory) {
+    MFSchemeTypeEntity findOrCreateMFSchemeTypeEntity(
+            String type, String category, @Nullable String subCategory, MFSchemeTypeRepository mfSchemeTypeRepository) {
         MFSchemeTypeEntity byTypeAndCategoryAndSubCategory =
                 mfSchemeTypeRepository.findByTypeAndCategoryAndSubCategory(type, category, subCategory);
         if (byTypeAndCategoryAndSubCategory == null) {

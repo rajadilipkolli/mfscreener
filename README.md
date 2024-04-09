@@ -2,15 +2,69 @@
 
 
 # mfscreener
-Spring Boot REST API which fetches the Net Asset Value(NAV) of an AMFI mutual fund and saves in db
 
+**Description:** MF Screener is a Java-based application designed to provide mutual fund screening capabilities. It allows users to fetch mutual fund data, including historical NAVs, scheme details, and portfolio information, through a set of RESTful APIs.
+
+**Setup:**
+ 
+ 1. Clone the repository.
+ 2. Ensure Java 17, docker and gradle are installed.
+ 3. Navigate to the project directory and follow steps at [run-locally](#run-locally) to start the application.
+
+ **Usage:**
+ 
+ * Fetch mutual fund schemes: `GET /api/scheme/{schemeName}`
+ * Upload portfolio details: `POST /api/portfolio/upload`
+ * Calculate XIRR: `GET /api/xirr/{pan}`
+
+### Simplified Class Diagram Concept
+ ```mermaid
+ classDiagram
+     class NAVController {
+         +getScheme(schemeCode)
+         +getSchemeNavOnDate(schemeCode, date)
+     }
+     class SchemeController {
+         +fetchSchemes(schemeName)
+         +fetchSchemesByFundName(fundName)
+     }
+     class PortfolioController {
+         +upload(multipartFile)
+         +getPortfolio(panNumber, date)
+     }
+     class XIRRCalculatorController {
+         +getXIRR(pan)
+     }
+     class SchemeService {
+         +fetchSchemeDetails(schemeCode)
+         +fetchSchemes(schemeName)
+     }
+     class PortfolioService {
+         +upload(multipartFile)
+         +getPortfolioByPAN(panNumber, asOfDate)
+     }
+     class NavService {
+         +getNav(schemeCode)
+         +getNavOnDate(schemeCode, inputDate)
+     }
+     class LocalDateUtility {
+         +getAdjustedDate(adjustedDate)
+     }
+     NAVController --> SchemeService : uses
+     SchemeController --> SchemeService : uses
+     PortfolioController --> PortfolioService : uses
+     XIRRCalculatorController --> NavService : uses
+     SchemeService --> LocalDateUtility : uses
+     PortfolioService --> LocalDateUtility : uses
+     NavService --> LocalDateUtility : uses
+ ```
+ This overview and class diagram provide a conceptual understanding of the project's structure. For detailed class relationships and method signatures, please refer to the source code directly.
 
 ### Run tests
 
 ```shell
-./gradlew clean build
+./gradlew clean test integrationTest
 ```
-
 ### Run locally
 
 ```shell

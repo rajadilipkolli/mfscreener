@@ -1,4 +1,4 @@
-/* Licensed under Apache-2.0 2022. */
+/* Licensed under Apache-2.0 2022-2024. */
 package com.learning.mfscreener.entities;
 
 import jakarta.persistence.CascadeType;
@@ -15,11 +15,7 @@ import jakarta.persistence.Table;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import lombok.Getter;
-import lombok.Setter;
 
-@Getter
-@Setter
 @Entity
 @Table(name = "user_cas_details")
 public class UserCASDetailsEntity extends AuditableEntity<String> implements Serializable {
@@ -42,7 +38,47 @@ public class UserCASDetailsEntity extends AuditableEntity<String> implements Ser
     @OneToMany(mappedBy = "userCasDetailsEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserFolioDetailsEntity> folioEntities = new ArrayList<>();
 
-    public void setInvestorInfoEntity(InvestorInfoEntity investorInfoEntity) {
+    public Long getId() {
+        return id;
+    }
+
+    public UserCASDetailsEntity setId(Long id) {
+        this.id = id;
+        return this;
+    }
+
+    public CasTypeEnum getCasTypeEnum() {
+        return casTypeEnum;
+    }
+
+    public UserCASDetailsEntity setCasTypeEnum(CasTypeEnum casTypeEnum) {
+        this.casTypeEnum = casTypeEnum;
+        return this;
+    }
+
+    public FileTypeEnum getFileTypeEnum() {
+        return fileTypeEnum;
+    }
+
+    public UserCASDetailsEntity setFileTypeEnum(FileTypeEnum fileTypeEnum) {
+        this.fileTypeEnum = fileTypeEnum;
+        return this;
+    }
+
+    public List<UserFolioDetailsEntity> getFolioEntities() {
+        return folioEntities;
+    }
+
+    public UserCASDetailsEntity setFolioEntities(List<UserFolioDetailsEntity> folioEntities) {
+        this.folioEntities = folioEntities;
+        return this;
+    }
+
+    public InvestorInfoEntity getInvestorInfoEntity() {
+        return investorInfoEntity;
+    }
+
+    public UserCASDetailsEntity setInvestorInfoEntity(InvestorInfoEntity investorInfoEntity) {
         if (investorInfoEntity == null) {
             if (this.investorInfoEntity != null) {
                 this.investorInfoEntity.setUserCasDetailsEntity(null);
@@ -51,6 +87,7 @@ public class UserCASDetailsEntity extends AuditableEntity<String> implements Ser
             investorInfoEntity.setUserCasDetailsEntity(this);
         }
         this.investorInfoEntity = investorInfoEntity;
+        return this;
     }
 
     public void addFolioEntity(UserFolioDetailsEntity userFolioDetailsEntity) {

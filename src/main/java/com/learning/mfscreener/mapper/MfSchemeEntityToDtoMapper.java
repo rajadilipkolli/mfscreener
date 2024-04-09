@@ -10,6 +10,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.util.StringUtils;
 
 @Mapper(config = MapperSpringConfig.class)
 public interface MfSchemeEntityToDtoMapper extends Converter<MFSchemeEntity, MFSchemeDTO> {
@@ -25,17 +26,25 @@ public interface MfSchemeEntityToDtoMapper extends Converter<MFSchemeEntity, MFS
 
     @AfterMapping
     default MFSchemeDTO updateMFScheme(MFSchemeEntity mfSchemeEntity, @MappingTarget MFSchemeDTO mfSchemeDTO) {
+        String date = null;
+        String nav = null;
         if (!mfSchemeEntity.getMfSchemeNavEntities().isEmpty()) {
-            Float navDouble = mfSchemeEntity.getMfSchemeNavEntities().get(0).getNav();
             LocalDate localDate = mfSchemeEntity.getMfSchemeNavEntities().get(0).getNavDate();
-            String nav = String.valueOf(navDouble);
-            String date = null;
+            nav = String.valueOf(mfSchemeEntity.getMfSchemeNavEntities().get(0).getNav());
             if (null != localDate) {
                 date = localDate.toString();
             }
-            return mfSchemeDTO.withNavAndDate(nav, date);
         }
         MFSchemeTypeEntity mfSchemeTypeEntity = mfSchemeEntity.getMfSchemeTypeEntity();
-        return mfSchemeDTO.withSchemeType(mfSchemeTypeEntity.getType() + "(" + mfSchemeTypeEntity.getCategory() + ")");
+        String subCategory = mfSchemeTypeEntity.getSubCategory();
+        String category = mfSchemeTypeEntity.getCategory();
+        String categoryAndSubCategory;
+        if (StringUtils.hasText(subCategory)) {
+            categoryAndSubCategory = category + " - " + subCategory;
+        } else {
+            categoryAndSubCategory = category;
+        }
+        return mfSchemeDTO.withNavAndDateAndSchemeType(
+                mfSchemeTypeEntity.getType() + "(" + categoryAndSubCategory + ")", nav, date);
     }
 }

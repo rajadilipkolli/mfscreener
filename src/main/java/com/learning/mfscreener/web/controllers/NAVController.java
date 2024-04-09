@@ -4,7 +4,6 @@ import com.learning.mfscreener.models.MFSchemeDTO;
 import com.learning.mfscreener.service.NavService;
 import com.learning.mfscreener.web.api.NAVApi;
 import java.time.LocalDate;
-import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,11 +12,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequiredArgsConstructor
 @RequestMapping("/api/nav")
 public class NAVController implements NAVApi {
 
     private final NavService navService;
+
+    public NAVController(NavService navService) {
+        this.navService = navService;
+    }
 
     @Override
     @GetMapping(path = "/{schemeCode}")

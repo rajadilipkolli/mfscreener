@@ -7,11 +7,7 @@ public record MFSchemeDTO(
         String amc, Long schemeCode, String payout, String schemeName, String nav, String date, String schemeType)
         implements Serializable {
 
-    public MFSchemeDTO withNavAndDate(String navValue, String navDate) {
-        return new MFSchemeDTO(amc(), schemeCode(), payout(), schemeName(), navValue, navDate, null);
-    }
-
-    public MFSchemeDTO withSchemeType(String schemeType) {
-        return new MFSchemeDTO(amc(), schemeCode(), payout(), schemeName(), nav(), date(), schemeType());
+    public MFSchemeDTO withNavAndDateAndSchemeType(String schemeType, String navValue, String navDate) {
+        return new MFSchemeDTO(amc(), schemeCode(), payout(), schemeName(), navValue, navDate, schemeType);
     }
 }

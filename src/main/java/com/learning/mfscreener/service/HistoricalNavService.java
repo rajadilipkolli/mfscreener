@@ -9,6 +9,7 @@ import com.learning.mfscreener.mapper.MfSchemeDtoToEntityMapper;
 import com.learning.mfscreener.models.MFSchemeDTO;
 import com.learning.mfscreener.models.projection.SchemeNameAndISIN;
 import com.learning.mfscreener.repository.MFSchemeRepository;
+import com.learning.mfscreener.repository.MFSchemeTypeRepository;
 import com.learning.mfscreener.repository.UserSchemeDetailsEntityRepository;
 import com.learning.mfscreener.utils.AppConstants;
 import java.io.BufferedReader;
@@ -30,19 +31,22 @@ import org.springframework.web.util.UriComponentsBuilder;
 @Service
 public class HistoricalNavService {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(HistoricalNavService.class);
+
     private final MFSchemeRepository mfSchemeRepository;
+    private final MFSchemeTypeRepository mfSchemeTypeRepository;
     private final UserSchemeDetailsEntityRepository userSchemeDetailsEntityRepository;
     private final RestClient restClient;
     private final MfSchemeDtoToEntityMapper mfSchemeDtoToEntityMapper;
 
-    private static final Logger log = LoggerFactory.getLogger(HistoricalNavService.class);
-
     public HistoricalNavService(
             MFSchemeRepository mfSchemeRepository,
+            MFSchemeTypeRepository mfSchemeTypeRepository,
             RestClient restClient,
             UserSchemeDetailsEntityRepository userSchemeDetailsEntityRepository,
             MfSchemeDtoToEntityMapper mfSchemeDtoToEntityMapper) {
         this.mfSchemeRepository = mfSchemeRepository;
+        this.mfSchemeTypeRepository = mfSchemeTypeRepository;
         this.restClient = restClient;
         this.userSchemeDetailsEntityRepository = userSchemeDetailsEntityRepository;
         this.mfSchemeDtoToEntityMapper = mfSchemeDtoToEntityMapper;
@@ -117,7 +121,8 @@ public class HistoricalNavService {
                                 final MFSchemeDTO mfSchemeDTO = new MFSchemeDTO(
                                         amc, Long.valueOf(schemecode), payout, schemename, nav, date, schemeType);
                                 MFSchemeEntity mfSchemeEntity =
-                                        mfSchemeDtoToEntityMapper.mapMFSchemeDTOToMFSchemeEntity(mfSchemeDTO);
+                                        mfSchemeDtoToEntityMapper.mapMFSchemeDTOToMFSchemeEntity(
+                                                mfSchemeDTO, mfSchemeTypeRepository);
                                 mfSchemeRepository.save(mfSchemeEntity);
                             }
                         }
@@ -128,7 +133,7 @@ public class HistoricalNavService {
                     }
                 }
             } catch (IOException e) {
-                log.error("Exception Occurred while reading response", e);
+                LOGGER.error("Exception Occurred while reading response", e);
                 throw new NavNotFoundException("Unable to parse for %s".formatted(schemeCode), navDate);
             }
             if (!StringUtils.hasText(oldSchemeId) && firstByAmfi != null) {
@@ -140,11 +145,11 @@ public class HistoricalNavService {
                 mfSchemeRepository.save(mfSchemeEntity);
                 oldSchemeId = String.valueOf(schemeCode);
             } else {
-                log.info("No Nav found for the given day");
+                LOGGER.info("No Nav found for the given day");
             }
         } catch (ResourceAccessException exception) {
             // eating as we can't do much, and it should be set when available
-            log.error("Unable to load Historical Data, downstream service is down ", exception);
+            LOGGER.error("Unable to load Historical Data, downstream service is down ", exception);
         }
         return oldSchemeId;
     }

@@ -6,6 +6,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
@@ -14,14 +15,12 @@ import jakarta.persistence.Version;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import lombok.Getter;
-import lombok.Setter;
 import org.hibernate.annotations.DynamicUpdate;
 
-@Table(name = "mf_scheme")
+@Table(
+        name = "mf_scheme",
+        indexes = {@Index(name = "mf_scheme_idx_scheme_id", columnList = "scheme_id")})
 @Entity
-@Getter
-@Setter
 @DynamicUpdate
 public class MFSchemeEntity extends AuditableEntity<String> implements Serializable {
 
@@ -49,6 +48,78 @@ public class MFSchemeEntity extends AuditableEntity<String> implements Serializa
 
     @OneToMany(mappedBy = "mfSchemeEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<MFSchemeNavEntity> mfSchemeNavEntities = new ArrayList<>();
+
+    public Long getSchemeId() {
+        return schemeId;
+    }
+
+    public MFSchemeEntity setSchemeId(Long schemeId) {
+        this.schemeId = schemeId;
+        return this;
+    }
+
+    public String getPayOut() {
+        return payOut;
+    }
+
+    public MFSchemeEntity setPayOut(String payOut) {
+        this.payOut = payOut;
+        return this;
+    }
+
+    public String getFundHouse() {
+        return fundHouse;
+    }
+
+    public MFSchemeEntity setFundHouse(String fundHouse) {
+        this.fundHouse = fundHouse;
+        return this;
+    }
+
+    public String getSchemeName() {
+        return schemeName;
+    }
+
+    public MFSchemeEntity setSchemeName(String schemeName) {
+        this.schemeName = schemeName;
+        return this;
+    }
+
+    public String getSchemeNameAlias() {
+        return schemeNameAlias;
+    }
+
+    public MFSchemeEntity setSchemeNameAlias(String schemeNameAlias) {
+        this.schemeNameAlias = schemeNameAlias;
+        return this;
+    }
+
+    public Short getVersion() {
+        return version;
+    }
+
+    public MFSchemeEntity setVersion(Short version) {
+        this.version = version;
+        return this;
+    }
+
+    public MFSchemeTypeEntity getMfSchemeTypeEntity() {
+        return mfSchemeTypeEntity;
+    }
+
+    public MFSchemeEntity setMfSchemeTypeEntity(MFSchemeTypeEntity mfSchemeTypeEntity) {
+        this.mfSchemeTypeEntity = mfSchemeTypeEntity;
+        return this;
+    }
+
+    public List<MFSchemeNavEntity> getMfSchemeNavEntities() {
+        return mfSchemeNavEntities;
+    }
+
+    public MFSchemeEntity setMfSchemeNavEntities(List<MFSchemeNavEntity> mfSchemeNavEntities) {
+        this.mfSchemeNavEntities = mfSchemeNavEntities;
+        return this;
+    }
 
     public void addSchemeNav(MFSchemeNavEntity mfSchemeNavEntity) {
         mfSchemeNavEntities.add(mfSchemeNavEntity);

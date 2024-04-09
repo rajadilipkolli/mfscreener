@@ -35,15 +35,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 @Service
-@Slf4j
-@RequiredArgsConstructor
 public class PortfolioService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(PortfolioService.class);
 
     private final ObjectMapper objectMapper;
     private final ConversionServiceAdapter conversionServiceAdapter;
@@ -55,6 +55,29 @@ public class PortfolioService {
     private final UserSchemeDetailsEntityRepository userSchemeDetailsEntityRepository;
     private final NavService navService;
     private final SchemeService schemeService;
+
+    public PortfolioService(
+            ObjectMapper objectMapper,
+            ConversionServiceAdapter conversionServiceAdapter,
+            CasDetailsMapper casDetailsMapper,
+            UserCASDetailsEntityRepository casDetailsEntityRepository,
+            InvestorInfoEntityRepository investorInfoEntityRepository,
+            UserFolioDetailsEntityRepository userFolioDetailsEntityRepository,
+            UserTransactionDetailsEntityRepository userTransactionDetailsEntityRepository,
+            UserSchemeDetailsEntityRepository userSchemeDetailsEntityRepository,
+            NavService navService,
+            SchemeService schemeService) {
+        this.objectMapper = objectMapper;
+        this.conversionServiceAdapter = conversionServiceAdapter;
+        this.casDetailsMapper = casDetailsMapper;
+        this.casDetailsEntityRepository = casDetailsEntityRepository;
+        this.investorInfoEntityRepository = investorInfoEntityRepository;
+        this.userFolioDetailsEntityRepository = userFolioDetailsEntityRepository;
+        this.userTransactionDetailsEntityRepository = userTransactionDetailsEntityRepository;
+        this.userSchemeDetailsEntityRepository = userSchemeDetailsEntityRepository;
+        this.navService = navService;
+        this.schemeService = schemeService;
+    }
 
     public String upload(MultipartFile multipartFile) throws IOException {
         CasDTO casDTO = this.objectMapper.readValue(multipartFile.getBytes(), CasDTO.class);
@@ -75,10 +98,11 @@ public class PortfolioService {
             casDetailsEntity = this.conversionServiceAdapter.mapCasDTOToUserCASDetailsEntity(casDTO);
             List<UserFolioDetailsEntity> folioEntities = casDetailsEntity.getFolioEntities();
             transactions = folioEntities.stream()
-                    .map(UserFolioDetailsEntity::getSchemeEntities)
-                    .flatMap(List::stream)
-                    .map(UserSchemeDetailsEntity::getTransactionEntities)
-                    .count();
+                    .flatMap(userFolioDTO -> userFolioDTO.getSchemeEntities().stream())
+                    .mapToLong(userSchemeDTO ->
+                            userSchemeDTO.getTransactionEntities().size())
+                    .sum();
+
             folios = folioEntities.size();
         }
         if (casDetailsEntity != null) {
@@ -107,7 +131,7 @@ public class PortfolioService {
                 casDetailsEntityRepository.findByInvestorEmailAndName(email, name);
 
         if (userTransactionDTOListCount == userTransactionDetailsEntityList.size()) {
-            log.info("No new transactions are added");
+            LOGGER.info("No new transactions are added");
             return null;
         }
 
@@ -122,7 +146,7 @@ public class PortfolioService {
         folioDTOList.forEach(userFolioDTO -> {
             String folio = userFolioDTO.folio();
             if (!existingFolios.contains(folio)) {
-                log.info("New folio: {} created that is not present in the database", folio);
+                LOGGER.info("New folio: {} created that is not present in the database", folio);
                 // userCASDetailsEntityView.addFolioEntity(
                 //         casDetailsMapper.mapUserFolioDTOToUserFolioDetailsEntity(userFolioDTO));
                 folioCounter.incrementAndGet();
@@ -137,7 +161,7 @@ public class PortfolioService {
 
         // Check if all new transactions are added as part of adding folios
         if (userTransactionDTOListCount == (userTransactionDetailsEntityList.size() + transactionsCounter.get())) {
-            log.info("All new transactions are added as part of adding folios, hence skipping");
+            LOGGER.info("All new transactions are added as part of adding folios, hence skipping");
         } else {
             // New schemes or transactions are added
 
@@ -168,7 +192,7 @@ public class PortfolioService {
                             .toList();
                     requestSchemes.forEach(userSchemeDTO -> {
                         if (!isInListDB.contains(userSchemeDTO.isin())) {
-                            log.info(
+                            LOGGER.info(
                                     "New ISIN: {} created for folio :{} that is not present in the database",
                                     userSchemeDTO.isin(),
                                     folioFromRequest);
@@ -192,7 +216,7 @@ public class PortfolioService {
 
             // Check if all new transactions are added as part of adding schemes
             if (userTransactionDTOListCount == (userTransactionDetailsEntityList.size() + transactionsCounter.get())) {
-                log.info("All new transactions are added as part of adding schemes, hence skipping");
+                LOGGER.info("All new transactions are added as part of adding schemes, hence skipping");
             } else {
                 // New transactions are added
 
@@ -228,7 +252,7 @@ public class PortfolioService {
                         requestTransactions.forEach(userTransactionDTO -> {
                             LocalDate newTransactionDate = userTransactionDTO.date();
                             if (!transactionDateListDB.contains(newTransactionDate)) {
-                                log.info(
+                                LOGGER.info(
                                         "New transaction on date: {} created for isin {} that is not present in the database",
                                         newTransactionDate,
                                         isinFromRequest);
@@ -253,17 +277,16 @@ public class PortfolioService {
 
     public PortfolioResponse getPortfolioByPAN(String panNumber, LocalDate asOfDate) {
 
+        LocalDate adjustedDate = LocalDateUtility.getAdjustedDate(asOfDate);
         List<CompletableFuture<PortfolioDetailsDTO>> completableFutureList =
-                casDetailsEntityRepository.getPortfolioDetails(panNumber, asOfDate).stream()
+                casDetailsEntityRepository.getPortfolioDetails(panNumber, adjustedDate).stream()
                         .map(portfolioDetails -> CompletableFuture.supplyAsync(() -> {
                             MFSchemeDTO scheme;
-                            LocalDate adjustedDate = asOfDate;
                             try {
-                                adjustedDate = LocalDateUtility.getAdjustedDate(asOfDate);
                                 scheme = navService.getNavByDateWithRetry(portfolioDetails.getSchemeId(), adjustedDate);
                             } catch (NavNotFoundException navNotFoundException) {
                                 // Will happen in case of NFO where units are allocated but not ready for subscription
-                                log.error(
+                                LOGGER.error(
                                         "NavNotFoundException occurred for scheme : {} on adjusted date :{}",
                                         portfolioDetails.getSchemeId(),
                                         adjustedDate,

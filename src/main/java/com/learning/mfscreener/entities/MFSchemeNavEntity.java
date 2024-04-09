@@ -14,8 +14,6 @@ import jakarta.persistence.UniqueConstraint;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.Objects;
-import lombok.Getter;
-import lombok.Setter;
 import org.hibernate.proxy.HibernateProxy;
 
 @Table(
@@ -26,8 +24,6 @@ import org.hibernate.proxy.HibernateProxy;
                     columnNames = {"nav", "nav_date", "mf_scheme_id"})
         })
 @Entity
-@Getter
-@Setter
 public class MFSchemeNavEntity extends AuditableEntity<String> implements Serializable {
 
     @Id
@@ -43,6 +39,42 @@ public class MFSchemeNavEntity extends AuditableEntity<String> implements Serial
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "mf_scheme_id")
     private MFSchemeEntity mfSchemeEntity;
+
+    public Long getId() {
+        return id;
+    }
+
+    public MFSchemeNavEntity setId(Long id) {
+        this.id = id;
+        return this;
+    }
+
+    public Float getNav() {
+        return nav;
+    }
+
+    public MFSchemeNavEntity setNav(Float nav) {
+        this.nav = nav;
+        return this;
+    }
+
+    public LocalDate getNavDate() {
+        return navDate;
+    }
+
+    public MFSchemeNavEntity setNavDate(LocalDate navDate) {
+        this.navDate = navDate;
+        return this;
+    }
+
+    public MFSchemeEntity getMfSchemeEntity() {
+        return mfSchemeEntity;
+    }
+
+    public MFSchemeNavEntity setMfSchemeEntity(MFSchemeEntity mfSchemeEntity) {
+        this.mfSchemeEntity = mfSchemeEntity;
+        return this;
+    }
 
     @Override
     public final boolean equals(Object o) {

@@ -4,10 +4,12 @@ package com.learning.mfscreener.models;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import java.io.Serializable;
 import java.time.LocalDate;
-import lombok.With;
 
 public record NAVDataDTO(
-        @JsonFormat(pattern = "dd-MM-yyyy", shape = JsonFormat.Shape.STRING) LocalDate date,
-        Float nav,
-        @With Long schemeId)
-        implements Serializable {}
+        @JsonFormat(pattern = "dd-MM-yyyy", shape = JsonFormat.Shape.STRING) LocalDate date, Float nav, Long schemeId)
+        implements Serializable {
+
+    public NAVDataDTO withSchemeId(Long schemeCode) {
+        return new NAVDataDTO(date(), nav(), schemeCode);
+    }
+}
