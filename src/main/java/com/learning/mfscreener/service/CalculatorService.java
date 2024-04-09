@@ -63,28 +63,26 @@ public class CalculatorService {
     List<XIRRResponse> calculateXIRRForAllFundsByPAN(String pan) {
         // get all the userFolioDetailsProjections
         List<UserFolioDetailsProjection> userFolioDetailsProjections = userFolioDetailsEntityRepository.findByPan(pan);
-        //        Iterable<Fund> userFolioDetailsProjections = getFunds();
+
         // create a map to store the fund id and XIRR value
         List<XIRRResponse> xirrResponseList = new ArrayList<>();
         // loop through the userFolioDetailsProjections
-        for (UserFolioDetailsProjection fund : userFolioDetailsProjections) {
-            // get the fund id
-            Long amfiId = fund.getSchemeEntities().get(0).getAmfi();
-            if (amfiId == null) {
-                LOGGER.error("FundID not available for fund :{} hence skipping", fund);
-                continue;
-            }
+        for (UserFolioDetailsProjection folioDetailsProjection : userFolioDetailsProjections) {
 
-            fund.getSchemeEntities().forEach(userSchemeDetailsEntityInfo -> {
+            folioDetailsProjection.getSchemeEntities().forEach(userSchemeDetailsEntityInfo -> {
                 Long schemeIdInDb = userSchemeDetailsEntityInfo.getId();
-                // calculate the XIRR for the fund
+                Long amfiId = userSchemeDetailsEntityInfo.getAmfi();
+                // calculate the XIRR for the folioDetailsProjection
                 double xirr = calculateXIRR(amfiId, schemeIdInDb);
 
                 if (xirr != 0.0d) {
                     LOGGER.debug("adding XIRR for schemeId : {}", amfiId);
-                    // put the fund id and XIRR value in the map
+                    // put the folioDetailsProjection id and XIRR value in the map
                     xirrResponseList.add(new XIRRResponse(
-                            fund.getFolio(), amfiId, userSchemeDetailsEntityInfo.getScheme(), xirr * 100));
+                            folioDetailsProjection.getFolio(),
+                            amfiId,
+                            userSchemeDetailsEntityInfo.getScheme(),
+                            xirr * 100));
                 } else {
                     LOGGER.info("Consolidated portfolio");
                 }
@@ -118,8 +116,10 @@ public class CalculatorService {
             xirrValue = Xirr.builder()
                     .withTransactions(transactionList)
                     .withGuess(0.01)
-                    .withNewtonRaphsonBuilder(
-                            NewtonRaphson.builder().withFunction(x -> x).withIterations(1000))
+                    .withNewtonRaphsonBuilder(NewtonRaphson.builder()
+                            .withFunction(x -> x)
+                            .withIterations(1000)
+                            .withTolerance(TOLERANCE))
                     .xirr();
         }
         return xirrValue;

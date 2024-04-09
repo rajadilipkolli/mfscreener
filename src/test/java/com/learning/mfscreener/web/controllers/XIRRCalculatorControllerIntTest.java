@@ -25,6 +25,6 @@ class XIRRCalculatorControllerIntTest extends AbstractIntegrationTest {
                 .andExpect(status().isOk())
                 .andDo(print())
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_JSON_VALUE)))
-                .andExpect(jsonPath("$.size()", is(2)));
+                .andExpect(jsonPath("$.size()", is(4)));
     }
 }
