@@ -9,9 +9,11 @@ import com.learning.mfscreener.repository.UserFolioDetailsEntityRepository;
 import com.learning.mfscreener.repository.UserTransactionDetailsEntityRepository;
 import com.learning.mfscreener.utils.LocalDateUtility;
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import org.decampo.xirr.NewtonRaphson;
+import org.decampo.xirr.Transaction;
+import org.decampo.xirr.Xirr;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -59,64 +61,68 @@ public class CalculatorService {
 
     // method to calculate XIRR for all funds
     List<XIRRResponse> calculateXIRRForAllFundsByPAN(String pan) {
-        // get all the funds
-        List<UserFolioDetailsProjection> funds = userFolioDetailsEntityRepository.findByPan(pan);
-        //        Iterable<Fund> funds = getFunds();
+        // get all the userFolioDetailsProjections
+        List<UserFolioDetailsProjection> userFolioDetailsProjections = userFolioDetailsEntityRepository.findByPan(pan);
+
         // create a map to store the fund id and XIRR value
         List<XIRRResponse> xirrResponseList = new ArrayList<>();
-        // loop through the funds
-        for (UserFolioDetailsProjection fund : funds) {
-            // get the fund id
-            Long amfiId = fund.getSchemeEntities().get(0).getAmfi();
-            if (amfiId == null) {
-                LOGGER.error("FundID not available for fund :{} hence skipping", fund);
-                continue;
-            }
-            // TODO calculate individually and at overall level as well
-            Long schemeIdInDb = fund.getSchemeEntities().get(0).getId();
-            // calculate the XIRR for the fund
-            Double xirr = calculateXIRR(amfiId, schemeIdInDb);
-            LOGGER.debug("adding XIRR for schemeId : {}", amfiId);
+        // loop through the userFolioDetailsProjections
+        for (UserFolioDetailsProjection folioDetailsProjection : userFolioDetailsProjections) {
 
-            // put the fund id and XIRR value in the map
-            xirrResponseList.add(new XIRRResponse(
-                    fund.getFolio(), amfiId, fund.getSchemeEntities().get(0).getScheme(), xirr * 100));
+            folioDetailsProjection.getSchemeEntities().forEach(userSchemeDetailsEntityInfo -> {
+                Long schemeIdInDb = userSchemeDetailsEntityInfo.getId();
+                Long amfiId = userSchemeDetailsEntityInfo.getAmfi();
+                // calculate the XIRR for the folioDetailsProjection
+                double xirr = calculateXIRR(amfiId, schemeIdInDb);
+
+                if (xirr != 0.0d) {
+                    LOGGER.debug("adding XIRR for schemeId : {}", amfiId);
+                    // put the folioDetailsProjection id and XIRR value in the map
+                    xirrResponseList.add(new XIRRResponse(
+                            folioDetailsProjection.getFolio(),
+                            amfiId,
+                            userSchemeDetailsEntityInfo.getScheme(),
+                            xirr * 100));
+                } else {
+                    LOGGER.info("Consolidated portfolio");
+                }
+            });
         }
         // return the map
         return xirrResponseList;
     }
 
-    Double calculateXIRR(Long fundId, Long schemeIdInDb) {
+    double calculateXIRR(Long fundId, Long schemeIdInDb) {
         LOGGER.debug("Calculating XIRR for fund ID : {} & schemeIdInDB :{}", fundId, schemeIdInDb);
         List<UserTransactionDetailsProjection> byUserSchemeDetailsEntityId =
                 userTransactionDetailsEntityRepository
                         .findByUserSchemeDetailsEntity_IdAndTypeNotInOrderByTransactionDateAsc(
                                 schemeIdInDb, List.of("STT_TAX", "STAMP_DUTY_TAX", "MISC"));
 
-        double currentBalance = getBalance(byUserSchemeDetailsEntityId);
-        // Check if the current balance is 0
-        if (currentBalance == 0) {
-            LOGGER.info(
-                    "Current balance is 0 for fund ID : {} & schemeIdInDB :{}, XIRR cannot be calculated.",
-                    fundId,
-                    schemeIdInDb);
-            return 0D;
+        double xirrValue = 0.0d;
+        if (!byUserSchemeDetailsEntityId.isEmpty()) {
+            double currentBalance = getBalance(byUserSchemeDetailsEntityId);
+            // in case if Additional Allotment is done then amount will be null
+            List<Transaction> transactionList = new ArrayList<>(byUserSchemeDetailsEntityId.stream()
+                    .filter(userTransactionDetailsProjection -> userTransactionDetailsProjection.getAmount() != null)
+                    .map(userTransactionDetailsProjection -> new Transaction(
+                            -(userTransactionDetailsProjection.getAmount()),
+                            userTransactionDetailsProjection.getTransactionDate()))
+                    .toList());
+            if (currentBalance != 0.0) {
+                // Add current Value and current date
+                transactionList.add(new Transaction(getCurrentValuation(fundId, currentBalance), LocalDate.now()));
+            }
+            xirrValue = Xirr.builder()
+                    .withTransactions(transactionList)
+                    .withGuess(0.01)
+                    .withNewtonRaphsonBuilder(NewtonRaphson.builder()
+                            .withFunction(x -> x)
+                            .withIterations(1000)
+                            .withTolerance(TOLERANCE))
+                    .xirr();
         }
-
-        int arraySize = byUserSchemeDetailsEntityId.size() + 1;
-        double[] payments = new double[arraySize];
-        LocalDate[] dates = new LocalDate[arraySize];
-
-        for (int i = 0; i < byUserSchemeDetailsEntityId.size(); i++) {
-            UserTransactionDetailsProjection userTransactionDetailsProjection = byUserSchemeDetailsEntityId.get(i);
-            payments[i] = -(userTransactionDetailsProjection.getAmount());
-            dates[i] = userTransactionDetailsProjection.getTransactionDate();
-        }
-
-        // Add current Value and current date
-        payments[arraySize - 1] = getCurrentValuation(fundId, currentBalance);
-        dates[arraySize - 1] = LocalDate.now();
-        return calculateXIRR(payments, dates);
+        return xirrValue;
     }
 
     // ensures that balance will never be null
@@ -136,62 +142,5 @@ public class CalculatorService {
     double getCurrentValuation(Long fundId, Double balance) {
         MFSchemeDTO scheme = navService.getNavByDateWithRetry(fundId, LocalDateUtility.getAdjustedDate());
         return balance * Double.parseDouble(scheme.nav());
-    }
-
-    // method to calculate XIRR for a given set of payments and dates
-    double calculateXIRR(double[] payments, LocalDate[] dates) {
-        // use Newton's method with an initial guess of 0.1
-        return newtonsMethod(0.1, payments, dates);
-    }
-
-    // method to implement Newton's method to find the root of the polynomial equation for XIRR
-    double newtonsMethod(double guess, double[] payments, LocalDate[] days) {
-        double x0 = guess;
-        double x1;
-        double err = 1e+100;
-
-        while (err > TOLERANCE) {
-            x1 = x0 - totalFXirr(payments, days, x0) / totalDfXirr(payments, days, x0);
-            err = Math.abs(x1 - x0);
-            x0 = x1;
-        }
-
-        return x0;
-    }
-
-    // helper method to calculate the sum of the derivative of the polynomial equation for XIRR
-    double totalDfXirr(double[] payments, LocalDate[] days, double x) {
-        double resf = 0.0;
-        for (int i = 0; i < payments.length; i++) {
-            resf = resf + dfXirr(payments[i], days[i], days[0], x);
-        }
-        return resf;
-    }
-
-    // helper method to calculate the derivative of the polynomial equation for XIRR
-    double dfXirr(double payment, LocalDate day, LocalDate day1, double x) {
-        return (1.0 / 365.0)
-                * dateDiff(day, day1)
-                * payment
-                * Math.pow((x + 1.0), ((dateDiff(day, day1) / 365.0) - 1.0));
-    }
-
-    // helper method to calculate the sum of the polynomial equation for XIRR
-    double totalFXirr(double[] payments, LocalDate[] days, double x) {
-        double resf = 0.0;
-        for (int i = 0; i < payments.length; i++) {
-            resf = resf + fXirr(payments[i], days[i], days[0], x);
-        }
-        return resf;
-    }
-
-    // helper method to calculate the value of the polynomial equation for XIRR
-    double fXirr(double payment, LocalDate day, LocalDate day1, double x) {
-        return payment * Math.pow((1.0 + x), (dateDiff(day, day1) / 365.0));
-    }
-
-    // helper method to calculate the difference between two dates in days
-    double dateDiff(LocalDate day, LocalDate day1) {
-        return ChronoUnit.DAYS.between(day, day1);
     }
 }
