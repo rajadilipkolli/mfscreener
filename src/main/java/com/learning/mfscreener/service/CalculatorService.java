@@ -11,6 +11,7 @@ import com.learning.mfscreener.utils.LocalDateUtility;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import org.decampo.xirr.NewtonRaphson;
 import org.decampo.xirr.Transaction;
 import org.decampo.xirr.Xirr;
@@ -40,56 +41,31 @@ public class CalculatorService {
 
     // method to calculate the total XIRR for a given PAN number
     public List<XIRRResponse> calculateTotalXIRRByPan(String pan) {
-        // get the map of fund id and XIRR value for all funds
-        // TODO : return schemeName as well
-        List<XIRRResponse> xirrResponseList = calculateXIRRForAllFundsByPAN(pan);
-        // initialize the total XIRR to zero
-        //        double totalXirr = 0.0;
-        //        // loop through the map
-        //        for (Map.Entry<Long, Double> entry : xirrResponseList.entrySet()) {
-        //            // get the fund id and XIRR value
-        //            Long fundId = entry.getKey();
-        //            Double xirr = entry.getValue();
-        //
-        //            // add the XIRR value to the total XIRR
-        //            totalXirr += xirr;
-        //        }
-        //        // return the total XIRR
-        //        return totalXirr;
-        return xirrResponseList;
+        return calculateXIRRForAllFundsByPAN(pan);
     }
 
     // method to calculate XIRR for all funds
     List<XIRRResponse> calculateXIRRForAllFundsByPAN(String pan) {
-        // get all the userFolioDetailsProjections
-        List<UserFolioDetailsProjection> userFolioDetailsProjections = userFolioDetailsEntityRepository.findByPan(pan);
+        return userFolioDetailsEntityRepository.findByPan(pan).parallelStream()
+                .map(this::getXirrResponse)
+                .filter(Objects::nonNull)
+                .toList();
+    }
 
-        // create a map to store the fund id and XIRR value
-        List<XIRRResponse> xirrResponseList = new ArrayList<>();
-        // loop through the userFolioDetailsProjections
-        for (UserFolioDetailsProjection folioDetailsProjection : userFolioDetailsProjections) {
+    XIRRResponse getXirrResponse(UserFolioDetailsProjection folioDetailsProjection) {
+        Long schemeIdInDb = folioDetailsProjection.id();
+        Long amfiId = folioDetailsProjection.amfi();
+        // calculate the XIRR for the folioDetailsProjection
+        double xirr = calculateXIRR(amfiId, schemeIdInDb);
 
-            folioDetailsProjection.getSchemeEntities().forEach(userSchemeDetailsEntityInfo -> {
-                Long schemeIdInDb = userSchemeDetailsEntityInfo.getId();
-                Long amfiId = userSchemeDetailsEntityInfo.getAmfi();
-                // calculate the XIRR for the folioDetailsProjection
-                double xirr = calculateXIRR(amfiId, schemeIdInDb);
-
-                if (xirr != 0.0d) {
-                    LOGGER.debug("adding XIRR for schemeId : {}", amfiId);
-                    // put the folioDetailsProjection id and XIRR value in the map
-                    xirrResponseList.add(new XIRRResponse(
-                            folioDetailsProjection.getFolio(),
-                            amfiId,
-                            userSchemeDetailsEntityInfo.getScheme(),
-                            xirr * 100));
-                } else {
-                    LOGGER.info("Consolidated portfolio");
-                }
-            });
+        if (xirr != 0.0d) {
+            LOGGER.debug("adding XIRR for schemeId : {}", amfiId);
+            return new XIRRResponse(
+                    folioDetailsProjection.folio(), amfiId, folioDetailsProjection.scheme(), xirr * 100);
+        } else {
+            LOGGER.info("Consolidated portfolio");
         }
-        // return the map
-        return xirrResponseList;
+        return null;
     }
 
     double calculateXIRR(Long fundId, Long schemeIdInDb) {
