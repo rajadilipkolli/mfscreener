@@ -8,9 +8,6 @@ import com.learning.mfscreener.exception.SchemeNotFoundException;
 import com.learning.mfscreener.mapper.MfSchemeDtoToEntityMapper;
 import com.learning.mfscreener.models.MFSchemeDTO;
 import com.learning.mfscreener.models.projection.SchemeNameAndISIN;
-import com.learning.mfscreener.repository.MFSchemeRepository;
-import com.learning.mfscreener.repository.MFSchemeTypeRepository;
-import com.learning.mfscreener.repository.UserSchemeDetailsEntityRepository;
 import com.learning.mfscreener.utils.AppConstants;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -33,23 +30,23 @@ public class HistoricalNavService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HistoricalNavService.class);
 
-    private final MFSchemeRepository mfSchemeRepository;
-    private final MFSchemeTypeRepository mfSchemeTypeRepository;
-    private final UserSchemeDetailsEntityRepository userSchemeDetailsEntityRepository;
+    private final SchemeService schemeService;
+    private final MFSchemeTypeService mfSchemeTypeService;
     private final RestClient restClient;
     private final MfSchemeDtoToEntityMapper mfSchemeDtoToEntityMapper;
+    private final UserSchemeDetailsService userSchemeDetailsService;
 
     public HistoricalNavService(
-            MFSchemeRepository mfSchemeRepository,
-            MFSchemeTypeRepository mfSchemeTypeRepository,
+            SchemeService schemeService,
+            MFSchemeTypeService mfSchemeTypeService,
             RestClient restClient,
-            UserSchemeDetailsEntityRepository userSchemeDetailsEntityRepository,
-            MfSchemeDtoToEntityMapper mfSchemeDtoToEntityMapper) {
-        this.mfSchemeRepository = mfSchemeRepository;
-        this.mfSchemeTypeRepository = mfSchemeTypeRepository;
+            MfSchemeDtoToEntityMapper mfSchemeDtoToEntityMapper,
+            UserSchemeDetailsService userSchemeDetailsService) {
+        this.schemeService = schemeService;
+        this.mfSchemeTypeService = mfSchemeTypeService;
         this.restClient = restClient;
-        this.userSchemeDetailsEntityRepository = userSchemeDetailsEntityRepository;
         this.mfSchemeDtoToEntityMapper = mfSchemeDtoToEntityMapper;
+        this.userSchemeDetailsService = userSchemeDetailsService;
     }
 
     public String getHistoricalNav(Long schemeCode, LocalDate navDate) {
@@ -61,14 +58,14 @@ public class HistoricalNavService {
         // tp=1 Open Ended Schemes
         String historicalUrl = "https://portal.amfiindia.com/DownloadNAVHistoryReport_Po.aspx?frmdt=%s&todt=%s"
                 .formatted(fromDate, toDate);
-        Optional<MFSchemeEntity> bySchemeId = mfSchemeRepository.findBySchemeId(schemeCode);
+        Optional<MFSchemeEntity> bySchemeId = schemeService.findBySchemeCode(schemeCode);
         String payOut;
         boolean persistSchemeInfo = false;
         SchemeNameAndISIN firstByAmfi = null;
         if (bySchemeId.isEmpty()) {
             // discontinued Scheme
-            firstByAmfi = userSchemeDetailsEntityRepository
-                    .findFirstByAmfi(schemeCode)
+            firstByAmfi = userSchemeDetailsService
+                    .findFirstBySchemeCode(schemeCode)
                     .orElseThrow(
                             () -> new SchemeNotFoundException("Fund with schemeCode " + schemeCode + " Not Found"));
             payOut = firstByAmfi.getIsin();
@@ -122,8 +119,8 @@ public class HistoricalNavService {
                                         amc, Long.valueOf(schemecode), payout, schemename, nav, date, schemeType);
                                 MFSchemeEntity mfSchemeEntity =
                                         mfSchemeDtoToEntityMapper.mapMFSchemeDTOToMFSchemeEntity(
-                                                mfSchemeDTO, mfSchemeTypeRepository);
-                                mfSchemeRepository.save(mfSchemeEntity);
+                                                mfSchemeDTO, mfSchemeTypeService);
+                                schemeService.saveEntity(mfSchemeEntity);
                             }
                         }
                     }
@@ -142,7 +139,7 @@ public class HistoricalNavService {
                 mfSchemeEntity.setPayOut(payOut);
                 mfSchemeEntity.setSchemeId(schemeCode);
                 mfSchemeEntity.setSchemeName(firstByAmfi.getScheme());
-                mfSchemeRepository.save(mfSchemeEntity);
+                schemeService.saveEntity(mfSchemeEntity);
                 oldSchemeId = String.valueOf(schemeCode);
             } else {
                 LOGGER.info("No Nav found for the given day");

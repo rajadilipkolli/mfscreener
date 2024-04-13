@@ -10,4 +10,6 @@ public interface PortfolioDetailsProjection {
     Double getBalanceUnits();
 
     Long getSchemeId();
+
+    Long getSchemeDetailId();
 }

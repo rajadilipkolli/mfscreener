@@ -6,8 +6,6 @@ import com.learning.mfscreener.models.MFSchemeDTO;
 import com.learning.mfscreener.models.projection.UserFolioDetailsProjection;
 import com.learning.mfscreener.models.projection.UserTransactionDetailsProjection;
 import com.learning.mfscreener.models.response.XIRRResponse;
-import com.learning.mfscreener.repository.UserFolioDetailsEntityRepository;
-import com.learning.mfscreener.repository.UserTransactionDetailsEntityRepository;
 import com.learning.mfscreener.utils.LocalDateUtility;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -27,16 +25,16 @@ public class CalculatorService {
     private static final Logger LOGGER = LoggerFactory.getLogger(CalculatorService.class);
     private static final double TOLERANCE = 0.001; // tolerance for Newton's method
 
-    private final UserFolioDetailsEntityRepository userFolioDetailsEntityRepository;
-    private final UserTransactionDetailsEntityRepository userTransactionDetailsEntityRepository;
+    private final UserFolioDetailsService userFolioDetailsService;
+    private final UserTransactionDetailsService userTransactionDetailsService;
     private final NavService navService;
 
     public CalculatorService(
-            UserFolioDetailsEntityRepository userFolioDetailsEntityRepository,
-            UserTransactionDetailsEntityRepository userTransactionDetailsEntityRepository,
+            UserFolioDetailsService userFolioDetailsService,
+            UserTransactionDetailsService userTransactionDetailsService,
             NavService navService) {
-        this.userFolioDetailsEntityRepository = userFolioDetailsEntityRepository;
-        this.userTransactionDetailsEntityRepository = userTransactionDetailsEntityRepository;
+        this.userFolioDetailsService = userFolioDetailsService;
+        this.userTransactionDetailsService = userTransactionDetailsService;
         this.navService = navService;
     }
 
@@ -50,7 +48,7 @@ public class CalculatorService {
 
     // method to calculate XIRR for all funds
     List<XIRRResponse> calculateXIRRForAllFundsByPAN(String pan, LocalDate asOfDate) {
-        return userFolioDetailsEntityRepository.findByPanAndAsOfDate(pan, asOfDate).parallelStream()
+        return userFolioDetailsService.findByPanAndAsOfDate(pan, asOfDate).parallelStream()
                 .map(userFolioDetailsProjection -> getXirrResponse(userFolioDetailsProjection, asOfDate))
                 .filter(Objects::nonNull)
                 .toList();
@@ -60,7 +58,7 @@ public class CalculatorService {
         Long schemeIdInDb = folioDetailsProjection.id();
         Long amfiId = folioDetailsProjection.amfi();
         // calculate the XIRR for the folioDetailsProjection
-        double xirr = calculateXIRR(amfiId, schemeIdInDb, asOfDate);
+        double xirr = calculateXIRRBySchemeId(amfiId, schemeIdInDb, asOfDate);
 
         if (xirr != 0.0d) {
             LOGGER.debug("adding XIRR for schemeId : {}", amfiId);
@@ -72,15 +70,11 @@ public class CalculatorService {
         return null;
     }
 
-    double calculateXIRR(Long fundId, Long schemeIdInDb, LocalDate asOfDate) {
+    public double calculateXIRRBySchemeId(Long fundId, Long schemeIdInDb, LocalDate asOfDate) {
         LOGGER.debug("Calculating XIRR for fund ID : {} & schemeIdInDB :{}", fundId, schemeIdInDb);
-        List<UserTransactionDetailsProjection> byUserSchemeDetailsEntityId = fetchTransactions(schemeIdInDb, asOfDate);
+        List<UserTransactionDetailsProjection> byUserSchemeDetailsEntityId =
+                userTransactionDetailsService.fetchTransactions(schemeIdInDb, asOfDate);
         return computeXIRR(byUserSchemeDetailsEntityId, fundId, asOfDate);
-    }
-
-    List<UserTransactionDetailsProjection> fetchTransactions(Long schemeIdInDb, LocalDate asOfDate) {
-        return userTransactionDetailsEntityRepository.getByUserSchemeIdAndTypeNotInAndTransactionDateLessThanEqual(
-                schemeIdInDb, asOfDate);
     }
 
     double computeXIRR(List<UserTransactionDetailsProjection> transactions, Long fundId, LocalDate asOfDate) {
@@ -89,26 +83,6 @@ public class CalculatorService {
             double currentBalance = getBalance(transactions);
             List<Transaction> transactionList = buildTransactionList(transactions, currentBalance, fundId, asOfDate);
             xirrValue = calculateXirrValue(transactionList, fundId);
-        }
-        return xirrValue;
-    }
-
-    double calculateXirrValue(List<Transaction> transactionList, Long fundId) {
-        double xirrValue = -0.00001; // Default value if unable to calculate
-        if (transactionList.size() > 1) {
-            try {
-                xirrValue = Xirr.builder()
-                        .withTransactions(transactionList)
-                        .withGuess(0.01)
-                        .withNewtonRaphsonBuilder(NewtonRaphson.builder()
-                                .withFunction(x -> x)
-                                .withIterations(1000)
-                                .withTolerance(TOLERANCE))
-                        .xirr();
-            } catch (IllegalArgumentException e) {
-                LOGGER.error("Unable to calculate XIRR for fundId :{}", fundId, e);
-                throw new XIRRCalculationException("Unable to calculate XIRR for fundId " + fundId);
-            }
         }
         return xirrValue;
     }
@@ -131,6 +105,26 @@ public class CalculatorService {
             transactionList.add(new Transaction(getCurrentValuation(fundId, currentBalance, asOfDate), asOfDate));
         }
         return transactionList;
+    }
+
+    double calculateXirrValue(List<Transaction> transactionList, Long fundId) {
+        double xirrValue = -0.00001; // Default value if unable to calculate
+        if (transactionList.size() > 1) {
+            try {
+                xirrValue = Xirr.builder()
+                        .withTransactions(transactionList)
+                        .withGuess(0.01)
+                        .withNewtonRaphsonBuilder(NewtonRaphson.builder()
+                                .withFunction(x -> x)
+                                .withIterations(1000)
+                                .withTolerance(TOLERANCE))
+                        .xirr();
+            } catch (IllegalArgumentException e) {
+                LOGGER.error("Unable to calculate XIRR for fundId :{}", fundId, e);
+                throw new XIRRCalculationException("Unable to calculate XIRR for fundId " + fundId);
+            }
+        }
+        return xirrValue;
     }
 
     // ensures that balance will never be null

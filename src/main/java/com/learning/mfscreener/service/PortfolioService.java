@@ -22,9 +22,6 @@ import com.learning.mfscreener.models.response.PortfolioResponse;
 import com.learning.mfscreener.models.response.UploadResponseHolder;
 import com.learning.mfscreener.repository.InvestorInfoEntityRepository;
 import com.learning.mfscreener.repository.UserCASDetailsEntityRepository;
-import com.learning.mfscreener.repository.UserFolioDetailsEntityRepository;
-import com.learning.mfscreener.repository.UserSchemeDetailsEntityRepository;
-import com.learning.mfscreener.repository.UserTransactionDetailsEntityRepository;
 import com.learning.mfscreener.utils.LocalDateUtility;
 import java.io.IOException;
 import java.time.LocalDate;
@@ -48,11 +45,12 @@ public class PortfolioService {
     private final CasDetailsMapper casDetailsMapper;
     private final UserCASDetailsEntityRepository casDetailsEntityRepository;
     private final InvestorInfoEntityRepository investorInfoEntityRepository;
-    private final UserFolioDetailsEntityRepository userFolioDetailsEntityRepository;
-    private final UserTransactionDetailsEntityRepository userTransactionDetailsEntityRepository;
-    private final UserSchemeDetailsEntityRepository userSchemeDetailsEntityRepository;
     private final NavService navService;
     private final SchemeService schemeService;
+    private final CalculatorService calculatorService;
+    private final UserTransactionDetailsService userTransactionDetailsService;
+    private final UserFolioDetailsService userFolioDetailsService;
+    private final UserSchemeDetailsService userSchemeDetailsService;
 
     public PortfolioService(
             ObjectMapper objectMapper,
@@ -60,21 +58,23 @@ public class PortfolioService {
             CasDetailsMapper casDetailsMapper,
             UserCASDetailsEntityRepository casDetailsEntityRepository,
             InvestorInfoEntityRepository investorInfoEntityRepository,
-            UserFolioDetailsEntityRepository userFolioDetailsEntityRepository,
-            UserTransactionDetailsEntityRepository userTransactionDetailsEntityRepository,
-            UserSchemeDetailsEntityRepository userSchemeDetailsEntityRepository,
+            UserTransactionDetailsService userTransactionDetailsService,
             NavService navService,
-            SchemeService schemeService) {
+            SchemeService schemeService,
+            CalculatorService calculatorService,
+            UserFolioDetailsService userFolioDetailsService,
+            UserSchemeDetailsService userSchemeDetailsService) {
         this.objectMapper = objectMapper;
         this.conversionServiceAdapter = conversionServiceAdapter;
         this.casDetailsMapper = casDetailsMapper;
         this.casDetailsEntityRepository = casDetailsEntityRepository;
         this.investorInfoEntityRepository = investorInfoEntityRepository;
-        this.userFolioDetailsEntityRepository = userFolioDetailsEntityRepository;
-        this.userTransactionDetailsEntityRepository = userTransactionDetailsEntityRepository;
-        this.userSchemeDetailsEntityRepository = userSchemeDetailsEntityRepository;
         this.navService = navService;
         this.schemeService = schemeService;
+        this.calculatorService = calculatorService;
+        this.userFolioDetailsService = userFolioDetailsService;
+        this.userSchemeDetailsService = userSchemeDetailsService;
+        this.userTransactionDetailsService = userTransactionDetailsService;
     }
 
     public String upload(MultipartFile multipartFile) throws IOException {
@@ -106,7 +106,7 @@ public class PortfolioService {
         if (casDetailsEntity != null) {
             UserCASDetailsEntity savedCasDetailsEntity = this.casDetailsEntityRepository.save(casDetailsEntity);
             CompletableFuture.runAsync(() -> schemeService.setPANIfNotSet(savedCasDetailsEntity.getId()));
-            CompletableFuture.runAsync(schemeService::setAMFIIfNull);
+            CompletableFuture.runAsync(userSchemeDetailsService::setAMFIIfNull);
             return "Imported %d folios and %d transactions".formatted(folios, transactions);
         } else {
             return "Nothing to Update";
@@ -123,7 +123,7 @@ public class PortfolioService {
                 .sum();
 
         List<UserTransactionDetailsEntity> userTransactionDetailsEntityList =
-                this.userTransactionDetailsEntityRepository.findAllTransactionsByEmailAndName(email, name);
+                this.userTransactionDetailsService.findAllTransactionsByEmailAndName(email, name);
 
         UserCASDetailsEntity userCASDetailsEntity = casDetailsEntityRepository.findByInvestorEmailAndName(email, name);
 
@@ -168,7 +168,7 @@ public class PortfolioService {
 
             // Grouping by folio for existingUserFolioSchemaRequestMap
             List<UserFolioDetailsEntity> existingUserFolioDetailsEntityList =
-                    userFolioDetailsEntityRepository.findByUserEmailAndName(email, name);
+                    userFolioDetailsService.findByUserEmailAndName(email, name);
             Map<String, List<UserSchemeDetailsEntity>> existingUserFolioSchemaRequestMap =
                     existingUserFolioDetailsEntityList.stream()
                             .collect(groupingBy(
@@ -224,7 +224,7 @@ public class PortfolioService {
                                 flatMapping(schemeDTO -> schemeDTO.transactions().stream(), toList())));
 
                 List<UserSchemeDetailsEntity> existingUserSchemeDetailsList =
-                        schemeService.getSchemesByEmailAndName(email, name);
+                        userSchemeDetailsService.getSchemesByEmailAndName(email, name);
 
                 // Grouping by ISIN for userSchemaTransactionMapFromDB
                 Map<String, List<UserTransactionDetailsEntity>> userSchemaTransactionMapFromDB =
@@ -258,7 +258,7 @@ public class PortfolioService {
                                     if (isinFromRequest.equals(userSchemeDetailsEntity.getIsin())) {
                                         userSchemeDetailsEntity.addTransactionEntity(userTransactionDetailsEntity);
                                         // TODO convert to bulkInsert
-                                        userSchemeDetailsEntityRepository.save(userSchemeDetailsEntity);
+                                        userSchemeDetailsService.saveUserScheme(userSchemeDetailsEntity);
                                         transactionsCounter.incrementAndGet();
                                     }
                                 });
@@ -296,7 +296,11 @@ public class PortfolioService {
                                     Math.round(totalValue * 100.0) / 100.0,
                                     portfolioDetails.getSchemeName(),
                                     portfolioDetails.getFolioNumber(),
-                                    scheme.date());
+                                    scheme.date(),
+                                    calculatorService.calculateXIRRBySchemeId(
+                                            portfolioDetails.getSchemeId(),
+                                            portfolioDetails.getSchemeDetailId(),
+                                            adjustedDate));
                         }))
                         .toList();
 
