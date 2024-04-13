@@ -74,49 +74,63 @@ public class CalculatorService {
 
     double calculateXIRR(Long fundId, Long schemeIdInDb, LocalDate asOfDate) {
         LOGGER.debug("Calculating XIRR for fund ID : {} & schemeIdInDB :{}", fundId, schemeIdInDb);
-        List<UserTransactionDetailsProjection> byUserSchemeDetailsEntityId =
-                userTransactionDetailsEntityRepository.getByUserSchemeIdAndTypeNotInAndTransactionDateLessThanEqual(
-                        schemeIdInDb, asOfDate);
+        List<UserTransactionDetailsProjection> byUserSchemeDetailsEntityId = fetchTransactions(schemeIdInDb, asOfDate);
+        return computeXIRR(byUserSchemeDetailsEntityId, fundId, asOfDate);
+    }
 
+    List<UserTransactionDetailsProjection> fetchTransactions(Long schemeIdInDb, LocalDate asOfDate) {
+        return userTransactionDetailsEntityRepository.getByUserSchemeIdAndTypeNotInAndTransactionDateLessThanEqual(
+                schemeIdInDb, asOfDate);
+    }
+
+    private double computeXIRR(List<UserTransactionDetailsProjection> transactions, Long fundId, LocalDate asOfDate) {
         double xirrValue = 0.0d;
-        if (!byUserSchemeDetailsEntityId.isEmpty()) {
-            double currentBalance = getBalance(byUserSchemeDetailsEntityId);
-            // in case if Additional Allotment is done then amount will be null
-            List<Transaction> transactionList = new ArrayList<>(byUserSchemeDetailsEntityId.stream()
-                    .filter(userTransactionDetailsProjection -> userTransactionDetailsProjection.getAmount() != null)
-                    .map(userTransactionDetailsProjection -> new Transaction(
-                            -(userTransactionDetailsProjection.getAmount()),
-                            userTransactionDetailsProjection.getTransactionDate()))
-                    .toList());
-            // XIRR cant be calculated when there are only 2 transactions and both has same date.
-            if (currentBalance != 0.0
-                    && !(transactionList.size() == 1
-                            && transactionList.get(0).getWhen().equals(asOfDate))) {
-                // Add current Value and current date
-                transactionList.add(new Transaction(getCurrentValuation(fundId, currentBalance, asOfDate), asOfDate));
-            } else {
-                LOGGER.info("Skipping calculating XIRR for fundId :{}", fundId);
-            }
-            // To calculate Xirr we need minimum of 2 transactions so manually set value as -0.00001 for such scenarios
-            if (transactionList.size() > 1) {
-                try {
-                    xirrValue = Xirr.builder()
-                            .withTransactions(transactionList)
-                            .withGuess(0.01)
-                            .withNewtonRaphsonBuilder(NewtonRaphson.builder()
-                                    .withFunction(x -> x)
-                                    .withIterations(1000)
-                                    .withTolerance(TOLERANCE))
-                            .xirr();
-                } catch (IllegalArgumentException illegalArgumentException) {
-                    LOGGER.error("Unable to calculate XIRR for fundId :{}", fundId, illegalArgumentException);
-                    throw new XIRRCalculationException("Unable to calculate XIRR for fundId " + fundId);
-                }
-            } else {
-                xirrValue = -0.00001;
+        if (!transactions.isEmpty()) {
+            double currentBalance = getBalance(transactions);
+            List<Transaction> transactionList = buildTransactionList(transactions, currentBalance, fundId, asOfDate);
+            xirrValue = calculateXirrValue(transactionList, fundId);
+        }
+        return xirrValue;
+    }
+
+    private double calculateXirrValue(List<Transaction> transactionList, Long fundId) {
+        double xirrValue = -0.00001; // Default value if unable to calculate
+        if (transactionList.size() > 1) {
+            try {
+                xirrValue = Xirr.builder()
+                        .withTransactions(transactionList)
+                        .withGuess(0.01)
+                        .withNewtonRaphsonBuilder(NewtonRaphson.builder()
+                                .withFunction(x -> x)
+                                .withIterations(1000)
+                                .withTolerance(TOLERANCE))
+                        .xirr();
+            } catch (IllegalArgumentException e) {
+                LOGGER.error("Unable to calculate XIRR for fundId :{}", fundId, e);
+                throw new XIRRCalculationException("Unable to calculate XIRR for fundId " + fundId);
             }
         }
         return xirrValue;
+    }
+
+    List<Transaction> buildTransactionList(
+            List<UserTransactionDetailsProjection> transactions,
+            double currentBalance,
+            Long fundId,
+            LocalDate asOfDate) {
+        List<Transaction> transactionList = new ArrayList<>(transactions.stream()
+                // in case if Additional Allotment is done then amount will be null
+                .filter(t -> t.getAmount() != null)
+                .map(t -> new Transaction(-t.getAmount(), t.getTransactionDate()))
+                .toList());
+        // XIRR cant be calculated when there are only 2 transactions and both has same date.
+        if (currentBalance != 0.0
+                && !(transactionList.size() == 1
+                        && transactionList.get(0).getWhen().equals(asOfDate))) {
+            // Add current Value and current date
+            transactionList.add(new Transaction(getCurrentValuation(fundId, currentBalance, asOfDate), asOfDate));
+        }
+        return transactionList;
     }
 
     // ensures that balance will never be null
