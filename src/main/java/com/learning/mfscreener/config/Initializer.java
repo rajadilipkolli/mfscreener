@@ -3,7 +3,7 @@ package com.learning.mfscreener.config;
 import com.learning.mfscreener.entities.MFSchemeEntity;
 import com.learning.mfscreener.mapper.MfSchemeDtoToEntityMapper;
 import com.learning.mfscreener.models.MFSchemeDTO;
-import com.learning.mfscreener.service.MFSchemeTypeService;
+import com.learning.mfscreener.repository.MFSchemeTypeRepository;
 import com.learning.mfscreener.service.SchemeService;
 import com.learning.mfscreener.utils.AppConstants;
 import java.io.BufferedReader;
@@ -29,17 +29,17 @@ public class Initializer implements CommandLineRunner {
     private static final Logger log = LoggerFactory.getLogger(Initializer.class);
 
     private final SchemeService schemeService;
-    private final MFSchemeTypeService mfSchemeTypeService;
+    private final MFSchemeTypeRepository mfSchemeTypeRepository;
     private final MfSchemeDtoToEntityMapper mfSchemeDtoToEntityMapper;
     private final RestTemplate restTemplate;
 
     public Initializer(
             SchemeService schemeService,
-            MFSchemeTypeService mfSchemeTypeService,
+            MFSchemeTypeRepository mfSchemeTypeRepository,
             MfSchemeDtoToEntityMapper mfSchemeDtoToEntityMapper,
             RestTemplate restTemplate) {
         this.schemeService = schemeService;
-        this.mfSchemeTypeService = mfSchemeTypeService;
+        this.mfSchemeTypeRepository = mfSchemeTypeRepository;
         this.mfSchemeDtoToEntityMapper = mfSchemeDtoToEntityMapper;
         this.restTemplate = restTemplate;
     }
@@ -109,7 +109,7 @@ public class Initializer implements CommandLineRunner {
                 chopArrayList.removeIf(s -> schemeCodesList.contains(s.schemeCode()));
                 chopArrayList.forEach(scheme -> {
                     MFSchemeEntity mfSchemeEntity =
-                            mfSchemeDtoToEntityMapper.mapMFSchemeDTOToMFSchemeEntity(scheme, mfSchemeTypeService);
+                            mfSchemeDtoToEntityMapper.mapMFSchemeDTOToMFSchemeEntity(scheme, mfSchemeTypeRepository);
                     list.add(mfSchemeEntity);
                 });
                 schemeService.saveAllEntities(list);

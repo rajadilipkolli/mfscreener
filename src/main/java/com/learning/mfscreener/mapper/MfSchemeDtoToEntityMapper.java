@@ -5,7 +5,7 @@ import com.learning.mfscreener.entities.MFSchemeEntity;
 import com.learning.mfscreener.entities.MFSchemeNavEntity;
 import com.learning.mfscreener.entities.MFSchemeTypeEntity;
 import com.learning.mfscreener.models.MFSchemeDTO;
-import com.learning.mfscreener.service.MFSchemeTypeService;
+import com.learning.mfscreener.repository.MFSchemeTypeRepository;
 import com.learning.mfscreener.utils.AppConstants;
 import jakarta.annotation.Nullable;
 import java.time.LocalDate;
@@ -39,13 +39,13 @@ public abstract class MfSchemeDtoToEntityMapper {
     @Mapping(target = "schemeId", source = "schemeCode")
     @Mapping(target = "version", ignore = true)
     public abstract MFSchemeEntity mapMFSchemeDTOToMFSchemeEntity(
-            MFSchemeDTO scheme, @Context MFSchemeTypeService mfSchemeTypeService);
+            MFSchemeDTO scheme, @Context MFSchemeTypeRepository mfSchemeTypeRepository);
 
     @AfterMapping
     void updateMFScheme(
             MFSchemeDTO scheme,
             @MappingTarget MFSchemeEntity mfSchemeEntity,
-            @Context MFSchemeTypeService mfSchemeTypeService) {
+            @Context MFSchemeTypeRepository mfSchemeTypeRepository) {
         MFSchemeNavEntity mfSchemenavEntity = new MFSchemeNavEntity();
         mfSchemenavEntity.setNav("N.A.".equals(scheme.nav()) ? 0F : Float.parseFloat(scheme.nav()));
         mfSchemenavEntity.setNavDate(LocalDate.parse(scheme.date(), AppConstants.FORMATTER_DD_MMM_YYYY));
@@ -58,12 +58,12 @@ public abstract class MfSchemeDtoToEntityMapper {
             String type = matcher.group(1).strip();
             String category = matcher.group(2).strip();
             String subCategory = matcher.group(3).strip();
-            mfSchemeTypeEntity = findOrCreateMFSchemeTypeEntity(type, category, subCategory, mfSchemeTypeService);
+            mfSchemeTypeEntity = findOrCreateMFSchemeTypeEntity(type, category, subCategory, mfSchemeTypeRepository);
         } else {
             if (!schemeType.contains("-")) {
                 String type = schemeType.substring(0, schemeType.indexOf('('));
                 String category = schemeType.substring(schemeType.indexOf('(') + 1, schemeType.length() - 1);
-                mfSchemeTypeEntity = findOrCreateMFSchemeTypeEntity(type, category, null, mfSchemeTypeService);
+                mfSchemeTypeEntity = findOrCreateMFSchemeTypeEntity(type, category, null, mfSchemeTypeRepository);
             } else {
                 log.error("Unable to parse schemeType :{}", schemeType);
             }
@@ -72,15 +72,15 @@ public abstract class MfSchemeDtoToEntityMapper {
     }
 
     MFSchemeTypeEntity findOrCreateMFSchemeTypeEntity(
-            String type, String category, @Nullable String subCategory, MFSchemeTypeService mfSchemeTypeService) {
+            String type, String category, @Nullable String subCategory, MFSchemeTypeRepository mfSchemeTypeRepository) {
         MFSchemeTypeEntity byTypeAndCategoryAndSubCategory =
-                mfSchemeTypeService.findByTypeAndCategoryAndSubCategory(type, category, subCategory);
+                mfSchemeTypeRepository.findByTypeAndCategoryAndSubCategory(type, category, subCategory);
         if (byTypeAndCategoryAndSubCategory == null) {
             MFSchemeTypeEntity mfSchemeType = new MFSchemeTypeEntity();
             mfSchemeType.setType(type);
             mfSchemeType.setCategory(category);
             mfSchemeType.setSubCategory(subCategory);
-            byTypeAndCategoryAndSubCategory = mfSchemeTypeService.saveSchemeType(mfSchemeType);
+            byTypeAndCategoryAndSubCategory = mfSchemeTypeRepository.save(mfSchemeType);
         }
         return byTypeAndCategoryAndSubCategory;
     }

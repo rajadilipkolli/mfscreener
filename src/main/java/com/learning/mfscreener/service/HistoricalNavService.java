@@ -8,6 +8,7 @@ import com.learning.mfscreener.exception.SchemeNotFoundException;
 import com.learning.mfscreener.mapper.MfSchemeDtoToEntityMapper;
 import com.learning.mfscreener.models.MFSchemeDTO;
 import com.learning.mfscreener.models.projection.SchemeNameAndISIN;
+import com.learning.mfscreener.repository.MFSchemeTypeRepository;
 import com.learning.mfscreener.utils.AppConstants;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -31,19 +32,19 @@ public class HistoricalNavService {
     private static final Logger LOGGER = LoggerFactory.getLogger(HistoricalNavService.class);
 
     private final SchemeService schemeService;
-    private final MFSchemeTypeService mfSchemeTypeService;
+    private final MFSchemeTypeRepository mfSchemeTypeRepository;
     private final RestClient restClient;
     private final MfSchemeDtoToEntityMapper mfSchemeDtoToEntityMapper;
     private final UserSchemeDetailsService userSchemeDetailsService;
 
     public HistoricalNavService(
             SchemeService schemeService,
-            MFSchemeTypeService mfSchemeTypeService,
+            MFSchemeTypeRepository mfSchemeTypeRepository,
             RestClient restClient,
             MfSchemeDtoToEntityMapper mfSchemeDtoToEntityMapper,
             UserSchemeDetailsService userSchemeDetailsService) {
         this.schemeService = schemeService;
-        this.mfSchemeTypeService = mfSchemeTypeService;
+        this.mfSchemeTypeRepository = mfSchemeTypeRepository;
         this.restClient = restClient;
         this.mfSchemeDtoToEntityMapper = mfSchemeDtoToEntityMapper;
         this.userSchemeDetailsService = userSchemeDetailsService;
@@ -119,7 +120,7 @@ public class HistoricalNavService {
                                         amc, Long.valueOf(schemecode), payout, schemename, nav, date, schemeType);
                                 MFSchemeEntity mfSchemeEntity =
                                         mfSchemeDtoToEntityMapper.mapMFSchemeDTOToMFSchemeEntity(
-                                                mfSchemeDTO, mfSchemeTypeService);
+                                                mfSchemeDTO, mfSchemeTypeRepository);
                                 schemeService.saveEntity(mfSchemeEntity);
                             }
                         }
