@@ -24,6 +24,7 @@ public interface UserCASDetailsEntityRepository extends JpaRepository<UserCASDet
                             COALESCE(mf.scheme_name, usd.scheme) AS schemeName,
                             usd.amfi AS schemeId,
                             ufd.folio AS folioNumber,
+                            utd.user_scheme_detail_id AS schemeDetailId,
                             ROW_NUMBER() OVER (
                                 PARTITION BY utd.user_scheme_detail_id ORDER BY utd.transaction_date DESC,
                                     CASE
@@ -47,13 +48,15 @@ public interface UserCASDetailsEntityRepository extends JpaRepository<UserCASDet
                     SELECT SUM(balance) AS balanceUnits,
                         schemeName,
                         schemeId,
-                        folioNumber
+                        folioNumber,
+                        schemeDetailId
                     FROM tempView
                     WHERE row_number = 1
                         AND balance <> 0
                     GROUP BY schemeName,
                         schemeId,
-                        folioNumber
+                        folioNumber,
+                        schemeDetailId
                     """)
     List<PortfolioDetailsProjection> getPortfolioDetails(
             @Param("pan") String panNumber, @Param("asOfDate") LocalDate asOfDate);

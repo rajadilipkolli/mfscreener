@@ -27,6 +27,13 @@ services:
     command:
       - --config.file=/etc/prometheus/prometheus.yml
 
+  loki:
+    image: grafana/loki:2.9.7
+    container_name: loki
+    extra_hosts: [ 'host.docker.internal:host-gateway' ]
+    command: -config.file=/etc/loki/local-config.yaml
+    ports:
+      - "3100:3100"
 volumes:
   prometheus_data: {}
   grafana_data: {}

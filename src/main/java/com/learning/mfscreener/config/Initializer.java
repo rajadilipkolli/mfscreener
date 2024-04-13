@@ -3,8 +3,8 @@ package com.learning.mfscreener.config;
 import com.learning.mfscreener.entities.MFSchemeEntity;
 import com.learning.mfscreener.mapper.MfSchemeDtoToEntityMapper;
 import com.learning.mfscreener.models.MFSchemeDTO;
-import com.learning.mfscreener.repository.MFSchemeRepository;
 import com.learning.mfscreener.repository.MFSchemeTypeRepository;
+import com.learning.mfscreener.service.SchemeService;
 import com.learning.mfscreener.utils.AppConstants;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -28,17 +28,17 @@ public class Initializer implements CommandLineRunner {
 
     private static final Logger log = LoggerFactory.getLogger(Initializer.class);
 
-    private final MFSchemeRepository mfSchemesRepository;
+    private final SchemeService schemeService;
     private final MFSchemeTypeRepository mfSchemeTypeRepository;
     private final MfSchemeDtoToEntityMapper mfSchemeDtoToEntityMapper;
     private final RestTemplate restTemplate;
 
     public Initializer(
-            MFSchemeRepository mfSchemesRepository,
+            SchemeService schemeService,
             MFSchemeTypeRepository mfSchemeTypeRepository,
             MfSchemeDtoToEntityMapper mfSchemeDtoToEntityMapper,
             RestTemplate restTemplate) {
-        this.mfSchemesRepository = mfSchemesRepository;
+        this.schemeService = schemeService;
         this.mfSchemeTypeRepository = mfSchemeTypeRepository;
         this.mfSchemeDtoToEntityMapper = mfSchemeDtoToEntityMapper;
         this.restTemplate = restTemplate;
@@ -101,18 +101,18 @@ public class Initializer implements CommandLineRunner {
                     (System.currentTimeMillis() - start),
                     chopArrayList.size());
 
-            if (mfSchemesRepository.count() != chopArrayList.size()) {
+            if (schemeService.count() != chopArrayList.size()) {
                 StopWatch stopWatch = new StopWatch();
                 stopWatch.start("saving fundNames");
                 List<MFSchemeEntity> list = new ArrayList<>();
-                List<Long> schemeCodesList = mfSchemesRepository.findAllSchemeIds();
+                List<Long> schemeCodesList = schemeService.findAllSchemeIds();
                 chopArrayList.removeIf(s -> schemeCodesList.contains(s.schemeCode()));
                 chopArrayList.forEach(scheme -> {
                     MFSchemeEntity mfSchemeEntity =
                             mfSchemeDtoToEntityMapper.mapMFSchemeDTOToMFSchemeEntity(scheme, mfSchemeTypeRepository);
                     list.add(mfSchemeEntity);
                 });
-                mfSchemesRepository.saveAll(list);
+                schemeService.saveAllEntities(list);
                 stopWatch.stop();
                 log.info("saved in db in : {} sec", stopWatch.getTotalTimeSeconds());
             }

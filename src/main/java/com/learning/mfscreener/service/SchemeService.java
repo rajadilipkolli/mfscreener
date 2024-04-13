@@ -4,7 +4,6 @@ import com.learning.mfscreener.adapter.ConversionServiceAdapter;
 import com.learning.mfscreener.config.logging.Loggable;
 import com.learning.mfscreener.entities.MFSchemeEntity;
 import com.learning.mfscreener.entities.MFSchemeNavEntity;
-import com.learning.mfscreener.entities.UserSchemeDetailsEntity;
 import com.learning.mfscreener.exception.SchemeNotFoundException;
 import com.learning.mfscreener.models.MFSchemeDTO;
 import com.learning.mfscreener.models.projection.FundDetailProjection;
@@ -12,7 +11,6 @@ import com.learning.mfscreener.models.projection.SchemeNameAndISIN;
 import com.learning.mfscreener.models.projection.UserFolioDetailsPanProjection;
 import com.learning.mfscreener.models.response.NavResponse;
 import com.learning.mfscreener.repository.MFSchemeRepository;
-import com.learning.mfscreener.repository.UserFolioDetailsEntityRepository;
 import com.learning.mfscreener.repository.UserSchemeDetailsEntityRepository;
 import com.learning.mfscreener.utils.AppConstants;
 import java.net.URI;
@@ -20,14 +18,13 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 import org.hibernate.exception.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -38,29 +35,31 @@ public class SchemeService {
 
     private final RestClient restClient;
     private final MFSchemeRepository mfSchemeRepository;
-    private final UserFolioDetailsEntityRepository userFolioDetailsEntityRepository;
     private final UserSchemeDetailsEntityRepository userSchemeDetailsEntityRepository;
     private final ConversionServiceAdapter conversionServiceAdapter;
+    private final UserFolioDetailsService userFolioDetailsService;
 
     public SchemeService(
             RestClient restClient,
             MFSchemeRepository mfSchemeRepository,
-            UserFolioDetailsEntityRepository userFolioDetailsEntityRepository,
             UserSchemeDetailsEntityRepository userSchemeDetailsEntityRepository,
-            ConversionServiceAdapter conversionServiceAdapter) {
+            ConversionServiceAdapter conversionServiceAdapter,
+            UserFolioDetailsService userFolioDetailsService) {
         this.restClient = restClient;
         this.mfSchemeRepository = mfSchemeRepository;
-        this.userFolioDetailsEntityRepository = userFolioDetailsEntityRepository;
         this.userSchemeDetailsEntityRepository = userSchemeDetailsEntityRepository;
         this.conversionServiceAdapter = conversionServiceAdapter;
+        this.userFolioDetailsService = userFolioDetailsService;
     }
 
     @Loggable
+    @Transactional
     public void fetchSchemeDetails(Long schemeCode) {
         processResponseEntity(schemeCode, getNavResponseResponseEntity(schemeCode));
     }
 
     @Loggable
+    @Transactional
     public void fetchSchemeDetails(String oldSchemeCode, Long newSchemeCode) {
         processResponseEntity(newSchemeCode, getNavResponseResponseEntity(Long.valueOf(oldSchemeCode)));
     }
@@ -79,36 +78,14 @@ public class SchemeService {
         return this.mfSchemeRepository.findByFundHouseLikeIgnoringCaseOrderBySchemeIdAsc(fName);
     }
 
-    @Loggable
-    public void setAMFIIfNull() {
-        List<UserSchemeDetailsEntity> userSchemeDetailsEntities = userSchemeDetailsEntityRepository.findByAmfiIsNull();
-        userSchemeDetailsEntities.forEach(userSchemeDetailsEntity -> {
-            String scheme = userSchemeDetailsEntity.getScheme();
-            LOGGER.info("amfi is Null for scheme :{}", scheme);
-            // attempting to find ISIN
-            if (scheme.contains("ISIN:")) {
-                String isin = scheme.substring(scheme.lastIndexOf("ISIN:") + 5).strip();
-                if (StringUtils.hasText(isin)) {
-                    Optional<MFSchemeEntity> mfSchemeEntity = mfSchemeRepository.findByPayOut(isin);
-                    mfSchemeEntity.ifPresent(schemeEntity -> userSchemeDetailsEntityRepository.updateAmfiAndIsinById(
-                            schemeEntity.getSchemeId(), isin, userSchemeDetailsEntity.getId()));
-                }
-            }
-        });
-    }
-
-    @Loggable
-    public List<UserSchemeDetailsEntity> getSchemesByEmailAndName(String email, String name) {
-        return this.userSchemeDetailsEntityRepository.findByUserEmailAndName(email, name);
-    }
-
     // if panKYC is NOT OK then PAN is not set. hence manually setting it.
     @Loggable
     public void setPANIfNotSet(Long userCasID) {
         // find pan by id
         UserFolioDetailsPanProjection panProjection =
-                userFolioDetailsEntityRepository.findFirstByUserCasDetailsEntity_IdAndPanKyc(userCasID, "OK");
-        userFolioDetailsEntityRepository.updatePanByCasId(panProjection.getPan(), userCasID);
+                userFolioDetailsService.findFirstByUserCasIdAndPanKyc(userCasID, "OK");
+        int rowsUpdated = userFolioDetailsService.updatePanByCasId(panProjection.getPan(), userCasID);
+        LOGGER.debug("Updated {} rows with PAN", rowsUpdated);
     }
 
     @Loggable
@@ -118,23 +95,8 @@ public class SchemeService {
                 .map(conversionServiceAdapter::mapMFSchemeEntityToMFSchemeDTO);
     }
 
-    @Loggable
-    public void loadHistoricalDataIfNotExists() {
-        List<Long> historicalDataNotLoadedSchemeIdList =
-                userSchemeDetailsEntityRepository.getHistoricalDataNotLoadedSchemeIdList();
-        if (!historicalDataNotLoadedSchemeIdList.isEmpty()) {
-            List<CompletableFuture<Void>> allSchemesWhereHistoricalDetailsNotLoadedCf =
-                    historicalDataNotLoadedSchemeIdList.stream()
-                            .map(schemeId -> CompletableFuture.runAsync(() -> fetchSchemeDetails(schemeId)))
-                            .toList();
-            CompletableFuture.allOf(allSchemesWhereHistoricalDetailsNotLoadedCf.toArray(new CompletableFuture<?>[0]))
-                    .join();
-            LOGGER.info("Loaded loadHistoricalDataIfNotExists");
-        }
-    }
-
     void processResponseEntity(Long schemeCode, NavResponse navResponse) {
-        Optional<MFSchemeEntity> entityBySchemeId = mfSchemeRepository.findBySchemeId(schemeCode);
+        Optional<MFSchemeEntity> entityBySchemeId = findBySchemeCode(schemeCode);
         if (entityBySchemeId.isEmpty()) {
             // Scenario where scheme is discontinued or merged with other
             SchemeNameAndISIN firstByAmfi = userSchemeDetailsEntityRepository
@@ -192,5 +154,31 @@ public class SchemeService {
         } else {
             LOGGER.info("data in db and from service is same hence ignoring");
         }
+    }
+
+    public Optional<MFSchemeEntity> findByPayOut(String isin) {
+        return mfSchemeRepository.findByPayOut(isin);
+    }
+
+    public long count() {
+        return mfSchemeRepository.count();
+    }
+
+    public List<Long> findAllSchemeIds() {
+        return mfSchemeRepository.findAllSchemeIds();
+    }
+
+    @Transactional
+    public List<MFSchemeEntity> saveAllEntities(List<MFSchemeEntity> mfSchemeEntityList) {
+        return mfSchemeRepository.saveAll(mfSchemeEntityList);
+    }
+
+    @Transactional
+    public MFSchemeEntity saveEntity(MFSchemeEntity mfSchemeEntity) {
+        return mfSchemeRepository.save(mfSchemeEntity);
+    }
+
+    public Optional<MFSchemeEntity> findBySchemeCode(Long schemeCode) {
+        return mfSchemeRepository.findBySchemeId(schemeCode);
     }
 }

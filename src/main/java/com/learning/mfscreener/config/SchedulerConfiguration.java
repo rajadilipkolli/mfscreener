@@ -1,6 +1,6 @@
 package com.learning.mfscreener.config;
 
-import com.learning.mfscreener.service.SchemeService;
+import com.learning.mfscreener.service.UserSchemeDetailsService;
 import org.jobrunr.scheduling.BackgroundJob;
 import org.jobrunr.scheduling.cron.Cron;
 import org.springframework.boot.context.event.ApplicationStartedEvent;
@@ -10,15 +10,16 @@ import org.springframework.stereotype.Component;
 @Component
 public class SchedulerConfiguration {
 
-    private final SchemeService schemeService;
+    private final UserSchemeDetailsService userSchemeDetailsService;
 
-    public SchedulerConfiguration(SchemeService schemeService) {
-        this.schemeService = schemeService;
+    public SchedulerConfiguration(UserSchemeDetailsService userSchemeDetailsService) {
+        this.userSchemeDetailsService = userSchemeDetailsService;
     }
 
     @EventListener(ApplicationStartedEvent.class)
     void setSchemeIfNotSetJob() {
-        BackgroundJob.scheduleRecurrently(Cron.every5minutes(), schemeService::setAMFIIfNull);
-        BackgroundJob.scheduleRecurrently(Cron.every5minutes(), schemeService::loadHistoricalDataIfNotExists);
+        BackgroundJob.scheduleRecurrently(Cron.every5minutes(), userSchemeDetailsService::setAMFIIfNull);
+        BackgroundJob.scheduleRecurrently(
+                Cron.every5minutes(), userSchemeDetailsService::loadHistoricalDataIfNotExists);
     }
 }
