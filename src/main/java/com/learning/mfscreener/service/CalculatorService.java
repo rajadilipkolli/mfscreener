@@ -135,6 +135,12 @@ public class CalculatorService {
 
     double getCurrentValuation(Long fundId, Double balance, LocalDate asOfDate) {
         MFSchemeDTO scheme = navService.getNavByDateWithRetry(fundId, asOfDate);
+        try {
+            return balance * Double.parseDouble(scheme.nav());
+        } catch (NumberFormatException e) {
+            LOGGER.error("Error parsing NAV value for fundId: {}", fundId, e);
+            throw new IllegalArgumentException("Invalid NAV value");
+        }
         return balance * Double.parseDouble(scheme.nav());
     }
 }
