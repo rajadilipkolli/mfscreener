@@ -42,3 +42,4 @@ out/
 mf.pdf
 pdf_parsed.json
 /logs/
+.jpb/

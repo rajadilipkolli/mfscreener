@@ -19,8 +19,8 @@ public interface PortfolioApi {
     @Operation(
             summary =
                     """
-                    Fetches the portfolio by Pan and given date, if date is empty then current\
-                     date portfolio will be returned\
+                    Fetches the portfolio by Pan and given date, if date is empty then current
+                    date portfolio will be returned
                     """)
     ResponseEntity<PortfolioResponse> getPortfolio(
             @Parameter(description = "Pan of the end User", name = "pan", in = ParameterIn.PATH, example = "ABCDE1234F")
@@ -28,8 +28,8 @@ public interface PortfolioApi {
             @Parameter(
                             description = "get portfolio value for given date (yyyy-MM-dd) format",
                             in = ParameterIn.QUERY,
-                            example = "2023-12-31",
-                            required = true)
+                            name = "asOfDate",
+                            example = "2023-12-31")
                     @PastOrPresent(message = "Date should be past or today")
                     LocalDate date);
 }

@@ -28,10 +28,10 @@ public interface UserCASDetailsEntityRepository
                             ROW_NUMBER() OVER (
                                 PARTITION BY utd.user_scheme_detail_id ORDER BY utd.transaction_date DESC,
                                     CASE
-                                        WHEN utd.type = 'REDEMPTION'
+                                        WHEN utd.type in ('REDEMPTION', 'SWITCH_OUT')
                                             THEN balance
                                         ELSE balance * - 1 -- Negate balance for descending order happens when 2 entries on same date
-                                        END ASC -- Ascending order for redemption, descending otherwise
+                                        END ASC -- Ascending order for redemption or switch out, descending otherwise
                                 ) AS row_number
                         FROM user_transaction_details utd
                         JOIN user_scheme_details usd ON utd.user_scheme_detail_id = usd.id

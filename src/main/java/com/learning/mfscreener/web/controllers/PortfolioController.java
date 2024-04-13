@@ -39,7 +39,8 @@ public class PortfolioController implements PortfolioApi {
     @Override
     public ResponseEntity<PortfolioResponse> getPortfolio(
             @PathVariable("pan") String panNumber,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
-        return ResponseEntity.ok(portfolioService.getPortfolioByPAN(panNumber, date));
+            @RequestParam(required = false, name = "asOfDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+                    LocalDate asOfDate) {
+        return ResponseEntity.ok(portfolioService.getPortfolioByPAN(panNumber, asOfDate));
     }
 }

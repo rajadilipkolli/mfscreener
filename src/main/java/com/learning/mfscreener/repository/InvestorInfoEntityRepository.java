@@ -6,5 +6,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface InvestorInfoEntityRepository extends JpaRepository<InvestorInfoEntity, Long> {
+
     boolean existsByEmailAndName(String email, String name);
 }

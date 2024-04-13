@@ -2,7 +2,7 @@ package com.learning.mfscreener.repository;
 
 import com.learning.mfscreener.entities.UserTransactionDetailsEntity;
 import com.learning.mfscreener.models.projection.UserTransactionDetailsProjection;
-import java.util.Collection;
+import java.time.LocalDate;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -13,8 +13,15 @@ import org.springframework.transaction.annotation.Transactional;
 @Repository
 public interface UserTransactionDetailsEntityRepository extends JpaRepository<UserTransactionDetailsEntity, Long> {
 
-    List<UserTransactionDetailsProjection> findByUserSchemeDetailsEntity_IdAndTypeNotInOrderByTransactionDateAsc(
-            Long id, Collection<String> types);
+    @Transactional(readOnly = true)
+    @Query(
+            """
+            select u from UserTransactionDetailsEntity u
+            where u.userSchemeDetailsEntity.id = :id and u.type not in ('STT_TAX', 'STAMP_DUTY_TAX', 'MISC') and u.transactionDate <= :asOfDate
+            order by u.transactionDate
+            """)
+    List<UserTransactionDetailsProjection> getByUserSchemeIdAndTypeNotInAndTransactionDateLessThanEqual(
+            @Param("id") Long id, @Param("asOfDate") LocalDate transactionDate);
 
     @Transactional(readOnly = true)
     @Query(
