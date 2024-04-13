@@ -8,6 +8,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.learning.mfscreener.common.AbstractIntegrationTest;
+import java.time.LocalDate;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -26,5 +27,19 @@ class XIRRCalculatorControllerIntTest extends AbstractIntegrationTest {
                 .andDo(print())
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_JSON_VALUE)))
                 .andExpect(jsonPath("$.size()", is(4)));
+    }
+
+    void getXIRRForAfterDate() throws Exception {
+        this.mockMvc
+                .perform(get("/api/xirr/{pan}", "ABCDE1234F")
+                        .param("asOfDate", LocalDate.now().plusDays(10).toString())
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
+                .andExpect(jsonPath("$.type", is("about:blank")))
+                .andExpect(jsonPath("$.title", is("Constraint Violation")))
+                .andExpect(jsonPath("$.status", is(400)))
+                .andExpect(jsonPath("$.detail", is("getXIRR.asOfDate: Date should be past or today")))
+                .andExpect(jsonPath("$.instance", is("/api/xirr/ABCDE1234F")));
     }
 }
