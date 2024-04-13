@@ -272,7 +272,9 @@ public class PortfolioService {
     }
 
     public PortfolioResponse getPortfolioByPAN(String panNumber, LocalDate asOfDate) {
-
+        if (asOfDate == null) {
+            asOfDate = LocalDate.now();
+        }
         LocalDate adjustedDate = LocalDateUtility.getAdjustedDate(asOfDate);
         List<CompletableFuture<PortfolioDetailsDTO>> completableFutureList =
                 casDetailsEntityRepository.getPortfolioDetails(panNumber, adjustedDate).stream()

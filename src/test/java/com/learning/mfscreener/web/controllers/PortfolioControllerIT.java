@@ -192,7 +192,7 @@ class PortfolioControllerIT extends AbstractIntegrationTest {
     void getPortfolio() throws Exception {
         this.mockMvc
                 .perform(get("/api/portfolio/{pan}", "ABCDE1234F")
-                        .param("date", LocalDate.now().minusDays(2).toString())
+                        .param("asOfDate", LocalDate.now().minusDays(2).toString())
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_JSON_VALUE)))
@@ -204,7 +204,7 @@ class PortfolioControllerIT extends AbstractIntegrationTest {
     void getPortfolioForAfterDate() throws Exception {
         this.mockMvc
                 .perform(get("/api/portfolio/{pan}", "ABCDE1234F")
-                        .param("date", LocalDate.now().plusDays(10).toString())
+                        .param("asOfDate", LocalDate.now().plusDays(10).toString())
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
@@ -213,5 +213,15 @@ class PortfolioControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.status", is(400)))
                 .andExpect(jsonPath("$.detail", is("getPortfolio.date: Date should be past or today")))
                 .andExpect(jsonPath("$.instance", is("/api/portfolio/ABCDE1234F")));
+    }
+
+    @Test
+    @Order(103)
+    void getPortfolioWithOutDate() throws Exception {
+        this.mockMvc
+                .perform(get("/api/portfolio/{pan}", "ABCDE1234F").accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_JSON_VALUE)))
+                .andExpect(jsonPath("$.portfolioDetailsDTOS.size()", is(4)));
     }
 }

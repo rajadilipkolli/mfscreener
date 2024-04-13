@@ -82,10 +82,6 @@
 
         <addUniqueConstraint tableName="mf_scheme_nav" columnNames="nav, nav_date, mf_scheme_id"
                              constraintName="uc_mf_scheme_nav"/>
-        
-        <createIndex tableName="mf_scheme" indexName="mf_scheme_idx_scheme_id">
-            <column name="scheme_id"/>
-        </createIndex>
     </changeSet>
 
 </databaseChangeLog>
