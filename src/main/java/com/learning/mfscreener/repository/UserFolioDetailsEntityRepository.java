@@ -3,6 +3,7 @@ package com.learning.mfscreener.repository;
 import com.learning.mfscreener.entities.UserFolioDetailsEntity;
 import com.learning.mfscreener.models.projection.UserFolioDetailsPanProjection;
 import com.learning.mfscreener.models.projection.UserFolioDetailsProjection;
+import java.time.LocalDate;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -18,9 +19,12 @@ public interface UserFolioDetailsEntityRepository extends JpaRepository<UserFoli
     @Query(
             """
                select new com.learning.mfscreener.models.projection.UserFolioDetailsProjection(u.folio, se.id, se.scheme, se.amfi) from UserFolioDetailsEntity u join u.schemeEntities se
-               where u.pan = :pan
+               inner join u.schemeEntities.transactionEntities te
+               where u.pan = :pan and te.transactionDate <= :asOfDate
+               group by u.folio, se.id, se.scheme, se.amfi
             """)
-    List<UserFolioDetailsProjection> findByPan(@Param("pan") String pan);
+    List<UserFolioDetailsProjection> findByPanAndAsOfDate(
+            @Param("pan") String pan, @Param("asOfDate") LocalDate asOfDate);
 
     @Query(
             """
