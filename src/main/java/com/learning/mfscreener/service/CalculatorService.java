@@ -83,7 +83,7 @@ public class CalculatorService {
                 schemeIdInDb, asOfDate);
     }
 
-    private double computeXIRR(List<UserTransactionDetailsProjection> transactions, Long fundId, LocalDate asOfDate) {
+    double computeXIRR(List<UserTransactionDetailsProjection> transactions, Long fundId, LocalDate asOfDate) {
         double xirrValue = 0.0d;
         if (!transactions.isEmpty()) {
             double currentBalance = getBalance(transactions);
@@ -93,7 +93,7 @@ public class CalculatorService {
         return xirrValue;
     }
 
-    private double calculateXirrValue(List<Transaction> transactionList, Long fundId) {
+    double calculateXirrValue(List<Transaction> transactionList, Long fundId) {
         double xirrValue = -0.00001; // Default value if unable to calculate
         if (transactionList.size() > 1) {
             try {
