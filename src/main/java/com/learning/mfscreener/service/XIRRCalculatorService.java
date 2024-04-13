@@ -20,16 +20,16 @@ import org.springframework.stereotype.Service;
 
 @Service
 @Loggable
-public class CalculatorService {
+public class XIRRCalculatorService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CalculatorService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(XIRRCalculatorService.class);
     private static final double TOLERANCE = 0.001; // tolerance for Newton's method
 
     private final UserFolioDetailsService userFolioDetailsService;
     private final UserTransactionDetailsService userTransactionDetailsService;
     private final NavService navService;
 
-    public CalculatorService(
+    public XIRRCalculatorService(
             UserFolioDetailsService userFolioDetailsService,
             UserTransactionDetailsService userTransactionDetailsService,
             NavService navService) {

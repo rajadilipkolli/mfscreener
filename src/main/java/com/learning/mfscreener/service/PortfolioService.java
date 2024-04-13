@@ -47,7 +47,7 @@ public class PortfolioService {
     private final InvestorInfoEntityRepository investorInfoEntityRepository;
     private final NavService navService;
     private final SchemeService schemeService;
-    private final CalculatorService calculatorService;
+    private final XIRRCalculatorService xIRRCalculatorService;
     private final UserTransactionDetailsService userTransactionDetailsService;
     private final UserFolioDetailsService userFolioDetailsService;
     private final UserSchemeDetailsService userSchemeDetailsService;
@@ -61,7 +61,7 @@ public class PortfolioService {
             UserTransactionDetailsService userTransactionDetailsService,
             NavService navService,
             SchemeService schemeService,
-            CalculatorService calculatorService,
+            XIRRCalculatorService xIRRCalculatorService,
             UserFolioDetailsService userFolioDetailsService,
             UserSchemeDetailsService userSchemeDetailsService) {
         this.objectMapper = objectMapper;
@@ -71,7 +71,7 @@ public class PortfolioService {
         this.investorInfoEntityRepository = investorInfoEntityRepository;
         this.navService = navService;
         this.schemeService = schemeService;
-        this.calculatorService = calculatorService;
+        this.xIRRCalculatorService = xIRRCalculatorService;
         this.userFolioDetailsService = userFolioDetailsService;
         this.userSchemeDetailsService = userSchemeDetailsService;
         this.userTransactionDetailsService = userTransactionDetailsService;
@@ -297,7 +297,7 @@ public class PortfolioService {
                                     portfolioDetails.getSchemeName(),
                                     portfolioDetails.getFolioNumber(),
                                     scheme.date(),
-                                    calculatorService.calculateXIRRBySchemeId(
+                                    xIRRCalculatorService.calculateXIRRBySchemeId(
                                             portfolioDetails.getSchemeId(),
                                             portfolioDetails.getSchemeDetailId(),
                                             adjustedDate));

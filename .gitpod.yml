@@ -22,3 +22,6 @@ ports:
   - port: 5050
     visibility: public
     onOpen: open-browser
+  - port: 9411
+    visibility: public
+    onOpen: open-browser

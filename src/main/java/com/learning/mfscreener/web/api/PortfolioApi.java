@@ -31,5 +31,5 @@ public interface PortfolioApi {
                             name = "asOfDate",
                             example = "2023-12-31")
                     @PastOrPresent(message = "Date should be past or today")
-                    LocalDate date);
+                    LocalDate asOfDate);
 }
