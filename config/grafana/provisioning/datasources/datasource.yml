@@ -4,48 +4,75 @@ apiVersion: 1
 # list of datasources that should be deleted from the database
 deleteDatasources:
   - name: Prometheus
-    orgId: 1
+  - name: Tempo
+  - name: Loki
 
 # list of datasources to insert/update depending
 # whats available in the database
 datasources:
-  # <string, required> name of the datasource. Required
-- name: Prometheus
-  # <string, required> datasource type. Required
-  type: prometheus
-  uid : PBFA97CFB590B2093
-  # <string, required> access mode. direct or proxy. Required
-  access: proxy
-  # <int> org id. will default to orgId 1 if not specified
-  orgId: 1
-  # <string> url
-  url: http://prometheus:9090
-  # <string> database password, if used
-  password:
-  # <string> database user, if used
-  user:
-  # <string> database name, if used
-  database:
-  # <bool> enable/disable basic auth
-  basicAuth: true
-  # <string> basic auth username
-  basicAuthUser: admin
-  # <string> basic auth password
-  basicAuthPassword: foobar
-  # <bool> enable/disable with credentials headers
-  withCredentials:
-  # <bool> mark as default datasource. Max one per org
-  isDefault: true
-  # <map> fields that will be converted to json and stored in json_data
-  jsonData:
-     graphiteVersion: "1.1"
-     tlsAuth: false
-     tlsAuthWithCACert: false
-  # <string> json object of data that will be encrypted.
-  secureJsonData:
-    tlsCACert: "..."
-    tlsClientCert: "..."
-    tlsClientKey: "..."
-  version: 1
-  # <bool> allow users to edit datasources from the UI.
-  editable: true
+  - name: Prometheus
+    type: prometheus
+    uid: prometheus-mfscreener
+    access: proxy
+    url: http://host.docker.internal:9090
+    basicAuth: false
+    isDefault: false
+    version: 1
+    editable: true
+    jsonData:
+      httpMethod: POST
+      exemplarTraceIdDestinations:
+        - name: trace_id
+          datasourceUid: tempo-mfscreener
+  - name: Tempo
+    type: tempo
+    uid: tempo-mfscreener
+    access: proxy
+    url: http://tempo:3100
+    basicAuth: false
+    isDefault: false
+    version: 1
+    editable: true
+    jsonData:
+      httpMethod: GET
+      tracesToMetrics:
+        datasourceUid: prometheus-mfscreener
+        tags: [ { key: 'service.name', value: 'application' }, { key: 'org' }, { key: 'method' }, { key: 'uri' }, { key: 'outcome' }, { key: 'status' }, { key: 'exception' } ]
+        queries:
+          - name: 'Throughput'
+            query: 'sum(rate(http_server_requests_seconds_count{$$__tags}[$$__rate_interval]))'
+          - name: 'Latency'
+            query: 'histogram_quantile(1.00, sum(rate(http_server_requests_seconds_bucket{$$__tags}[$$__rate_interval])) by (le))'
+      tracesToLogs:
+        datasourceUid: 'loki-mfscreener'
+        tags: [ 'instance', 'pod', 'namespace', 'hostname' ]
+        mappedTags: [ { key: 'org' }, { key: 'service.name', value: 'application' }  ]
+        mapTagNamesEnabled: true
+        spanStartTimeShift: '1h'
+        spanEndTimeShift: '1h'
+        filterByTraceID: true
+        filterBySpanID: false
+        lokiSearch: true
+      lokiSearch:
+        datasourceUid: loki-mfscreener
+      serviceMap:
+        datasourceUid: prometheus-mfscreener
+      search:
+        hide: false
+      nodeGraph:
+        enabled: true
+  - name: Loki
+    type: loki
+    uid: loki-mfscreener
+    access: proxy
+    url: http://loki:3100
+    basicAuth: false
+    isDefault: true
+    version: 1
+    editable: true
+    jsonData:
+      derivedFields:
+        - datasourceUid: tempo-mfscreener
+          matcherRegex: \[.+,(.+?),
+          name: traceId
+          url: $${__value.raw}
