@@ -141,6 +141,5 @@ public class CalculatorService {
             LOGGER.error("Error parsing NAV value for fundId: {}", fundId, e);
             throw new IllegalArgumentException("Invalid NAV value");
         }
-        return balance * Double.parseDouble(scheme.nav());
     }
 }
