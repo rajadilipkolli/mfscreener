@@ -7,9 +7,11 @@ import com.learning.mfscreener.repository.UserTransactionDetailsEntityRepository
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Loggable
+@Transactional(readOnly = true)
 public class UserTransactionDetailsService {
 
     private final UserTransactionDetailsEntityRepository userTransactionDetailsEntityRepository;

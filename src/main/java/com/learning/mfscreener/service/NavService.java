@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 @Service
+@Loggable
 public class NavService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NavService.class);
