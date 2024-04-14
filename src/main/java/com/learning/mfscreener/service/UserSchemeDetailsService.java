@@ -74,7 +74,7 @@ public class UserSchemeDetailsService {
                             .toList();
             CompletableFuture.allOf(allSchemesWhereHistoricalDetailsNotLoadedCf.toArray(new CompletableFuture<?>[0]))
                     .join();
-            LOGGER.info("Completed loading HistoricalData for schemes that doesn't exists");
+            LOGGER.info("Completed loading HistoricalData for schemes that don't exists");
         }
     }
 }
