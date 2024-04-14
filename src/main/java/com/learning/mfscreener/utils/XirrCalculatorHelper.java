@@ -17,13 +17,13 @@ public class XirrCalculatorHelper {
 
     // ensures that balance will never be null
     public static Double getBalance(List<UserTransactionDetailsProjection> transactionDetailsProjectionList) {
-        if (transactionDetailsProjectionList.size() < 2) {
-            throw new IllegalArgumentException("Insufficient data to calculate balance.");
-        }
         Double balance = transactionDetailsProjectionList
                 .get(transactionDetailsProjectionList.size() - 1)
                 .getBalance();
         if (balance == null) {
+            if (transactionDetailsProjectionList.size() < 2) {
+                throw new IllegalArgumentException("Insufficient data to calculate balance.");
+            }
             LOGGER.debug("Balance units Not found hence, attempting for 2nd last row");
             balance = transactionDetailsProjectionList
                     .get(transactionDetailsProjectionList.size() - 2)
