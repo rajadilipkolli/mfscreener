@@ -54,20 +54,20 @@ public class HistoricalNavService {
 
     public String getHistoricalNav(Long schemeCode, LocalDate navDate) {
         URI historicalNavUri = buildHistoricalNavUri(navDate);
-        Optional<MFSchemeEntity> bySchemeId = schemeService.findBySchemeCode(schemeCode);
-        String payOut;
-        boolean persistSchemeInfo = false;
-        SchemeNameAndISIN schemeNameAndISIN = null;
-        if (bySchemeId.isEmpty()) {
-            // discontinued Scheme
-            schemeNameAndISIN = fetchSchemeDetails(schemeCode);
-            payOut = schemeNameAndISIN.getIsin();
-            persistSchemeInfo = true;
+        Optional<MFSchemeEntity> bySchemeCode = this.schemeService.findBySchemeCode(schemeCode);
+        if (bySchemeCode.isPresent()) {
+            return fetchAndProcessNavData(
+                    historicalNavUri, bySchemeCode.get().getPayOut(), false, null, schemeCode, navDate);
         } else {
-            payOut = bySchemeId.get().getPayOut();
+            return handleDiscontinuedScheme(schemeCode, historicalNavUri, navDate);
         }
-        return fetchAndProcessNavData(
-                historicalNavUri, payOut, persistSchemeInfo, schemeNameAndISIN, schemeCode, navDate);
+    }
+
+    String handleDiscontinuedScheme(Long schemeCode, URI historicalNavUri, LocalDate navDate) {
+        // discontinued scheme Isin
+        SchemeNameAndISIN schemeNameAndISIN = fetchSchemeDetails(schemeCode);
+        String payOut = schemeNameAndISIN.getIsin();
+        return fetchAndProcessNavData(historicalNavUri, payOut, true, schemeNameAndISIN, schemeCode, navDate);
     }
 
     String fetchAndProcessNavData(
