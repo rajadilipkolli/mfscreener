@@ -319,13 +319,13 @@ public class PortfolioService {
                                 toList())));
     }
 
-    Map<String, List<UserSchemeDTO>> groupSchemesByFolio(List<UserFolioDTO> folioDTOList) {
-        return folioDTOList.stream()
+    Map<String, List<UserSchemeDTO>> groupSchemesByFolio(List<UserFolioDTO> userFolioDTOList) {
+        return userFolioDTOList.stream()
                 .collect(groupingBy(UserFolioDTO::folio, flatMapping(folio -> folio.schemes().stream(), toList())));
     }
 
     void processNewFolios(
-            List<UserFolioDTO> folioDTOList,
+            List<UserFolioDTO> userFolioDTOList,
             UserCASDetailsEntity userCASDetailsEntity,
             AtomicInteger folioCounter,
             AtomicInteger transactionsCounter) {
@@ -334,7 +334,7 @@ public class PortfolioService {
                 .map(UserFolioDetailsEntity::getFolio)
                 .toList();
 
-        folioDTOList.forEach(userFolioDTO -> {
+        userFolioDTOList.forEach(userFolioDTO -> {
             String folio = userFolioDTO.folio();
             if (!existingFolioNumbers.contains(folio)) {
                 LOGGER.info("New folio: {} created that is not present in the database", folio);
