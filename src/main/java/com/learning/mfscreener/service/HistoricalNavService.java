@@ -2,6 +2,7 @@ package com.learning.mfscreener.service;
 
 import static com.learning.mfscreener.utils.AppConstants.FORMATTER_DD_MMM_YYYY;
 
+import com.learning.mfscreener.config.logging.Loggable;
 import com.learning.mfscreener.entities.MFSchemeEntity;
 import com.learning.mfscreener.exception.NavNotFoundException;
 import com.learning.mfscreener.exception.SchemeNotFoundException;
@@ -27,6 +28,7 @@ import org.springframework.web.client.RestClient;
 import org.springframework.web.util.UriComponentsBuilder;
 
 @Service
+@Loggable
 public class HistoricalNavService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HistoricalNavService.class);

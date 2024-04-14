@@ -1,6 +1,7 @@
 package com.learning.mfscreener.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.learning.mfscreener.config.logging.Loggable;
 import com.learning.mfscreener.exception.NavNotFoundException;
 import com.learning.mfscreener.models.MFSchemeDTO;
 import com.learning.mfscreener.models.PortfolioDetailsDTO;
@@ -14,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 @Service
+@Loggable
 public class PortfolioServiceHelper {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PortfolioServiceHelper.class);

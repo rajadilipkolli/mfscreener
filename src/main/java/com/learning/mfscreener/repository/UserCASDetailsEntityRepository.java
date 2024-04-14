@@ -8,12 +8,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
 @Repository
 public interface UserCASDetailsEntityRepository extends JpaRepository<UserCASDetailsEntity, Long> {
 
-    @Transactional(readOnly = true)
     @Query(
             nativeQuery = true,
             value =
@@ -61,7 +59,6 @@ public interface UserCASDetailsEntityRepository extends JpaRepository<UserCASDet
     List<PortfolioDetailsProjection> getPortfolioDetails(
             @Param("pan") String panNumber, @Param("asOfDate") LocalDate asOfDate);
 
-    @Transactional(readOnly = true)
     @Query(
             """
               select u from UserCASDetailsEntity u join fetch u.folioEntities join fetch u.investorInfoEntity as i

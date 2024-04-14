@@ -1,27 +1,32 @@
 package com.learning.mfscreener.utils;
 
-import static com.learning.mfscreener.service.XIRRCalculatorService.LOGGER;
-
 import com.learning.mfscreener.exception.XIRRCalculationException;
 import com.learning.mfscreener.models.projection.UserTransactionDetailsProjection;
 import java.util.List;
 import org.decampo.xirr.NewtonRaphson;
 import org.decampo.xirr.Transaction;
 import org.decampo.xirr.Xirr;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class XirrCalculatorHelper {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(XirrCalculatorHelper.class);
 
     private static final double TOLERANCE = 0.001; // tolerance for Newton's method
 
     // ensures that balance will never be null
-    public static Double getBalance(List<UserTransactionDetailsProjection> byUserSchemeDetailsEntityId) {
-        Double balance = byUserSchemeDetailsEntityId
-                .get(byUserSchemeDetailsEntityId.size() - 1)
+    public static Double getBalance(List<UserTransactionDetailsProjection> transactionDetailsProjectionList) {
+        if (transactionDetailsProjectionList.size() < 2) {
+            throw new IllegalArgumentException("Insufficient data to calculate balance.");
+        }
+        Double balance = transactionDetailsProjectionList
+                .get(transactionDetailsProjectionList.size() - 1)
                 .getBalance();
         if (balance == null) {
             LOGGER.debug("Balance units Not found hence, attempting for 2nd last row");
-            balance = byUserSchemeDetailsEntityId
-                    .get(byUserSchemeDetailsEntityId.size() - 2)
+            balance = transactionDetailsProjectionList
+                    .get(transactionDetailsProjectionList.size() - 2)
                     .getBalance();
         }
         return balance;

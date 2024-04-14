@@ -1,5 +1,6 @@
 package com.learning.mfscreener.service;
 
+import com.learning.mfscreener.config.logging.Loggable;
 import com.learning.mfscreener.entities.UserCASDetailsEntity;
 import com.learning.mfscreener.models.projection.PortfolioDetailsProjection;
 import com.learning.mfscreener.repository.UserCASDetailsEntityRepository;
@@ -8,6 +9,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Loggable
 @Service
 @Transactional(readOnly = true)
 public class UserCASDetailsService {

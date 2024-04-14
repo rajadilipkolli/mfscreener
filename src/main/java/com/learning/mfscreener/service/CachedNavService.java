@@ -10,6 +10,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 @Service
+@Loggable
 public class CachedNavService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CachedNavService.class);

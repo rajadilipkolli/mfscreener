@@ -29,6 +29,7 @@ import org.springframework.web.client.RestClient;
 import org.springframework.web.util.UriComponentsBuilder;
 
 @Service
+@Loggable
 public class SchemeService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SchemeService.class);

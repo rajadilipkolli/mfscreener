@@ -20,7 +20,7 @@ import org.springframework.stereotype.Service;
 @Loggable
 public class XIRRCalculatorService {
 
-    public static final Logger LOGGER = LoggerFactory.getLogger(XIRRCalculatorService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(XIRRCalculatorService.class);
 
     private final UserFolioDetailsService userFolioDetailsService;
     private final UserTransactionDetailsService userTransactionDetailsService;

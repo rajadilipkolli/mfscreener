@@ -5,6 +5,7 @@ import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
 
 import com.learning.mfscreener.adapter.ConversionServiceAdapter;
+import com.learning.mfscreener.config.logging.Loggable;
 import com.learning.mfscreener.entities.UserCASDetailsEntity;
 import com.learning.mfscreener.entities.UserFolioDetailsEntity;
 import com.learning.mfscreener.entities.UserSchemeDetailsEntity;
@@ -32,6 +33,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 @Service
+@Loggable
 public class PortfolioService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PortfolioService.class);
@@ -132,11 +134,48 @@ public class PortfolioService {
             return null;
         }
 
+        return processFoliosAndTransactions(
+                email,
+                name,
+                casDTO,
+                userCASDetailsEntity,
+                userTransactionDTOListCount,
+                userTransactionDetailsEntityList);
+    }
+
+    UploadResponseHolder processFoliosAndTransactions(
+            String email,
+            String name,
+            CasDTO casDTO,
+            UserCASDetailsEntity userCASDetailsEntity,
+            long userTransactionDTOListCount,
+            List<UserTransactionDetailsEntity> userTransactionDetailsEntityList) {
         AtomicInteger folioCounter = new AtomicInteger();
         AtomicInteger transactionsCounter = new AtomicInteger();
 
-        processNewFolios(folioDTOList, userCASDetailsEntity, folioCounter, transactionsCounter);
+        processNewFolios(casDTO.folios(), userCASDetailsEntity, folioCounter, transactionsCounter);
+        updateSchemesAndTransactions(
+                email,
+                name,
+                casDTO,
+                userCASDetailsEntity,
+                userTransactionDTOListCount,
+                userTransactionDetailsEntityList,
+                folioCounter,
+                transactionsCounter);
 
+        return new UploadResponseHolder(userCASDetailsEntity, folioCounter.get(), transactionsCounter.get());
+    }
+
+    void updateSchemesAndTransactions(
+            String email,
+            String name,
+            CasDTO casDTO,
+            UserCASDetailsEntity userCASDetailsEntity,
+            long userTransactionDTOListCount,
+            List<UserTransactionDetailsEntity> userTransactionDetailsEntityList,
+            AtomicInteger folioCounter,
+            AtomicInteger transactionsCounter) {
         // Check if all new transactions are added as part of adding folios
         if (userTransactionDTOListCount == (userTransactionDetailsEntityList.size() + transactionsCounter.get())) {
             LOGGER.info("All new transactions are added as part of adding folios, hence skipping");
@@ -144,6 +183,7 @@ public class PortfolioService {
             // New schemes or transactions are added
 
             // Grouping by folio for userFolioSchemaRequestMap
+            List<UserFolioDTO> folioDTOList = casDTO.folios();
             Map<String, List<UserSchemeDTO>> userFolioSchemaRequestMap = folioDTOList.stream()
                     .collect(groupingBy(UserFolioDTO::folio, flatMapping(folio -> folio.schemes().stream(), toList())));
 
@@ -249,7 +289,6 @@ public class PortfolioService {
                 });
             }
         }
-        return new UploadResponseHolder(userCASDetailsEntity, folioCounter.get(), transactionsCounter.get());
     }
 
     void processNewFolios(
