@@ -1,0 +1,79 @@
+package com.learning.mfscreener.service;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.learning.mfscreener.exception.NavNotFoundException;
+import com.learning.mfscreener.models.MFSchemeDTO;
+import com.learning.mfscreener.models.PortfolioDetailsDTO;
+import com.learning.mfscreener.models.portfolio.UserFolioDTO;
+import com.learning.mfscreener.repository.UserCASDetailsEntityRepository;
+import java.io.IOException;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
+@Service
+public class PortfolioServiceHelper {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(PortfolioServiceHelper.class);
+
+    private final ObjectMapper objectMapper;
+    private final UserCASDetailsEntityRepository casDetailsEntityRepository;
+    private final NavService navService;
+    private final XIRRCalculatorService xIRRCalculatorService;
+
+    public PortfolioServiceHelper(
+            ObjectMapper objectMapper,
+            UserCASDetailsEntityRepository casDetailsEntityRepository,
+            NavService navService,
+            XIRRCalculatorService xIRRCalculatorService) {
+        this.objectMapper = objectMapper;
+        this.casDetailsEntityRepository = casDetailsEntityRepository;
+        this.navService = navService;
+        this.xIRRCalculatorService = xIRRCalculatorService;
+    }
+
+    public <T> T readValue(byte[] bytes, Class<T> tClass) throws IOException {
+        return this.objectMapper.readValue(bytes, tClass);
+    }
+
+    public <T> List<T> joinFutures(List<CompletableFuture<T>> futures) {
+        return futures.stream().map(CompletableFuture::join).toList();
+    }
+
+    public List<PortfolioDetailsDTO> getPortfolioDetailsByPANAndAsOfDate(String panNumber, LocalDate asOfDate) {
+        return joinFutures(casDetailsEntityRepository.getPortfolioDetails(panNumber, asOfDate).stream()
+                .map(portfolioDetails -> CompletableFuture.supplyAsync(() -> {
+                    MFSchemeDTO scheme;
+                    try {
+                        scheme = navService.getNavByDateWithRetry(portfolioDetails.getSchemeId(), asOfDate);
+                    } catch (NavNotFoundException navNotFoundException) {
+                        // Will happen in case of NFO where units are allocated but not ready for subscription
+                        LOGGER.error(
+                                "NavNotFoundException occurred for scheme : {} on adjusted date :{}",
+                                portfolioDetails.getSchemeId(),
+                                asOfDate,
+                                navNotFoundException);
+                        scheme = new MFSchemeDTO(null, null, null, null, "10", asOfDate.toString(), null);
+                    }
+                    double totalValue = portfolioDetails.getBalanceUnits() * Double.parseDouble(scheme.nav());
+                    return new PortfolioDetailsDTO(
+                            Math.round(totalValue * 100.0) / 100.0,
+                            portfolioDetails.getSchemeName(),
+                            portfolioDetails.getFolioNumber(),
+                            scheme.date(),
+                            xIRRCalculatorService.calculateXIRRBySchemeId(
+                                    portfolioDetails.getSchemeId(), portfolioDetails.getSchemeDetailId(), asOfDate));
+                }))
+                .toList());
+    }
+
+    public long countTransactionsByUserFolioDTOList(List<UserFolioDTO> folioDTOList) {
+        return folioDTOList.stream()
+                .flatMap(userFolioDTO -> userFolioDTO.schemes().stream())
+                .mapToLong(userSchemeDTO -> userSchemeDTO.transactions().size())
+                .sum();
+    }
+}
