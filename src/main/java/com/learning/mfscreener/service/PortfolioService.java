@@ -161,7 +161,6 @@ public class PortfolioService {
                 userCASDetailsEntity,
                 userTransactionDTOListCount,
                 userTransactionDetailsEntityList,
-                folioCounter,
                 transactionsCounter);
 
         return new UploadResponseHolder(userCASDetailsEntity, folioCounter.get(), transactionsCounter.get());
@@ -174,7 +173,6 @@ public class PortfolioService {
             UserCASDetailsEntity userCASDetailsEntity,
             long userTransactionDTOListCount,
             List<UserTransactionDetailsEntity> userTransactionDetailsEntityList,
-            AtomicInteger folioCounter,
             AtomicInteger transactionsCounter) {
         // Check if all new transactions are added as part of adding folios
         if (userTransactionDTOListCount == (userTransactionDetailsEntityList.size() + transactionsCounter.get())) {
@@ -183,52 +181,20 @@ public class PortfolioService {
             // New schemes or transactions are added
 
             // Grouping by folio for userFolioSchemaRequestMap
-            List<UserFolioDTO> folioDTOList = casDTO.folios();
-            Map<String, List<UserSchemeDTO>> userFolioSchemaRequestMap = folioDTOList.stream()
-                    .collect(groupingBy(UserFolioDTO::folio, flatMapping(folio -> folio.schemes().stream(), toList())));
+            Map<String, List<UserSchemeDTO>> userFolioSchemaRequestMap = groupSchemesByFolio(casDTO.folios());
 
             // Grouping by folio for existingUserFolioSchemaRequestMap
             List<UserFolioDetailsEntity> existingUserFolioDetailsEntityList =
                     userFolioDetailsService.findByUserEmailAndName(email, name);
             Map<String, List<UserSchemeDetailsEntity>> existingUserFolioSchemaRequestMap =
-                    existingUserFolioDetailsEntityList.stream()
-                            .collect(groupingBy(
-                                    UserFolioDetailsEntity::getFolio,
-                                    flatMapping(
-                                            userFolioDetailsEntity ->
-                                                    userFolioDetailsEntity.getSchemeEntities().stream(),
-                                            toList())));
+                    groupExistingSchemesByEmailAndName(existingUserFolioDetailsEntityList);
 
             // Update schemes in existing folios
-            userFolioSchemaRequestMap.forEach((folioFromRequest, requestSchemes) -> {
-                List<UserSchemeDetailsEntity> existingSchemesFromDB =
-                        existingUserFolioSchemaRequestMap.getOrDefault(folioFromRequest, new ArrayList<>());
-                if (requestSchemes.size() != existingSchemesFromDB.size()) {
-                    // New schemes added to folio
-                    List<String> isInListDB = existingSchemesFromDB.stream()
-                            .map(UserSchemeDetailsEntity::getIsin)
-                            .toList();
-                    requestSchemes.forEach(userSchemeDTO -> {
-                        if (!isInListDB.contains(userSchemeDTO.isin())) {
-                            LOGGER.info(
-                                    "New ISIN: {} created for folio :{} that is not present in the database",
-                                    userSchemeDTO.isin(),
-                                    folioFromRequest);
-                            UserSchemeDetailsEntity userSchemeDetailsEntity =
-                                    casDetailsMapper.schemeDTOToSchemeEntity(userSchemeDTO);
-
-                            existingUserFolioDetailsEntityList.forEach(userFolioDetailsEntity -> {
-                                if (folioFromRequest.equals(userFolioDetailsEntity.getFolio())) {
-                                    userFolioDetailsEntity.addSchemeEntity(userSchemeDetailsEntity);
-                                    int newTransactions =
-                                            userSchemeDTO.transactions().size();
-                                    transactionsCounter.addAndGet(newTransactions);
-                                }
-                            });
-                        }
-                    });
-                }
-            });
+            updateExistingFoliosWithNewSchemes(
+                    userFolioSchemaRequestMap,
+                    existingUserFolioSchemaRequestMap,
+                    existingUserFolioDetailsEntityList,
+                    transactionsCounter);
             userCASDetailsEntity.setFolioEntities(existingUserFolioDetailsEntityList);
 
             // Check if all new transactions are added as part of adding schemes
@@ -238,57 +204,129 @@ public class PortfolioService {
                 // New transactions are added
 
                 // Grouping by ISIN for userSchemaTransactionMap
-                Map<String, List<UserTransactionDTO>> userSchemaTransactionMap = folioDTOList.stream()
-                        .flatMap(userFolioDTO -> userFolioDTO.schemes().stream())
-                        .collect(groupingBy(
-                                UserSchemeDTO::isin,
-                                flatMapping(schemeDTO -> schemeDTO.transactions().stream(), toList())));
+                Map<String, List<UserTransactionDTO>> userSchemaTransactionMap =
+                        groupTransactionBySchemes(casDTO.folios());
 
                 List<UserSchemeDetailsEntity> existingUserSchemeDetailsList =
                         userSchemeDetailsService.getSchemesByEmailAndName(email, name);
 
                 // Grouping by ISIN for userSchemaTransactionMapFromDB
                 Map<String, List<UserTransactionDetailsEntity>> userSchemaTransactionMapFromDB =
-                        existingUserSchemeDetailsList.stream()
-                                .collect(groupingBy(
-                                        UserSchemeDetailsEntity::getIsin,
-                                        flatMapping(
-                                                userSchemeDetailsEntity ->
-                                                        userSchemeDetailsEntity.getTransactionEntities().stream(),
-                                                toList())));
+                        groupExistingTransactionsByIsin(existingUserSchemeDetailsList);
 
                 // Update transactions in existing schemes
-                userSchemaTransactionMap.forEach((isinFromRequest, requestTransactions) -> {
-                    List<UserTransactionDetailsEntity> dbTransactions =
-                            userSchemaTransactionMapFromDB.getOrDefault(isinFromRequest, List.of());
-                    if (requestTransactions.size() != dbTransactions.size()) {
-                        // New transactions added to scheme
-                        List<LocalDate> transactionDateListDB = dbTransactions.stream()
-                                .map(UserTransactionDetailsEntity::getTransactionDate)
-                                .toList();
-                        requestTransactions.forEach(userTransactionDTO -> {
-                            LocalDate newTransactionDate = userTransactionDTO.date();
-                            if (!transactionDateListDB.contains(newTransactionDate)) {
-                                LOGGER.info(
-                                        "New transaction on date: {} created for isin {} that is not present in the database",
-                                        newTransactionDate,
-                                        isinFromRequest);
-                                UserTransactionDetailsEntity userTransactionDetailsEntity =
-                                        casDetailsMapper.transactionDTOToTransactionEntity(userTransactionDTO);
-                                existingUserSchemeDetailsList.forEach(userSchemeDetailsEntity -> {
-                                    if (isinFromRequest.equals(userSchemeDetailsEntity.getIsin())) {
-                                        userSchemeDetailsEntity.addTransactionEntity(userTransactionDetailsEntity);
-                                        // TODO convert to bulkInsert
-                                        userSchemeDetailsService.saveUserScheme(userSchemeDetailsEntity);
-                                        transactionsCounter.incrementAndGet();
-                                    }
-                                });
+                processNewTransactions(
+                        transactionsCounter,
+                        userSchemaTransactionMap,
+                        userSchemaTransactionMapFromDB,
+                        existingUserSchemeDetailsList);
+            }
+        }
+    }
+
+    void processNewTransactions(
+            AtomicInteger transactionsCounter,
+            Map<String, List<UserTransactionDTO>> userSchemaTransactionMap,
+            Map<String, List<UserTransactionDetailsEntity>> userSchemaTransactionMapFromDB,
+            List<UserSchemeDetailsEntity> existingUserSchemeDetailsList) {
+        userSchemaTransactionMap.forEach((isinFromRequest, requestTransactions) -> {
+            List<UserTransactionDetailsEntity> dbTransactions =
+                    userSchemaTransactionMapFromDB.getOrDefault(isinFromRequest, List.of());
+            if (requestTransactions.size() != dbTransactions.size()) {
+                // New transactions added to scheme
+                List<LocalDate> transactionDateListDB = dbTransactions.stream()
+                        .map(UserTransactionDetailsEntity::getTransactionDate)
+                        .toList();
+                requestTransactions.forEach(userTransactionDTO -> {
+                    LocalDate newTransactionDate = userTransactionDTO.date();
+                    if (!transactionDateListDB.contains(newTransactionDate)) {
+                        LOGGER.info(
+                                "New transaction on date: {} created for isin {} that is not present in the database",
+                                newTransactionDate,
+                                isinFromRequest);
+                        UserTransactionDetailsEntity userTransactionDetailsEntity =
+                                casDetailsMapper.transactionDTOToTransactionEntity(userTransactionDTO);
+                        existingUserSchemeDetailsList.forEach(userSchemeDetailsEntity -> {
+                            if (isinFromRequest.equals(userSchemeDetailsEntity.getIsin())) {
+                                userSchemeDetailsEntity.addTransactionEntity(userTransactionDetailsEntity);
+                                // TODO convert to bulkInsert
+                                userSchemeDetailsService.saveUserScheme(userSchemeDetailsEntity);
+                                transactionsCounter.incrementAndGet();
                             }
                         });
                     }
                 });
             }
-        }
+        });
+    }
+
+    Map<String, List<UserTransactionDetailsEntity>> groupExistingTransactionsByIsin(
+            List<UserSchemeDetailsEntity> existingUserSchemeDetailsList) {
+        return existingUserSchemeDetailsList.stream()
+                .collect(groupingBy(
+                        UserSchemeDetailsEntity::getIsin,
+                        flatMapping(
+                                userSchemeDetailsEntity -> userSchemeDetailsEntity.getTransactionEntities().stream(),
+                                toList())));
+    }
+
+    Map<String, List<UserTransactionDTO>> groupTransactionBySchemes(List<UserFolioDTO> userFolioDTOList) {
+        return userFolioDTOList.stream()
+                .flatMap(userFolioDTO -> userFolioDTO.schemes().stream())
+                .collect(groupingBy(
+                        UserSchemeDTO::isin, flatMapping(schemeDTO -> schemeDTO.transactions().stream(), toList())));
+    }
+
+    void updateExistingFoliosWithNewSchemes(
+            Map<String, List<UserSchemeDTO>> userFolioSchemaRequestMap,
+            Map<String, List<UserSchemeDetailsEntity>> existingUserFolioSchemaRequestMap,
+            List<UserFolioDetailsEntity> existingUserFolioDetailsEntityList,
+            AtomicInteger transactionsCounter) {
+        userFolioSchemaRequestMap.forEach((folioFromRequest, requestSchemes) -> {
+            List<UserSchemeDetailsEntity> existingSchemesFromDB =
+                    existingUserFolioSchemaRequestMap.getOrDefault(folioFromRequest, new ArrayList<>());
+            if (requestSchemes.size() != existingSchemesFromDB.size()) {
+                // New schemes added to folio
+                List<String> isInListDB = existingSchemesFromDB.stream()
+                        .map(UserSchemeDetailsEntity::getIsin)
+                        .toList();
+                requestSchemes.forEach(userSchemeDTO -> {
+                    if (!isInListDB.contains(userSchemeDTO.isin())) {
+                        LOGGER.info(
+                                "New ISIN: {} created for folio :{} that is not present in the database",
+                                userSchemeDTO.isin(),
+                                folioFromRequest);
+                        UserSchemeDetailsEntity userSchemeDetailsEntity =
+                                casDetailsMapper.schemeDTOToSchemeEntity(userSchemeDTO);
+
+                        existingUserFolioDetailsEntityList.forEach(userFolioDetailsEntity -> {
+                            if (folioFromRequest.equals(userFolioDetailsEntity.getFolio())) {
+                                userFolioDetailsEntity.addSchemeEntity(userSchemeDetailsEntity);
+                                int newTransactions =
+                                        userSchemeDTO.transactions().size();
+                                transactionsCounter.addAndGet(newTransactions);
+                            }
+                        });
+                    }
+                });
+            }
+        });
+    }
+
+    Map<String, List<UserSchemeDetailsEntity>> groupExistingSchemesByEmailAndName(
+            List<UserFolioDetailsEntity> existingUserFolioDetailsEntityList) {
+
+        return existingUserFolioDetailsEntityList.stream()
+                .collect(groupingBy(
+                        UserFolioDetailsEntity::getFolio,
+                        flatMapping(
+                                userFolioDetailsEntity -> userFolioDetailsEntity.getSchemeEntities().stream(),
+                                toList())));
+    }
+
+    Map<String, List<UserSchemeDTO>> groupSchemesByFolio(List<UserFolioDTO> folioDTOList) {
+        return folioDTOList.stream()
+                .collect(groupingBy(UserFolioDTO::folio, flatMapping(folio -> folio.schemes().stream(), toList())));
     }
 
     void processNewFolios(
