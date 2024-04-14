@@ -69,78 +69,73 @@ public class PortfolioService {
         this.portfolioServiceHelper = portfolioServiceHelper;
     }
 
-    public String upload(MultipartFile multipartFile) throws IOException {
-        CasDTO casDTO = parseCasDTO(multipartFile);
+    public String upload(MultipartFile portfolioFile) throws IOException {
+        CasDTO casDTO = parseCasDTO(portfolioFile);
         return processCasDTO(casDTO);
     }
 
-    public PortfolioResponse getPortfolioByPAN(String panNumber, LocalDate asOfDate) {
+    public PortfolioResponse getPortfolioByPAN(String panNumber, LocalDate evaluationDate) {
         List<PortfolioDetailsDTO> portfolioDetailsDTOList = portfolioServiceHelper.getPortfolioDetailsByPANAndAsOfDate(
-                panNumber, LocalDateUtility.getAdjustedDateOrDefault(asOfDate));
+                panNumber, LocalDateUtility.getAdjustedDateOrDefault(evaluationDate));
         Double totalPortfolioValue = portfolioDetailsDTOList.stream()
                 .map(PortfolioDetailsDTO::totalValue)
                 .reduce((double) 0, Double::sum);
         return new PortfolioResponse(Math.round(totalPortfolioValue * 100.0) / 100.0, portfolioDetailsDTOList);
     }
 
-    CasDTO parseCasDTO(MultipartFile multipartFile) throws IOException {
-        return portfolioServiceHelper.readValue(multipartFile.getBytes(), CasDTO.class);
+    CasDTO parseCasDTO(MultipartFile casFile) throws IOException {
+        return portfolioServiceHelper.readValue(casFile.getBytes(), CasDTO.class);
     }
 
     String processCasDTO(CasDTO casDTO) {
         String email = casDTO.investorInfo().email();
         String name = casDTO.investorInfo().name();
-        UserCASDetailsEntity casDetailsEntity = null;
-        int folios = 0;
-        long transactions = 0;
+        UserCASDetailsEntity userCASDetailsEntity = null;
+        int folioCount = 0;
+        long transactionCount = 0;
         if (this.investorInfoEntityRepository.existsByEmailAndName(email, name)) {
             var holder = findDelta(email, name, casDTO);
             if (holder != null) {
-                casDetailsEntity = holder.userCASDetailsEntity();
-                folios = holder.folioCount();
-                transactions = holder.transactionsCount();
+                userCASDetailsEntity = holder.userCASDetailsEntity();
+                folioCount = holder.folioCount();
+                transactionCount = holder.transactionsCount();
             }
         } else {
-            casDetailsEntity = this.conversionServiceAdapter.mapCasDTOToUserCASDetailsEntity(casDTO);
-            folios = casDetailsEntity.getFolioEntities().size();
-            transactions = casDetailsEntity.getFolioEntities().stream()
+            userCASDetailsEntity = this.conversionServiceAdapter.mapCasDTOToUserCASDetailsEntity(casDTO);
+            folioCount = userCASDetailsEntity.getFolioEntities().size();
+            transactionCount = userCASDetailsEntity.getFolioEntities().stream()
                     .flatMap(f -> f.getSchemeEntities().stream())
                     .mapToLong(s -> s.getTransactionEntities().size())
                     .sum();
         }
-        return finalizeUpload(casDetailsEntity, folios, transactions);
+        return finalizeUpload(userCASDetailsEntity, folioCount, transactionCount);
     }
 
-    String finalizeUpload(UserCASDetailsEntity casDetailsEntity, int folios, long transactions) {
-        if (casDetailsEntity != null) {
-            UserCASDetailsEntity savedCasDetailsEntity = this.userCASDetailsService.saveEntity(casDetailsEntity);
+    String finalizeUpload(UserCASDetailsEntity userCASDetailsEntity, int folioCount, long transactionCount) {
+        if (userCASDetailsEntity != null) {
+            UserCASDetailsEntity savedCasDetailsEntity = this.userCASDetailsService.saveEntity(userCASDetailsEntity);
             CompletableFuture.runAsync(() -> schemeService.setPANIfNotSet(savedCasDetailsEntity.getId()));
             CompletableFuture.runAsync(userSchemeDetailsService::setAMFIIfNull);
-            return "Imported %d folios and %d transactions".formatted(folios, transactions);
+            return "Imported %d folios and %d transactions".formatted(folioCount, transactionCount);
         } else {
             return "Nothing to Update";
         }
     }
 
     UploadResponseHolder findDelta(String email, String name, CasDTO casDTO) {
-        List<UserFolioDTO> folioDTOList = casDTO.folios();
-        long userTransactionDTOListCount = portfolioServiceHelper.countTransactionsByUserFolioDTOList(folioDTOList);
+        List<UserFolioDTO> inputUserFolioDTOList = casDTO.folios();
+        long userTransactionCount = portfolioServiceHelper.countTransactionsByUserFolioDTOList(inputUserFolioDTOList);
         List<UserTransactionDetailsEntity> userTransactionDetailsEntityList =
                 this.userTransactionDetailsService.findAllTransactionsByEmailAndName(email, name);
         UserCASDetailsEntity userCASDetailsEntity = userCASDetailsService.findByInvestorEmailAndName(email, name);
 
-        if (userTransactionDTOListCount == userTransactionDetailsEntityList.size()) {
+        if (userTransactionCount == userTransactionDetailsEntityList.size()) {
             LOGGER.info("No new transactions are added");
             return null;
         }
 
         return processFoliosAndTransactions(
-                email,
-                name,
-                casDTO,
-                userCASDetailsEntity,
-                userTransactionDTOListCount,
-                userTransactionDetailsEntityList);
+                email, name, casDTO, userCASDetailsEntity, userTransactionCount, userTransactionDetailsEntityList);
     }
 
     UploadResponseHolder processFoliosAndTransactions(
@@ -180,19 +175,19 @@ public class PortfolioService {
         } else {
             // New schemes or transactions are added
 
-            // Grouping by folio for userFolioSchemaRequestMap
-            Map<String, List<UserSchemeDTO>> userFolioSchemaRequestMap = groupSchemesByFolio(casDTO.folios());
+            // Grouping by folio for requestedFolioSchemesMap
+            Map<String, List<UserSchemeDTO>> requestedFolioSchemesMap = groupSchemesByFolio(casDTO.folios());
 
-            // Grouping by folio for existingUserFolioSchemaRequestMap
+            // Grouping by folio for existingFolioSchemesMap
             List<UserFolioDetailsEntity> existingUserFolioDetailsEntityList =
                     userFolioDetailsService.findByUserEmailAndName(email, name);
-            Map<String, List<UserSchemeDetailsEntity>> existingUserFolioSchemaRequestMap =
+            Map<String, List<UserSchemeDetailsEntity>> existingFolioSchemesMap =
                     groupExistingSchemesByEmailAndName(existingUserFolioDetailsEntityList);
 
             // Update schemes in existing folios
             updateExistingFoliosWithNewSchemes(
-                    userFolioSchemaRequestMap,
-                    existingUserFolioSchemaRequestMap,
+                    requestedFolioSchemesMap,
+                    existingFolioSchemesMap,
                     existingUserFolioDetailsEntityList,
                     transactionsCounter);
             userCASDetailsEntity.setFolioEntities(existingUserFolioDetailsEntityList);
@@ -278,13 +273,13 @@ public class PortfolioService {
     }
 
     void updateExistingFoliosWithNewSchemes(
-            Map<String, List<UserSchemeDTO>> userFolioSchemaRequestMap,
-            Map<String, List<UserSchemeDetailsEntity>> existingUserFolioSchemaRequestMap,
+            Map<String, List<UserSchemeDTO>> requestedFolioSchemesMap,
+            Map<String, List<UserSchemeDetailsEntity>> existingFolioSchemesMap,
             List<UserFolioDetailsEntity> existingUserFolioDetailsEntityList,
             AtomicInteger transactionsCounter) {
-        userFolioSchemaRequestMap.forEach((folioFromRequest, requestSchemes) -> {
+        requestedFolioSchemesMap.forEach((folioFromRequest, requestSchemes) -> {
             List<UserSchemeDetailsEntity> existingSchemesFromDB =
-                    existingUserFolioSchemaRequestMap.getOrDefault(folioFromRequest, new ArrayList<>());
+                    existingFolioSchemesMap.getOrDefault(folioFromRequest, new ArrayList<>());
             if (requestSchemes.size() != existingSchemesFromDB.size()) {
                 // New schemes added to folio
                 List<String> isInListDB = existingSchemesFromDB.stream()
@@ -335,13 +330,13 @@ public class PortfolioService {
             AtomicInteger folioCounter,
             AtomicInteger transactionsCounter) {
         // Logic to process new folios
-        List<String> existingFolios = userCASDetailsEntity.getFolioEntities().stream()
+        List<String> existingFolioNumbers = userCASDetailsEntity.getFolioEntities().stream()
                 .map(UserFolioDetailsEntity::getFolio)
                 .toList();
 
         folioDTOList.forEach(userFolioDTO -> {
             String folio = userFolioDTO.folio();
-            if (!existingFolios.contains(folio)) {
+            if (!existingFolioNumbers.contains(folio)) {
                 LOGGER.info("New folio: {} created that is not present in the database", folio);
                 userCASDetailsEntity.addFolioEntity(
                         casDetailsMapper.mapUserFolioDTOToUserFolioDetailsEntity(userFolioDTO));
