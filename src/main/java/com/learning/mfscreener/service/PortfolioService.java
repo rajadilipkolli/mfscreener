@@ -68,8 +68,24 @@ public class PortfolioService {
     }
 
     public String upload(MultipartFile multipartFile) throws IOException {
-        CasDTO casDTO = portfolioServiceHelper.readValue(multipartFile.getBytes(), CasDTO.class);
-        // check if user and email exits
+        CasDTO casDTO = parseCasDTO(multipartFile);
+        return processCasDTO(casDTO);
+    }
+
+    public PortfolioResponse getPortfolioByPAN(String panNumber, LocalDate asOfDate) {
+        List<PortfolioDetailsDTO> portfolioDetailsDTOList = portfolioServiceHelper.getPortfolioDetailsByPANAndAsOfDate(
+                panNumber, LocalDateUtility.getAdjustedDateOrDefault(asOfDate));
+        Double totalPortfolioValue = portfolioDetailsDTOList.stream()
+                .map(PortfolioDetailsDTO::totalValue)
+                .reduce((double) 0, Double::sum);
+        return new PortfolioResponse(Math.round(totalPortfolioValue * 100.0) / 100.0, portfolioDetailsDTOList);
+    }
+
+    CasDTO parseCasDTO(MultipartFile multipartFile) throws IOException {
+        return portfolioServiceHelper.readValue(multipartFile.getBytes(), CasDTO.class);
+    }
+
+    String processCasDTO(CasDTO casDTO) {
         String email = casDTO.investorInfo().email();
         String name = casDTO.investorInfo().name();
         UserCASDetailsEntity casDetailsEntity = null;
@@ -84,15 +100,16 @@ public class PortfolioService {
             }
         } else {
             casDetailsEntity = this.conversionServiceAdapter.mapCasDTOToUserCASDetailsEntity(casDTO);
-            List<UserFolioDetailsEntity> folioEntities = casDetailsEntity.getFolioEntities();
-            transactions = folioEntities.stream()
-                    .flatMap(userFolioDTO -> userFolioDTO.getSchemeEntities().stream())
-                    .mapToLong(userSchemeDTO ->
-                            userSchemeDTO.getTransactionEntities().size())
+            folios = casDetailsEntity.getFolioEntities().size();
+            transactions = casDetailsEntity.getFolioEntities().stream()
+                    .flatMap(f -> f.getSchemeEntities().stream())
+                    .mapToLong(s -> s.getTransactionEntities().size())
                     .sum();
-
-            folios = folioEntities.size();
         }
+        return finalizeUpload(casDetailsEntity, folios, transactions);
+    }
+
+    String finalizeUpload(UserCASDetailsEntity casDetailsEntity, int folios, long transactions) {
         if (casDetailsEntity != null) {
             UserCASDetailsEntity savedCasDetailsEntity = this.userCASDetailsService.saveEntity(casDetailsEntity);
             CompletableFuture.runAsync(() -> schemeService.setPANIfNotSet(savedCasDetailsEntity.getId()));
@@ -101,15 +118,6 @@ public class PortfolioService {
         } else {
             return "Nothing to Update";
         }
-    }
-
-    public PortfolioResponse getPortfolioByPAN(String panNumber, LocalDate asOfDate) {
-        List<PortfolioDetailsDTO> portfolioDetailsDTOList = portfolioServiceHelper.getPortfolioDetailsByPANAndAsOfDate(
-                panNumber, LocalDateUtility.adjustDate(asOfDate));
-        Double totalPortfolioValue = portfolioDetailsDTOList.stream()
-                .map(PortfolioDetailsDTO::totalValue)
-                .reduce((double) 0, Double::sum);
-        return new PortfolioResponse(Math.round(totalPortfolioValue * 100.0) / 100.0, portfolioDetailsDTOList);
     }
 
     UploadResponseHolder findDelta(String email, String name, CasDTO casDTO) {

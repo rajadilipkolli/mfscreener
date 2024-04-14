@@ -1,19 +1,17 @@
 package com.learning.mfscreener.service;
 
 import com.learning.mfscreener.config.logging.Loggable;
-import com.learning.mfscreener.exception.XIRRCalculationException;
 import com.learning.mfscreener.models.MFSchemeDTO;
 import com.learning.mfscreener.models.projection.UserFolioDetailsProjection;
 import com.learning.mfscreener.models.projection.UserTransactionDetailsProjection;
 import com.learning.mfscreener.models.response.XIRRResponse;
 import com.learning.mfscreener.utils.LocalDateUtility;
+import com.learning.mfscreener.utils.XirrCalculatorHelper;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import org.decampo.xirr.NewtonRaphson;
 import org.decampo.xirr.Transaction;
-import org.decampo.xirr.Xirr;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -22,8 +20,7 @@ import org.springframework.stereotype.Service;
 @Loggable
 public class XIRRCalculatorService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(XIRRCalculatorService.class);
-    private static final double TOLERANCE = 0.001; // tolerance for Newton's method
+    public static final Logger LOGGER = LoggerFactory.getLogger(XIRRCalculatorService.class);
 
     private final UserFolioDetailsService userFolioDetailsService;
     private final UserTransactionDetailsService userTransactionDetailsService;
@@ -40,7 +37,9 @@ public class XIRRCalculatorService {
 
     // method to calculate the total XIRR for a given PAN number
     public List<XIRRResponse> calculateTotalXIRRByPan(String pan, LocalDate asOfDate) {
-        return calculateXIRRForAllFundsByPAN(pan, LocalDateUtility.adjustDate(asOfDate));
+        LocalDate effectiveDate = LocalDateUtility.getAdjustedDateOrDefault(asOfDate);
+        LOGGER.debug("Effective date used for calculation: {}", effectiveDate);
+        return calculateXIRRForAllFundsByPAN(pan, effectiveDate);
     }
 
     // method to calculate XIRR for all funds
@@ -75,11 +74,12 @@ public class XIRRCalculatorService {
     }
 
     double computeXIRR(List<UserTransactionDetailsProjection> transactions, Long fundId, LocalDate asOfDate) {
+        LOGGER.debug("Starting XIRR calculation for fundId : {} with as of Date : {}", fundId, asOfDate);
         double xirrValue = 0.0d;
         if (!transactions.isEmpty()) {
-            double currentBalance = getBalance(transactions);
+            double currentBalance = XirrCalculatorHelper.getBalance(transactions);
             List<Transaction> transactionList = buildTransactionList(transactions, currentBalance, fundId, asOfDate);
-            xirrValue = calculateXirrValue(transactionList, fundId);
+            xirrValue = XirrCalculatorHelper.calculateXirrValue(transactionList, fundId);
         }
         return xirrValue;
     }
@@ -102,40 +102,6 @@ public class XIRRCalculatorService {
             transactionList.add(new Transaction(getCurrentValuation(fundId, currentBalance, asOfDate), asOfDate));
         }
         return transactionList;
-    }
-
-    double calculateXirrValue(List<Transaction> transactionList, Long fundId) {
-        double xirrValue = -0.00001; // Default value if unable to calculate
-        if (transactionList.size() > 1) {
-            try {
-                xirrValue = Xirr.builder()
-                        .withTransactions(transactionList)
-                        .withGuess(0.01)
-                        .withNewtonRaphsonBuilder(NewtonRaphson.builder()
-                                .withFunction(x -> x)
-                                .withIterations(1000)
-                                .withTolerance(TOLERANCE))
-                        .xirr();
-            } catch (IllegalArgumentException e) {
-                LOGGER.error("Unable to calculate XIRR for fundId :{}", fundId, e);
-                throw new XIRRCalculationException("Unable to calculate XIRR for fundId " + fundId);
-            }
-        }
-        return xirrValue;
-    }
-
-    // ensures that balance will never be null
-    Double getBalance(List<UserTransactionDetailsProjection> byUserSchemeDetailsEntityId) {
-        Double balance = byUserSchemeDetailsEntityId
-                .get(byUserSchemeDetailsEntityId.size() - 1)
-                .getBalance();
-        if (balance == null) {
-            LOGGER.debug("Balance units Not found hence, attempting for 2nd last row");
-            balance = byUserSchemeDetailsEntityId
-                    .get(byUserSchemeDetailsEntityId.size() - 2)
-                    .getBalance();
-        }
-        return balance;
     }
 
     double getCurrentValuation(Long fundId, Double balance, LocalDate asOfDate) {
