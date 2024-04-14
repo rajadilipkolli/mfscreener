@@ -78,7 +78,8 @@ public class HistoricalNavService {
             Long schemeCode,
             LocalDate navDate) {
         try {
-            Reader inputString = fetchHistoricalNavByCallingUri(historicalNavUri);
+            String allNAVsByDate = fetchHistoricalNavByCallingUri(historicalNavUri);
+            Reader inputString = new StringReader(Objects.requireNonNull(allNAVsByDate));
             return parseNavData(inputString, payOut, persistSchemeInfo, schemeNameAndISIN, schemeCode, navDate);
         } catch (ResourceAccessException exception) {
             // eating as we can't do much, and it should be set when available
@@ -162,9 +163,8 @@ public class HistoricalNavService {
         return oldSchemeId;
     }
 
-    StringReader fetchHistoricalNavByCallingUri(URI historicalNavUri) {
-        String allNAVsByDate = restClient.get().uri(historicalNavUri).retrieve().body(String.class);
-        return new StringReader(Objects.requireNonNull(allNAVsByDate));
+    String fetchHistoricalNavByCallingUri(URI historicalNavUri) {
+        return restClient.get().uri(historicalNavUri).retrieve().body(String.class);
     }
 
     SchemeNameAndISIN fetchSchemeDetails(Long schemeCode) {

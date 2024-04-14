@@ -62,12 +62,12 @@ class NavControllerIT extends AbstractIntegrationTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_JSON_VALUE)))
-                .andExpect(jsonPath("$.schemeCode", is(120503L), Long.class))
-                .andExpect(jsonPath("$.payout", is("INF846K01EW2")))
-                .andExpect(jsonPath("$.schemeName", is("Axis ELSS Tax Saver Fund - Direct Plan - Growth Option")))
-                .andExpect(jsonPath("$.nav", is("73.6085")))
-                .andExpect(jsonPath("$.date", is("2022-12-20")))
-                .andExpect(jsonPath("$.schemeType", is("Open Ended Schemes(Equity Scheme - ELSS)")));
+                .andExpect(jsonPath("$.schemeCode", is(119578L), Long.class))
+                .andExpect(jsonPath("$.payout", is("INF903J01MV8")))
+                .andExpect(jsonPath("$.schemeName", is("Sundaram Select Focus Direct Plan - Growth")))
+                .andExpect(jsonPath("$.nav", is("173.7261")))
+                .andExpect(jsonPath("$.date", is("2018-12-27")))
+                .andExpect(jsonPath("$.schemeType", is("Open Ended Schemes(Equity Scheme - Focused Fund)")));
     }
 
     @Test
