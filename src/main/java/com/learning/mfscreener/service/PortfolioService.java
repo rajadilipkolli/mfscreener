@@ -77,8 +77,12 @@ public class PortfolioService {
         this.userTransactionDetailsService = userTransactionDetailsService;
     }
 
+    CasDTO parseCasDTO(MultipartFile multipartFile) throws IOException {
+        return this.objectMapper.readValue(multipartFile.getBytes(), CasDTO.class);
+    }
+
     public String upload(MultipartFile multipartFile) throws IOException {
-        CasDTO casDTO = this.objectMapper.readValue(multipartFile.getBytes(), CasDTO.class);
+        CasDTO casDTO = parseCasDTO(multipartFile);
         // check if user and email exits
         String email = casDTO.investorInfo().email();
         String name = casDTO.investorInfo().name();
@@ -115,16 +119,9 @@ public class PortfolioService {
 
     UploadResponseHolder findDelta(String email, String name, CasDTO casDTO) {
         List<UserFolioDTO> folioDTOList = casDTO.folios();
-
-        // Extract all transactions from folios
-        long userTransactionDTOListCount = folioDTOList.stream()
-                .flatMap(userFolioDTO -> userFolioDTO.schemes().stream())
-                .mapToLong(userSchemeDTO -> userSchemeDTO.transactions().size())
-                .sum();
-
+        long userTransactionDTOListCount = countTransactions(folioDTOList);
         List<UserTransactionDetailsEntity> userTransactionDetailsEntityList =
                 this.userTransactionDetailsService.findAllTransactionsByEmailAndName(email, name);
-
         UserCASDetailsEntity userCASDetailsEntity = casDetailsEntityRepository.findByInvestorEmailAndName(email, name);
 
         if (userTransactionDTOListCount == userTransactionDetailsEntityList.size()) {
@@ -135,26 +132,7 @@ public class PortfolioService {
         AtomicInteger folioCounter = new AtomicInteger();
         AtomicInteger transactionsCounter = new AtomicInteger();
 
-        // Verify if new folios are added
-        List<String> existingFolios = userCASDetailsEntity.getFolioEntities().stream()
-                .map(UserFolioDetailsEntity::getFolio)
-                .toList();
-
-        folioDTOList.forEach(userFolioDTO -> {
-            String folio = userFolioDTO.folio();
-            if (!existingFolios.contains(folio)) {
-                LOGGER.info("New folio: {} created that is not present in the database", folio);
-                userCASDetailsEntity.addFolioEntity(
-                        casDetailsMapper.mapUserFolioDTOToUserFolioDetailsEntity(userFolioDTO));
-                folioCounter.incrementAndGet();
-                int newTransactions = userFolioDTO.schemes().stream()
-                        .map(UserSchemeDTO::transactions)
-                        .flatMap(List::stream)
-                        .toList()
-                        .size();
-                transactionsCounter.addAndGet(newTransactions);
-            }
-        });
+        processNewFolios(folioDTOList, userCASDetailsEntity, folioCounter, transactionsCounter);
 
         // Check if all new transactions are added as part of adding folios
         if (userTransactionDTOListCount == (userTransactionDetailsEntityList.size() + transactionsCounter.get())) {
@@ -271,45 +249,87 @@ public class PortfolioService {
         return new UploadResponseHolder(userCASDetailsEntity, folioCounter.get(), transactionsCounter.get());
     }
 
+    long countTransactions(List<UserFolioDTO> folioDTOList) {
+        return folioDTOList.stream()
+                .flatMap(userFolioDTO -> userFolioDTO.schemes().stream())
+                .mapToLong(userSchemeDTO -> userSchemeDTO.transactions().size())
+                .sum();
+    }
+
+    void processNewFolios(
+            List<UserFolioDTO> folioDTOList,
+            UserCASDetailsEntity userCASDetailsEntity,
+            AtomicInteger folioCounter,
+            AtomicInteger transactionsCounter) {
+        // Logic to process new folios
+        List<String> existingFolios = userCASDetailsEntity.getFolioEntities().stream()
+                .map(UserFolioDetailsEntity::getFolio)
+                .toList();
+
+        folioDTOList.forEach(userFolioDTO -> {
+            String folio = userFolioDTO.folio();
+            if (!existingFolios.contains(folio)) {
+                LOGGER.info("New folio: {} created that is not present in the database", folio);
+                userCASDetailsEntity.addFolioEntity(
+                        casDetailsMapper.mapUserFolioDTOToUserFolioDetailsEntity(userFolioDTO));
+                folioCounter.incrementAndGet();
+                int newTransactions = userFolioDTO.schemes().stream()
+                        .map(UserSchemeDTO::transactions)
+                        .flatMap(List::stream)
+                        .toList()
+                        .size();
+                transactionsCounter.addAndGet(newTransactions);
+            }
+        });
+    }
+
     public PortfolioResponse getPortfolioByPAN(String panNumber, LocalDate asOfDate) {
-        if (asOfDate == null) {
-            asOfDate = LocalDate.now();
-        }
-        LocalDate adjustedDate = LocalDateUtility.getAdjustedDate(asOfDate);
+        asOfDate = adjustDate(asOfDate);
         List<CompletableFuture<PortfolioDetailsDTO>> completableFutureList =
-                casDetailsEntityRepository.getPortfolioDetails(panNumber, adjustedDate).stream()
-                        .map(portfolioDetails -> CompletableFuture.supplyAsync(() -> {
-                            MFSchemeDTO scheme;
-                            try {
-                                scheme = navService.getNavByDateWithRetry(portfolioDetails.getSchemeId(), adjustedDate);
-                            } catch (NavNotFoundException navNotFoundException) {
-                                // Will happen in case of NFO where units are allocated but not ready for subscription
-                                LOGGER.error(
-                                        "NavNotFoundException occurred for scheme : {} on adjusted date :{}",
-                                        portfolioDetails.getSchemeId(),
-                                        adjustedDate,
-                                        navNotFoundException);
-                                scheme = new MFSchemeDTO(null, null, null, null, "10", adjustedDate.toString(), null);
-                            }
-                            double totalValue = portfolioDetails.getBalanceUnits() * Double.parseDouble(scheme.nav());
-                            return new PortfolioDetailsDTO(
-                                    Math.round(totalValue * 100.0) / 100.0,
-                                    portfolioDetails.getSchemeName(),
-                                    portfolioDetails.getFolioNumber(),
-                                    scheme.date(),
-                                    xIRRCalculatorService.calculateXIRRBySchemeId(
-                                            portfolioDetails.getSchemeId(),
-                                            portfolioDetails.getSchemeDetailId(),
-                                            adjustedDate));
-                        }))
-                        .toList();
+                preparePortfolioFutures(panNumber, asOfDate);
+        List<PortfolioDetailsDTO> portfolioDetailsDTOS = joinFutures(completableFutureList);
+        Double totalPortfolioValue = calculateTotalPortfolioValue(portfolioDetailsDTOS);
+        return new PortfolioResponse(Math.round(totalPortfolioValue * 100.0) / 100.0, portfolioDetailsDTOS);
+    }
 
-        List<PortfolioDetailsDTO> portfolioDetailsDTOS =
-                completableFutureList.stream().map(CompletableFuture::join).toList();
+    LocalDate adjustDate(LocalDate asOfDate) {
+        return asOfDate == null ? LocalDateUtility.getAdjustedDate() : LocalDateUtility.getAdjustedDate(asOfDate);
+    }
 
-        Double totalPortfolioValue = portfolioDetailsDTOS.stream()
+    List<CompletableFuture<PortfolioDetailsDTO>> preparePortfolioFutures(String panNumber, LocalDate asOfDate) {
+        return casDetailsEntityRepository.getPortfolioDetails(panNumber, asOfDate).stream()
+                .map(portfolioDetails -> CompletableFuture.supplyAsync(() -> {
+                    MFSchemeDTO scheme;
+                    try {
+                        scheme = navService.getNavByDateWithRetry(portfolioDetails.getSchemeId(), asOfDate);
+                    } catch (NavNotFoundException navNotFoundException) {
+                        // Will happen in case of NFO where units are allocated but not ready for subscription
+                        LOGGER.error(
+                                "NavNotFoundException occurred for scheme : {} on adjusted date :{}",
+                                portfolioDetails.getSchemeId(),
+                                asOfDate,
+                                navNotFoundException);
+                        scheme = new MFSchemeDTO(null, null, null, null, "10", asOfDate.toString(), null);
+                    }
+                    double totalValue = portfolioDetails.getBalanceUnits() * Double.parseDouble(scheme.nav());
+                    return new PortfolioDetailsDTO(
+                            Math.round(totalValue * 100.0) / 100.0,
+                            portfolioDetails.getSchemeName(),
+                            portfolioDetails.getFolioNumber(),
+                            scheme.date(),
+                            xIRRCalculatorService.calculateXIRRBySchemeId(
+                                    portfolioDetails.getSchemeId(), portfolioDetails.getSchemeDetailId(), asOfDate));
+                }))
+                .toList();
+    }
+
+    List<PortfolioDetailsDTO> joinFutures(List<CompletableFuture<PortfolioDetailsDTO>> futures) {
+        return futures.stream().map(CompletableFuture::join).toList();
+    }
+
+    Double calculateTotalPortfolioValue(List<PortfolioDetailsDTO> portfolioDetailsDTOS) {
+        return portfolioDetailsDTOS.stream()
                 .map(PortfolioDetailsDTO::totalValue)
                 .reduce((double) 0, Double::sum);
-        return new PortfolioResponse(Math.round(totalPortfolioValue * 100.0) / 100.0, portfolioDetailsDTOS);
     }
 }
