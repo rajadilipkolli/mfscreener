@@ -40,10 +40,7 @@ public class XIRRCalculatorService {
 
     // method to calculate the total XIRR for a given PAN number
     public List<XIRRResponse> calculateTotalXIRRByPan(String pan, LocalDate asOfDate) {
-        if (asOfDate == null) {
-            asOfDate = LocalDate.now();
-        }
-        return calculateXIRRForAllFundsByPAN(pan, LocalDateUtility.getAdjustedDate(asOfDate));
+        return calculateXIRRForAllFundsByPAN(pan, LocalDateUtility.adjustDate(asOfDate));
     }
 
     // method to calculate XIRR for all funds

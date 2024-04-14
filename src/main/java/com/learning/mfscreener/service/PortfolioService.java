@@ -96,7 +96,7 @@ public class PortfolioService {
 
     String handleNewUser(CasDTO casDTO) {
         UserCASDetailsEntity casDetailsEntity = this.conversionServiceAdapter.mapCasDTOToUserCASDetailsEntity(casDTO);
-        long transactions = countTransactions(casDTO.folios());
+        long transactions = countTransactions(casDetailsEntity.getFolioEntities());
         int folios = casDetailsEntity.getFolioEntities().size();
         UserCASDetailsEntity savedCasDetailsEntity = this.casDetailsEntityRepository.save(casDetailsEntity);
         CompletableFuture.runAsync(() -> schemeService.setPANIfNotSet(savedCasDetailsEntity.getId()));
@@ -118,7 +118,7 @@ public class PortfolioService {
 
     UploadResponseHolder findDelta(String email, String name, CasDTO casDTO) {
         List<UserFolioDTO> folioDTOList = casDTO.folios();
-        long userTransactionDTOListCount = countTransactions(folioDTOList);
+        long userTransactionDTOListCount = countTransactionsByUserFolioDTOList(folioDTOList);
         List<UserTransactionDetailsEntity> userTransactionDetailsEntityList =
                 this.userTransactionDetailsService.findAllTransactionsByEmailAndName(email, name);
         UserCASDetailsEntity userCASDetailsEntity = casDetailsEntityRepository.findByInvestorEmailAndName(email, name);
@@ -134,18 +134,34 @@ public class PortfolioService {
         processNewFolios(folioDTOList, userCASDetailsEntity, folioCounter, transactionsCounter);
 
         // Check if all new transactions are added as part of adding folios
-        if (userTransactionDTOListCount == (userTransactionDetailsEntityList.size() + transactionsCounter.get())) {
-            LOGGER.info("All new transactions are added as part of adding folios, hence skipping");
-        } else {
+        boolean allTransactionsAdded = verifyTransactionCount(
+                userTransactionDTOListCount,
+                transactionsCounter,
+                "All new transactions are added as part of adding folios, hence skipping");
+
+        if (!allTransactionsAdded) {
             processExistingFolios(folioDTOList, email, name, userCASDetailsEntity, transactionsCounter);
         }
+
         // Check if all new transactions are added as part of adding schemes
-        if (userTransactionDTOListCount == (userTransactionDetailsEntityList.size() + transactionsCounter.get())) {
-            LOGGER.info("All new transactions are added as part of adding schemes, hence skipping");
-        } else {
+        allTransactionsAdded = verifyTransactionCount(
+                userTransactionDTOListCount,
+                transactionsCounter,
+                "All new transactions are added as part of adding schemes, hence skipping");
+
+        if (!allTransactionsAdded) {
             processExistingFolioWithNewSchemes(folioDTOList, email, name, userCASDetailsEntity, transactionsCounter);
         }
+
         return new UploadResponseHolder(userCASDetailsEntity, folioCounter.get(), transactionsCounter.get());
+    }
+
+    boolean verifyTransactionCount(long expectedCount, AtomicInteger actualCount, String logMessage) {
+        if (expectedCount == actualCount.get()) {
+            LOGGER.info(logMessage);
+            return true;
+        }
+        return false;
     }
 
     void processExistingFolioWithNewSchemes(
@@ -264,10 +280,17 @@ public class PortfolioService {
         userCASDetailsEntity.setFolioEntities(existingUserFolioDetailsEntityList);
     }
 
-    long countTransactions(List<UserFolioDTO> folioDTOList) {
+    long countTransactionsByUserFolioDTOList(List<UserFolioDTO> folioDTOList) {
         return folioDTOList.stream()
                 .flatMap(userFolioDTO -> userFolioDTO.schemes().stream())
                 .mapToLong(userSchemeDTO -> userSchemeDTO.transactions().size())
+                .sum();
+    }
+
+    long countTransactions(List<UserFolioDetailsEntity> folioEntities) {
+        return folioEntities.stream()
+                .flatMap(userFolioDetailsEntity -> userFolioDetailsEntity.getSchemeEntities().stream())
+                .mapToLong(value -> value.getTransactionEntities().size())
                 .sum();
     }
 
@@ -299,16 +322,11 @@ public class PortfolioService {
     }
 
     public PortfolioResponse getPortfolioByPAN(String panNumber, LocalDate asOfDate) {
-        asOfDate = adjustDate(asOfDate);
         List<CompletableFuture<PortfolioDetailsDTO>> completableFutureList =
-                preparePortfolioFutures(panNumber, asOfDate);
+                preparePortfolioFutures(panNumber, LocalDateUtility.adjustDate(asOfDate));
         List<PortfolioDetailsDTO> portfolioDetailsDTOS = joinFutures(completableFutureList);
         Double totalPortfolioValue = calculateTotalPortfolioValue(portfolioDetailsDTOS);
         return new PortfolioResponse(Math.round(totalPortfolioValue * 100.0) / 100.0, portfolioDetailsDTOS);
-    }
-
-    LocalDate adjustDate(LocalDate asOfDate) {
-        return asOfDate == null ? LocalDateUtility.getAdjustedDate() : LocalDateUtility.getAdjustedDate(asOfDate);
     }
 
     List<CompletableFuture<PortfolioDetailsDTO>> preparePortfolioFutures(String panNumber, LocalDate asOfDate) {

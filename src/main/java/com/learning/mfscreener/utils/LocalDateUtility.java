@@ -24,6 +24,10 @@ public class LocalDateUtility {
         return getAdjustedDate(currentDateTime.toLocalDate());
     }
 
+    public static LocalDate adjustDate(LocalDate asOfDate) {
+        return asOfDate == null ? LocalDateUtility.getAdjustedDate() : LocalDateUtility.getAdjustedDate(asOfDate);
+    }
+
     private LocalDateUtility() {
         throw new UnsupportedOperationException("Constructor can't be initialized");
     }
