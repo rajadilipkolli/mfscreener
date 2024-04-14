@@ -18,7 +18,6 @@ import com.learning.mfscreener.models.portfolio.UserTransactionDTO;
 import com.learning.mfscreener.models.response.PortfolioResponse;
 import com.learning.mfscreener.models.response.UploadResponseHolder;
 import com.learning.mfscreener.repository.InvestorInfoEntityRepository;
-import com.learning.mfscreener.repository.UserCASDetailsEntityRepository;
 import com.learning.mfscreener.utils.LocalDateUtility;
 import java.io.IOException;
 import java.time.LocalDate;
@@ -39,29 +38,27 @@ public class PortfolioService {
 
     private final ConversionServiceAdapter conversionServiceAdapter;
     private final CasDetailsMapper casDetailsMapper;
-    private final UserCASDetailsEntityRepository casDetailsEntityRepository;
     private final InvestorInfoEntityRepository investorInfoEntityRepository;
     private final SchemeService schemeService;
     private final UserTransactionDetailsService userTransactionDetailsService;
     private final UserFolioDetailsService userFolioDetailsService;
     private final UserSchemeDetailsService userSchemeDetailsService;
     private final PortfolioServiceHelper portfolioServiceHelper;
+    private final UserCASDetailsService userCASDetailsService;
 
     public PortfolioService(
             ConversionServiceAdapter conversionServiceAdapter,
             CasDetailsMapper casDetailsMapper,
-            UserCASDetailsEntityRepository casDetailsEntityRepository,
             InvestorInfoEntityRepository investorInfoEntityRepository,
             UserTransactionDetailsService userTransactionDetailsService,
-            NavService navService,
             SchemeService schemeService,
-            XIRRCalculatorService xIRRCalculatorService,
             UserFolioDetailsService userFolioDetailsService,
             UserSchemeDetailsService userSchemeDetailsService,
-            PortfolioServiceHelper portfolioServiceHelper) {
+            PortfolioServiceHelper portfolioServiceHelper,
+            UserCASDetailsService userCASDetailsService) {
         this.conversionServiceAdapter = conversionServiceAdapter;
         this.casDetailsMapper = casDetailsMapper;
-        this.casDetailsEntityRepository = casDetailsEntityRepository;
+        this.userCASDetailsService = userCASDetailsService;
         this.investorInfoEntityRepository = investorInfoEntityRepository;
         this.schemeService = schemeService;
         this.userFolioDetailsService = userFolioDetailsService;
@@ -97,7 +94,7 @@ public class PortfolioService {
             folios = folioEntities.size();
         }
         if (casDetailsEntity != null) {
-            UserCASDetailsEntity savedCasDetailsEntity = this.casDetailsEntityRepository.save(casDetailsEntity);
+            UserCASDetailsEntity savedCasDetailsEntity = this.userCASDetailsService.saveEntity(casDetailsEntity);
             CompletableFuture.runAsync(() -> schemeService.setPANIfNotSet(savedCasDetailsEntity.getId()));
             CompletableFuture.runAsync(userSchemeDetailsService::setAMFIIfNull);
             return "Imported %d folios and %d transactions".formatted(folios, transactions);
@@ -120,7 +117,7 @@ public class PortfolioService {
         long userTransactionDTOListCount = portfolioServiceHelper.countTransactionsByUserFolioDTOList(folioDTOList);
         List<UserTransactionDetailsEntity> userTransactionDetailsEntityList =
                 this.userTransactionDetailsService.findAllTransactionsByEmailAndName(email, name);
-        UserCASDetailsEntity userCASDetailsEntity = casDetailsEntityRepository.findByInvestorEmailAndName(email, name);
+        UserCASDetailsEntity userCASDetailsEntity = userCASDetailsService.findByInvestorEmailAndName(email, name);
 
         if (userTransactionDTOListCount == userTransactionDetailsEntityList.size()) {
             LOGGER.info("No new transactions are added");

@@ -5,7 +5,6 @@ import com.learning.mfscreener.exception.NavNotFoundException;
 import com.learning.mfscreener.models.MFSchemeDTO;
 import com.learning.mfscreener.models.PortfolioDetailsDTO;
 import com.learning.mfscreener.models.portfolio.UserFolioDTO;
-import com.learning.mfscreener.repository.UserCASDetailsEntityRepository;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
@@ -20,17 +19,17 @@ public class PortfolioServiceHelper {
     private static final Logger LOGGER = LoggerFactory.getLogger(PortfolioServiceHelper.class);
 
     private final ObjectMapper objectMapper;
-    private final UserCASDetailsEntityRepository casDetailsEntityRepository;
+    private final UserCASDetailsService userCASDetailsService;
     private final NavService navService;
     private final XIRRCalculatorService xIRRCalculatorService;
 
     public PortfolioServiceHelper(
             ObjectMapper objectMapper,
-            UserCASDetailsEntityRepository casDetailsEntityRepository,
+            UserCASDetailsService userCASDetailsService,
             NavService navService,
             XIRRCalculatorService xIRRCalculatorService) {
         this.objectMapper = objectMapper;
-        this.casDetailsEntityRepository = casDetailsEntityRepository;
+        this.userCASDetailsService = userCASDetailsService;
         this.navService = navService;
         this.xIRRCalculatorService = xIRRCalculatorService;
     }
@@ -44,7 +43,7 @@ public class PortfolioServiceHelper {
     }
 
     public List<PortfolioDetailsDTO> getPortfolioDetailsByPANAndAsOfDate(String panNumber, LocalDate asOfDate) {
-        return joinFutures(casDetailsEntityRepository.getPortfolioDetails(panNumber, asOfDate).stream()
+        return joinFutures(userCASDetailsService.getPortfolioDetailsByPanAndAsOfDate(panNumber, asOfDate).stream()
                 .map(portfolioDetails -> CompletableFuture.supplyAsync(() -> {
                     MFSchemeDTO scheme;
                     try {
