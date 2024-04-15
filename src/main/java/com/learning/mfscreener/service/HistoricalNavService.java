@@ -88,59 +88,95 @@ public class HistoricalNavService {
         }
     }
 
-    String parseNavData(
+    public String parseNavData(
             Reader inputString,
             String payOut,
             boolean persistSchemeInfo,
             SchemeNameAndISIN schemeNameAndISIN,
             Long schemeCode,
             LocalDate navDate) {
-        String oldSchemeId = null;
         try (BufferedReader br = new BufferedReader(inputString)) {
-            String lineValue = br.readLine();
-            for (int i = 0; i < 2; ++i) {
-                lineValue = br.readLine();
-            }
-            String schemeType = lineValue;
-            String amc = lineValue;
-            while (lineValue != null && !StringUtils.hasText(oldSchemeId)) {
-                String[] tokenize = lineValue.split(AppConstants.NAV_SEPARATOR);
-                boolean nonAmcRow = true;
-                boolean processRowByForce = false;
-                if (tokenize.length == 1) {
-                    nonAmcRow = false;
-                    String tempVal = lineValue;
-                    lineValue = br.readLine();
-                    if (!StringUtils.hasText(lineValue)) {
-                        lineValue = br.readLine();
-                        tokenize = lineValue.split(AppConstants.NAV_SEPARATOR);
-                        if (tokenize.length == 1) {
-                            schemeType = tempVal;
-                            amc = lineValue;
-                        } else {
-                            amc = tempVal;
-                            processRowByForce = true;
-                        }
-                    }
-                }
-                oldSchemeId = handleMultipleTokenLine(
-                        payOut,
-                        persistSchemeInfo,
-                        nonAmcRow,
-                        processRowByForce,
-                        tokenize,
-                        oldSchemeId,
-                        amc,
-                        schemeType);
-                lineValue = br.readLine();
-                if (!StringUtils.hasText(lineValue)) {
-                    lineValue = br.readLine();
-                }
-            }
+            return processLines(br, payOut, persistSchemeInfo, schemeNameAndISIN, schemeCode);
         } catch (IOException e) {
             LOGGER.error("Exception Occurred while reading response", e);
             throw new NavNotFoundException("Unable to parse for %s".formatted(schemeCode), navDate);
         }
+    }
+
+    private String processLines(
+            BufferedReader br,
+            String payOut,
+            boolean persistSchemeInfo,
+            SchemeNameAndISIN schemeNameAndISIN,
+            Long schemeCode)
+            throws IOException {
+        String lineValue = skipInitialLines(br);
+        String oldSchemeId = null;
+        String amc = null;
+        String schemeType = null;
+        boolean processRowByForce = false;
+
+        while (lineValue != null && oldSchemeId == null) { // Stop processing if oldSchemeId is found
+            String[] tokenize = lineValue.split(AppConstants.NAV_SEPARATOR);
+            if (isAmcOrSchemeNameRow(tokenize)) {
+                String tempVal = lineValue;
+                lineValue = br.readLine();
+                if (!StringUtils.hasText(lineValue)) {
+                    lineValue = br.readLine();
+                    tokenize = lineValue.split(AppConstants.NAV_SEPARATOR);
+                    if (isAmcOrSchemeNameRow(tokenize)) {
+                        schemeType = tempVal;
+                        amc = lineValue;
+                    } else {
+                        amc = tempVal;
+                        processRowByForce = true;
+                    }
+                }
+                if (processRowByForce) {
+                    oldSchemeId = processTokenLine(tokenize, payOut, persistSchemeInfo, amc, schemeType, oldSchemeId);
+                }
+            } else {
+                oldSchemeId = processTokenLine(tokenize, payOut, persistSchemeInfo, amc, schemeType, oldSchemeId);
+            }
+            lineValue = readNextNonEmptyLine(br);
+        }
+        return finalizeSchemeInfo(oldSchemeId, schemeNameAndISIN, schemeCode, payOut);
+    }
+
+    String readNextNonEmptyLine(BufferedReader br) throws IOException {
+        String lineValue;
+        do {
+            lineValue = br.readLine();
+        } while (!StringUtils.hasText(lineValue));
+        return lineValue;
+    }
+
+    String skipInitialLines(BufferedReader br) throws IOException {
+        br.readLine(); // Skip first line
+        return br.readLine(); // Read second line which is needed
+    }
+
+    boolean isAmcOrSchemeNameRow(String[] tokenize) {
+        return tokenize.length == 1;
+    }
+
+    String processTokenLine(
+            String[] tokenize,
+            String payOut,
+            boolean persistSchemeInfo,
+            String amc,
+            String schemeType,
+            String oldSchemeId) {
+        if (payOut.equalsIgnoreCase(tokenize[2])) {
+            oldSchemeId = tokenize[0];
+            if (persistSchemeInfo) {
+                persistSchemeInfo(tokenize, amc, schemeType, tokenize[0], tokenize[2]);
+            }
+        }
+        return oldSchemeId;
+    }
+
+    String finalizeSchemeInfo(String oldSchemeId, SchemeNameAndISIN schemeNameAndISIN, Long schemeCode, String payOut) {
         if (!StringUtils.hasText(oldSchemeId) && schemeNameAndISIN != null) {
             // Manually creating entry in mf_scheme table as no entry found in historical link
             MFSchemeEntity mfSchemeEntity = new MFSchemeEntity();
@@ -151,28 +187,6 @@ public class HistoricalNavService {
             oldSchemeId = String.valueOf(schemeCode);
         } else {
             LOGGER.info("No Nav found for the given day");
-        }
-        return oldSchemeId;
-    }
-
-    String handleMultipleTokenLine(
-            String payOut,
-            boolean persistSchemeInfo,
-            boolean nonAmcRow,
-            boolean processRowByForce,
-            String[] tokenize,
-            String oldSchemeId,
-            String amc,
-            String schemeType) {
-        if (nonAmcRow || processRowByForce) {
-            final String schemeCode = tokenize[0];
-            final String payout = tokenize[2];
-            if (payOut.equalsIgnoreCase(payout)) {
-                oldSchemeId = schemeCode;
-                if (persistSchemeInfo) {
-                    persistSchemeInfo(tokenize, amc, schemeType, schemeCode, payout);
-                }
-            }
         }
         return oldSchemeId;
     }
