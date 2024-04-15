@@ -88,7 +88,7 @@ public class HistoricalNavService {
         }
     }
 
-    public String parseNavData(
+    String parseNavData(
             Reader inputString,
             String payOut,
             boolean persistSchemeInfo,
@@ -103,7 +103,7 @@ public class HistoricalNavService {
         }
     }
 
-    private String processLines(
+    String processLines(
             BufferedReader br,
             String payOut,
             boolean persistSchemeInfo,
