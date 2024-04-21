@@ -13,6 +13,7 @@ import com.learning.mfscreener.utils.TestData;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.time.LocalDate;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
@@ -185,6 +186,40 @@ class PortfolioControllerIT extends AbstractIntegrationTest {
         } finally {
             tempFile.deleteOnExit();
         }
+    }
+
+    @Test
+    @Order(7)
+    void addOnlySchemeWhichIsImpossible() throws Exception {
+        File tempFile = File.createTempFile("file", ".json");
+        FileWriter fileWriter = getFileWriter(tempFile);
+        fileWriter.close();
+
+        try (FileInputStream fileInputStream = new FileInputStream(tempFile)) {
+
+            // Create a MockMultipartFile object
+            MockMultipartFile multipartFile = new MockMultipartFile(
+                    "file", // parameter name expected by the controller
+                    "file.json", // original file name
+                    MediaType.APPLICATION_JSON_VALUE, // content type
+                    fileInputStream);
+
+            // Perform the file upload request
+            mockMvc.perform(multipart("/api/portfolio/upload").file(multipartFile))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string("Imported 1 folios and 0 transactions"));
+        } finally {
+            tempFile.deleteOnExit();
+        }
+    }
+
+    private static FileWriter getFileWriter(File tempFile) throws IOException, IOException {
+        FileWriter fileWriter = new FileWriter(tempFile);
+        fileWriter.write(
+                """
+                    {"statement_period":{"to":"20-Jun-2023","from":"01-Jan-1990"},"file_type":"CAMS","cas_type":"DETAILED","investor_info":{"email":"junit@email.com","name":"Junit","mobile":"9848022338","address":"address"},"folios":[{"PAN":"ABCDE1234F","KYC":"OK","PANKYC":"OK","folio":"501764137100 / 0","amc":"Sundaram Mutual Fund","schemes":[{"rta_code":"119578","open":"0.0","close_calculated":"0.0","valuation":null,"transactions":[],"scheme":"SUNDARAM SELECT FOCUS FUND - DIRECT GROWTH - ISIN: INF903J01MV8","isin":"INF903J01MV8","amfi":119578,"advisor":null,"type":"EQUITY","rta":"KFINTECH","close":"0.0"}]}]}
+                    """);
+        return fileWriter;
     }
 
     @Test

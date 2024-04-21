@@ -113,7 +113,7 @@ class NavControllerIT extends AbstractIntegrationTest {
     @Test
     void shouldNotLoadHistoricalDataWhenSchemeNotFound() throws Exception {
         this.mockMvc
-                .perform(get("/api/nav/{schemeCode}/{date}", 144610L, "2021-07-12")
+                .perform(get("/api/nav/{schemeCode}/{date}", 144610L, "2023-07-12")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound())
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
@@ -121,7 +121,7 @@ class NavControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.title", is("Scheme NotFound")))
                 .andExpect(jsonPath("$.status", is(404)))
                 .andExpect(jsonPath("$.detail", is("Fund with schemeCode 144610 Not Found")))
-                .andExpect(jsonPath("$.instance", is("/api/nav/144610/2021-07-12")));
+                .andExpect(jsonPath("$.instance", is("/api/nav/144610/2023-07-12")));
     }
 
     @Test
