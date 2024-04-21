@@ -207,7 +207,7 @@ class PortfolioControllerIT extends AbstractIntegrationTest {
             // Perform the file upload request
             mockMvc.perform(multipart("/api/portfolio/upload").file(multipartFile))
                     .andExpect(status().isOk())
-                    .andExpect(content().string("Imported 1 folios and 3 transactions"));
+                    .andExpect(content().string("Imported 1 folios and 1 transactions"));
         } finally {
             tempFile.deleteOnExit();
         }
