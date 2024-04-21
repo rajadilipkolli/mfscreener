@@ -1,5 +1,6 @@
 package com.learning.mfscreener.web.controllers;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -23,7 +24,7 @@ class NavControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.type", is("about:blank")))
                 .andExpect(jsonPath("$.title", is("Scheme NotFound")))
                 .andExpect(jsonPath("$.status", is(404)))
-                .andExpect(jsonPath("$.detail", is("Nav Not Found for schemeCode - 159999 on 2024-04-15")))
+                .andExpect(jsonPath("$.detail", containsString("Nav Not Found for schemeCode - 159999 on")))
                 .andExpect(jsonPath("$.instance", is("/api/nav/159999")));
     }
 
