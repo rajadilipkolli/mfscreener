@@ -17,14 +17,14 @@ class NavControllerIT extends AbstractIntegrationTest {
     @Test
     void shouldThrowExceptionWhenSchemeNotFound() throws Exception {
         this.mockMvc
-                .perform(get("/api/nav/{schemeCode}", 1).accept(MediaType.APPLICATION_JSON))
+                .perform(get("/api/nav/{schemeCode}", 159999).accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound())
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                 .andExpect(jsonPath("$.type", is("about:blank")))
                 .andExpect(jsonPath("$.title", is("Scheme NotFound")))
                 .andExpect(jsonPath("$.status", is(404)))
-                .andExpect(jsonPath("$.detail", is("Fund with schemeCode 1 Not Found")))
-                .andExpect(jsonPath("$.instance", is("/api/nav/1")));
+                .andExpect(jsonPath("$.detail", is("Nav Not Found for schemeCode - 159999 on 2024-04-15")))
+                .andExpect(jsonPath("$.instance", is("/api/nav/159999")));
     }
 
     @Test

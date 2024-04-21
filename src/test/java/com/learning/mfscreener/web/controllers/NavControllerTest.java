@@ -43,7 +43,7 @@ class NavControllerTest {
     @Test
     void shouldThrowBadRequestWhenSchemeCodeIsNotInMinRange() throws Exception {
         this.mockMvc
-                .perform(get("/api/nav/{schemeCode}", 1).accept(MediaType.APPLICATION_JSON))
+                .perform(get("/api/nav/{schemeCode}", 10000).accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                 .andExpect(jsonPath("$.type", is("about:blank")))
@@ -51,6 +51,6 @@ class NavControllerTest {
                 .andExpect(jsonPath("$.status", is(400)))
                 .andExpect(jsonPath(
                         "$.detail", is("getScheme.schemeCode: Min value of schemeCode should be greater than 100000")))
-                .andExpect(jsonPath("$.instance", is("/api/nav/1")));
+                .andExpect(jsonPath("$.instance", is("/api/nav/10000")));
     }
 }
