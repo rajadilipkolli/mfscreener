@@ -5,7 +5,6 @@ import static com.learning.mfscreener.utils.AppConstants.FORMATTER_DD_MMM_YYYY;
 import com.learning.mfscreener.config.logging.Loggable;
 import com.learning.mfscreener.entities.MFSchemeEntity;
 import com.learning.mfscreener.exception.NavNotFoundException;
-import com.learning.mfscreener.exception.SchemeNotFoundException;
 import com.learning.mfscreener.mapper.MfSchemeDtoToEntityMapper;
 import com.learning.mfscreener.models.MFSchemeDTO;
 import com.learning.mfscreener.models.projection.SchemeNameAndISIN;
@@ -64,8 +63,11 @@ public class HistoricalNavService {
 
     String handleDiscontinuedScheme(Long schemeCode, URI historicalNavUri, LocalDate navDate) {
         // discontinued scheme Isin
-        SchemeNameAndISIN schemeNameAndISIN = fetchSchemeDetails(schemeCode);
-        String payOut = schemeNameAndISIN.getIsin();
+        Optional<SchemeNameAndISIN> schemeNameAndISIN = userSchemeDetailsService.findFirstBySchemeCode(schemeCode);
+        String payOut = null;
+        if (schemeNameAndISIN.isPresent()) {
+            payOut = schemeNameAndISIN.get().getIsin();
+        }
         return fetchAndProcessNavData(historicalNavUri, payOut, true, schemeCode, navDate);
     }
 
@@ -96,27 +98,22 @@ public class HistoricalNavService {
                 String[] tokenize = lineValue.split(AppConstants.NAV_SEPARATOR);
                 if (tokenize.length == 1) {
                     String tempVal = lineValue;
-                    lineValue = br.readLine();
-                    if (!StringUtils.hasText(lineValue)) {
-                        lineValue = br.readLine();
-                        tokenize = lineValue.split(AppConstants.NAV_SEPARATOR);
-                        if (tokenize.length == 1) {
-                            schemeType = tempVal;
-                            amc = lineValue;
-                        } else {
-                            amc = tempVal;
-                            oldSchemeId = handleMultipleTokenLine(
-                                    payOut, persistSchemeInfo, tokenize, oldSchemeId, amc, schemeType);
-                        }
+                    lineValue = readNextNonEmptyLine(br);
+                    tokenize = lineValue.split(AppConstants.NAV_SEPARATOR);
+                    if (tokenize.length == 1) {
+                        schemeType = tempVal;
+                        amc = lineValue;
+                    } else {
+                        amc = tempVal;
+                        oldSchemeId = handleMultipleTokenLine(
+                                payOut, persistSchemeInfo, tokenize, oldSchemeId, amc, schemeType, schemeCode);
                     }
+
                 } else {
-                    oldSchemeId =
-                            handleMultipleTokenLine(payOut, persistSchemeInfo, tokenize, oldSchemeId, amc, schemeType);
+                    oldSchemeId = handleMultipleTokenLine(
+                            payOut, persistSchemeInfo, tokenize, oldSchemeId, amc, schemeType, schemeCode);
                 }
-                lineValue = br.readLine();
-                if (!StringUtils.hasText(lineValue)) {
-                    lineValue = br.readLine();
-                }
+                lineValue = readNextNonEmptyLine(br);
             }
         } catch (IOException e) {
             LOGGER.error("Exception Occurred while reading response", e);
@@ -125,16 +122,25 @@ public class HistoricalNavService {
         return oldSchemeId;
     }
 
+    String readNextNonEmptyLine(BufferedReader br) throws IOException {
+        String lineValue;
+        do {
+            lineValue = br.readLine();
+        } while (!StringUtils.hasText(lineValue));
+        return lineValue;
+    }
+
     String handleMultipleTokenLine(
             String payOut,
             boolean persistSchemeInfo,
             String[] tokenize,
             String oldSchemeId,
             String amc,
-            String schemeType) {
+            String schemeType,
+            Long inputSchemeCode) {
         final String schemeCode = tokenize[0];
         final String payout = tokenize[2];
-        if (payOut.equalsIgnoreCase(payout)) {
+        if (payout.equalsIgnoreCase(payOut) || schemeCode.equalsIgnoreCase(inputSchemeCode.toString())) {
             oldSchemeId = schemeCode;
             if (persistSchemeInfo) {
                 persistSchemeInfo(tokenize, amc, schemeType, schemeCode, payout);
@@ -160,12 +166,6 @@ public class HistoricalNavService {
 
     String fetchHistoricalNavData(URI historicalNavUri) {
         return restClient.get().uri(historicalNavUri).retrieve().body(String.class);
-    }
-
-    SchemeNameAndISIN fetchSchemeDetails(Long schemeCode) {
-        return userSchemeDetailsService
-                .findFirstBySchemeCode(schemeCode)
-                .orElseThrow(() -> new SchemeNotFoundException("Fund with schemeCode " + schemeCode + " Not Found"));
     }
 
     URI buildHistoricalNavUri(LocalDate navDate) {
