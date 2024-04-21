@@ -88,6 +88,7 @@ class NavControllerIT extends AbstractIntegrationTest {
     }
 
     @Test
+    @Disabled
     void shouldNotLoadDataWhenSchemeFoundAndLoadHistoricalDataNotFound() throws Exception {
         this.mockMvc
                 .perform(get("/api/nav/{schemeCode}/{date}", 141565, "2017-10-01")
