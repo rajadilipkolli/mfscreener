@@ -21,6 +21,9 @@ public interface NAVApi {
                             name = "schemeCode",
                             in = ParameterIn.PATH,
                             example = "120503")
+                    @Min(value = 100000, message = "Min value of schemeCode should be greater than 100000")
+                    @Max(value = 160000, message = "Max value of schemeCode should be less than 160000")
+                    @Valid
                     Long schemeCode);
 
     @Operation(summary = "Fetch NAV on date yyyy-MM-dd (or the last working day before yyyy-MM-dd).")

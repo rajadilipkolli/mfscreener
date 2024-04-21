@@ -8,7 +8,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.learning.mfscreener.common.AbstractIntegrationTest;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -19,12 +18,13 @@ class NavControllerIT extends AbstractIntegrationTest {
     void shouldThrowExceptionWhenSchemeNotFound() throws Exception {
         this.mockMvc
                 .perform(get("/api/nav/{schemeCode}", 1).accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNotFound())
+                .andExpect(status().isBadRequest())
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                 .andExpect(jsonPath("$.type", is("about:blank")))
-                .andExpect(jsonPath("$.title", is("Scheme NotFound")))
-                .andExpect(jsonPath("$.status", is(404)))
-                .andExpect(jsonPath("$.detail", is("Fund with schemeCode 1 Not Found")))
+                .andExpect(jsonPath("$.title", is("Constraint Violation")))
+                .andExpect(jsonPath("$.status", is(400)))
+                .andExpect(jsonPath(
+                        "$.detail", is("getScheme.schemeCode: Min value of schemeCode should be greater than 100000")))
                 .andExpect(jsonPath("$.instance", is("/api/nav/1")));
     }
 
@@ -73,7 +73,6 @@ class NavControllerIT extends AbstractIntegrationTest {
     }
 
     @Test
-    @Disabled("temporarily till others are working")
     void shouldNotLoadHistoricalDataWhenSchemeNotFound() throws Exception {
         this.mockMvc
                 .perform(get("/api/nav/{schemeCode}/{date}", 144610L, "2023-07-12")
@@ -88,7 +87,6 @@ class NavControllerIT extends AbstractIntegrationTest {
     }
 
     @Test
-    @Disabled
     void shouldNotLoadDataWhenSchemeFoundAndLoadHistoricalDataNotFound() throws Exception {
         this.mockMvc
                 .perform(get("/api/nav/{schemeCode}/{date}", 141565, "2017-10-01")
