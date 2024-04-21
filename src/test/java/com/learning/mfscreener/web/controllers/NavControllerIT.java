@@ -18,13 +18,12 @@ class NavControllerIT extends AbstractIntegrationTest {
     void shouldThrowExceptionWhenSchemeNotFound() throws Exception {
         this.mockMvc
                 .perform(get("/api/nav/{schemeCode}", 1).accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest())
+                .andExpect(status().isNotFound())
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                 .andExpect(jsonPath("$.type", is("about:blank")))
-                .andExpect(jsonPath("$.title", is("Constraint Violation")))
-                .andExpect(jsonPath("$.status", is(400)))
-                .andExpect(jsonPath(
-                        "$.detail", is("getScheme.schemeCode: Min value of schemeCode should be greater than 100000")))
+                .andExpect(jsonPath("$.title", is("Scheme NotFound")))
+                .andExpect(jsonPath("$.status", is(404)))
+                .andExpect(jsonPath("$.detail", is("Fund with schemeCode 1 Not Found")))
                 .andExpect(jsonPath("$.instance", is("/api/nav/1")));
     }
 
