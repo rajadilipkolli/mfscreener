@@ -56,8 +56,7 @@ public class HistoricalNavService {
         URI historicalNavUri = buildHistoricalNavUri(navDate);
         Optional<MFSchemeEntity> bySchemeCode = this.schemeService.findBySchemeCode(schemeCode);
         if (bySchemeCode.isPresent()) {
-            return fetchAndProcessNavData(
-                    historicalNavUri, bySchemeCode.get().getPayOut(), false, null, schemeCode, navDate);
+            return fetchAndProcessNavData(historicalNavUri, bySchemeCode.get().getPayOut(), false, schemeCode, navDate);
         } else {
             return handleDiscontinuedScheme(schemeCode, historicalNavUri, navDate);
         }
@@ -67,20 +66,15 @@ public class HistoricalNavService {
         // discontinued scheme Isin
         SchemeNameAndISIN schemeNameAndISIN = fetchSchemeDetails(schemeCode);
         String payOut = schemeNameAndISIN.getIsin();
-        return fetchAndProcessNavData(historicalNavUri, payOut, true, schemeNameAndISIN, schemeCode, navDate);
+        return fetchAndProcessNavData(historicalNavUri, payOut, true, schemeCode, navDate);
     }
 
     String fetchAndProcessNavData(
-            URI historicalNavUri,
-            String payOut,
-            boolean persistSchemeInfo,
-            SchemeNameAndISIN schemeNameAndISIN,
-            Long schemeCode,
-            LocalDate navDate) {
+            URI historicalNavUri, String payOut, boolean persistSchemeInfo, Long schemeCode, LocalDate navDate) {
         try {
             String allNAVsByDate = fetchHistoricalNavData(historicalNavUri);
             Reader inputString = new StringReader(Objects.requireNonNull(allNAVsByDate));
-            return parseNavData(inputString, payOut, persistSchemeInfo, schemeNameAndISIN, schemeCode, navDate);
+            return parseNavData(inputString, payOut, persistSchemeInfo, schemeCode, navDate);
         } catch (ResourceAccessException exception) {
             // eating as we can't do much, and it should be set when available
             LOGGER.error("Unable to load Historical Data, downstream service is down ", exception);
@@ -89,12 +83,7 @@ public class HistoricalNavService {
     }
 
     String parseNavData(
-            Reader inputString,
-            String payOut,
-            boolean persistSchemeInfo,
-            SchemeNameAndISIN schemeNameAndISIN,
-            Long schemeCode,
-            LocalDate navDate) {
+            Reader inputString, String payOut, boolean persistSchemeInfo, Long schemeCode, LocalDate navDate) {
         String oldSchemeId = null;
         try (BufferedReader br = new BufferedReader(inputString)) {
             String lineValue = br.readLine();
@@ -132,17 +121,6 @@ public class HistoricalNavService {
         } catch (IOException e) {
             LOGGER.error("Exception Occurred while reading response", e);
             throw new NavNotFoundException("Unable to parse for %s".formatted(schemeCode), navDate);
-        }
-        if (!StringUtils.hasText(oldSchemeId) && schemeNameAndISIN != null) {
-            // Manually creating entry in mf_scheme table as no entry found in historical link
-            MFSchemeEntity mfSchemeEntity = new MFSchemeEntity();
-            mfSchemeEntity.setPayOut(payOut);
-            mfSchemeEntity.setSchemeId(schemeCode);
-            mfSchemeEntity.setSchemeName(schemeNameAndISIN.getScheme());
-            schemeService.saveEntity(mfSchemeEntity);
-            oldSchemeId = String.valueOf(schemeCode);
-        } else {
-            LOGGER.info("No Nav found for the given day");
         }
         return oldSchemeId;
     }
