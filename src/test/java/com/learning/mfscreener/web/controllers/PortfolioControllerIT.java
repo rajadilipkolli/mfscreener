@@ -190,7 +190,7 @@ class PortfolioControllerIT extends AbstractIntegrationTest {
 
     @Test
     @Order(7)
-    void addTransaction() throws Exception {
+    void addOnlySchemeWhichIsImpossible() throws Exception {
         File tempFile = File.createTempFile("file", ".json");
         FileWriter fileWriter = getFileWriter(tempFile);
         fileWriter.close();
@@ -207,7 +207,7 @@ class PortfolioControllerIT extends AbstractIntegrationTest {
             // Perform the file upload request
             mockMvc.perform(multipart("/api/portfolio/upload").file(multipartFile))
                     .andExpect(status().isOk())
-                    .andExpect(content().string("Imported 1 folios and 1 transactions"));
+                    .andExpect(content().string("Imported 1 folios and 0 transactions"));
         } finally {
             tempFile.deleteOnExit();
         }
@@ -217,7 +217,7 @@ class PortfolioControllerIT extends AbstractIntegrationTest {
         FileWriter fileWriter = new FileWriter(tempFile);
         fileWriter.write(
                 """
-                    {"statement_period":{"to":"20-Jun-2023","from":"01-Jan-1990"},"file_type":"CAMS","cas_type":"DETAILED","investor_info":{"email":"junit@email.com","name":"Junit","mobile":"9848022338","address":"address"},"folios":[{"PAN":"ABCDE1234F","KYC":"OK","PANKYC":"OK","folio":"501764137099 / 0","amc":"Sundaram Mutual Fund","schemes":[{"rta_code":"119578","open":"0.0","close_calculated":"0.0","valuation":null,"transactions":[],"scheme":"SUNDARAM SELECT FOCUS FUND - DIRECT GROWTH - ISIN: INF903J01MV8","isin":"INF903J01MV8","amfi":119578,"advisor":null,"type":"EQUITY","rta":"KFINTECH","close":"0.0"}]}]}
+                    {"statement_period":{"to":"20-Jun-2023","from":"01-Jan-1990"},"file_type":"CAMS","cas_type":"DETAILED","investor_info":{"email":"junit@email.com","name":"Junit","mobile":"9848022338","address":"address"},"folios":[{"PAN":"ABCDE1234F","KYC":"OK","PANKYC":"OK","folio":"501764137100 / 0","amc":"Sundaram Mutual Fund","schemes":[{"rta_code":"119578","open":"0.0","close_calculated":"0.0","valuation":null,"transactions":[],"scheme":"SUNDARAM SELECT FOCUS FUND - DIRECT GROWTH - ISIN: INF903J01MV8","isin":"INF903J01MV8","amfi":119578,"advisor":null,"type":"EQUITY","rta":"KFINTECH","close":"0.0"}]}]}
                     """);
         return fileWriter;
     }
