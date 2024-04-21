@@ -123,13 +123,10 @@ public class HistoricalNavService {
     }
 
     String readNextNonEmptyLine(BufferedReader br) throws IOException {
-        String lineValue;
-        do {
+        String lineValue = br.readLine();
+        while (lineValue != null && !StringUtils.hasText(lineValue)) {
             lineValue = br.readLine();
-            if (lineValue == null) { // Check for end of file
-                return null;
-            }
-        } while (!StringUtils.hasText(lineValue));
+        }
         return lineValue;
     }
 
