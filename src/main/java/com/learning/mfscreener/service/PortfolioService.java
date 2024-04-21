@@ -288,7 +288,7 @@ public class PortfolioService {
                 requestSchemes.forEach(userSchemeDTO -> {
                     if (!isInListDB.contains(userSchemeDTO.isin())) {
                         LOGGER.info(
-                                "New ISIN: {} created for folio :{} that is not present in the database",
+                                "New ISIN: {} created for folio : {} that is not present in the database",
                                 userSchemeDTO.isin(),
                                 folioFromRequest);
                         UserSchemeDetailsEntity userSchemeDetailsEntity =

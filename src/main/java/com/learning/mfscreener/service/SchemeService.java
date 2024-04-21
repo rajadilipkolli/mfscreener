@@ -7,11 +7,9 @@ import com.learning.mfscreener.entities.MFSchemeNavEntity;
 import com.learning.mfscreener.exception.SchemeNotFoundException;
 import com.learning.mfscreener.models.MFSchemeDTO;
 import com.learning.mfscreener.models.projection.FundDetailProjection;
-import com.learning.mfscreener.models.projection.SchemeNameAndISIN;
 import com.learning.mfscreener.models.projection.UserFolioDetailsPanProjection;
 import com.learning.mfscreener.models.response.NavResponse;
 import com.learning.mfscreener.repository.MFSchemeRepository;
-import com.learning.mfscreener.repository.UserSchemeDetailsEntityRepository;
 import com.learning.mfscreener.utils.AppConstants;
 import java.net.URI;
 import java.time.LocalDate;
@@ -36,19 +34,16 @@ public class SchemeService {
 
     private final RestClient restClient;
     private final MFSchemeRepository mfSchemeRepository;
-    private final UserSchemeDetailsEntityRepository userSchemeDetailsEntityRepository;
     private final ConversionServiceAdapter conversionServiceAdapter;
     private final UserFolioDetailsService userFolioDetailsService;
 
     public SchemeService(
             RestClient restClient,
             MFSchemeRepository mfSchemeRepository,
-            UserSchemeDetailsEntityRepository userSchemeDetailsEntityRepository,
             ConversionServiceAdapter conversionServiceAdapter,
             UserFolioDetailsService userFolioDetailsService) {
         this.restClient = restClient;
         this.mfSchemeRepository = mfSchemeRepository;
-        this.userSchemeDetailsEntityRepository = userSchemeDetailsEntityRepository;
         this.conversionServiceAdapter = conversionServiceAdapter;
         this.userFolioDetailsService = userFolioDetailsService;
     }
@@ -100,12 +95,7 @@ public class SchemeService {
         Optional<MFSchemeEntity> entityBySchemeId = findBySchemeCode(schemeCode);
         if (entityBySchemeId.isEmpty()) {
             // Scenario where scheme is discontinued or merged with other
-            SchemeNameAndISIN firstByAmfi = userSchemeDetailsEntityRepository
-                    .findFirstByAmfi(schemeCode)
-                    .orElseThrow(
-                            () -> new SchemeNotFoundException("Fund with schemeCode " + schemeCode + " Not Found"));
-            String isin = firstByAmfi.getIsin();
-            LOGGER.error("Found Discontinued IsIn : {}", isin);
+            LOGGER.error("Found Discontinued SchemeCode : {}", schemeCode);
         } else {
             mergeList(navResponse, entityBySchemeId.get(), schemeCode);
         }
