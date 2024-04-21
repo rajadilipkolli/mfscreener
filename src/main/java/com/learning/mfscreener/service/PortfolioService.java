@@ -18,7 +18,6 @@ import com.learning.mfscreener.models.portfolio.UserSchemeDTO;
 import com.learning.mfscreener.models.portfolio.UserTransactionDTO;
 import com.learning.mfscreener.models.response.PortfolioResponse;
 import com.learning.mfscreener.models.response.UploadResponseHolder;
-import com.learning.mfscreener.repository.InvestorInfoEntityRepository;
 import com.learning.mfscreener.utils.LocalDateUtility;
 import java.io.IOException;
 import java.time.LocalDate;
@@ -40,33 +39,34 @@ public class PortfolioService {
 
     private final ConversionServiceAdapter conversionServiceAdapter;
     private final CasDetailsMapper casDetailsMapper;
-    private final InvestorInfoEntityRepository investorInfoEntityRepository;
+
     private final SchemeService schemeService;
     private final UserTransactionDetailsService userTransactionDetailsService;
     private final UserFolioDetailsService userFolioDetailsService;
     private final UserSchemeDetailsService userSchemeDetailsService;
     private final PortfolioServiceHelper portfolioServiceHelper;
     private final UserCASDetailsService userCASDetailsService;
+    private final InvestorInfoService investorInfoService;
 
     public PortfolioService(
             ConversionServiceAdapter conversionServiceAdapter,
             CasDetailsMapper casDetailsMapper,
-            InvestorInfoEntityRepository investorInfoEntityRepository,
             UserTransactionDetailsService userTransactionDetailsService,
             SchemeService schemeService,
             UserFolioDetailsService userFolioDetailsService,
             UserSchemeDetailsService userSchemeDetailsService,
             PortfolioServiceHelper portfolioServiceHelper,
-            UserCASDetailsService userCASDetailsService) {
+            UserCASDetailsService userCASDetailsService,
+            InvestorInfoService investorInfoService) {
         this.conversionServiceAdapter = conversionServiceAdapter;
         this.casDetailsMapper = casDetailsMapper;
         this.userCASDetailsService = userCASDetailsService;
-        this.investorInfoEntityRepository = investorInfoEntityRepository;
         this.schemeService = schemeService;
         this.userFolioDetailsService = userFolioDetailsService;
         this.userSchemeDetailsService = userSchemeDetailsService;
         this.userTransactionDetailsService = userTransactionDetailsService;
         this.portfolioServiceHelper = portfolioServiceHelper;
+        this.investorInfoService = investorInfoService;
     }
 
     public String upload(MultipartFile portfolioFile) throws IOException {
@@ -93,7 +93,7 @@ public class PortfolioService {
         UserCASDetailsEntity userCASDetailsEntity = null;
         int folioCount = 0;
         long transactionCount = 0;
-        if (this.investorInfoEntityRepository.existsByEmailAndName(email, name)) {
+        if (this.investorInfoService.existsByEmailAndName(email, name)) {
             var holder = findDelta(email, name, casDTO);
             if (holder != null) {
                 userCASDetailsEntity = holder.userCASDetailsEntity();

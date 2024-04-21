@@ -68,9 +68,9 @@ public class XIRRCalculatorService {
 
     public double calculateXIRRBySchemeId(Long fundId, Long schemeIdInDb, LocalDate asOfDate) {
         LOGGER.debug("Calculating XIRR for fund ID : {} & schemeIdInDB :{}", fundId, schemeIdInDb);
-        List<UserTransactionDetailsProjection> byUserSchemeDetailsEntityId =
+        List<UserTransactionDetailsProjection> transactionDetailsProjectionList =
                 userTransactionDetailsService.fetchTransactions(schemeIdInDb, asOfDate);
-        return computeXIRR(byUserSchemeDetailsEntityId, fundId, asOfDate);
+        return computeXIRR(transactionDetailsProjectionList, fundId, asOfDate);
     }
 
     double computeXIRR(List<UserTransactionDetailsProjection> transactions, Long fundId, LocalDate asOfDate) {
