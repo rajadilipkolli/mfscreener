@@ -54,6 +54,7 @@ public class HistoricalNavService {
 
     public String getHistoricalNav(Long schemeCode, LocalDate navDate) {
         URI historicalNavUri = buildHistoricalNavUri(navDate);
+        LOGGER.debug("historicalNavUri :{}", historicalNavUri.toString());
         Optional<MFSchemeEntity> bySchemeCode = this.schemeService.findBySchemeCode(schemeCode);
         if (bySchemeCode.isPresent()) {
             return fetchAndProcessNavData(

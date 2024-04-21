@@ -147,7 +147,7 @@ spotless {
     java {
         importOrder()
         removeUnusedImports()
-        palantirJavaFormat("2.40.0")
+        palantirJavaFormat("2.42.0")
         formatAnnotations()
     }
 }

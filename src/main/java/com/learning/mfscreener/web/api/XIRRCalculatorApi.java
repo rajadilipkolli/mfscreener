@@ -1,6 +1,7 @@
 package com.learning.mfscreener.web.api;
 
 import com.learning.mfscreener.models.response.XIRRResponse;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import jakarta.validation.constraints.PastOrPresent;
@@ -10,6 +11,9 @@ import org.springframework.http.ResponseEntity;
 
 public interface XIRRCalculatorApi {
 
+    @Operation(
+            description =
+                    "calculates XIRR for given PAN as of the provided date, if as of date is not provided then XIRR will be calculated for current Date")
     ResponseEntity<List<XIRRResponse>> getXIRR(
             @Parameter(description = "Pan of the end User", name = "pan", in = ParameterIn.PATH, example = "ABCDE1234F")
                     String panNumber,

@@ -19,7 +19,6 @@ class LayeredArchitectureTest {
     private static final String CONTROLLER = "Controller";
     private static final String MODEL = "Model";
     private static final String REPOSITORY = "Repository";
-    ;
     private static final String SERVICE = "Service";
 
     @ArchTest
