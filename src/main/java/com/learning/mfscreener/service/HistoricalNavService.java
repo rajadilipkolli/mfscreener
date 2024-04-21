@@ -55,10 +55,12 @@ public class HistoricalNavService {
     public String getHistoricalNav(Long schemeCode, LocalDate navDate) {
         URI historicalNavUri = buildHistoricalNavUri(navDate);
         Optional<MFSchemeEntity> bySchemeCode = this.schemeService.findBySchemeCode(schemeCode);
-        return bySchemeCode
-                .map(schemeEntity -> fetchAndProcessNavData(
-                        historicalNavUri, schemeEntity.getPayOut(), false, null, schemeCode, navDate))
-                .orElseGet(() -> handleDiscontinuedScheme(schemeCode, historicalNavUri, navDate));
+        if (bySchemeCode.isPresent()) {
+            return fetchAndProcessNavData(
+                    historicalNavUri, bySchemeCode.get().getPayOut(), false, null, schemeCode, navDate);
+        } else {
+            return handleDiscontinuedScheme(schemeCode, historicalNavUri, navDate);
+        }
     }
 
     String handleDiscontinuedScheme(Long schemeCode, URI historicalNavUri, LocalDate navDate) {
@@ -103,10 +105,7 @@ public class HistoricalNavService {
             String amc = lineValue;
             while (lineValue != null && !StringUtils.hasText(oldSchemeId)) {
                 String[] tokenize = lineValue.split(AppConstants.NAV_SEPARATOR);
-                boolean nonAmcRow = true;
-                boolean processRowByForce = false;
                 if (tokenize.length == 1) {
-                    nonAmcRow = false;
                     String tempVal = lineValue;
                     lineValue = br.readLine();
                     if (!StringUtils.hasText(lineValue)) {
@@ -117,20 +116,14 @@ public class HistoricalNavService {
                             amc = lineValue;
                         } else {
                             amc = tempVal;
-                            processRowByForce = true;
+                            oldSchemeId = handleMultipleTokenLine(
+                                    payOut, persistSchemeInfo, tokenize, oldSchemeId, amc, schemeType);
                         }
                     }
+                } else {
+                    oldSchemeId =
+                            handleMultipleTokenLine(payOut, persistSchemeInfo, tokenize, oldSchemeId, amc, schemeType);
                 }
-                // handle multipleToken
-                oldSchemeId = handleMultipleTokenLine(
-                        payOut,
-                        persistSchemeInfo,
-                        nonAmcRow,
-                        processRowByForce,
-                        tokenize,
-                        oldSchemeId,
-                        amc,
-                        schemeType);
                 lineValue = br.readLine();
                 if (!StringUtils.hasText(lineValue)) {
                     lineValue = br.readLine();
@@ -157,35 +150,34 @@ public class HistoricalNavService {
     String handleMultipleTokenLine(
             String payOut,
             boolean persistSchemeInfo,
-            boolean nonAmcRow,
-            boolean processRowByForce,
             String[] tokenize,
             String oldSchemeId,
             String amc,
             String schemeType) {
-        if (nonAmcRow || processRowByForce) {
-            final String schemeCode = tokenize[0];
-            final String payout = tokenize[2];
-            if (payOut.equalsIgnoreCase(payout)) {
-                oldSchemeId = schemeCode;
-                if (persistSchemeInfo) {
-                    persistSchemeInfo(tokenize, amc, schemeType, schemeCode, payout);
-                }
+        final String schemeCode = tokenize[0];
+        final String payout = tokenize[2];
+        if (payOut.equalsIgnoreCase(payout)) {
+            oldSchemeId = schemeCode;
+            if (persistSchemeInfo) {
+                persistSchemeInfo(tokenize, amc, schemeType, schemeCode, payout);
             }
         }
         return oldSchemeId;
     }
 
     void persistSchemeInfo(String[] tokenize, String amc, String schemeType, String schemeCode, String payout) {
-        String schemeName = tokenize[1];
-        String nav = tokenize[4];
-        String date = tokenize[7];
-        final MFSchemeDTO mfSchemeDTO =
-                new MFSchemeDTO(amc, Long.valueOf(schemeCode), payout, schemeName, nav, date, schemeType);
+        MFSchemeDTO mfSchemeDTO = createSchemeDTO(tokenize, amc, schemeType, schemeCode, payout);
         MFSchemeEntity mfSchemeEntity =
                 mfSchemeDtoToEntityMapper.mapMFSchemeDTOToMFSchemeEntity(mfSchemeDTO, mfSchemeTypeRepository);
         MFSchemeEntity persistedScheme = schemeService.saveEntity(mfSchemeEntity);
         LOGGER.info("Persisted Entity :{}", persistedScheme);
+    }
+
+    MFSchemeDTO createSchemeDTO(String[] tokenize, String amc, String schemeType, String schemeCode, String payout) {
+        String schemeName = tokenize[1];
+        String nav = tokenize[4];
+        String date = tokenize[7];
+        return new MFSchemeDTO(amc, Long.valueOf(schemeCode), payout, schemeName, nav, date, schemeType);
     }
 
     String fetchHistoricalNavData(URI historicalNavUri) {
