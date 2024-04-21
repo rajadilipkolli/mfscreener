@@ -32,14 +32,15 @@
             <column name="advisor" type="${string.type}"/>
             <column name="rta_code" type="${string.type}"/>
             <column name="rta" type="${string.type}"/>
-            <column name="TYPE" type="${string.type}"/>
+            <column name="type" type="${string.type}"/>
             <column name="amfi" type="BIGINT"/>
-            <column name="OPEN" type="${string.type}"/>
-            <column name="CLOSE" type="${string.type}"/>
+            <column name="open" type="${string.type}"/>
+            <column name="close" type="${string.type}"/>
             <column name="close_calculated" type="${string.type}"/>
             <column name="user_folio_id" type="BIGINT">
                 <constraints nullable="false"/>
             </column>
+            <column name="version" type="tinyint"/>
             <column name="created_by" type="${string.type}"/>
             <column name="created_date" type="${timestamp.type}"/>
             <column name="last_modified_by" type="${string.type}"/>

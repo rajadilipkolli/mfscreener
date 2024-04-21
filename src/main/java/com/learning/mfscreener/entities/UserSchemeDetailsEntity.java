@@ -12,6 +12,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+import jakarta.persistence.Version;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -56,6 +57,9 @@ public class UserSchemeDetailsEntity extends AuditableEntity<String> implements 
 
     @Column(name = "close_calculated")
     private String closeCalculated;
+
+    @Version
+    private Short version;
 
     @ManyToOne
     @JoinColumn(name = "user_folio_id")
@@ -178,6 +182,15 @@ public class UserSchemeDetailsEntity extends AuditableEntity<String> implements 
 
     public UserSchemeDetailsEntity setTransactionEntities(List<UserTransactionDetailsEntity> transactionEntities) {
         this.transactionEntities = transactionEntities;
+        return this;
+    }
+
+    public Short getVersion() {
+        return version;
+    }
+
+    public UserSchemeDetailsEntity setVersion(Short version) {
+        this.version = version;
         return this;
     }
 

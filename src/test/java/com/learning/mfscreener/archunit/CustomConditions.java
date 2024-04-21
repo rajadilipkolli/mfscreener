@@ -44,8 +44,7 @@ public class CustomConditions {
 
     private static ArchCondition<JavaField> buildFieldHaveGetterAndSetterCondition(
             boolean forceSetters, Map<String, String> exclusions) {
-        return new ArchCondition<JavaField>(
-                forceSetters ? HAVE_GETTER_AND_SETTER_DESCRIPTION : HAVE_GETTER_DESCRIPTION) {
+        return new ArchCondition<>(forceSetters ? HAVE_GETTER_AND_SETTER_DESCRIPTION : HAVE_GETTER_DESCRIPTION) {
 
             @Override
             public void check(JavaField field, ConditionEvents events) {
@@ -85,7 +84,7 @@ public class CustomConditions {
     }
 
     private static ArchCondition<JavaClass> buildClassHaveEqualsAndHashCodeCondition() {
-        return new ArchCondition<JavaClass>(EQUALS_AND_HASH_CODE_DESCRIPTION) {
+        return new ArchCondition<>(EQUALS_AND_HASH_CODE_DESCRIPTION) {
 
             @Override
             public void check(JavaClass javaClass, ConditionEvents events) {
@@ -110,7 +109,7 @@ public class CustomConditions {
     }
 
     private static ArchCondition<JavaClass> buildStaticMethodsAreNotAllowedCondition() {
-        return new ArchCondition<JavaClass>(EQUALS_AND_HASH_CODE_DESCRIPTION) {
+        return new ArchCondition<>(EQUALS_AND_HASH_CODE_DESCRIPTION) {
 
             @Override
             public void check(JavaClass javaClass, ConditionEvents events) {

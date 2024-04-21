@@ -43,6 +43,7 @@ public interface CasDetailsMapper extends Converter<CasDTO, UserCASDetailsEntity
     @Mapping(source = "panKyc", target = "panKyc")
     UserFolioDetailsEntity mapUserFolioDTOToUserFolioDetailsEntity(UserFolioDTO folioDTO);
 
+    @Mapping(target = "version", ignore = true)
     @Mapping(target = "transactionEntities", ignore = true)
     @Mapping(target = "userFolioDetailsEntity", ignore = true)
     @Mapping(target = "id", ignore = true)
