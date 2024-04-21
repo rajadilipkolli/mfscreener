@@ -6,10 +6,10 @@ tasks:
 
 vscode:
   extensions:
+    - Pivotal.vscode-boot-dev-pack
     - vscjava.vscode-java-pack
     - GabrielBB.vscode-lombok
     - richardwillis.vscode-gradle
-    - Pivotal.vscode-boot-dev-pack
 
 ports:
   - port: 8080

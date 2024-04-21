@@ -54,14 +54,11 @@ public class HistoricalNavService {
 
     public String getHistoricalNav(Long schemeCode, LocalDate navDate) {
         URI historicalNavUri = buildHistoricalNavUri(navDate);
-        LOGGER.debug("historicalNavUri :{}", historicalNavUri.toString());
         Optional<MFSchemeEntity> bySchemeCode = this.schemeService.findBySchemeCode(schemeCode);
-        if (bySchemeCode.isPresent()) {
-            return fetchAndProcessNavData(
-                    historicalNavUri, bySchemeCode.get().getPayOut(), false, null, schemeCode, navDate);
-        } else {
-            return handleDiscontinuedScheme(schemeCode, historicalNavUri, navDate);
-        }
+        return bySchemeCode
+                .map(schemeEntity -> fetchAndProcessNavData(
+                        historicalNavUri, schemeEntity.getPayOut(), false, null, schemeCode, navDate))
+                .orElseGet(() -> handleDiscontinuedScheme(schemeCode, historicalNavUri, navDate));
     }
 
     String handleDiscontinuedScheme(Long schemeCode, URI historicalNavUri, LocalDate navDate) {
@@ -79,7 +76,7 @@ public class HistoricalNavService {
             Long schemeCode,
             LocalDate navDate) {
         try {
-            String allNAVsByDate = fetchHistoricalNavByCallingUri(historicalNavUri);
+            String allNAVsByDate = fetchHistoricalNavData(historicalNavUri);
             Reader inputString = new StringReader(Objects.requireNonNull(allNAVsByDate));
             return parseNavData(inputString, payOut, persistSchemeInfo, schemeNameAndISIN, schemeCode, navDate);
         } catch (ResourceAccessException exception) {
@@ -124,6 +121,7 @@ public class HistoricalNavService {
                         }
                     }
                 }
+                // handle multipleToken
                 oldSchemeId = handleMultipleTokenLine(
                         payOut,
                         persistSchemeInfo,
@@ -190,7 +188,7 @@ public class HistoricalNavService {
         LOGGER.info("Persisted Entity :{}", persistedScheme);
     }
 
-    String fetchHistoricalNavByCallingUri(URI historicalNavUri) {
+    String fetchHistoricalNavData(URI historicalNavUri) {
         return restClient.get().uri(historicalNavUri).retrieve().body(String.class);
     }
 
