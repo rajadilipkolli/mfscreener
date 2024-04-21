@@ -40,6 +40,7 @@ out/
 *.log
 .DS_Store
 mf.pdf
-pdf_parsed.json
+pdf_par*.json
 /logs/
 .jpb/
+*.pdf
