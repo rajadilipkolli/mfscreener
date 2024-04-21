@@ -126,6 +126,9 @@ public class HistoricalNavService {
         String lineValue;
         do {
             lineValue = br.readLine();
+            if (lineValue == null) { // Check for end of file
+                return null;
+            }
         } while (!StringUtils.hasText(lineValue));
         return lineValue;
     }
