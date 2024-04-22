@@ -101,4 +101,10 @@ public class MFSchemeTypeEntity extends AuditableEntity<String> implements Seria
         mfSchemeEntities.add(mfSchemeEntity);
         mfSchemeEntity.setMfSchemeTypeEntity(this);
     }
+
+    @Override
+    public String toString() {
+        return "MFSchemeTypeEntity [schemeTypeId=" + schemeTypeId + ", type=" + type + ", category=" + category
+                + ", subCategory=" + subCategory + ", version=" + version + "]";
+    }
 }

@@ -6,7 +6,6 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
-import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
@@ -18,9 +17,7 @@ import java.util.List;
 import java.util.StringJoiner;
 import org.hibernate.annotations.DynamicUpdate;
 
-@Table(
-        name = "mf_scheme",
-        indexes = {@Index(name = "mf_scheme_idx_scheme_id", columnList = "scheme_id")})
+@Table(name = "mf_scheme")
 @Entity
 @DynamicUpdate
 public class MFSchemeEntity extends AuditableEntity<String> implements Serializable {
