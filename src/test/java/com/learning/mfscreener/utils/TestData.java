@@ -3,6 +3,7 @@ package com.learning.mfscreener.utils;
 import com.learning.mfscreener.models.portfolio.CasDTO;
 import com.learning.mfscreener.models.portfolio.InvestorInfoDTO;
 import com.learning.mfscreener.models.portfolio.StatementPeriodDTO;
+import com.learning.mfscreener.models.portfolio.TransactionType;
 import com.learning.mfscreener.models.portfolio.UserFolioDTO;
 import com.learning.mfscreener.models.portfolio.UserSchemeDTO;
 import com.learning.mfscreener.models.portfolio.UserTransactionDTO;
@@ -44,7 +45,7 @@ public class TestData {
                 0.859d,
                 116.4d,
                 0.859d,
-                "PURCHASE_SIP",
+                TransactionType.PURCHASE_SIP,
                 null);
         transactions.add(userTransactionDTO);
         return new UserSchemeDTO(
@@ -65,11 +66,25 @@ public class TestData {
     private static UserSchemeDTO axisSchemeDTO(boolean addTransaction) {
         List<UserTransactionDTO> transactions = new ArrayList<>();
         UserTransactionDTO userTransactionDTO = new UserTransactionDTO(
-                LocalDate.parse("2017-09-20"), "Purchase", 1000.0d, 23.711d, 42.1747d, 23.711d, "PURCHASE", null);
+                LocalDate.parse("2017-09-20"),
+                "Purchase",
+                1000.0d,
+                23.711d,
+                42.1747d,
+                23.711d,
+                TransactionType.PURCHASE,
+                null);
         transactions.add(userTransactionDTO);
         if (addTransaction) {
             transactions.add(new UserTransactionDTO(
-                    LocalDate.parse("2017-09-22"), "Purchase", 500.0d, 12.031d, 41.5579d, 35.742d, "PURCHASE", null));
+                    LocalDate.parse("2017-09-22"),
+                    "Purchase",
+                    500.0d,
+                    12.031d,
+                    41.5579d,
+                    35.742d,
+                    TransactionType.PURCHASE,
+                    null));
         }
         return new UserSchemeDTO(
                 "Axis ELSS Tax Saver Fund - Direct Growth - ISIN: INF846K01EW2",
@@ -95,7 +110,7 @@ public class TestData {
                 15.965d,
                 31.3182d,
                 15.965d,
-                "PURCHASE_SIP",
+                TransactionType.PURCHASE_SIP,
                 null);
         transactions.add(userTransactionDTO);
         return new UserSchemeDTO(
@@ -136,7 +151,7 @@ public class TestData {
                         3.221d,
                         31.0496d,
                         19.186d,
-                        "SWITCH_IN",
+                        TransactionType.SWITCH_IN,
                         null));
         return casDTO;
     }
@@ -150,7 +165,7 @@ public class TestData {
                 2.796d,
                 35.76d,
                 2.796d,
-                "PURCHASE_SIP",
+                TransactionType.PURCHASE_SIP,
                 null);
         transactions.add(userTransactionDTO);
         return new UserSchemeDTO(
@@ -177,7 +192,7 @@ public class TestData {
                 10.359d,
                 289.6d,
                 10.359d,
-                "PURCHASE_SIP",
+                TransactionType.PURCHASE_SIP,
                 null);
         transactions.add(userTransactionDTO);
         return new UserSchemeDTO(
