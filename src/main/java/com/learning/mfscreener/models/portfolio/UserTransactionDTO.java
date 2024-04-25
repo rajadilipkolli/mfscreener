@@ -12,6 +12,6 @@ public record UserTransactionDTO(
         Double units,
         Double nav,
         Double balance,
-        String type,
+        TransactionType type,
         @JsonProperty("dividend_rate") String dividendRate)
         implements Serializable {}
