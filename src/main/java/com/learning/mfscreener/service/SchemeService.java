@@ -67,7 +67,7 @@ public class SchemeService {
         return this.mfSchemeRepository.findBySchemeNameLikeIgnoreCaseOrderBySchemeIdAsc(sName);
     }
 
-    @Loggable
+    @Loggable(result = false)
     public List<FundDetailProjection> fetchSchemesByFundName(String fundName) {
         String fName = "%" + fundName.toUpperCase(Locale.ROOT) + "%";
         LOGGER.info("Fetching schemes available for fundHouse :{}", fName);
@@ -84,7 +84,7 @@ public class SchemeService {
         LOGGER.debug("Updated {} rows with PAN", rowsUpdated);
     }
 
-    @Loggable
+    @Loggable(result = false)
     public Optional<MFSchemeDTO> getMfSchemeDTO(Long schemeCode, LocalDate navDate) {
         return this.mfSchemeRepository
                 .findBySchemeIdAndMfSchemeNavEntities_NavDate(schemeCode, navDate)
