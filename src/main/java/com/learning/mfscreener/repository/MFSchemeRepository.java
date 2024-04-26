@@ -18,10 +18,6 @@ public interface MFSchemeRepository extends JpaRepository<MFSchemeEntity, Long> 
     @Transactional(readOnly = true)
     Optional<MFSchemeEntity> findByPayOut(String payOut);
 
-    @Transactional(readOnly = true)
-    @Query("select o.schemeId from MFSchemeEntity o")
-    List<Long> findAllSchemeIds();
-
     @EntityGraph(attributePaths = {"mfSchemeTypeEntity", "mfSchemeNavEntities"})
     @Transactional(readOnly = true)
     Optional<MFSchemeEntity> findBySchemeIdAndMfSchemeNavEntities_NavDate(
@@ -48,4 +44,7 @@ public interface MFSchemeRepository extends JpaRepository<MFSchemeEntity, Long> 
     List<FundDetailProjection> findByFundHouseLikeIgnoringCaseOrderBySchemeIdAsc(@Param("fName") String fName);
 
     int countByMfSchemeNavEntities_NavDate(LocalDate grandFathertedDate);
+
+    @Query("select m.schemeId from MFSchemeEntity m where m.payOut = :isin")
+    Optional<Long> getSchemeIdByISIN(@Param("isin") String isin);
 }

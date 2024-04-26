@@ -11,6 +11,7 @@ import com.learning.mfscreener.models.projection.UserFolioDetailsPanProjection;
 import com.learning.mfscreener.models.response.NavResponse;
 import com.learning.mfscreener.repository.MFSchemeRepository;
 import com.learning.mfscreener.utils.AppConstants;
+import com.learning.mfscreener.utils.LocalDateUtility;
 import java.net.URI;
 import java.time.LocalDate;
 import java.util.List;
@@ -151,26 +152,26 @@ public class SchemeService {
         return mfSchemeRepository.findByPayOut(isin);
     }
 
-    public List<Long> findAllSchemeIds() {
-        return mfSchemeRepository.findAllSchemeIds();
+    public Optional<Long> getSchemeIdByISIN(String isin) {
+        return mfSchemeRepository.getSchemeIdByISIN(isin);
     }
 
     @Transactional
-    public List<MFSchemeEntity> saveAllEntities(List<MFSchemeEntity> mfSchemeEntityList) {
-        return mfSchemeRepository.saveAll(mfSchemeEntityList);
-    }
-
-    @Transactional
-    @Loggable(result = false)
+    @Loggable(result = false, params = false)
     public MFSchemeEntity saveEntity(MFSchemeEntity mfSchemeEntity) {
         return mfSchemeRepository.save(mfSchemeEntity);
     }
 
+    @Loggable(result = false)
     public Optional<MFSchemeEntity> findBySchemeCode(Long schemeCode) {
         return mfSchemeRepository.findBySchemeId(schemeCode);
     }
 
     public boolean navLoadedFor31Jan2018() {
         return mfSchemeRepository.countByMfSchemeNavEntities_NavDate(AppConstants.GRAND_FATHERTED_DATE) > 0;
+    }
+
+    public boolean navLoadedForAdjustedDate() {
+        return mfSchemeRepository.countByMfSchemeNavEntities_NavDate(LocalDateUtility.getAdjustedDate()) > 0;
     }
 }

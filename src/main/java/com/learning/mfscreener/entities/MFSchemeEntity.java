@@ -14,7 +14,6 @@ import jakarta.persistence.Version;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.StringJoiner;
 import org.hibernate.annotations.DynamicUpdate;
 
 @Table(name = "mf_scheme")
@@ -119,22 +118,9 @@ public class MFSchemeEntity extends AuditableEntity<String> implements Serializa
         return this;
     }
 
-    public void addSchemeNav(MFSchemeNavEntity mfSchemeNavEntity) {
+    public MFSchemeEntity addSchemeNav(MFSchemeNavEntity mfSchemeNavEntity) {
         mfSchemeNavEntities.add(mfSchemeNavEntity);
         mfSchemeNavEntity.setMfSchemeEntity(this);
-    }
-
-    @Override
-    public String toString() {
-        return new StringJoiner(", ", MFSchemeEntity.class.getSimpleName() + "[", "]")
-                .add("schemeId=" + schemeId)
-                .add("payOut='" + payOut + "'")
-                .add("fundHouse='" + fundHouse + "'")
-                .add("schemeName='" + schemeName + "'")
-                .add("schemeNameAlias='" + schemeNameAlias + "'")
-                .add("version=" + version)
-                .add("mfSchemeTypeEntity=" + mfSchemeTypeEntity)
-                .add("mfSchemeNavEntities=" + mfSchemeNavEntities)
-                .toString();
+        return this;
     }
 }
