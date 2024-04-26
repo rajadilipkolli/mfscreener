@@ -1,4 +1,4 @@
-package com.learning.mfscreener.service;
+package com.learning.mfscreener.utils;
 
 import com.learning.mfscreener.exception.GainsException;
 import com.learning.mfscreener.models.portfolio.Fund;
@@ -7,14 +7,18 @@ import com.learning.mfscreener.models.portfolio.GainEntry;
 import com.learning.mfscreener.models.portfolio.TransactionType;
 import com.learning.mfscreener.models.portfolio.UserTransactionDTO;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Deque;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,59 +71,65 @@ public class FIFOUnits {
     }
 
     public List<GainEntry> process() throws GainsException {
-        List<LocalDate> toSort = new ArrayList<>();
-        for (LocalDate dt : mergedTransactions.keySet()) {
-            toSort.add(dt);
-        }
-        toSort.sort(null);
-        for (LocalDate dt : toSort) {
+        List<LocalDate> transactionDates = new ArrayList<>(mergedTransactions.keySet());
+        Collections.sort(transactionDates);
+        for (LocalDate dt : transactionDates) {
             MergedTransaction txn = mergedTransactions.get(dt);
             List<UserTransactionDTO> userTransactionDTOS = txn.transactions;
-            if (userTransactionDTOS.size() == 2) {
-                // if buy we will have STAMP_DUTY_TAX, for sale we will have STT_TAX
-                if (userTransactionDTOS.get(1).type().compareTo(TransactionType.STAMP_DUTY_TAX) == 0) {
-                    // buy
-                    Double tax = userTransactionDTOS.get(1).amount();
-                    buy(
-                            dt,
-                            BigDecimal.valueOf(userTransactionDTOS.get(0).units()),
-                            BigDecimal.valueOf(userTransactionDTOS.get(0).nav()),
-                            BigDecimal.valueOf(tax));
-                } else if (userTransactionDTOS.get(0).type().compareTo(TransactionType.STT_TAX) == 0) {
-                    // sell
-                    Double tax = userTransactionDTOS.get(0).amount();
-                    sell(
-                            dt,
-                            BigDecimal.valueOf(userTransactionDTOS.get(1).units()),
-                            BigDecimal.valueOf(userTransactionDTOS.get(1).nav()),
-                            BigDecimal.valueOf(tax));
-                }
-            } else if (userTransactionDTOS.size() > 2) {
-                // TODO handle this.
-                LOGGER.error("Unhandled Scenario");
+            if (userTransactionDTOS.size() == 2 && dt.isAfter(AppConstants.TAX_STARTED_DATE)) {
+                findTaxFromTransactionsAndProcess(userTransactionDTOS, dt);
+            } else if (userTransactionDTOS.size() > 2 && dt.isAfter(AppConstants.TAX_STARTED_DATE)) {
+                final AtomicInteger counter = new AtomicInteger();
+                int chunkSize = 2;
+                userTransactionDTOS.stream()
+                        .collect(Collectors.groupingBy(it -> counter.getAndIncrement() / chunkSize))
+                        .values()
+                        .forEach(userTransactionList -> findTaxFromTransactionsAndProcess(userTransactionList, dt));
             } else {
-                UserTransactionDTO userTransactionDTO = userTransactionDTOS.get(0);
-                if (userTransactionDTO.units() == null) {
-                    // dividend transactions
-                    LOGGER.error("Unhandled dividend Transactions");
-                } else {
-                    if (userTransactionDTO.units() > 0) {
-                        buy(
-                                dt,
-                                BigDecimal.valueOf(userTransactionDTO.units()),
-                                BigDecimal.valueOf(userTransactionDTO.nav()),
-                                BigDecimal.ZERO);
-                    } else if (userTransactionDTO.units() < 0) {
-                        sell(
-                                dt,
-                                BigDecimal.valueOf(userTransactionDTO.units()),
-                                BigDecimal.valueOf(userTransactionDTO.nav()),
-                                BigDecimal.ZERO);
+                userTransactionDTOS.forEach(userTransactionDTO -> {
+                    if (userTransactionDTO.units() == null) {
+                        // dividend transactions
+                        LOGGER.error("Unhandled dividend Transactions");
+                    } else {
+                        if (userTransactionDTO.units() > 0) {
+                            buy(
+                                    dt,
+                                    BigDecimal.valueOf(userTransactionDTO.units()),
+                                    BigDecimal.valueOf(userTransactionDTO.nav()),
+                                    BigDecimal.ZERO);
+                        } else if (userTransactionDTO.units() < 0) {
+                            sell(
+                                    dt,
+                                    BigDecimal.valueOf(userTransactionDTO.units()),
+                                    BigDecimal.valueOf(userTransactionDTO.nav()),
+                                    BigDecimal.ZERO);
+                        }
                     }
-                }
+                });
             }
         }
         return gains;
+    }
+
+    private void findTaxFromTransactionsAndProcess(List<UserTransactionDTO> userTransactionDTOS, LocalDate dt) {
+        // if buy we will have STAMP_DUTY_TAX, for sale we will have STT_TAX
+        if (userTransactionDTOS.get(1).type().compareTo(TransactionType.STAMP_DUTY_TAX) == 0) {
+            // buy
+            Double tax = userTransactionDTOS.get(1).amount();
+            buy(
+                    dt,
+                    BigDecimal.valueOf(userTransactionDTOS.get(0).units()),
+                    BigDecimal.valueOf(userTransactionDTOS.get(0).nav()),
+                    BigDecimal.valueOf(tax));
+        } else if (userTransactionDTOS.get(0).type().compareTo(TransactionType.STT_TAX) == 0) {
+            // sell
+            Double tax = userTransactionDTOS.get(0).amount();
+            sell(
+                    dt,
+                    BigDecimal.valueOf(userTransactionDTOS.get(1).units()),
+                    BigDecimal.valueOf(userTransactionDTOS.get(1).nav()),
+                    BigDecimal.valueOf(tax));
+        }
     }
 
     private void buy(LocalDate txnDate, BigDecimal quantity, BigDecimal nav, BigDecimal tax) {
@@ -146,10 +156,10 @@ public class FIFOUnits {
 
             BigDecimal gainUnits = units.min(pendingUnits);
 
-            BigDecimal purchaseValue = gainUnits.multiply(purchaseNav).setScale(2, BigDecimal.ROUND_HALF_UP);
-            BigDecimal saleValue = gainUnits.multiply(nav).setScale(2, BigDecimal.ROUND_HALF_UP);
-            BigDecimal stampDuty = purchaseTax.multiply(gainUnits).divide(units, 2, BigDecimal.ROUND_HALF_UP);
-            BigDecimal stt = tax.multiply(gainUnits).divide(originalQuantity, 2, BigDecimal.ROUND_HALF_UP);
+            BigDecimal purchaseValue = gainUnits.multiply(purchaseNav).setScale(2, RoundingMode.HALF_UP);
+            BigDecimal saleValue = gainUnits.multiply(nav).setScale(2, RoundingMode.HALF_UP);
+            BigDecimal stampDuty = purchaseTax.multiply(gainUnits).divide(units, 2, RoundingMode.HALF_UP);
+            BigDecimal stt = tax.multiply(gainUnits).divide(originalQuantity, 2, RoundingMode.HALF_UP);
 
             GainEntry ge = new GainEntry(
                     finYear,
@@ -171,12 +181,14 @@ public class FIFOUnits {
 
             pendingUnits = pendingUnits.subtract(units);
             if (pendingUnits.compareTo(BigDecimal.ZERO) < 0 && purchaseNav != null) {
+                // Sale is partially matched against the last buy transactions Re-add the remaining units to the FIFO
+                // queue
                 transactions.addFirst(new Transaction(purchaseDate, pendingUnits.negate(), purchaseNav, purchaseTax));
             }
         }
     }
 
-    private String getFinYear(LocalDate sellDate) {
+    public static String getFinYear(LocalDate sellDate) {
         int year1, year2;
         if (sellDate.getMonthValue() > 3) {
             year1 = sellDate.getYear();
@@ -208,14 +220,11 @@ public class FIFOUnits {
                 .anyMatch(x -> x.units() != null && x.units() < 0 && x.type() != TransactionType.REVERSAL);
 
         if (!valid) {
-            System.out.println(FundType.UNKNOWN);
             return FundType.UNKNOWN;
         }
         if (transactions.stream().anyMatch(x -> x.type() == TransactionType.STT_TAX)) {
-            System.out.println(FundType.EQUITY);
             return FundType.EQUITY;
         } else {
-            System.out.println(FundType.DEBT);
             return FundType.DEBT;
         }
     }

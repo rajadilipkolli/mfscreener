@@ -1,5 +1,6 @@
 package com.learning.mfscreener.utils;
 
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
@@ -14,4 +15,5 @@ public final class AppConstants {
     public static final DateTimeFormatter FORMATTER_DD_MMM_YYYY =
             DateTimeFormatter.ofPattern(DATE_PATTERN_DD_MMM_YYYY, Locale.ENGLISH);
     public static final String MFAPI_WEBSITE_BASE_URL = "https://api.mfapi.in/mf/";
+    public static final LocalDate TAX_STARTED_DATE = LocalDate.of(2020, 7, 1);
 }
