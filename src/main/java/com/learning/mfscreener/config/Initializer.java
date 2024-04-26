@@ -21,5 +21,9 @@ public class Initializer implements CommandLineRunner {
         if (!schemeService.navLoadedFor31Jan2018()) {
             historicalNavService.getHistoricalNavOn31Jan2018();
         }
+
+        if (!schemeService.navLoadedForAdjustedDate()) {
+            historicalNavService.getHistoricalNavForAdjustedDate();
+        }
     }
 }

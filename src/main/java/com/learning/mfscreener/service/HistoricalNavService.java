@@ -4,12 +4,14 @@ import static com.learning.mfscreener.utils.AppConstants.FORMATTER_DD_MMM_YYYY;
 
 import com.learning.mfscreener.config.logging.Loggable;
 import com.learning.mfscreener.entities.MFSchemeEntity;
+import com.learning.mfscreener.entities.MFSchemeNavEntity;
 import com.learning.mfscreener.exception.NavNotFoundException;
 import com.learning.mfscreener.mapper.MfSchemeDtoToEntityMapper;
 import com.learning.mfscreener.models.MFSchemeDTO;
 import com.learning.mfscreener.models.projection.SchemeNameAndISIN;
 import com.learning.mfscreener.repository.MFSchemeTypeRepository;
 import com.learning.mfscreener.utils.AppConstants;
+import com.learning.mfscreener.utils.LocalDateUtility;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
@@ -52,7 +54,9 @@ public class HistoricalNavService {
     }
 
     public String getHistoricalNav(Long schemeCode, LocalDate navDate) {
-        URI historicalNavUri = buildHistoricalNavUri(navDate);
+        String toDate = navDate.format(FORMATTER_DD_MMM_YYYY);
+        String fromDate = navDate.minusDays(3).format(FORMATTER_DD_MMM_YYYY);
+        URI historicalNavUri = buildHistoricalNavUri(toDate, fromDate);
         Optional<MFSchemeEntity> bySchemeCode = this.schemeService.findBySchemeCode(schemeCode);
         if (bySchemeCode.isPresent()) {
             return fetchAndProcessNavData(historicalNavUri, bySchemeCode.get().getPayOut(), false, schemeCode, navDate);
@@ -62,8 +66,18 @@ public class HistoricalNavService {
     }
 
     public void getHistoricalNavOn31Jan2018() {
-        URI historicalNavUri = buildHistoricalNavUri(null);
+        String toDate = AppConstants.GRAND_FATHERTED_DATE.format(FORMATTER_DD_MMM_YYYY);
+        String fromDate = AppConstants.GRAND_FATHERTED_DATE.format(FORMATTER_DD_MMM_YYYY);
+        URI historicalNavUri = buildHistoricalNavUri(toDate, fromDate);
         fetchAndProcessNavData(historicalNavUri, null, true, null, AppConstants.GRAND_FATHERTED_DATE);
+    }
+
+    public void getHistoricalNavForAdjustedDate() {
+        LocalDate adjustedDate = LocalDateUtility.getAdjustedDate();
+        String toDate = adjustedDate.format(FORMATTER_DD_MMM_YYYY);
+        String fromDate = adjustedDate.format(FORMATTER_DD_MMM_YYYY);
+        URI historicalNavUri = buildHistoricalNavUri(toDate, fromDate);
+        fetchAndProcessNavData(historicalNavUri, null, true, null, adjustedDate);
     }
 
     String handleDiscontinuedScheme(Long schemeCode, URI historicalNavUri, LocalDate navDate) {
@@ -99,7 +113,8 @@ public class HistoricalNavService {
             }
             String schemeType = lineValue;
             String amc = lineValue;
-            boolean insertEachRow = navDate.isEqual(AppConstants.GRAND_FATHERTED_DATE);
+            boolean insertEachRow = navDate.isEqual(AppConstants.GRAND_FATHERTED_DATE)
+                    || navDate.isEqual(LocalDateUtility.getAdjustedDate());
             while (lineValue != null && (insertEachRow || !StringUtils.hasText(oldSchemeId))) {
                 String[] tokenize = lineValue.split(AppConstants.NAV_SEPARATOR);
                 if (tokenize.length == 1) {
@@ -173,35 +188,34 @@ public class HistoricalNavService {
     }
 
     void persistSchemeInfo(String[] tokenize, String amc, String schemeType, String schemeCode, String payout) {
-        MFSchemeDTO mfSchemeDTO = createSchemeDTO(tokenize, amc, schemeType, schemeCode, payout);
-        MFSchemeEntity mfSchemeEntity =
-                mfSchemeDtoToEntityMapper.mapMFSchemeDTOToMFSchemeEntity(mfSchemeDTO, mfSchemeTypeRepository);
+        MFSchemeEntity mfSchemeEntity = createSchemeDTO(tokenize, amc, schemeType, schemeCode, payout);
         MFSchemeEntity persistedScheme = schemeService.saveEntity(mfSchemeEntity);
-        LOGGER.info("Persisted Entity :{}", persistedScheme);
+        LOGGER.debug("Persisted Entity :{}", persistedScheme);
     }
 
-    MFSchemeDTO createSchemeDTO(String[] tokenize, String amc, String schemeType, String schemeCode, String payout) {
-        String schemeName = tokenize[1];
+    MFSchemeEntity createSchemeDTO(String[] tokenize, String amc, String schemeType, String schemeCode, String payout) {
+        Optional<MFSchemeEntity> bySchemeCode = schemeService.findBySchemeCode(Long.valueOf(schemeCode));
         String nav = tokenize[4];
         String date = tokenize[7];
-        return new MFSchemeDTO(amc, Long.valueOf(schemeCode), payout, schemeName, nav, date, schemeType);
+        if (bySchemeCode.isEmpty()) {
+            String schemeName = tokenize[1];
+            MFSchemeDTO mfSchemeDTO =
+                    new MFSchemeDTO(amc, Long.valueOf(schemeCode), payout, schemeName, nav, date, schemeType);
+            return mfSchemeDtoToEntityMapper.mapMFSchemeDTOToMFSchemeEntity(mfSchemeDTO, mfSchemeTypeRepository);
+        } else {
+            MFSchemeNavEntity mfSchemenavEntity = new MFSchemeNavEntity();
+            mfSchemenavEntity.setNav("N.A.".equals(nav) ? 0F : Float.parseFloat(nav));
+            mfSchemenavEntity.setNavDate(LocalDate.parse(date, AppConstants.FORMATTER_DD_MMM_YYYY));
+            return bySchemeCode.get().addSchemeNav(mfSchemenavEntity);
+        }
     }
 
     String fetchHistoricalNavData(URI historicalNavUri) {
         return restClient.get().uri(historicalNavUri).retrieve().body(String.class);
     }
 
-    URI buildHistoricalNavUri(LocalDate navDate) {
+    URI buildHistoricalNavUri(String toDate, String fromDate) {
         // URL https://portal.amfiindia.com/DownloadNAVHistoryReport_Po.aspx?tp=1&frmdt=01-Jan-2024&todt=03-Jan-2024
-        String fromDate = null;
-        String toDate = null;
-        if (navDate != null) {
-            toDate = navDate.format(FORMATTER_DD_MMM_YYYY);
-            fromDate = navDate.minusDays(3).format(FORMATTER_DD_MMM_YYYY);
-        } else {
-            toDate = AppConstants.GRAND_FATHERTED_DATE.format(FORMATTER_DD_MMM_YYYY);
-            fromDate = AppConstants.GRAND_FATHERTED_DATE.format(FORMATTER_DD_MMM_YYYY);
-        }
         // tp=3 Interval Fund Schemes ( Income )
         // tp=2 Close Ended Schemes ( Income )
         // tp=1 Open Ended Schemes
