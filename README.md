@@ -6,16 +6,21 @@
 **Description:** MF Screener is a Java-based application designed to provide mutual fund screening capabilities. It allows users to fetch mutual fund data, including historical NAVs, scheme details, and portfolio information, through a set of RESTful APIs.
 
 **Setup:**
- 
- 1. Clone the repository.
- 2. Ensure Java 17, docker and gradle are installed.
- 3. Navigate to the project directory and follow steps at [run-locally](#run-locally) to start the application.
 
- **Usage:**
- 
- * Fetch mutual fund schemes: `GET /api/scheme/{schemeName}`
- * Upload portfolio details: `POST /api/portfolio/upload`
- * Calculate XIRR: `GET /api/xirr/{pan}`
+1. Clone the repository.
+2. Ensure Java 17, docker and gradle are installed.
+3. Navigate to the project directory and follow steps at [run-locally](#run-locally) to start the application.
+
+**Usage:**
+
+* Fetch mutual fund schemes: `GET /api/scheme/{schemeName}`
+* Upload portfolio details: `POST /api/portfolio/upload`
+* Calculate XIRR: `GET /api/xirr/{pan}`
+
+### Acronyms
+* **_ISIN_** - International Security Identification Number
+* **_PAN_** - Personal Account Number
+* **_CAS_** - Consolidated Account Statement
 
 ### Simplified Class Diagram Concept
  ```mermaid
@@ -58,7 +63,7 @@
      PortfolioService --> LocalDateUtility : uses
      NavService --> LocalDateUtility : uses
  ```
- This overview and class diagram provide a conceptual understanding of the project's structure. For detailed class relationships and method signatures, please refer to the source code directly.
+This overview and class diagram provide a conceptual understanding of the project's structure. For detailed class relationships and method signatures, please refer to the source code directly.
 
 ### Run tests
 
@@ -99,13 +104,13 @@ docker exec -it docker-redis-1 redis-cli
 ```
 
 ### how to read CAS Data using [casparser](https://pypi.org/project/casparser/)
- * Install phyton
- * install casparser using command
-    ```shell
-    pip install casparser
-    ```
- * generate json using below command and upload to system
+* Install phyton
+* install casparser using command
    ```shell
-   casparser 42103626220211831ZFFDEPR3H0RBD644686241F761CPIMBCP142488446.pdf -p ABCDE1234F -o pdf_parsed.json
+   pip install casparser
    ```
-   Here 2nd argument is the path of the pdf file, followed by password of CAS file and the output Type needed
+* generate json using below command and upload to system
+  ```shell
+  casparser 42103626220211831ZFFDEPR3H0RBD644686241F761CPIMBCP142488446.pdf -p ABCDE1234F -o pdf_parsed.json
+  ```
+  Here 2nd argument is the path of the pdf file, followed by password of CAS file and the output Type needed
