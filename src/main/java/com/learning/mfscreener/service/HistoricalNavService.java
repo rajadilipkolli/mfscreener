@@ -100,7 +100,7 @@ public class HistoricalNavService {
             String schemeType = lineValue;
             String amc = lineValue;
             boolean insertEachRow = navDate.isEqual(AppConstants.GRAND_FATHERTED_DATE);
-            while ((lineValue != null && !StringUtils.hasText(oldSchemeId)) || (lineValue != null && insertEachRow)) {
+            while (lineValue != null && (insertEachRow || !StringUtils.hasText(oldSchemeId))) {
                 String[] tokenize = lineValue.split(AppConstants.NAV_SEPARATOR);
                 if (tokenize.length == 1) {
                     String tempVal = lineValue;
