@@ -67,7 +67,7 @@ public class SchemeService {
         return this.mfSchemeRepository.findBySchemeNameLikeIgnoreCaseOrderBySchemeIdAsc(sName);
     }
 
-    @Loggable
+    @Loggable(result = false)
     public List<FundDetailProjection> fetchSchemesByFundName(String fundName) {
         String fName = "%" + fundName.toUpperCase(Locale.ROOT) + "%";
         LOGGER.info("Fetching schemes available for fundHouse :{}", fName);
@@ -84,7 +84,7 @@ public class SchemeService {
         LOGGER.debug("Updated {} rows with PAN", rowsUpdated);
     }
 
-    @Loggable
+    @Loggable(result = false)
     public Optional<MFSchemeDTO> getMfSchemeDTO(Long schemeCode, LocalDate navDate) {
         return this.mfSchemeRepository
                 .findBySchemeIdAndMfSchemeNavEntities_NavDate(schemeCode, navDate)
@@ -151,10 +151,6 @@ public class SchemeService {
         return mfSchemeRepository.findByPayOut(isin);
     }
 
-    public long count() {
-        return mfSchemeRepository.count();
-    }
-
     public List<Long> findAllSchemeIds() {
         return mfSchemeRepository.findAllSchemeIds();
     }
@@ -165,11 +161,16 @@ public class SchemeService {
     }
 
     @Transactional
+    @Loggable(result = false)
     public MFSchemeEntity saveEntity(MFSchemeEntity mfSchemeEntity) {
         return mfSchemeRepository.save(mfSchemeEntity);
     }
 
     public Optional<MFSchemeEntity> findBySchemeCode(Long schemeCode) {
         return mfSchemeRepository.findBySchemeId(schemeCode);
+    }
+
+    public boolean navLoadedFor31Jan2018() {
+        return mfSchemeRepository.countByMfSchemeNavEntities_NavDate(AppConstants.GRAND_FATHERTED_DATE) > 0;
     }
 }

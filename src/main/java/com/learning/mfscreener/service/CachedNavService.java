@@ -22,7 +22,7 @@ public class CachedNavService {
     }
 
     @Cacheable(cacheNames = "getNavForDate", unless = "#result == null")
-    @Loggable
+    @Loggable(result = false)
     public MFSchemeDTO getNavForDate(Long schemeCode, LocalDate navDate) {
         LOGGER.info("Fetching Nav for AMFISchemeCode: {} for date: {} from Database", schemeCode, navDate);
         return schemeService
