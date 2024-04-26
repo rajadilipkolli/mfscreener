@@ -151,10 +151,6 @@ public class SchemeService {
         return mfSchemeRepository.findByPayOut(isin);
     }
 
-    public long count() {
-        return mfSchemeRepository.count();
-    }
-
     public List<Long> findAllSchemeIds() {
         return mfSchemeRepository.findAllSchemeIds();
     }
@@ -165,11 +161,16 @@ public class SchemeService {
     }
 
     @Transactional
+    @Loggable(result = false)
     public MFSchemeEntity saveEntity(MFSchemeEntity mfSchemeEntity) {
         return mfSchemeRepository.save(mfSchemeEntity);
     }
 
     public Optional<MFSchemeEntity> findBySchemeCode(Long schemeCode) {
         return mfSchemeRepository.findBySchemeId(schemeCode);
+    }
+
+    public boolean navLoadedFor31Jan2018() {
+        return mfSchemeRepository.countByMfSchemeNavEntities_NavDate(AppConstants.GRAND_FATHERTED_DATE) > 0;
     }
 }

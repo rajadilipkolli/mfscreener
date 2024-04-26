@@ -46,4 +46,6 @@ public interface MFSchemeRepository extends JpaRepository<MFSchemeEntity, Long> 
             """)
     @Transactional(readOnly = true)
     List<FundDetailProjection> findByFundHouseLikeIgnoringCaseOrderBySchemeIdAsc(@Param("fName") String fName);
+
+    int countByMfSchemeNavEntities_NavDate(LocalDate grandFathertedDate);
 }

@@ -61,6 +61,11 @@ public class HistoricalNavService {
         }
     }
 
+    public void getHistoricalNavOn31Jan2018() {
+        URI historicalNavUri = buildHistoricalNavUri(null);
+        fetchAndProcessNavData(historicalNavUri, null, true, null, AppConstants.GRAND_FATHERTED_DATE);
+    }
+
     String handleDiscontinuedScheme(Long schemeCode, URI historicalNavUri, LocalDate navDate) {
         // discontinued scheme Isin
         Optional<SchemeNameAndISIN> schemeNameAndISIN = userSchemeDetailsService.findFirstBySchemeCode(schemeCode);
@@ -94,7 +99,8 @@ public class HistoricalNavService {
             }
             String schemeType = lineValue;
             String amc = lineValue;
-            while (lineValue != null && !StringUtils.hasText(oldSchemeId)) {
+            boolean insertEachRow = navDate.isEqual(AppConstants.GRAND_FATHERTED_DATE);
+            while ((lineValue != null && !StringUtils.hasText(oldSchemeId)) || (lineValue != null && insertEachRow)) {
                 String[] tokenize = lineValue.split(AppConstants.NAV_SEPARATOR);
                 if (tokenize.length == 1) {
                     String tempVal = lineValue;
@@ -106,12 +112,26 @@ public class HistoricalNavService {
                     } else {
                         amc = tempVal;
                         oldSchemeId = handleMultipleTokenLine(
-                                payOut, persistSchemeInfo, tokenize, oldSchemeId, amc, schemeType, schemeCode);
+                                payOut,
+                                persistSchemeInfo,
+                                tokenize,
+                                oldSchemeId,
+                                amc,
+                                schemeType,
+                                schemeCode,
+                                insertEachRow);
                     }
 
                 } else {
                     oldSchemeId = handleMultipleTokenLine(
-                            payOut, persistSchemeInfo, tokenize, oldSchemeId, amc, schemeType, schemeCode);
+                            payOut,
+                            persistSchemeInfo,
+                            tokenize,
+                            oldSchemeId,
+                            amc,
+                            schemeType,
+                            schemeCode,
+                            insertEachRow);
                 }
                 lineValue = readNextNonEmptyLine(br);
             }
@@ -137,10 +157,13 @@ public class HistoricalNavService {
             String oldSchemeId,
             String amc,
             String schemeType,
-            Long inputSchemeCode) {
+            Long inputSchemeCode,
+            boolean insertEachRow) {
         final String schemeCode = tokenize[0];
         final String payout = tokenize[2];
-        if (payout.equalsIgnoreCase(payOut) || schemeCode.equalsIgnoreCase(inputSchemeCode.toString())) {
+        if (insertEachRow) {
+            persistSchemeInfo(tokenize, amc, schemeType, schemeCode, payout);
+        } else if (payout.equalsIgnoreCase(payOut) || schemeCode.equalsIgnoreCase(inputSchemeCode.toString())) {
             oldSchemeId = schemeCode;
             if (persistSchemeInfo) {
                 persistSchemeInfo(tokenize, amc, schemeType, schemeCode, payout);
@@ -170,8 +193,15 @@ public class HistoricalNavService {
 
     URI buildHistoricalNavUri(LocalDate navDate) {
         // URL https://portal.amfiindia.com/DownloadNAVHistoryReport_Po.aspx?tp=1&frmdt=01-Jan-2024&todt=03-Jan-2024
-        String toDate = navDate.format(FORMATTER_DD_MMM_YYYY);
-        String fromDate = navDate.minusDays(3).format(FORMATTER_DD_MMM_YYYY);
+        String fromDate = null;
+        String toDate = null;
+        if (navDate != null) {
+            toDate = navDate.format(FORMATTER_DD_MMM_YYYY);
+            fromDate = navDate.minusDays(3).format(FORMATTER_DD_MMM_YYYY);
+        } else {
+            toDate = AppConstants.GRAND_FATHERTED_DATE.format(FORMATTER_DD_MMM_YYYY);
+            fromDate = AppConstants.GRAND_FATHERTED_DATE.format(FORMATTER_DD_MMM_YYYY);
+        }
         // tp=3 Interval Fund Schemes ( Income )
         // tp=2 Close Ended Schemes ( Income )
         // tp=1 Open Ended Schemes
