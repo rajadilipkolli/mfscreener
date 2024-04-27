@@ -7,6 +7,7 @@ import com.learning.mfscreener.models.portfolio.TransactionType;
 import com.learning.mfscreener.models.portfolio.UserFolioDTO;
 import com.learning.mfscreener.models.portfolio.UserSchemeDTO;
 import com.learning.mfscreener.models.portfolio.UserTransactionDTO;
+import com.learning.mfscreener.models.portfolio.ValuationDTO;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -59,7 +60,7 @@ public class TestData {
                 "0.0",
                 "86.696",
                 "86.696",
-                null,
+                new ValuationDTO("2024-04-12", 190.11, 0),
                 transactions);
     }
 
@@ -97,7 +98,7 @@ public class TestData {
                 "0.0",
                 "206.719",
                 "206.719",
-                null,
+                new ValuationDTO("2024-04-12", 97.352, 0),
                 transactions);
     }
 
@@ -124,7 +125,7 @@ public class TestData {
                 "0.0",
                 "3801.107",
                 "3801.107",
-                null,
+                new ValuationDTO("2024-04-12", 58.1998, 0),
                 transactions);
     }
 
@@ -179,7 +180,7 @@ public class TestData {
                 "0.0",
                 "109.583",
                 "109.583",
-                null,
+                new ValuationDTO("2024-04-12", 63.04, 0),
                 transactions);
     }
 
@@ -206,7 +207,7 @@ public class TestData {
                 "0.0",
                 "192.868",
                 "192.868",
-                null,
+                new ValuationDTO("2024-04-12", 351.49, 0),
                 transactions);
     }
 }
