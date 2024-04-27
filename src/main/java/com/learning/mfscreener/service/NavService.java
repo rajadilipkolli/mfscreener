@@ -3,6 +3,7 @@ package com.learning.mfscreener.service;
 import com.learning.mfscreener.config.logging.Loggable;
 import com.learning.mfscreener.exception.NavNotFoundException;
 import com.learning.mfscreener.models.MFSchemeDTO;
+import com.learning.mfscreener.utils.AppConstants;
 import com.learning.mfscreener.utils.LocalDateUtility;
 import java.time.LocalDate;
 import org.slf4j.Logger;
@@ -51,24 +52,25 @@ public class NavService {
             } catch (NavNotFoundException navNotFoundException) {
                 LOGGER.error("NavNotFoundException occurred: {}", navNotFoundException.getMessage());
 
-                if (retryCount == 1 || retryCount == 3) {
+                LocalDate currentNavDate = navNotFoundException.getDate();
+                if (retryCount == AppConstants.FIRST_RETRY || retryCount == AppConstants.THIRD_RETRY) {
                     // make a call to get historical Data and persist
                     String oldSchemeCode = historicalNavService.getHistoricalNav(schemeCode, navDate);
                     if (StringUtils.hasText(oldSchemeCode)) {
                         schemeService.fetchSchemeDetails(oldSchemeCode, schemeCode);
+                        currentNavDate = LocalDateUtility.getAdjustedDate(currentNavDate.plusDays(2));
                     } else {
                         // NFO scenario where data is not present in historical data, hence load all available data
                         schemeService.fetchSchemeDetails(String.valueOf(schemeCode), schemeCode);
                     }
                 }
                 // retrying 4 times
-                if (retryCount >= 4) {
+                if (retryCount >= AppConstants.MAX_RETRIES) {
                     throw navNotFoundException;
                 }
 
                 retryCount++;
-                navDate = LocalDateUtility.getAdjustedDate(
-                        navNotFoundException.getDate().minusDays(1));
+                navDate = LocalDateUtility.getAdjustedDate(currentNavDate.minusDays(1));
                 LOGGER.info("Retrying for date: {} for scheme: {}", navDate, schemeCode);
             }
         }

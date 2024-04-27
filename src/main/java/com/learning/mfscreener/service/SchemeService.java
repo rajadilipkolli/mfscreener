@@ -11,7 +11,6 @@ import com.learning.mfscreener.models.projection.UserFolioDetailsPanProjection;
 import com.learning.mfscreener.models.response.NavResponse;
 import com.learning.mfscreener.repository.MFSchemeRepository;
 import com.learning.mfscreener.utils.AppConstants;
-import com.learning.mfscreener.utils.LocalDateUtility;
 import java.net.URI;
 import java.time.LocalDate;
 import java.util.List;
@@ -61,7 +60,7 @@ public class SchemeService {
         processResponseEntity(newSchemeCode, getNavResponseResponseEntity(Long.valueOf(oldSchemeCode)));
     }
 
-    @Loggable
+    @Loggable(result = false)
     public List<FundDetailProjection> fetchSchemes(String schemeName) {
         String sName = "%" + schemeName.toUpperCase(Locale.ROOT) + "%";
         LOGGER.info("Fetching schemes with :{}", sName);
@@ -148,10 +147,12 @@ public class SchemeService {
         }
     }
 
+    @Transactional(readOnly = true)
     public Optional<MFSchemeEntity> findByPayOut(String isin) {
         return mfSchemeRepository.findByPayOut(isin);
     }
 
+    @Transactional(readOnly = true)
     public Optional<Long> getSchemeIdByISIN(String isin) {
         return mfSchemeRepository.getSchemeIdByISIN(isin);
     }
@@ -162,16 +163,26 @@ public class SchemeService {
         return mfSchemeRepository.save(mfSchemeEntity);
     }
 
+    @Transactional(readOnly = true)
     @Loggable(result = false)
     public Optional<MFSchemeEntity> findBySchemeCode(Long schemeCode) {
         return mfSchemeRepository.findBySchemeId(schemeCode);
     }
 
-    public boolean navLoadedFor31Jan2018() {
-        return mfSchemeRepository.countByMfSchemeNavEntities_NavDate(AppConstants.GRAND_FATHERTED_DATE) > 0;
+    @Transactional(readOnly = true)
+    public long count() {
+        return mfSchemeRepository.count();
     }
 
-    public boolean navLoadedForAdjustedDate() {
-        return mfSchemeRepository.countByMfSchemeNavEntities_NavDate(LocalDateUtility.getAdjustedDate()) > 0;
+    @Transactional(readOnly = true)
+    @Loggable(result = false)
+    public List<Long> findAllSchemeIds() {
+        return mfSchemeRepository.findAllSchemeIds();
+    }
+
+    @Transactional
+    @Loggable(result = false, params = false)
+    public List<MFSchemeEntity> saveAllEntities(List<MFSchemeEntity> mfSchemeEntityList) {
+        return mfSchemeRepository.saveAll(mfSchemeEntityList);
     }
 }

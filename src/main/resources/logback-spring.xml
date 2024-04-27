@@ -19,7 +19,7 @@
         </root>
     </springProfile>
 
-    <logger name="com.learning.mfscreener" level="DEBUG"/>
+    <logger name="com.learning.mfscreener" level="INFO"/>
     <logger name="net.ttddyy.dsproxy.listener" level="DEBUG"/>
     <logger name="org.springframework" level="INFO"/>
     <logger name="datasource-query-logger" level="DEBUG"/>

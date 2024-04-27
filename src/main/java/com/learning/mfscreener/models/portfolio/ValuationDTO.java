@@ -3,4 +3,4 @@ package com.learning.mfscreener.models.portfolio;
 
 import java.io.Serializable;
 
-public record ValuationDTO(String date, String nav, double value) implements Serializable {}
+public record ValuationDTO(String date, double nav, double value) implements Serializable {}
