@@ -3,6 +3,7 @@ package com.learning.mfscreener.service;
 import com.learning.mfscreener.config.logging.Loggable;
 import com.learning.mfscreener.exception.NavNotFoundException;
 import com.learning.mfscreener.models.MFSchemeDTO;
+import com.learning.mfscreener.utils.AppConstants;
 import com.learning.mfscreener.utils.LocalDateUtility;
 import java.time.LocalDate;
 import org.slf4j.Logger;
@@ -52,7 +53,7 @@ public class NavService {
                 LOGGER.error("NavNotFoundException occurred: {}", navNotFoundException.getMessage());
 
                 LocalDate currentNavDate = navNotFoundException.getDate();
-                if (retryCount == 1 || retryCount == 3) {
+                if (retryCount == AppConstants.FIRST_RETRY || retryCount == AppConstants.THIRD_RETRY) {
                     // make a call to get historical Data and persist
                     String oldSchemeCode = historicalNavService.getHistoricalNav(schemeCode, navDate);
                     if (StringUtils.hasText(oldSchemeCode)) {
@@ -64,7 +65,7 @@ public class NavService {
                     }
                 }
                 // retrying 4 times
-                if (retryCount >= 4) {
+                if (retryCount >= AppConstants.MAX_RETRIES) {
                     throw navNotFoundException;
                 }
 

@@ -17,4 +17,7 @@ public final class AppConstants {
             DateTimeFormatter.ofPattern(DATE_PATTERN_DD_MMM_YYYY, Locale.ENGLISH);
     public static final String MFAPI_WEBSITE_BASE_URL = "https://api.mfapi.in/mf/";
     public static final LocalDate TAX_STARTED_DATE = LocalDate.of(2020, 7, 1);
+    public static final int MAX_RETRIES = 4;
+    public static final int FIRST_RETRY = 1;
+    public static final int THIRD_RETRY = 3;
 }
