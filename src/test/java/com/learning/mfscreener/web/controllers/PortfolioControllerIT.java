@@ -134,7 +134,8 @@ class PortfolioControllerIT extends AbstractIntegrationTest {
             mockMvc.perform(multipart("/api/portfolio/upload").file(multipartFile))
                     .andExpect(status().isOk())
                     .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(jsonPath("$.importSummary", is("Imported 0 folios and 1 transactions")));
+                    .andExpect(jsonPath("$.importSummary", is("Imported 0 folios and 6 transactions")))
+                    .andExpect(jsonPath("$.FY2022-23", notNullValue()));
         } finally {
             tempFile.deleteOnExit();
         }

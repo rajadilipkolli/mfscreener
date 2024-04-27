@@ -48,7 +48,57 @@ public class TestData {
                 0.859d,
                 TransactionType.PURCHASE_SIP,
                 null);
+        UserTransactionDTO userTransactionDTO1 = new UserTransactionDTO(
+                LocalDate.parse("2021-05-24"),
+                "SIP Purchase - INA100009859",
+                100.0d,
+                0.823d,
+                121.58d,
+                0.823d,
+                TransactionType.PURCHASE_SIP,
+                null);
+        UserTransactionDTO buyTransaction = new UserTransactionDTO(
+                LocalDate.parse("2022-09-08"),
+                "Purchase-BSE - - INA200005166",
+                999.95d,
+                6.954d,
+                143.79d,
+                58.584d,
+                TransactionType.PURCHASE,
+                null);
+        UserTransactionDTO buyTransactionTax = new UserTransactionDTO(
+                LocalDate.parse("2022-09-08"),
+                "*** Stamp Duty ***",
+                0.05d,
+                null,
+                null,
+                null,
+                TransactionType.STAMP_DUTY_TAX,
+                null);
+        UserTransactionDTO sellTransaction = new UserTransactionDTO(
+                LocalDate.parse("2022-09-08"),
+                "*Redemption - ELECTRONIC PAYMENT-BSE - - N256222117703332 ,\t\tess STT l",
+                -1000.0,
+                -6.955,
+                143.79,
+                51.629,
+                TransactionType.REDEMPTION,
+                null);
+        UserTransactionDTO sellTransactionTax = new UserTransactionDTO(
+                LocalDate.parse("2022-09-08"),
+                "*** SSTT Paid ***",
+                0.01,
+                null,
+                null,
+                null,
+                TransactionType.STT_TAX,
+                null);
         transactions.add(userTransactionDTO);
+        transactions.add(userTransactionDTO1);
+        transactions.add(buyTransaction);
+        transactions.add(buyTransactionTax);
+        transactions.add(sellTransaction);
+        transactions.add(sellTransactionTax);
         return new UserSchemeDTO(
                 "ICICI Prudential Technology Fund - Direct Plan - Growth (Non-Demat) - ISIN: INF109K01Z48",
                 "INF109K01Z48",
