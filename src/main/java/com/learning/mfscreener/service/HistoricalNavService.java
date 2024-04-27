@@ -61,21 +61,6 @@ public class HistoricalNavService {
         }
     }
 
-    public void getHistoricalNavOn31Jan2018() {
-        String toDate = AppConstants.GRAND_FATHERTED_DATE.format(FORMATTER_DD_MMM_YYYY);
-        String fromDate = AppConstants.GRAND_FATHERTED_DATE.format(FORMATTER_DD_MMM_YYYY);
-        URI historicalNavUri = buildHistoricalNavUri(toDate, fromDate);
-        fetchAndProcessNavData(historicalNavUri, null, true, null, AppConstants.GRAND_FATHERTED_DATE);
-    }
-
-    public void getHistoricalNavForAdjustedDate() {
-        LocalDate adjustedDate = LocalDateUtility.getAdjustedDate();
-        String toDate = adjustedDate.format(FORMATTER_DD_MMM_YYYY);
-        String fromDate = adjustedDate.format(FORMATTER_DD_MMM_YYYY);
-        URI historicalNavUri = buildHistoricalNavUri(toDate, fromDate);
-        fetchAndProcessNavData(historicalNavUri, null, true, null, adjustedDate);
-    }
-
     String handleDiscontinuedScheme(Long schemeCode, URI historicalNavUri, LocalDate navDate) {
         // discontinued scheme Isin
         Optional<SchemeNameAndISIN> schemeNameAndISIN = userSchemeDetailsService.findFirstBySchemeCode(schemeCode);
