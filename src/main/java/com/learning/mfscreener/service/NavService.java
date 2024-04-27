@@ -51,11 +51,13 @@ public class NavService {
             } catch (NavNotFoundException navNotFoundException) {
                 LOGGER.error("NavNotFoundException occurred: {}", navNotFoundException.getMessage());
 
+                LocalDate currentNavDate = navNotFoundException.getDate();
                 if (retryCount == 1 || retryCount == 3) {
                     // make a call to get historical Data and persist
                     String oldSchemeCode = historicalNavService.getHistoricalNav(schemeCode, navDate);
                     if (StringUtils.hasText(oldSchemeCode)) {
                         schemeService.fetchSchemeDetails(oldSchemeCode, schemeCode);
+                        currentNavDate = LocalDateUtility.getAdjustedDate(currentNavDate.plusDays(2));
                     } else {
                         // NFO scenario where data is not present in historical data, hence load all available data
                         schemeService.fetchSchemeDetails(String.valueOf(schemeCode), schemeCode);
@@ -67,8 +69,7 @@ public class NavService {
                 }
 
                 retryCount++;
-                navDate = LocalDateUtility.getAdjustedDate(
-                        navNotFoundException.getDate().minusDays(1));
+                navDate = LocalDateUtility.getAdjustedDate(currentNavDate.minusDays(1));
                 LOGGER.info("Retrying for date: {} for scheme: {}", navDate, schemeCode);
             }
         }
