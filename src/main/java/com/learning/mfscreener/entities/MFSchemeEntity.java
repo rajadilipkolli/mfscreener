@@ -10,7 +10,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import jakarta.persistence.Version;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,9 +34,6 @@ public class MFSchemeEntity extends AuditableEntity<String> implements Serializa
 
     @Column(name = "scheme_name_alias")
     private String schemeNameAlias;
-
-    @Version
-    private Short version;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "mf_scheme_type_id")
@@ -88,15 +84,6 @@ public class MFSchemeEntity extends AuditableEntity<String> implements Serializa
 
     public MFSchemeEntity setSchemeNameAlias(String schemeNameAlias) {
         this.schemeNameAlias = schemeNameAlias;
-        return this;
-    }
-
-    public Short getVersion() {
-        return version;
-    }
-
-    public MFSchemeEntity setVersion(Short version) {
-        this.version = version;
         return this;
     }
 

@@ -26,7 +26,6 @@
             <column name="pay_out" type="${string.type}"/>
             <column name="scheme_name_alias" type="${string.type}"/>
             <column name="mf_scheme_type_id" type="INT"/>
-            <column name="version" type="tinyint"/>
             <column name="created_by" type="${string.type}"/>
             <column name="created_date" type="DATETIME"/>
             <column name="last_modified_by" type="${string.type}"/>

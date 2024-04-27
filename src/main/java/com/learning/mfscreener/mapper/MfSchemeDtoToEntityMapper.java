@@ -12,12 +12,12 @@ import java.time.LocalDate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.mapstruct.AfterMapping;
-import org.mapstruct.Context;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @Mapper(config = MapperSpringConfig.class)
 public abstract class MfSchemeDtoToEntityMapper {
@@ -26,6 +26,9 @@ public abstract class MfSchemeDtoToEntityMapper {
     // Define the regular expressions
     private static final Pattern TYPE_CATEGORY_SUBCATEGORY_PATTERN =
             Pattern.compile("^(.*?)\\((.*?)\\s*-\\s*(.*?)\\)$");
+
+    @Autowired
+    MFSchemeTypeRepository mfSchemeTypeRepository;
 
     @Mapping(target = "mfSchemeTypeEntity", ignore = true)
     @Mapping(target = "mfSchemeNavEntities", ignore = true)
@@ -37,15 +40,10 @@ public abstract class MfSchemeDtoToEntityMapper {
     @Mapping(target = "createdBy", ignore = true)
     @Mapping(target = "payOut", source = "payout")
     @Mapping(target = "schemeId", source = "schemeCode")
-    @Mapping(target = "version", ignore = true)
-    public abstract MFSchemeEntity mapMFSchemeDTOToMFSchemeEntity(
-            MFSchemeDTO scheme, @Context MFSchemeTypeRepository mfSchemeTypeRepository);
+    public abstract MFSchemeEntity mapMFSchemeDTOToMFSchemeEntity(MFSchemeDTO scheme);
 
     @AfterMapping
-    void updateMFScheme(
-            MFSchemeDTO scheme,
-            @MappingTarget MFSchemeEntity mfSchemeEntity,
-            @Context MFSchemeTypeRepository mfSchemeTypeRepository) {
+    void updateMFScheme(MFSchemeDTO scheme, @MappingTarget MFSchemeEntity mfSchemeEntity) {
         MFSchemeNavEntity mfSchemenavEntity = new MFSchemeNavEntity();
         mfSchemenavEntity.setNav("N.A.".equals(scheme.nav()) ? 0F : Float.parseFloat(scheme.nav()));
         mfSchemenavEntity.setNavDate(LocalDate.parse(scheme.date(), AppConstants.FORMATTER_DD_MMM_YYYY));
