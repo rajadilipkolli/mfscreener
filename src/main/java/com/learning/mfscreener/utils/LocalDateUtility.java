@@ -28,6 +28,24 @@ public class LocalDateUtility {
         return asOfDate == null ? getAdjustedDate() : getAdjustedDate(asOfDate);
     }
 
+    public static String getFinYear(LocalDate sellDate) {
+        int year1;
+        int year2;
+        if (sellDate.getMonthValue() > 3) {
+            year1 = sellDate.getYear();
+            year2 = sellDate.getYear() + 1;
+        } else {
+            year1 = sellDate.getYear() - 1;
+            year2 = sellDate.getYear();
+        }
+
+        if (year1 % 100 != 99) {
+            year2 %= 100;
+        }
+
+        return String.format("FY%d-%02d", year1, year2);
+    }
+
     private LocalDateUtility() {
         throw new UnsupportedOperationException("Constructor can't be initialized");
     }

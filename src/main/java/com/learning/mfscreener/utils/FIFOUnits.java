@@ -138,7 +138,7 @@ public class FIFOUnits {
     }
 
     private void sell(LocalDate sellDate, BigDecimal quantity, BigDecimal nav, BigDecimal tax) throws GainsException {
-        String finYear = getFinYear(sellDate);
+        String finYear = LocalDateUtility.getFinYear(sellDate);
         BigDecimal originalQuantity = quantity.abs();
         BigDecimal pendingUnits = originalQuantity;
 
@@ -185,23 +185,6 @@ public class FIFOUnits {
                 transactions.addFirst(new Transaction(purchaseDate, pendingUnits.negate(), purchaseNav, purchaseTax));
             }
         }
-    }
-
-    public static String getFinYear(LocalDate sellDate) {
-        int year1, year2;
-        if (sellDate.getMonthValue() > 3) {
-            year1 = sellDate.getYear();
-            year2 = sellDate.getYear() + 1;
-        } else {
-            year1 = sellDate.getYear() - 1;
-            year2 = sellDate.getYear();
-        }
-
-        if (year1 % 100 != 99) {
-            year2 %= 100;
-        }
-
-        return String.format("FY%d-%02d", year1, year2);
     }
 
     /**
