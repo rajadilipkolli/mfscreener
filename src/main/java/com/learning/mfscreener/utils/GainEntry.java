@@ -1,8 +1,9 @@
-package com.learning.mfscreener.models.portfolio;
+package com.learning.mfscreener.utils;
 
-import com.learning.mfscreener.config.SpringContext;
-import com.learning.mfscreener.service.NavSearchService;
-import com.learning.mfscreener.utils.FIFOUnits;
+import com.learning.mfscreener.helper.NavSearchHelper;
+import com.learning.mfscreener.models.portfolio.Fund;
+import com.learning.mfscreener.models.portfolio.FundType;
+import com.learning.mfscreener.models.portfolio.GainType;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
@@ -91,7 +92,7 @@ public class GainEntry {
 
     private void updateNav(String isin) {
         this.cachedIsin = isin;
-        this.cachedNav = SpringContext.getBean(NavSearchService.class).navSearch(cachedIsin);
+        this.cachedNav = NavSearchHelper.getNav(isin);
     }
 
     public String getFinYear() {
@@ -202,6 +203,14 @@ public class GainEntry {
         return this;
     }
 
+    public LocalDate getCutoffDate() {
+        return cutoffDate;
+    }
+
+    public LocalDate getSellCutoffDate() {
+        return sellCutoffDate;
+    }
+
     public BigDecimal getLtcgTaxable() {
         if (this.getGainType() == GainType.LTCG) {
             return this.saleValue.subtract(this.getCoa()).setScale(2, RoundingMode.HALF_UP);
@@ -210,11 +219,11 @@ public class GainEntry {
     }
 
     public BigDecimal getCoa() {
-        if (this.fundType == FundType.DEBT) {
+        if (this.getFundType() == FundType.DEBT) {
             return this.purchaseValue.multiply(this.getIndexRatio()).setScale(2, RoundingMode.HALF_UP);
         }
-        if (this.purchaseDate.isBefore(this.cutoffDate)) {
-            if (this.saleDate.isBefore(this.sellCutoffDate)) {
+        if (this.purchaseDate.isBefore(this.getCutoffDate())) {
+            if (this.saleDate.isBefore(this.getSellCutoffDate())) {
                 return this.saleValue;
             }
             return this.purchaseValue.max(this.getFmv().min(this.saleValue));
@@ -227,7 +236,7 @@ public class GainEntry {
         if (fmvNav == null) {
             return this.purchaseValue;
         }
-        return fmvNav.multiply(this.units);
+        return fmvNav.multiply(this.getUnits());
     }
 
     private BigDecimal getFmvNav() {

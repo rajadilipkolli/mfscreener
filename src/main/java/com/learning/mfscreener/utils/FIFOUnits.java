@@ -3,7 +3,6 @@ package com.learning.mfscreener.utils;
 import com.learning.mfscreener.exception.GainsException;
 import com.learning.mfscreener.models.portfolio.Fund;
 import com.learning.mfscreener.models.portfolio.FundType;
-import com.learning.mfscreener.models.portfolio.GainEntry;
 import com.learning.mfscreener.models.portfolio.TransactionType;
 import com.learning.mfscreener.models.portfolio.UserTransactionDTO;
 import java.math.BigDecimal;

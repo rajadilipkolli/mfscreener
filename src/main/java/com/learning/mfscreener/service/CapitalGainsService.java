@@ -6,11 +6,11 @@ import com.learning.mfscreener.exception.IncompleteCASError;
 import com.learning.mfscreener.models.portfolio.CasDTO;
 import com.learning.mfscreener.models.portfolio.Fund;
 import com.learning.mfscreener.models.portfolio.FundType;
-import com.learning.mfscreener.models.portfolio.GainEntry;
 import com.learning.mfscreener.models.portfolio.UserFolioDTO;
 import com.learning.mfscreener.models.portfolio.UserSchemeDTO;
 import com.learning.mfscreener.models.portfolio.UserTransactionDTO;
 import com.learning.mfscreener.utils.FIFOUnits;
+import com.learning.mfscreener.utils.GainEntry;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -31,28 +31,39 @@ public class CapitalGainsService {
 
     @Loggable(params = false)
     Map<String, Object> processData(CasDTO casDTO) throws IncompleteCASError {
-
-        for (UserFolioDTO folio : casDTO.folios()) {
-            for (UserSchemeDTO scheme : folio.schemes()) {
-                List<UserTransactionDTO> transactions = scheme.transactions();
-                Fund fund = new Fund(scheme.scheme(), folio.folio(), scheme.isin(), scheme.type());
-                if (!transactions.isEmpty()) {
-                    if (Double.parseDouble(scheme.myopen()) >= MIN_OPEN_BALANCE) {
-                        throw new IncompleteCASError(
-                                "Incomplete CAS found. For gains computation all folios should have zero opening balance");
-                    }
-                    try {
-                        FIFOUnits fifo = new FIFOUnits(fund, transactions);
-                        investedAmount = this.investedAmount.add(fifo.getInvested());
-                        currentValue = currentValue + scheme.valuation().value();
-                        gainEntries.addAll(fifo.getGains());
-                    } catch (GainsException exc) {
-                        this.errors.add(fund.scheme() + ", " + exc.getMessage());
-                    }
-                }
-            }
-        }
+        casDTO.folios().forEach(this::processFolio);
         return prepareGains(gainEntries);
+    }
+
+    void processFolio(UserFolioDTO folio) {
+        folio.schemes().forEach(scheme -> processScheme(folio, scheme));
+    }
+
+    void processScheme(UserFolioDTO folio, UserSchemeDTO scheme) {
+        List<UserTransactionDTO> transactions = scheme.transactions();
+        Fund fund = new Fund(scheme.scheme(), folio.folio(), scheme.isin(), scheme.type());
+        if (!transactions.isEmpty()) {
+            validateOpenBalance(scheme);
+            processTransactions(fund, transactions, scheme);
+        }
+    }
+
+    void validateOpenBalance(UserSchemeDTO scheme) {
+        if (Double.parseDouble(scheme.myopen()) >= MIN_OPEN_BALANCE) {
+            throw new IncompleteCASError(
+                    "Incomplete CAS found. For gains computation all folios should have zero opening balance");
+        }
+    }
+
+    void processTransactions(Fund fund, List<UserTransactionDTO> transactions, UserSchemeDTO scheme) {
+        try {
+            FIFOUnits fifo = new FIFOUnits(fund, transactions);
+            investedAmount = this.investedAmount.add(fifo.getInvested());
+            currentValue += scheme.valuation().value();
+            gainEntries.addAll(fifo.getGains());
+        } catch (GainsException exc) {
+            this.errors.add(fund.scheme() + ", " + exc.getMessage());
+        }
     }
 
     Map<String, Object> prepareGains(List<GainEntry> gainEntries) {
