@@ -5,6 +5,7 @@ import com.learning.mfscreener.service.PortfolioService;
 import com.learning.mfscreener.web.api.PortfolioApi;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.Map;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -31,7 +32,8 @@ public class PortfolioController implements PortfolioApi {
 
     @Override
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<String> upload(@RequestPart("file") MultipartFile multipartFile) throws IOException {
+    public ResponseEntity<Map<String, Object>> upload(@RequestPart("file") MultipartFile multipartFile)
+            throws IOException {
         return ResponseEntity.ok(portfolioService.upload(multipartFile));
     }
 

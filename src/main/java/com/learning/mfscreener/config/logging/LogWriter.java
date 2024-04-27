@@ -17,4 +17,8 @@ public class LogWriter {
             default -> logger.warn("No suitable logLevel found");
         }
     }
+
+    private LogWriter() {
+        throw new UnsupportedOperationException("Constructor can't be initialized");
+    }
 }

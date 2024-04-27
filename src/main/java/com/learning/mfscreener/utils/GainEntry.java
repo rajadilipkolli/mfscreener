@@ -12,7 +12,7 @@ import java.util.Map;
 
 public class GainEntry {
 
-    private final Map<String, BigDecimal> CII = loadCIIData();
+    private final Map<String, BigDecimal> CII = loadCostInflationIndexData();
     private final LocalDate cutoffDate;
     private final LocalDate sellCutoffDate;
 
@@ -248,7 +248,7 @@ public class GainEntry {
         return this.saleDate.isAfter(ltcg.get(this.fundType.name())) ? GainType.LTCG : GainType.STCG;
     }
 
-    private Map<String, BigDecimal> loadCIIData() {
+    private Map<String, BigDecimal> loadCostInflationIndexData() {
         Map<String, BigDecimal> ciiDataMap = new HashMap<>();
         ciiDataMap.put("FY2001-02", BigDecimal.valueOf(100));
         ciiDataMap.put("FY2002-03", BigDecimal.valueOf(105));
@@ -272,6 +272,9 @@ public class GainEntry {
         ciiDataMap.put("FY2020-21", BigDecimal.valueOf(301));
         ciiDataMap.put("FY2021-22", BigDecimal.valueOf(317));
         ciiDataMap.put("FY2022-23", BigDecimal.valueOf(331));
+        ciiDataMap.put("FY2023-24", BigDecimal.valueOf(348));
+        // TODO to be updated when notified
+        ciiDataMap.put("FY2024-25", BigDecimal.valueOf(348));
         return ciiDataMap;
     }
 }
