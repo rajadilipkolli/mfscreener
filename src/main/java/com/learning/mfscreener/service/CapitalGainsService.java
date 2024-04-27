@@ -58,9 +58,9 @@ public class CapitalGainsService {
     void processTransactions(Fund fund, List<UserTransactionDTO> transactions, UserSchemeDTO scheme) {
         try {
             FIFOUnits fifo = new FIFOUnits(fund, transactions);
-            investedAmount = this.investedAmount.add(fifo.getInvested());
+            investedAmount = this.investedAmount.add(fifo.getTotalInvested());
             currentValue += scheme.valuation().value();
-            gainEntries.addAll(fifo.getGains());
+            gainEntries.addAll(fifo.getRecordedGains());
         } catch (GainsException exc) {
             this.errors.add(fund.scheme() + ", " + exc.getMessage());
         }
@@ -73,14 +73,14 @@ public class CapitalGainsService {
         // Group the gains by fy and fund
         Map<String, List<GainEntry>> groupedGains = new HashMap<>();
         for (GainEntry txn : gainEntries) {
-            String key = txn.getFinYear() + "-" + txn.getFundType();
+            String key = txn.getFinYear() + "#" + txn.getFundType();
             if (!groupedGains.containsKey(key)) {
                 groupedGains.put(key, new ArrayList<>());
             }
             groupedGains.get(key).add(txn);
         }
         for (Map.Entry<String, List<GainEntry>> entry : groupedGains.entrySet()) {
-            String[] keys = entry.getKey().split("-");
+            String[] keys = entry.getKey().split("#");
             String fy = keys[0];
             FundType fund = FundType.valueOf(keys[1]);
             if (!summary.containsKey(fy)) {

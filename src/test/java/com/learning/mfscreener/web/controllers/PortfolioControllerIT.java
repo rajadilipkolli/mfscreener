@@ -1,6 +1,7 @@
 package com.learning.mfscreener.web.controllers;
 
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -47,7 +48,9 @@ class PortfolioControllerIT extends AbstractIntegrationTest {
             // Perform the file upload request
             mockMvc.perform(multipart("/api/portfolio/upload").file(multipartFile))
                     .andExpect(status().isOk())
-                    .andExpect(content().string("Imported 1 folios and 1 transactions"));
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("$.importSummary", is("Imported 1 folios and 5 transactions")))
+                    .andExpect(jsonPath("$.FY2022-23", notNullValue()));
         } finally {
             tempFile.deleteOnExit();
         }
@@ -74,7 +77,8 @@ class PortfolioControllerIT extends AbstractIntegrationTest {
             // Perform the file upload request
             mockMvc.perform(multipart("/api/portfolio/upload").file(multipartFile))
                     .andExpect(status().isOk())
-                    .andExpect(content().string("Nothing to Update"));
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("$.importSummary", is("Nothing to Update")));
         } finally {
             tempFile.deleteOnExit();
         }
@@ -101,7 +105,8 @@ class PortfolioControllerIT extends AbstractIntegrationTest {
             // Perform the file upload request
             mockMvc.perform(multipart("/api/portfolio/upload").file(multipartFile))
                     .andExpect(status().isOk())
-                    .andExpect(content().string("Imported 1 folios and 1 transactions"));
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("$.importSummary", is("Imported 1 folios and 1 transactions")));
         } finally {
             tempFile.deleteOnExit();
         }
@@ -128,7 +133,9 @@ class PortfolioControllerIT extends AbstractIntegrationTest {
             // Perform the file upload request
             mockMvc.perform(multipart("/api/portfolio/upload").file(multipartFile))
                     .andExpect(status().isOk())
-                    .andExpect(content().string("Imported 0 folios and 1 transactions"));
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("$.importSummary", is("Imported 0 folios and 6 transactions")))
+                    .andExpect(jsonPath("$.FY2022-23", notNullValue()));
         } finally {
             tempFile.deleteOnExit();
         }
@@ -155,7 +162,8 @@ class PortfolioControllerIT extends AbstractIntegrationTest {
             // Perform the file upload request
             mockMvc.perform(multipart("/api/portfolio/upload").file(multipartFile))
                     .andExpect(status().isOk())
-                    .andExpect(content().string("Imported 0 folios and 1 transactions"));
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("$.importSummary", is("Imported 0 folios and 1 transactions")));
         } finally {
             tempFile.deleteOnExit();
         }
@@ -182,7 +190,8 @@ class PortfolioControllerIT extends AbstractIntegrationTest {
             // Perform the file upload request
             mockMvc.perform(multipart("/api/portfolio/upload").file(multipartFile))
                     .andExpect(status().isOk())
-                    .andExpect(content().string("Imported 1 folios and 3 transactions"));
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("$.importSummary", is("Imported 1 folios and 3 transactions")));
         } finally {
             tempFile.deleteOnExit();
         }
@@ -207,13 +216,14 @@ class PortfolioControllerIT extends AbstractIntegrationTest {
             // Perform the file upload request
             mockMvc.perform(multipart("/api/portfolio/upload").file(multipartFile))
                     .andExpect(status().isOk())
-                    .andExpect(content().string("Imported 1 folios and 0 transactions"));
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("$.importSummary", is("Imported 1 folios and 0 transactions")));
         } finally {
             tempFile.deleteOnExit();
         }
     }
 
-    private static FileWriter getFileWriter(File tempFile) throws IOException, IOException {
+    private static FileWriter getFileWriter(File tempFile) throws IOException {
         FileWriter fileWriter = new FileWriter(tempFile);
         fileWriter.write(
                 """

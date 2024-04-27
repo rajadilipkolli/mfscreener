@@ -72,10 +72,12 @@ public class PortfolioService {
         this.capitalGainsService = capitalGainsService;
     }
 
-    public String upload(MultipartFile portfolioFile) throws IOException {
+    public Map<String, Object> upload(MultipartFile portfolioFile) throws IOException {
         CasDTO casDTO = parseCasDTO(portfolioFile);
-        capitalGainsService.processData(casDTO);
-        return processCasDTO(casDTO);
+        String response = processCasDTO(casDTO);
+        Map<String, Object> investmentSummary = capitalGainsService.processData(casDTO);
+        investmentSummary.put("importSummary", response);
+        return investmentSummary;
     }
 
     public PortfolioResponse getPortfolioByPAN(String panNumber, LocalDate evaluationDate) {
