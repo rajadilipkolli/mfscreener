@@ -9,7 +9,6 @@ import com.learning.mfscreener.exception.NavNotFoundException;
 import com.learning.mfscreener.mapper.MfSchemeDtoToEntityMapper;
 import com.learning.mfscreener.models.MFSchemeDTO;
 import com.learning.mfscreener.models.projection.SchemeNameAndISIN;
-import com.learning.mfscreener.repository.MFSchemeTypeRepository;
 import com.learning.mfscreener.utils.AppConstants;
 import com.learning.mfscreener.utils.LocalDateUtility;
 import java.io.BufferedReader;
@@ -35,19 +34,16 @@ public class HistoricalNavService {
     private static final Logger LOGGER = LoggerFactory.getLogger(HistoricalNavService.class);
 
     private final SchemeService schemeService;
-    private final MFSchemeTypeRepository mfSchemeTypeRepository;
     private final RestClient restClient;
     private final MfSchemeDtoToEntityMapper mfSchemeDtoToEntityMapper;
     private final UserSchemeDetailsService userSchemeDetailsService;
 
     public HistoricalNavService(
             SchemeService schemeService,
-            MFSchemeTypeRepository mfSchemeTypeRepository,
             RestClient restClient,
             MfSchemeDtoToEntityMapper mfSchemeDtoToEntityMapper,
             UserSchemeDetailsService userSchemeDetailsService) {
         this.schemeService = schemeService;
-        this.mfSchemeTypeRepository = mfSchemeTypeRepository;
         this.restClient = restClient;
         this.mfSchemeDtoToEntityMapper = mfSchemeDtoToEntityMapper;
         this.userSchemeDetailsService = userSchemeDetailsService;
@@ -201,7 +197,7 @@ public class HistoricalNavService {
             String schemeName = tokenize[1];
             MFSchemeDTO mfSchemeDTO =
                     new MFSchemeDTO(amc, Long.valueOf(schemeCode), payout, schemeName, nav, date, schemeType);
-            return mfSchemeDtoToEntityMapper.mapMFSchemeDTOToMFSchemeEntity(mfSchemeDTO, mfSchemeTypeRepository);
+            return mfSchemeDtoToEntityMapper.mapMFSchemeDTOToMFSchemeEntity(mfSchemeDTO);
         } else {
             MFSchemeNavEntity mfSchemenavEntity = new MFSchemeNavEntity();
             mfSchemenavEntity.setNav("N.A.".equals(nav) ? 0F : Float.parseFloat(nav));
