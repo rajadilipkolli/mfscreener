@@ -105,6 +105,42 @@ public class TestData {
     private static UserSchemeDTO getIciciSchemeDTO() {
         List<UserTransactionDTO> transactions = new ArrayList<>();
         UserTransactionDTO userTransactionDTO = new UserTransactionDTO(
+                LocalDate.parse("2021-07-19"),
+                "Switch In - From Liquid Fund - DP Growth - INA000006651",
+                24383.78d,
+                153.371d,
+                158.9851d,
+                153.371d,
+                TransactionType.SWITCH_IN,
+                null);
+        UserTransactionDTO taxTransaction = new UserTransactionDTO(
+                LocalDate.parse("2021-07-19"),
+                "*** Stamp Duty ***",
+                1.22d,
+                null,
+                null,
+                null,
+                TransactionType.STAMP_DUTY_TAX,
+                null);
+        UserTransactionDTO sellUserTransactionDTO = new UserTransactionDTO(
+                LocalDate.parse("2022-08-01"),
+                "*Switch Out - To Nifty 50 Index Fund-DP Growth-BSE - , less STT",
+                -5000.0d,
+                -28.261d,
+                176.9251d,
+                125.110d,
+                TransactionType.SWITCH_OUT,
+                null);
+        UserTransactionDTO sellTaxTransaction = new UserTransactionDTO(
+                LocalDate.parse("2022-08-01"),
+                "*** STT Paid ***",
+                0.05d,
+                null,
+                null,
+                null,
+                TransactionType.STT_TAX,
+                null);
+        UserTransactionDTO userTransactionDTO1 = new UserTransactionDTO(
                 LocalDate.parse("2021-01-14"),
                 "SIP Purchase-BSE - - INA200005166",
                 499.98d,
@@ -114,6 +150,10 @@ public class TestData {
                 TransactionType.PURCHASE_SIP,
                 null);
         transactions.add(userTransactionDTO);
+        transactions.add(taxTransaction);
+        transactions.add(sellUserTransactionDTO);
+        transactions.add(sellTaxTransaction);
+        transactions.add(userTransactionDTO1);
         return new UserSchemeDTO(
                 "ICICI Prudential Nifty Next 50 Index Fund - Direct Plan - Growth (Non-Demat) - ISIN: INF109K01Y80",
                 "INF109K01Y80",

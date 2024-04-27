@@ -1,6 +1,7 @@
 package com.learning.mfscreener.web.controllers;
 
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -48,7 +49,8 @@ class PortfolioControllerIT extends AbstractIntegrationTest {
             mockMvc.perform(multipart("/api/portfolio/upload").file(multipartFile))
                     .andExpect(status().isOk())
                     .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(jsonPath("$.importSummary", is("Imported 1 folios and 1 transactions")));
+                    .andExpect(jsonPath("$.importSummary", is("Imported 1 folios and 5 transactions")))
+                    .andExpect(jsonPath("$.FY2022-23", notNullValue()));
         } finally {
             tempFile.deleteOnExit();
         }
