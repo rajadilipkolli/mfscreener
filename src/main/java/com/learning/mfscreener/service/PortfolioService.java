@@ -47,6 +47,7 @@ public class PortfolioService {
     private final PortfolioServiceHelper portfolioServiceHelper;
     private final UserCASDetailsService userCASDetailsService;
     private final InvestorInfoService investorInfoService;
+    private final CapitalGainsService capitalGainsService;
 
     public PortfolioService(
             ConversionServiceAdapter conversionServiceAdapter,
@@ -57,7 +58,8 @@ public class PortfolioService {
             UserSchemeDetailsService userSchemeDetailsService,
             PortfolioServiceHelper portfolioServiceHelper,
             UserCASDetailsService userCASDetailsService,
-            InvestorInfoService investorInfoService) {
+            InvestorInfoService investorInfoService,
+            CapitalGainsService capitalGainsService) {
         this.conversionServiceAdapter = conversionServiceAdapter;
         this.casDetailsMapper = casDetailsMapper;
         this.userCASDetailsService = userCASDetailsService;
@@ -67,10 +69,12 @@ public class PortfolioService {
         this.userTransactionDetailsService = userTransactionDetailsService;
         this.portfolioServiceHelper = portfolioServiceHelper;
         this.investorInfoService = investorInfoService;
+        this.capitalGainsService = capitalGainsService;
     }
 
     public String upload(MultipartFile portfolioFile) throws IOException {
         CasDTO casDTO = parseCasDTO(portfolioFile);
+        capitalGainsService.processData(casDTO);
         return processCasDTO(casDTO);
     }
 
