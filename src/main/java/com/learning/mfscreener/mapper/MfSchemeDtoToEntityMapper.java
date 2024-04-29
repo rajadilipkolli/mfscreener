@@ -26,7 +26,7 @@ public abstract class MfSchemeDtoToEntityMapper {
 
     // Define the regular expressions
     private static final Pattern TYPE_CATEGORY_SUBCATEGORY_PATTERN =
-            Pattern.compile("^(.*?)\\((.*?)\\s*-\\s*(.*?)\\)$");
+            Pattern.compile("^(.+?)\\(([^()]*?)\\s*-\\s*([^()]*?)\\)$");
 
     @Autowired
     MFSchemeTypeRepository mfSchemeTypeRepository;
