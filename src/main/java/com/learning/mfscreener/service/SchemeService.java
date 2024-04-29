@@ -4,6 +4,7 @@ import com.learning.mfscreener.adapter.ConversionServiceAdapter;
 import com.learning.mfscreener.config.logging.Loggable;
 import com.learning.mfscreener.entities.MFSchemeEntity;
 import com.learning.mfscreener.entities.MFSchemeNavEntity;
+import com.learning.mfscreener.exception.FileNotFoundException;
 import com.learning.mfscreener.exception.SchemeNotFoundException;
 import com.learning.mfscreener.mapper.MfSchemeDtoToEntityMapper;
 import com.learning.mfscreener.models.MFSchemeDTO;
@@ -238,7 +239,7 @@ public class SchemeService {
             List<MFSchemeEntity> persistedEntities = mfSchemeRepository.saveAll(mfSchemeEntities);
             LOGGER.info("Persisted : {} rows", persistedEntities.size());
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new FileNotFoundException(e.getMessage());
         }
     }
 }

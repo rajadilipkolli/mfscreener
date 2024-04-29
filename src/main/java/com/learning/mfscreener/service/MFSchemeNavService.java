@@ -1,6 +1,8 @@
 package com.learning.mfscreener.service;
 
+import com.learning.mfscreener.config.logging.Loggable;
 import com.learning.mfscreener.entities.MFSchemeNavEntity;
+import com.learning.mfscreener.exception.FileNotFoundException;
 import com.learning.mfscreener.repository.MFSchemeNavEntityRepository;
 import com.learning.mfscreener.repository.MFSchemeRepository;
 import com.learning.mfscreener.utils.AppConstants;
@@ -16,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Loggable
 public class MFSchemeNavService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MFSchemeNavService.class);
@@ -60,7 +63,7 @@ public class MFSchemeNavService {
             List<MFSchemeNavEntity> persistedEntities = mfSchemeNavEntityRepository.saveAll(mfSchemeNavEntities);
             LOGGER.info("Persisted : {} rows", persistedEntities.size());
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new FileNotFoundException(e.getMessage());
         }
     }
 
