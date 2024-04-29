@@ -153,9 +153,9 @@ public class SchemeService {
         return mfSchemeRepository.findByPayOut(isin);
     }
 
-    @Cacheable("schemeIdByISIN")
+    @Cacheable(value = "schemeIdByISIN")
     @Transactional(readOnly = true)
-    public Optional<Long> getSchemeIdByISIN(String isin) {
+    public List<Long> getSchemeIdByISIN(String isin) {
         return mfSchemeRepository.getSchemeIdByISIN(isin);
     }
 
@@ -191,5 +191,10 @@ public class SchemeService {
     @Transactional(readOnly = true)
     public boolean navLoadedFor31Jan2018() {
         return mfSchemeRepository.countByMfSchemeNavEntities_NavDate(AppConstants.GRAND_FATHERED_DATE) > 9000;
+    }
+
+    @Transactional(readOnly = true)
+    public MFSchemeEntity getReferenceBySchemeId(Long schemeCode) {
+        return mfSchemeRepository.findBySchemeId(schemeCode).get();
     }
 }

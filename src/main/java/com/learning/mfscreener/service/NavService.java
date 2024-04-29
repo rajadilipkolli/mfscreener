@@ -7,7 +7,7 @@ import com.learning.mfscreener.utils.AppConstants;
 import com.learning.mfscreener.utils.LocalDateUtility;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.Optional;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -43,10 +43,10 @@ public class NavService {
 
     @Loggable
     public BigDecimal getNavByISINOnDate(String isin, LocalDate inputDate) {
-        Optional<Long> schemeIdByISIN = schemeService.getSchemeIdByISIN(isin);
+        List<Long> schemeIdByISINList = schemeService.getSchemeIdByISIN(isin);
         BigDecimal nav = BigDecimal.ZERO;
-        if (schemeIdByISIN.isPresent()) {
-            Long schemeCode = schemeIdByISIN.get();
+        if (!schemeIdByISINList.isEmpty()) {
+            Long schemeCode = schemeIdByISINList.get(0);
             if (schemeCode < 143000) {
                 try {
                     MFSchemeDTO navByDateWithRetry = getNavByDateWithRetry(schemeCode, inputDate);

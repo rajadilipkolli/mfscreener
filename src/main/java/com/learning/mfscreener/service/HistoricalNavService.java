@@ -16,6 +16,8 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.net.URI;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import org.slf4j.Logger;
@@ -36,6 +38,8 @@ public class HistoricalNavService {
     private final RestClient restClient;
     private final MfSchemeDtoToEntityMapper mfSchemeDtoToEntityMapper;
     private final UserSchemeDetailsService userSchemeDetailsService;
+
+    List<Long> schemeCodeList = new ArrayList<>();
 
     public HistoricalNavService(
             SchemeService schemeService,
@@ -159,12 +163,12 @@ public class HistoricalNavService {
             String schemeType,
             Long inputSchemeCode,
             boolean insertEachRow) {
-        final String schemeCode = tokenize[0];
+        final Long schemeCode = Long.valueOf(tokenize[0]);
         final String payout = tokenize[2];
         if (insertEachRow) {
             persistSchemeInfo(tokenize, amc, schemeType, schemeCode, payout);
-        } else if (payout.equalsIgnoreCase(payOut) || schemeCode.equals(inputSchemeCode.toString())) {
-            oldSchemeId = schemeCode;
+        } else if (payout.equalsIgnoreCase(payOut) || schemeCode.equals(inputSchemeCode)) {
+            oldSchemeId = String.valueOf(schemeCode);
             if (persistSchemeInfo) {
                 persistSchemeInfo(tokenize, amc, schemeType, schemeCode, payout);
             }
@@ -172,27 +176,33 @@ public class HistoricalNavService {
         return oldSchemeId;
     }
 
-    void persistSchemeInfo(String[] tokenize, String amc, String schemeType, String schemeCode, String payout) {
+    void persistSchemeInfo(String[] tokenize, String amc, String schemeType, Long schemeCode, String payout) {
         MFSchemeEntity mfSchemeEntity = createSchemeDTO(tokenize, amc, schemeType, schemeCode, payout);
         MFSchemeEntity persistedScheme = schemeService.saveEntity(mfSchemeEntity);
         LOGGER.debug("Persisted Entity :{}", persistedScheme);
     }
 
-    MFSchemeEntity createSchemeDTO(String[] tokenize, String amc, String schemeType, String schemeCode, String payout) {
-        Optional<MFSchemeEntity> bySchemeCode = schemeService.findBySchemeCode(Long.valueOf(schemeCode));
+    MFSchemeEntity createSchemeDTO(String[] tokenize, String amc, String schemeType, Long schemeCode, String payout) {
+        List<Long> allSchemeIds = findAllSchemeIds();
         String nav = tokenize[4];
         String date = tokenize[7];
-        if (bySchemeCode.isEmpty()) {
-            String schemeName = tokenize[1];
-            MFSchemeDTO mfSchemeDTO =
-                    new MFSchemeDTO(amc, Long.valueOf(schemeCode), payout, schemeName, nav, date, schemeType);
-            return mfSchemeDtoToEntityMapper.mapMFSchemeDTOToMFSchemeEntity(mfSchemeDTO);
-        } else {
+        if (allSchemeIds.contains(schemeCode)) {
             MFSchemeNavEntity mfSchemenavEntity = new MFSchemeNavEntity();
             mfSchemenavEntity.setNav("N.A.".equals(nav) ? 0F : Float.parseFloat(nav));
-            mfSchemenavEntity.setNavDate(LocalDate.parse(date, AppConstants.FORMATTER_DD_MMM_YYYY));
-            return bySchemeCode.get().addSchemeNav(mfSchemenavEntity);
+            mfSchemenavEntity.setNavDate(LocalDate.parse(date, FORMATTER_DD_MMM_YYYY));
+            return schemeService.getReferenceBySchemeId(schemeCode).addSchemeNav(mfSchemenavEntity);
+        } else {
+            String schemeName = tokenize[1];
+            MFSchemeDTO mfSchemeDTO = new MFSchemeDTO(amc, schemeCode, payout, schemeName, nav, date, schemeType);
+            return mfSchemeDtoToEntityMapper.mapMFSchemeDTOToMFSchemeEntity(mfSchemeDTO);
         }
+    }
+
+    private List<Long> findAllSchemeIds() {
+        if (schemeCodeList.isEmpty()) {
+            schemeCodeList = schemeService.findAllSchemeIds();
+        }
+        return schemeCodeList;
     }
 
     String fetchHistoricalNavData(URI historicalNavUri) {
