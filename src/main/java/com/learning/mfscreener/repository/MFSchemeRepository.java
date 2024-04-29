@@ -5,7 +5,6 @@ import com.learning.mfscreener.models.projection.FundDetailProjection;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -21,7 +20,6 @@ public interface MFSchemeRepository extends JpaRepository<MFSchemeEntity, Long> 
 
     @EntityGraph(attributePaths = {"mfSchemeTypeEntity", "mfSchemeNavEntities"})
     @Transactional(readOnly = true)
-    @Cacheable(value = "bySchemeIdAndSchemeNav", unless = "#result == null || #result.isEmpty()")
     Optional<MFSchemeEntity> findBySchemeIdAndMfSchemeNavEntities_NavDate(
             @Param("schemeCode") Long schemeCode, @Param("date") LocalDate navDate);
 
