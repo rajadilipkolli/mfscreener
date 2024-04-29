@@ -44,11 +44,18 @@ public class NavService {
     @Loggable
     public BigDecimal getNavByISINOnDate(String isin, LocalDate inputDate) {
         Optional<Long> schemeIdByISIN = schemeService.getSchemeIdByISIN(isin);
+        BigDecimal nav = BigDecimal.ZERO;
         if (schemeIdByISIN.isPresent()) {
-            MFSchemeDTO navByDateWithRetry = getNavByDateWithRetry(schemeIdByISIN.get(), inputDate);
-            return BigDecimal.valueOf(Long.parseLong(navByDateWithRetry.nav()));
+            try {
+                MFSchemeDTO navByDateWithRetry = getNavByDateWithRetry(schemeIdByISIN.get(), inputDate);
+                nav = BigDecimal.valueOf(Double.parseDouble(navByDateWithRetry.nav()));
+            } catch (NavNotFoundException ignore) {
+                // this fund was created after 2018-01-31
+            }
+        } else {
+            LOGGER.info("Scheme not found for ISIN :{} ", isin);
         }
-        return BigDecimal.ZERO;
+        return nav;
     }
 
     @Loggable
