@@ -45,7 +45,6 @@ public interface MFSchemeRepository extends JpaRepository<MFSchemeEntity, Long> 
     @Transactional(readOnly = true)
     List<FundDetailProjection> findByFundHouseLikeIgnoringCaseOrderBySchemeIdAsc(@Param("fName") String fName);
 
-    @Cacheable("schemeIdByISIN")
     @Query("select m.schemeId from MFSchemeEntity m where m.payOut = :isin")
     Optional<Long> getSchemeIdByISIN(@Param("isin") String isin);
 

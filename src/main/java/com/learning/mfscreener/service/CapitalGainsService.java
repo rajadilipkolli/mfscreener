@@ -10,8 +10,6 @@ import com.learning.mfscreener.models.portfolio.UserFolioDTO;
 import com.learning.mfscreener.models.portfolio.UserSchemeDTO;
 import com.learning.mfscreener.models.portfolio.UserTransactionDTO;
 import com.learning.mfscreener.models.response.ProcessCasResponse;
-import com.learning.mfscreener.utils.FIFOUnits;
-import com.learning.mfscreener.utils.GainEntry;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -32,8 +30,14 @@ public class CapitalGainsService {
 
     private BigDecimal investedAmount = BigDecimal.ZERO;
     private Double currentValue = 0D;
-    private final List<GainEntry> gainEntries = new ArrayList<>();
+    private final List<GainEntryService> gainEntries = new ArrayList<>();
     private final List<String> errors = new ArrayList<>();
+
+    private final FIFOUnitsService fifoUnitsService;
+
+    public CapitalGainsService(FIFOUnitsService fifoUnitsService) {
+        this.fifoUnitsService = fifoUnitsService;
+    }
 
     @Loggable(params = false)
     ProcessCasResponse processData(CasDTO casDTO) throws IncompleteCASError {
@@ -64,7 +68,7 @@ public class CapitalGainsService {
 
     void processTransactions(Fund fund, List<UserTransactionDTO> transactions, UserSchemeDTO scheme) {
         try {
-            FIFOUnits fifo = new FIFOUnits(fund, transactions);
+            FIFOUnitsService fifo = fifoUnitsService.init(fund, transactions);
             investedAmount = this.investedAmount.add(fifo.getTotalInvested());
             currentValue += scheme.valuation().value();
             gainEntries.addAll(fifo.getRecordedGains());
@@ -73,11 +77,12 @@ public class CapitalGainsService {
         }
     }
 
-    Map<String, Map<String, Object>> prepareGains(List<GainEntry> gainEntries) {
+    Map<String, Map<String, Object>> prepareGains(List<GainEntryService> gainEntries) {
 
-        gainEntries.sort(Comparator.comparing(GainEntry::getFinYear).thenComparing(GainEntry::getFundType));
+        gainEntries.sort(
+                Comparator.comparing(GainEntryService::getFinYear).thenComparing(GainEntryService::getFundType));
 
-        Map<String, List<GainEntry>> groupedGains =
+        Map<String, List<GainEntryService>> groupedGains =
                 gainEntries.stream().collect(Collectors.groupingBy(txn -> txn.getFinYear() + "#" + txn.getFundType()));
 
         Map<String, Map<String, Object>> summary = new HashMap<>();

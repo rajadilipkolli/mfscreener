@@ -1,10 +1,15 @@
-package com.learning.mfscreener.utils;
+package com.learning.mfscreener.service;
 
 import com.learning.mfscreener.exception.GainsException;
 import com.learning.mfscreener.models.portfolio.Fund;
 import com.learning.mfscreener.models.portfolio.FundType;
+import com.learning.mfscreener.models.portfolio.MergedTransaction;
+import com.learning.mfscreener.models.portfolio.Transaction;
 import com.learning.mfscreener.models.portfolio.TransactionType;
 import com.learning.mfscreener.models.portfolio.UserTransactionDTO;
+import com.learning.mfscreener.utils.AppConstants;
+import com.learning.mfscreener.utils.FundTypeUtility;
+import com.learning.mfscreener.utils.LocalDateUtility;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
@@ -19,31 +24,38 @@ import java.util.TreeMap;
 import java.util.stream.IntStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
-public class FIFOUnits {
+@Service
+public class FIFOUnitsService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(FIFOUnits.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(FIFOUnitsService.class);
 
-    private final Fund fund;
-    private final FundType fundType;
+    private Fund fund;
+    private FundType fundType;
     private final Deque<Transaction> transactionsQueue = new ArrayDeque<>();
+    private final GainEntryService gainEntryService;
 
     private BigDecimal totalInvested = BigDecimal.ZERO;
     private BigDecimal currentBalance = BigDecimal.ZERO;
-    private List<GainEntry> recordedGains = new ArrayList<>();
+    private List<GainEntryService> recordedGains = new ArrayList<>();
 
-    public FIFOUnits(Fund fund, List<UserTransactionDTO> userTransactionDTOList) throws GainsException {
+    public FIFOUnitsService(GainEntryService gainEntryService) {
+        this.gainEntryService = gainEntryService;
+    }
+
+    public FIFOUnitsService init(Fund fund, List<UserTransactionDTO> userTransactionDTOList) {
         this.fund = fund;
         this.fundType = determineFundType(fund.type(), userTransactionDTOList);
         Map<LocalDate, MergedTransaction> mergedTransactions = mergeTransactions(userTransactionDTOList);
-
         processTransactions(mergedTransactions);
+        return this;
     }
 
     FundType determineFundType(String type, List<UserTransactionDTO> transactions) {
         FundType fundType;
         if (!"EQUITY".equals(type) && !"DEBT".equals(type)) {
-            fundType = deriveFundTypeFromTransactions(transactions);
+            fundType = FundTypeUtility.deriveFundTypeFromTransactions(transactions);
         } else {
             fundType = FundType.valueOf(type);
         }
@@ -77,8 +89,8 @@ public class FIFOUnits {
         transactionDates.forEach(localDate -> processTransactionDate(localDate, mergedTransactions.get(localDate)));
     }
 
-    private void processTransactionDate(LocalDate dt, MergedTransaction mergedTransaction) {
-        List<UserTransactionDTO> userTransactionDTOS = mergedTransaction.transactions;
+    void processTransactionDate(LocalDate dt, MergedTransaction mergedTransaction) {
+        List<UserTransactionDTO> userTransactionDTOS = mergedTransaction.getTransactions();
         if (userTransactionDTOS.size() == 2 && dt.isAfter(AppConstants.TAX_STARTED_DATE)) {
             findTaxFromTransactionsAndProcess(userTransactionDTOS, dt);
         } else if (userTransactionDTOS.size() > 2 && dt.isAfter(AppConstants.TAX_STARTED_DATE)) {
@@ -88,7 +100,7 @@ public class FIFOUnits {
         }
     }
 
-    private void processMultipleTransactions(List<UserTransactionDTO> userTransactionDTOS, LocalDate dt) {
+    void processMultipleTransactions(List<UserTransactionDTO> userTransactionDTOS, LocalDate dt) {
         int splitIndex = 0;
         boolean found = false;
         for (int i = 0; i < userTransactionDTOS.size(); i++) {
@@ -112,7 +124,7 @@ public class FIFOUnits {
         processesGroupedTransactions(dt, sellTransactionList, true);
     }
 
-    private void processesGroupedTransactions(
+    void processesGroupedTransactions(
             LocalDate dt, List<UserTransactionDTO> userTransactionDTOList, boolean sellOrder) {
         if (!userTransactionDTOList.isEmpty()) {
             groupTransactions(userTransactionDTOList, sellOrder)
@@ -120,8 +132,7 @@ public class FIFOUnits {
         }
     }
 
-    private List<List<UserTransactionDTO>> groupTransactions(
-            List<UserTransactionDTO> transactionDTOList, boolean sellOrder) {
+    List<List<UserTransactionDTO>> groupTransactions(List<UserTransactionDTO> transactionDTOList, boolean sellOrder) {
         // If list size is less than or equal to 2, no need to regroup
         if (transactionDTOList.size() <= 2) {
             return Collections.singletonList(transactionDTOList);
@@ -145,7 +156,7 @@ public class FIFOUnits {
                 .toList();
     }
 
-    private void processStandardTransactions(List<UserTransactionDTO> userTransactionDTOS) {
+    void processStandardTransactions(List<UserTransactionDTO> userTransactionDTOS) {
         userTransactionDTOS.forEach(userTransactionDTO -> {
             if (userTransactionDTO.units() == null) {
                 LOGGER.error("Unhandled dividend Transactions");
@@ -155,7 +166,7 @@ public class FIFOUnits {
         });
     }
 
-    private void processTransaction(UserTransactionDTO userTransactionDTO) {
+    void processTransaction(UserTransactionDTO userTransactionDTO) {
         if (userTransactionDTO.units() > 0) {
             buy(
                     userTransactionDTO.date(),
@@ -171,7 +182,7 @@ public class FIFOUnits {
         }
     }
 
-    private void findTaxFromTransactionsAndProcess(List<UserTransactionDTO> userTransactionDTOS, LocalDate dt) {
+    void findTaxFromTransactionsAndProcess(List<UserTransactionDTO> userTransactionDTOS, LocalDate dt) {
         // if buy we will have STAMP_DUTY_TAX, for sale we will have STT_TAX
         if (userTransactionDTOS.size() == 2) {
             if (userTransactionDTOS.get(1).type().compareTo(TransactionType.STAMP_DUTY_TAX) == 0) {
@@ -210,13 +221,13 @@ public class FIFOUnits {
         }
     }
 
-    private void buy(LocalDate txnDate, BigDecimal quantity, BigDecimal nav, BigDecimal tax) {
+    void buy(LocalDate txnDate, BigDecimal quantity, BigDecimal nav, BigDecimal tax) {
         transactionsQueue.add(new Transaction(txnDate, quantity, nav, tax));
         totalInvested = totalInvested.add(quantity.multiply(nav));
         currentBalance = currentBalance.add(quantity);
     }
 
-    private void sell(LocalDate sellDate, BigDecimal quantity, BigDecimal nav, BigDecimal tax) throws GainsException {
+    void sell(LocalDate sellDate, BigDecimal quantity, BigDecimal nav, BigDecimal tax) throws GainsException {
         String finYear = LocalDateUtility.getFinYear(sellDate);
         BigDecimal originalQuantity = quantity.abs();
         BigDecimal pendingUnits = originalQuantity;
@@ -239,7 +250,7 @@ public class FIFOUnits {
             BigDecimal stampDuty = purchaseTax.multiply(gainUnits).divide(units, 2, RoundingMode.HALF_UP);
             BigDecimal stt = tax.multiply(gainUnits).divide(originalQuantity, 2, RoundingMode.HALF_UP);
 
-            GainEntry ge = new GainEntry(
+            GainEntryService ge = gainEntryService.init(
                     finYear,
                     fund,
                     fundType,
@@ -267,61 +278,21 @@ public class FIFOUnits {
         }
     }
 
-    /**
-     *
-     * Detect Fund Type.
-     *  - UNKNOWN if there are no redemption transactions
-     *  - EQUITY if STT_TAX transactions are present in the portfolio
-     *  - DEBT if no STT_TAX transactions are present along with redemptions
-     *
-     * @param transactions list of transactions for a single fund parsed from the CAS
-     * @return type of fund
-     */
-    private FundType deriveFundTypeFromTransactions(List<UserTransactionDTO> transactions) {
-        boolean valid = transactions.stream()
-                .anyMatch(x -> x.units() != null && x.units() < 0 && x.type() != TransactionType.REVERSAL);
-
-        if (!valid) {
-            return FundType.UNKNOWN;
-        }
-        if (transactions.stream().anyMatch(x -> x.type() == TransactionType.STT_TAX)) {
-            return FundType.EQUITY;
-        } else {
-            return FundType.DEBT;
-        }
-    }
-
     public BigDecimal getTotalInvested() {
         return totalInvested;
     }
 
-    public FIFOUnits setTotalInvested(BigDecimal totalInvested) {
+    public FIFOUnitsService setTotalInvested(BigDecimal totalInvested) {
         this.totalInvested = totalInvested;
         return this;
     }
 
-    public List<GainEntry> getRecordedGains() {
+    public List<GainEntryService> getRecordedGains() {
         return recordedGains;
     }
 
-    public FIFOUnits setRecordedGains(List<GainEntry> recordedGains) {
+    public FIFOUnitsService setRecordedGains(List<GainEntryService> recordedGains) {
         this.recordedGains = recordedGains;
         return this;
     }
-
-    private static class MergedTransaction {
-        private final LocalDate date;
-        private final List<UserTransactionDTO> transactions;
-
-        public MergedTransaction(LocalDate date) {
-            this.date = date;
-            this.transactions = new ArrayList<>();
-        }
-
-        public void add(UserTransactionDTO txn) {
-            this.transactions.add(txn);
-        }
-    }
-
-    private record Transaction(LocalDate txnDate, BigDecimal units, BigDecimal nav, BigDecimal tax) {}
 }

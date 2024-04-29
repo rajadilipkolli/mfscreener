@@ -19,6 +19,7 @@ import java.util.Optional;
 import org.hibernate.exception.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
@@ -152,6 +153,7 @@ public class SchemeService {
         return mfSchemeRepository.findByPayOut(isin);
     }
 
+    @Cacheable("schemeIdByISIN")
     @Transactional(readOnly = true)
     public Optional<Long> getSchemeIdByISIN(String isin) {
         return mfSchemeRepository.getSchemeIdByISIN(isin);

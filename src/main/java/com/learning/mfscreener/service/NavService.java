@@ -5,7 +5,9 @@ import com.learning.mfscreener.exception.NavNotFoundException;
 import com.learning.mfscreener.models.MFSchemeDTO;
 import com.learning.mfscreener.utils.AppConstants;
 import com.learning.mfscreener.utils.LocalDateUtility;
+import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -37,6 +39,16 @@ public class NavService {
     public MFSchemeDTO getNavOnDate(Long schemeCode, LocalDate inputDate) {
         LocalDate adjustedDate = LocalDateUtility.getAdjustedDate(inputDate);
         return getNavByDateWithRetry(schemeCode, adjustedDate);
+    }
+
+    @Loggable
+    public BigDecimal getNavByISINOnDate(String isin, LocalDate inputDate) {
+        Optional<Long> schemeIdByISIN = schemeService.getSchemeIdByISIN(isin);
+        if (schemeIdByISIN.isPresent()) {
+            MFSchemeDTO navByDateWithRetry = getNavByDateWithRetry(schemeIdByISIN.get(), inputDate);
+            return BigDecimal.valueOf(Long.parseLong(navByDateWithRetry.nav()));
+        }
+        return BigDecimal.ZERO;
     }
 
     @Loggable
