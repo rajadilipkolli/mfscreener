@@ -51,4 +51,6 @@ public interface MFSchemeRepository extends JpaRepository<MFSchemeEntity, Long> 
     @Transactional(readOnly = true)
     @Query("select o.schemeId from MFSchemeEntity o")
     List<Long> findAllSchemeIds();
+
+    int countByMfSchemeNavEntities_NavDate(LocalDate grandFathertedDate);
 }

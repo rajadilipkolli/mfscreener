@@ -46,11 +46,17 @@ public class NavService {
         Optional<Long> schemeIdByISIN = schemeService.getSchemeIdByISIN(isin);
         BigDecimal nav = BigDecimal.ZERO;
         if (schemeIdByISIN.isPresent()) {
-            try {
-                MFSchemeDTO navByDateWithRetry = getNavByDateWithRetry(schemeIdByISIN.get(), inputDate);
-                nav = BigDecimal.valueOf(Double.parseDouble(navByDateWithRetry.nav()));
-            } catch (NavNotFoundException ignore) {
-                // this fund was created after 2018-01-31
+            Long schemeCode = schemeIdByISIN.get();
+            if (schemeCode < 143000) {
+                try {
+                    MFSchemeDTO navByDateWithRetry = getNavByDateWithRetry(schemeCode, inputDate);
+                    nav = BigDecimal.valueOf(Double.parseDouble(navByDateWithRetry.nav()));
+                } catch (NavNotFoundException ignore) {
+                    // this fund was created after 2018-01-31
+                    LOGGER.error("NAV not found for SchemeCode :{}", schemeCode);
+                }
+            } else {
+                LOGGER.debug("SchemeCode : {} Started after 2018-01-31, hence will return 0", schemeCode);
             }
         } else {
             LOGGER.info("Scheme not found for ISIN :{} ", isin);

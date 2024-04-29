@@ -187,4 +187,9 @@ public class SchemeService {
     public List<MFSchemeEntity> saveAllEntities(List<MFSchemeEntity> mfSchemeEntityList) {
         return mfSchemeRepository.saveAll(mfSchemeEntityList);
     }
+
+    @Transactional(readOnly = true)
+    public boolean navLoadedFor31Jan2018() {
+        return mfSchemeRepository.countByMfSchemeNavEntities_NavDate(AppConstants.GRAND_FATHERED_DATE) > 9000;
+    }
 }
