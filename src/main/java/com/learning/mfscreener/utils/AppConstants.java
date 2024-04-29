@@ -24,7 +24,7 @@ public final class AppConstants {
     public static final int THIRD_RETRY = 3;
     public static final DateTimeFormatter FLEXIBLE_DATE_FORMATTER = new DateTimeFormatterBuilder()
             .appendOptional(DateTimeFormatter.ISO_LOCAL_DATE)
-            .appendOptional(DateTimeFormatter.ofPattern("dd-MMM-yyyy"))
+            .appendOptional(FORMATTER_DD_MMM_YYYY)
             .toFormatter()
             .withResolverStyle(ResolverStyle.STRICT);
     ;
