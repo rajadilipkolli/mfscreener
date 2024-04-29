@@ -21,7 +21,7 @@ public interface MFSchemeRepository extends JpaRepository<MFSchemeEntity, Long> 
 
     @EntityGraph(attributePaths = {"mfSchemeTypeEntity", "mfSchemeNavEntities"})
     @Transactional(readOnly = true)
-    @Cacheable("bySchemeIdAndSchemeNav")
+    @Cacheable(value = "bySchemeIdAndSchemeNav", unless = "#result == null || #result.isEmpty()")
     Optional<MFSchemeEntity> findBySchemeIdAndMfSchemeNavEntities_NavDate(
             @Param("schemeCode") Long schemeCode, @Param("date") LocalDate navDate);
 

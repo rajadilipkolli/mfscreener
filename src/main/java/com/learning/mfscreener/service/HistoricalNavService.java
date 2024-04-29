@@ -94,8 +94,9 @@ public class HistoricalNavService {
     }
 
     String parseNavData(
-            Reader inputString, String payOut, boolean persistSchemeInfo, Long schemeCode, LocalDate navDate) {
+            Reader inputString, String isin, boolean persistSchemeInfo, Long schemeCode, LocalDate navDate) {
         String oldSchemeId = null;
+        List<SchemeData> schemeDataList = new ArrayList<>();
         try (BufferedReader br = new BufferedReader(inputString)) {
             String lineValue = br.readLine();
             for (int i = 0; i < 2; ++i) {
@@ -116,26 +117,28 @@ public class HistoricalNavService {
                     } else {
                         amc = tempVal;
                         oldSchemeId = handleMultipleTokenLine(
-                                payOut,
+                                isin,
                                 persistSchemeInfo,
                                 tokenize,
                                 oldSchemeId,
                                 amc,
                                 schemeType,
                                 schemeCode,
-                                insertEachRow);
+                                insertEachRow,
+                                schemeDataList);
                     }
 
                 } else {
                     oldSchemeId = handleMultipleTokenLine(
-                            payOut,
+                            isin,
                             persistSchemeInfo,
                             tokenize,
                             oldSchemeId,
                             amc,
                             schemeType,
                             schemeCode,
-                            insertEachRow);
+                            insertEachRow,
+                            schemeDataList);
                 }
                 lineValue = readNextNonEmptyLine(br);
             }
@@ -143,7 +146,21 @@ public class HistoricalNavService {
             LOGGER.error("Exception Occurred while reading response", e);
             throw new NavNotFoundException("Unable to parse for %s".formatted(schemeCode), navDate);
         }
+        if (!schemeDataList.isEmpty()) {
+            persistSchemeInfoBulk(schemeDataList);
+        }
         return oldSchemeId;
+    }
+
+    void persistSchemeInfoBulk(List<SchemeData> schemeDataList) {
+        List<MFSchemeEntity> entitiesToPersist = new ArrayList<>();
+        for (SchemeData schemeData : schemeDataList) {
+            String[] tokenize = schemeData.tokenize();
+            MFSchemeEntity entity = createSchemeDTO(tokenize, schemeData.amc(), schemeData.schemeType());
+            entitiesToPersist.add(entity);
+        }
+        schemeService.saveAllEntities(entitiesToPersist);
+        LOGGER.debug("Persisted Entities: {}", entitiesToPersist.size());
     }
 
     String readNextNonEmptyLine(BufferedReader br) throws IOException {
@@ -155,35 +172,32 @@ public class HistoricalNavService {
     }
 
     String handleMultipleTokenLine(
-            String payOut,
+            String isin,
             boolean persistSchemeInfo,
             String[] tokenize,
             String oldSchemeId,
             String amc,
             String schemeType,
             Long inputSchemeCode,
-            boolean insertEachRow) {
+            boolean insertEachRow,
+            List<SchemeData> schemeDataList) {
         final Long schemeCode = Long.valueOf(tokenize[0]);
         final String payout = tokenize[2];
         if (insertEachRow) {
-            persistSchemeInfo(tokenize, amc, schemeType, schemeCode, payout);
-        } else if (payout.equalsIgnoreCase(payOut) || schemeCode.equals(inputSchemeCode)) {
+            schemeDataList.add(new SchemeData(tokenize, amc, schemeType));
+        } else if (payout.equalsIgnoreCase(isin) || schemeCode.equals(inputSchemeCode)) {
             oldSchemeId = String.valueOf(schemeCode);
             if (persistSchemeInfo) {
-                persistSchemeInfo(tokenize, amc, schemeType, schemeCode, payout);
+                schemeDataList.add(new SchemeData(tokenize, amc, schemeType));
             }
         }
         return oldSchemeId;
     }
 
-    void persistSchemeInfo(String[] tokenize, String amc, String schemeType, Long schemeCode, String payout) {
-        MFSchemeEntity mfSchemeEntity = createSchemeDTO(tokenize, amc, schemeType, schemeCode, payout);
-        MFSchemeEntity persistedScheme = schemeService.saveEntity(mfSchemeEntity);
-        LOGGER.debug("Persisted Entity :{}", persistedScheme);
-    }
-
-    MFSchemeEntity createSchemeDTO(String[] tokenize, String amc, String schemeType, Long schemeCode, String payout) {
+    MFSchemeEntity createSchemeDTO(String[] tokenize, String amc, String schemeType) {
         List<Long> allSchemeIds = findAllSchemeIds();
+        Long schemeCode = Long.valueOf(tokenize[0]);
+        String payout = tokenize[2];
         String nav = tokenize[4];
         String date = tokenize[7];
         if (allSchemeIds.contains(schemeCode)) {
@@ -218,4 +232,6 @@ public class HistoricalNavService {
                 .formatted(fromDate, toDate);
         return UriComponentsBuilder.fromHttpUrl(historicalUrl).build().toUri();
     }
+
+    record SchemeData(String[] tokenize, String amc, String schemeType) {}
 }
