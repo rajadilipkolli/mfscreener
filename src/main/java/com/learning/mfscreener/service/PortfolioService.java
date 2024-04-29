@@ -22,6 +22,7 @@ import com.learning.mfscreener.utils.LocalDateUtility;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -75,9 +76,10 @@ public class PortfolioService {
     public Map<String, Object> upload(MultipartFile portfolioFile) throws IOException {
         CasDTO casDTO = parseCasDTO(portfolioFile);
         String response = processCasDTO(casDTO);
-        Map<String, Object> investmentSummary = capitalGainsService.processData(casDTO);
-        investmentSummary.put("importSummary", response);
-        return investmentSummary;
+        Map<String, Map<String, Object>> investmentSummary = capitalGainsService.processData(casDTO);
+        Map<String, Object> responseMap = new HashMap<>(investmentSummary);
+        responseMap.put("importSummary", response);
+        return responseMap;
     }
 
     public PortfolioResponse getPortfolioByPAN(String panNumber, LocalDate evaluationDate) {
