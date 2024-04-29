@@ -17,12 +17,12 @@ import com.learning.mfscreener.models.portfolio.UserFolioDTO;
 import com.learning.mfscreener.models.portfolio.UserSchemeDTO;
 import com.learning.mfscreener.models.portfolio.UserTransactionDTO;
 import com.learning.mfscreener.models.response.PortfolioResponse;
+import com.learning.mfscreener.models.response.ProcessCasResponse;
 import com.learning.mfscreener.models.response.UploadResponseHolder;
 import com.learning.mfscreener.utils.LocalDateUtility;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -73,13 +73,11 @@ public class PortfolioService {
         this.capitalGainsService = capitalGainsService;
     }
 
-    public Map<String, Object> upload(MultipartFile portfolioFile) throws IOException {
+    public ProcessCasResponse upload(MultipartFile portfolioFile) throws IOException {
         CasDTO casDTO = parseCasDTO(portfolioFile);
         String response = processCasDTO(casDTO);
-        Map<String, Map<String, Object>> investmentSummary = capitalGainsService.processData(casDTO);
-        Map<String, Object> responseMap = new HashMap<>(investmentSummary);
-        responseMap.put("importSummary", response);
-        return responseMap;
+        ProcessCasResponse processCasResponse = capitalGainsService.processData(casDTO);
+        return processCasResponse.withImportSummary(response);
     }
 
     public PortfolioResponse getPortfolioByPAN(String panNumber, LocalDate evaluationDate) {

@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 public abstract class MfSchemeDtoToEntityMapper {
 
     private final Logger log = LoggerFactory.getLogger(this.getClass());
+
     // Define the regular expressions
     private static final Pattern TYPE_CATEGORY_SUBCATEGORY_PATTERN =
             Pattern.compile("^(.*?)\\((.*?)\\s*-\\s*(.*?)\\)$");
@@ -30,6 +31,7 @@ public abstract class MfSchemeDtoToEntityMapper {
     @Autowired
     MFSchemeTypeRepository mfSchemeTypeRepository;
 
+    @Mapping(target = "version", ignore = true)
     @Mapping(target = "mfSchemeTypeEntity", ignore = true)
     @Mapping(target = "mfSchemeNavEntities", ignore = true)
     @Mapping(target = "schemeNameAlias", ignore = true)

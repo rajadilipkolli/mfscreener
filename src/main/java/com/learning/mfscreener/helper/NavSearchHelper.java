@@ -23,4 +23,8 @@ public class NavSearchHelper {
         }
         return BigDecimal.ZERO;
     }
+
+    private NavSearchHelper() {
+        throw new UnsupportedOperationException("Constructor can't be initialized");
+    }
 }
