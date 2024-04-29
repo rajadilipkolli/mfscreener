@@ -3,7 +3,7 @@ package com.learning.mfscreener.config;
 import com.learning.mfscreener.entities.MFSchemeEntity;
 import com.learning.mfscreener.mapper.MfSchemeDtoToEntityMapper;
 import com.learning.mfscreener.models.MFSchemeDTO;
-import com.learning.mfscreener.service.HistoricalNavService;
+import com.learning.mfscreener.service.MFSchemeNavService;
 import com.learning.mfscreener.service.SchemeService;
 import com.learning.mfscreener.utils.AppConstants;
 import java.io.BufferedReader;
@@ -31,17 +31,17 @@ public class Initializer implements CommandLineRunner {
     private final SchemeService schemeService;
     private final MfSchemeDtoToEntityMapper mfSchemeDtoToEntityMapper;
     private final RestTemplate restTemplate;
-    private final HistoricalNavService historicalNavService;
+    private final MFSchemeNavService mfSchemeNavService;
 
     public Initializer(
             SchemeService schemeService,
             MfSchemeDtoToEntityMapper mfSchemeDtoToEntityMapper,
             RestTemplate restTemplate,
-            HistoricalNavService historicalNavService) {
+            MFSchemeNavService mfSchemeNavService) {
         this.schemeService = schemeService;
         this.mfSchemeDtoToEntityMapper = mfSchemeDtoToEntityMapper;
         this.restTemplate = restTemplate;
-        this.historicalNavService = historicalNavService;
+        this.mfSchemeNavService = mfSchemeNavService;
     }
 
     @Override
@@ -120,8 +120,12 @@ public class Initializer implements CommandLineRunner {
             LOGGER.error("Unable to load data from :{}", AppConstants.AMFI_WEBSITE_LINK, httpClientErrorException);
         }
 
-        if (!schemeService.navLoadedFor31Jan2018()) {
-            historicalNavService.getHistoricalNavOn31Jan2018();
+        if (!mfSchemeNavService.navLoadedFor31Jan2018ForExistingSchemes()) {
+            mfSchemeNavService.loadHistoricalNavOn31Jan2018ForExistingSchemes();
+        }
+
+        if (!mfSchemeNavService.navLoadedForClosedOrMergedSchemes()) {
+            schemeService.loadHistoricalDataForClosedOrMergedSchemes();
         }
     }
 }
