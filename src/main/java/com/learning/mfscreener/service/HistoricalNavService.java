@@ -233,5 +233,5 @@ public class HistoricalNavService {
         return UriComponentsBuilder.fromHttpUrl(historicalUrl).build().toUri();
     }
 
-    record SchemeData(String[] tokenize, String amc, String schemeType) {}
+    public record SchemeData(String[] tokenize, String amc, String schemeType) {}
 }

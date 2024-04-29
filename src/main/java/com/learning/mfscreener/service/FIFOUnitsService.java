@@ -3,8 +3,6 @@ package com.learning.mfscreener.service;
 import com.learning.mfscreener.exception.GainsException;
 import com.learning.mfscreener.models.portfolio.Fund;
 import com.learning.mfscreener.models.portfolio.FundType;
-import com.learning.mfscreener.models.portfolio.MergedTransaction;
-import com.learning.mfscreener.models.portfolio.Transaction;
 import com.learning.mfscreener.models.portfolio.TransactionType;
 import com.learning.mfscreener.models.portfolio.UserTransactionDTO;
 import com.learning.mfscreener.utils.AppConstants;
@@ -86,11 +84,12 @@ public class FIFOUnitsService {
     void processTransactions(Map<LocalDate, MergedTransaction> mergedTransactions) {
         List<LocalDate> transactionDates = new ArrayList<>(mergedTransactions.keySet());
         Collections.sort(transactionDates);
-        transactionDates.forEach(localDate -> processTransactionDate(localDate, mergedTransactions.get(localDate)));
+        transactionDates.forEach(localDate -> processTransactionDate(mergedTransactions.get(localDate)));
     }
 
-    void processTransactionDate(LocalDate dt, MergedTransaction mergedTransaction) {
+    void processTransactionDate(MergedTransaction mergedTransaction) {
         List<UserTransactionDTO> userTransactionDTOS = mergedTransaction.getTransactions();
+        LocalDate dt = mergedTransaction.getDate();
         if (userTransactionDTOS.size() == 2 && dt.isAfter(AppConstants.TAX_STARTED_DATE)) {
             findTaxFromTransactionsAndProcess(userTransactionDTOS, dt);
         } else if (userTransactionDTOS.size() > 2 && dt.isAfter(AppConstants.TAX_STARTED_DATE)) {
@@ -294,5 +293,30 @@ public class FIFOUnitsService {
     public FIFOUnitsService setRecordedGains(List<GainEntryService> recordedGains) {
         this.recordedGains = recordedGains;
         return this;
+    }
+
+    public record Transaction(LocalDate txnDate, BigDecimal units, BigDecimal nav, BigDecimal tax) {}
+
+    static class MergedTransaction {
+
+        private final LocalDate date;
+        private final List<UserTransactionDTO> transactions;
+
+        public MergedTransaction(LocalDate date) {
+            this.date = date;
+            this.transactions = new ArrayList<>();
+        }
+
+        public void add(UserTransactionDTO txn) {
+            this.transactions.add(txn);
+        }
+
+        public LocalDate getDate() {
+            return date;
+        }
+
+        public List<UserTransactionDTO> getTransactions() {
+            return transactions;
+        }
     }
 }
