@@ -48,7 +48,13 @@ public abstract class MfSchemeDtoToEntityMapper {
     void updateMFScheme(MFSchemeDTO scheme, @MappingTarget MFSchemeEntity mfSchemeEntity) {
         MFSchemeNavEntity mfSchemenavEntity = new MFSchemeNavEntity();
         mfSchemenavEntity.setNav("N.A.".equals(scheme.nav()) ? 0F : Float.parseFloat(scheme.nav()));
-        mfSchemenavEntity.setNavDate(LocalDate.parse(scheme.date(), AppConstants.FORMATTER_DD_MMM_YYYY));
+        LocalDate parsedDate;
+        if (scheme.date().length() == 10) {
+            parsedDate = LocalDate.parse(scheme.date());
+        } else {
+            parsedDate = LocalDate.parse(scheme.date(), AppConstants.FORMATTER_DD_MMM_YYYY);
+        }
+        mfSchemenavEntity.setNavDate(parsedDate);
         mfSchemeEntity.addSchemeNav(mfSchemenavEntity);
 
         MFSchemeTypeEntity mfSchemeTypeEntity = null;
