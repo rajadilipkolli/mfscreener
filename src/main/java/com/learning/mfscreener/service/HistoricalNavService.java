@@ -10,13 +10,14 @@ import com.learning.mfscreener.mapper.MfSchemeDtoToEntityMapper;
 import com.learning.mfscreener.models.MFSchemeDTO;
 import com.learning.mfscreener.models.projection.SchemeNameAndISIN;
 import com.learning.mfscreener.utils.AppConstants;
-import com.learning.mfscreener.utils.LocalDateUtility;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 import java.net.URI;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import org.slf4j.Logger;
@@ -37,6 +38,8 @@ public class HistoricalNavService {
     private final RestClient restClient;
     private final MfSchemeDtoToEntityMapper mfSchemeDtoToEntityMapper;
     private final UserSchemeDetailsService userSchemeDetailsService;
+
+    List<Long> schemeCodeList = new ArrayList<>();
 
     public HistoricalNavService(
             SchemeService schemeService,
@@ -59,6 +62,12 @@ public class HistoricalNavService {
         } else {
             return handleDiscontinuedScheme(schemeCode, historicalNavUri, navDate);
         }
+    }
+
+    public void getHistoricalNavOn31Jan2018() {
+        String toDate = AppConstants.GRAND_FATHERED_DATE.format(FORMATTER_DD_MMM_YYYY);
+        URI historicalNavUri = buildHistoricalNavUri(toDate, toDate);
+        fetchAndProcessNavData(historicalNavUri, null, true, null, AppConstants.GRAND_FATHERED_DATE);
     }
 
     String handleDiscontinuedScheme(Long schemeCode, URI historicalNavUri, LocalDate navDate) {
@@ -85,8 +94,9 @@ public class HistoricalNavService {
     }
 
     String parseNavData(
-            Reader inputString, String payOut, boolean persistSchemeInfo, Long schemeCode, LocalDate navDate) {
+            Reader inputString, String isin, boolean persistSchemeInfo, Long schemeCode, LocalDate navDate) {
         String oldSchemeId = null;
+        List<SchemeData> schemeDataList = new ArrayList<>();
         try (BufferedReader br = new BufferedReader(inputString)) {
             String lineValue = br.readLine();
             for (int i = 0; i < 2; ++i) {
@@ -94,8 +104,7 @@ public class HistoricalNavService {
             }
             String schemeType = lineValue;
             String amc = lineValue;
-            boolean insertEachRow = navDate.isEqual(AppConstants.GRAND_FATHERTED_DATE)
-                    || navDate.isEqual(LocalDateUtility.getAdjustedDate());
+            boolean insertEachRow = navDate.isEqual(AppConstants.GRAND_FATHERED_DATE);
             while (lineValue != null && (insertEachRow || !StringUtils.hasText(oldSchemeId))) {
                 String[] tokenize = lineValue.split(AppConstants.NAV_SEPARATOR);
                 if (tokenize.length == 1) {
@@ -108,26 +117,28 @@ public class HistoricalNavService {
                     } else {
                         amc = tempVal;
                         oldSchemeId = handleMultipleTokenLine(
-                                payOut,
+                                isin,
                                 persistSchemeInfo,
                                 tokenize,
                                 oldSchemeId,
                                 amc,
                                 schemeType,
                                 schemeCode,
-                                insertEachRow);
+                                insertEachRow,
+                                schemeDataList);
                     }
 
                 } else {
                     oldSchemeId = handleMultipleTokenLine(
-                            payOut,
+                            isin,
                             persistSchemeInfo,
                             tokenize,
                             oldSchemeId,
                             amc,
                             schemeType,
                             schemeCode,
-                            insertEachRow);
+                            insertEachRow,
+                            schemeDataList);
                 }
                 lineValue = readNextNonEmptyLine(br);
             }
@@ -135,7 +146,21 @@ public class HistoricalNavService {
             LOGGER.error("Exception Occurred while reading response", e);
             throw new NavNotFoundException("Unable to parse for %s".formatted(schemeCode), navDate);
         }
+        if (!schemeDataList.isEmpty()) {
+            persistSchemeInfoBulk(schemeDataList);
+        }
         return oldSchemeId;
+    }
+
+    void persistSchemeInfoBulk(List<SchemeData> schemeDataList) {
+        List<MFSchemeEntity> entitiesToPersist = new ArrayList<>();
+        for (SchemeData schemeData : schemeDataList) {
+            String[] tokenize = schemeData.tokenize();
+            MFSchemeEntity entity = createSchemeDTO(tokenize, schemeData.amc(), schemeData.schemeType());
+            entitiesToPersist.add(entity);
+        }
+        schemeService.saveAllEntities(entitiesToPersist);
+        LOGGER.debug("Persisted Entities: {}", entitiesToPersist.size());
     }
 
     String readNextNonEmptyLine(BufferedReader br) throws IOException {
@@ -147,48 +172,51 @@ public class HistoricalNavService {
     }
 
     String handleMultipleTokenLine(
-            String payOut,
+            String isin,
             boolean persistSchemeInfo,
             String[] tokenize,
             String oldSchemeId,
             String amc,
             String schemeType,
             Long inputSchemeCode,
-            boolean insertEachRow) {
-        final String schemeCode = tokenize[0];
+            boolean insertEachRow,
+            List<SchemeData> schemeDataList) {
+        final Long schemeCode = Long.valueOf(tokenize[0]);
         final String payout = tokenize[2];
         if (insertEachRow) {
-            persistSchemeInfo(tokenize, amc, schemeType, schemeCode, payout);
-        } else if (payout.equalsIgnoreCase(payOut) || schemeCode.equalsIgnoreCase(inputSchemeCode.toString())) {
-            oldSchemeId = schemeCode;
+            schemeDataList.add(new SchemeData(tokenize, amc, schemeType));
+        } else if (payout.equalsIgnoreCase(isin) || schemeCode.equals(inputSchemeCode)) {
+            oldSchemeId = String.valueOf(schemeCode);
             if (persistSchemeInfo) {
-                persistSchemeInfo(tokenize, amc, schemeType, schemeCode, payout);
+                schemeDataList.add(new SchemeData(tokenize, amc, schemeType));
             }
         }
         return oldSchemeId;
     }
 
-    void persistSchemeInfo(String[] tokenize, String amc, String schemeType, String schemeCode, String payout) {
-        MFSchemeEntity mfSchemeEntity = createSchemeDTO(tokenize, amc, schemeType, schemeCode, payout);
-        MFSchemeEntity persistedScheme = schemeService.saveEntity(mfSchemeEntity);
-        LOGGER.debug("Persisted Entity :{}", persistedScheme);
-    }
-
-    MFSchemeEntity createSchemeDTO(String[] tokenize, String amc, String schemeType, String schemeCode, String payout) {
-        Optional<MFSchemeEntity> bySchemeCode = schemeService.findBySchemeCode(Long.valueOf(schemeCode));
+    MFSchemeEntity createSchemeDTO(String[] tokenize, String amc, String schemeType) {
+        List<Long> allSchemeIds = findAllSchemeIds();
+        Long schemeCode = Long.valueOf(tokenize[0]);
+        String payout = tokenize[2];
         String nav = tokenize[4];
         String date = tokenize[7];
-        if (bySchemeCode.isEmpty()) {
-            String schemeName = tokenize[1];
-            MFSchemeDTO mfSchemeDTO =
-                    new MFSchemeDTO(amc, Long.valueOf(schemeCode), payout, schemeName, nav, date, schemeType);
-            return mfSchemeDtoToEntityMapper.mapMFSchemeDTOToMFSchemeEntity(mfSchemeDTO);
-        } else {
+        if (allSchemeIds.contains(schemeCode)) {
             MFSchemeNavEntity mfSchemenavEntity = new MFSchemeNavEntity();
             mfSchemenavEntity.setNav("N.A.".equals(nav) ? 0F : Float.parseFloat(nav));
-            mfSchemenavEntity.setNavDate(LocalDate.parse(date, AppConstants.FORMATTER_DD_MMM_YYYY));
-            return bySchemeCode.get().addSchemeNav(mfSchemenavEntity);
+            mfSchemenavEntity.setNavDate(LocalDate.parse(date, FORMATTER_DD_MMM_YYYY));
+            return schemeService.getReferenceBySchemeId(schemeCode).addSchemeNav(mfSchemenavEntity);
+        } else {
+            String schemeName = tokenize[1];
+            MFSchemeDTO mfSchemeDTO = new MFSchemeDTO(amc, schemeCode, payout, schemeName, nav, date, schemeType);
+            return mfSchemeDtoToEntityMapper.mapMFSchemeDTOToMFSchemeEntity(mfSchemeDTO);
         }
+    }
+
+    List<Long> findAllSchemeIds() {
+        if (schemeCodeList.isEmpty()) {
+            schemeCodeList = schemeService.findAllSchemeIds();
+        }
+        return schemeCodeList;
     }
 
     String fetchHistoricalNavData(URI historicalNavUri) {
@@ -204,4 +232,6 @@ public class HistoricalNavService {
                 .formatted(fromDate, toDate);
         return UriComponentsBuilder.fromHttpUrl(historicalUrl).build().toUri();
     }
+
+    public record SchemeData(String[] tokenize, String amc, String schemeType) {}
 }

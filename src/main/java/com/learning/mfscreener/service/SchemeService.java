@@ -19,6 +19,7 @@ import java.util.Optional;
 import org.hibernate.exception.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
@@ -152,8 +153,9 @@ public class SchemeService {
         return mfSchemeRepository.findByPayOut(isin);
     }
 
+    @Cacheable(value = "schemeIdByISIN")
     @Transactional(readOnly = true)
-    public Optional<Long> getSchemeIdByISIN(String isin) {
+    public List<Long> getSchemeIdByISIN(String isin) {
         return mfSchemeRepository.getSchemeIdByISIN(isin);
     }
 
@@ -184,5 +186,15 @@ public class SchemeService {
     @Loggable(result = false, params = false)
     public List<MFSchemeEntity> saveAllEntities(List<MFSchemeEntity> mfSchemeEntityList) {
         return mfSchemeRepository.saveAll(mfSchemeEntityList);
+    }
+
+    @Transactional(readOnly = true)
+    public boolean navLoadedFor31Jan2018() {
+        return mfSchemeRepository.countByMfSchemeNavEntities_NavDate(AppConstants.GRAND_FATHERED_DATE) > 9000;
+    }
+
+    @Transactional(readOnly = true)
+    public MFSchemeEntity getReferenceBySchemeId(Long schemeCode) {
+        return mfSchemeRepository.findBySchemeId(schemeCode).get();
     }
 }

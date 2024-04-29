@@ -9,8 +9,7 @@ import com.learning.mfscreener.models.portfolio.FundType;
 import com.learning.mfscreener.models.portfolio.UserFolioDTO;
 import com.learning.mfscreener.models.portfolio.UserSchemeDTO;
 import com.learning.mfscreener.models.portfolio.UserTransactionDTO;
-import com.learning.mfscreener.utils.FIFOUnits;
-import com.learning.mfscreener.utils.GainEntry;
+import com.learning.mfscreener.models.response.ProcessCasResponse;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -24,16 +23,27 @@ import org.springframework.stereotype.Service;
 public class CapitalGainsService {
 
     private static final double MIN_OPEN_BALANCE = 0.01;
+    private static final String TAX_LTCG = "tax_ltcg";
+    private static final String LTCG = "ltcg";
+    private static final String STCG = "stcg";
+    private static final String TOTAL = "total";
 
     private BigDecimal investedAmount = BigDecimal.ZERO;
     private Double currentValue = 0D;
-    private final List<GainEntry> gainEntries = new ArrayList<>();
-    List<String> errors = new ArrayList<>();
+    private final List<GainEntryService> gainEntries = new ArrayList<>();
+    private final List<String> errors = new ArrayList<>();
+
+    private final FIFOUnitsService fifoUnitsService;
+
+    public CapitalGainsService(FIFOUnitsService fifoUnitsService) {
+        this.fifoUnitsService = fifoUnitsService;
+    }
 
     @Loggable(params = false)
-    Map<String, Map<String, Object>> processData(CasDTO casDTO) throws IncompleteCASError {
+    ProcessCasResponse processData(CasDTO casDTO) throws IncompleteCASError {
         casDTO.folios().forEach(this::processFolio);
-        return prepareGains(gainEntries);
+        Map<String, Map<String, Object>> summaryByFY = prepareGains(gainEntries);
+        return new ProcessCasResponse(summaryByFY, investedAmount, currentValue, errors, null);
     }
 
     void processFolio(UserFolioDTO folio) {
@@ -58,7 +68,7 @@ public class CapitalGainsService {
 
     void processTransactions(Fund fund, List<UserTransactionDTO> transactions, UserSchemeDTO scheme) {
         try {
-            FIFOUnits fifo = new FIFOUnits(fund, transactions);
+            FIFOUnitsService fifo = fifoUnitsService.init(fund, transactions);
             investedAmount = this.investedAmount.add(fifo.getTotalInvested());
             currentValue += scheme.valuation().value();
             gainEntries.addAll(fifo.getRecordedGains());
@@ -67,11 +77,12 @@ public class CapitalGainsService {
         }
     }
 
-    Map<String, Map<String, Object>> prepareGains(List<GainEntry> gainEntries) {
+    Map<String, Map<String, Object>> prepareGains(List<GainEntryService> gainEntries) {
 
-        gainEntries.sort(Comparator.comparing(GainEntry::getFinYear).thenComparing(GainEntry::getFundType));
+        gainEntries.sort(
+                Comparator.comparing(GainEntryService::getFinYear).thenComparing(GainEntryService::getFundType));
 
-        Map<String, List<GainEntry>> groupedGains =
+        Map<String, List<GainEntryService>> groupedGains =
                 gainEntries.stream().collect(Collectors.groupingBy(txn -> txn.getFinYear() + "#" + txn.getFundType()));
 
         Map<String, Map<String, Object>> summary = new HashMap<>();
@@ -86,18 +97,18 @@ public class CapitalGainsService {
                 fySummary = new HashMap<>();
                 fySummary.put("funds", new ArrayList<>());
                 Map<String, BigDecimal> totalMap = new HashMap<>();
-                totalMap.put("ltcg", BigDecimal.ZERO);
-                totalMap.put("stcg", BigDecimal.ZERO);
-                totalMap.put("tax_ltcg", BigDecimal.ZERO);
-                fySummary.put("total", totalMap);
+                totalMap.put(LTCG, BigDecimal.ZERO);
+                totalMap.put(STCG, BigDecimal.ZERO);
+                totalMap.put(TAX_LTCG, BigDecimal.ZERO);
+                fySummary.put(TOTAL, totalMap);
                 summary.put(fy, fySummary);
             }
 
-            Map<String, BigDecimal> netTotal = (Map<String, BigDecimal>) fySummary.get("total");
+            Map<String, BigDecimal> netTotal = (Map<String, BigDecimal>) fySummary.get(TOTAL);
             Map<String, BigDecimal> total = new HashMap<>();
-            total.put("ltcg", BigDecimal.ZERO);
-            total.put("stcg", BigDecimal.ZERO);
-            total.put("tax_ltcg", BigDecimal.ZERO);
+            total.put(LTCG, BigDecimal.ZERO);
+            total.put(STCG, BigDecimal.ZERO);
+            total.put(TAX_LTCG, BigDecimal.ZERO);
 
             Map<String, Object> data = new HashMap<>();
             data.put("fy", fy);
@@ -105,9 +116,9 @@ public class CapitalGainsService {
             data.put("txns", new ArrayList<Map<String, Object>>());
 
             value.forEach(txn -> {
-                total.computeIfPresent("ltcg", (k, v) -> v.add(txn.getLtcg()));
-                total.computeIfPresent("stcg", (k, v) -> v.add(txn.getStcg()));
-                total.computeIfPresent("tax_ltcg", (k, v) -> v.add(txn.getLtcgTaxable()));
+                total.computeIfPresent(LTCG, (k, v) -> v.add(txn.getLtcg()));
+                total.computeIfPresent(STCG, (k, v) -> v.add(txn.getStcg()));
+                total.computeIfPresent(TAX_LTCG, (k, v) -> v.add(txn.getLtcgTaxable()));
 
                 Map<String, Object> txnData = new HashMap<>();
                 txnData.put("buy_date", txn.getPurchaseDate());
@@ -116,20 +127,20 @@ public class CapitalGainsService {
                 txnData.put("coa", txn.getCoa());
                 txnData.put("sell_date", txn.getSaleDate());
                 txnData.put("sell_price", txn.getSaleValue());
-                txnData.put("ltcg", txn.getLtcg());
-                txnData.put("stcg", txn.getStcg());
-                txnData.put("tax_ltcg", txn.getLtcgTaxable());
+                txnData.put(LTCG, txn.getLtcg());
+                txnData.put(STCG, txn.getStcg());
+                txnData.put(TAX_LTCG, txn.getLtcgTaxable());
                 ((List<Map<String, Object>>) data.get("txns")).add(txnData);
             });
 
-            data.put("total", total);
+            data.put(TOTAL, total);
             ((List<Map<String, Object>>) fySummary.get("funds")).add(data);
 
-            netTotal.computeIfPresent("ltcg", (k, v) -> v.add(total.get("ltcg")));
-            netTotal.computeIfPresent("stcg", (k, v) -> v.add(total.get("stcg")));
-            netTotal.computeIfPresent("tax_ltcg", (k, v) -> v.add(total.get("tax_ltcg")));
+            netTotal.computeIfPresent(LTCG, (k, v) -> v.add(total.get(LTCG)));
+            netTotal.computeIfPresent(STCG, (k, v) -> v.add(total.get(STCG)));
+            netTotal.computeIfPresent(TAX_LTCG, (k, v) -> v.add(total.get(TAX_LTCG)));
 
-            fySummary.put("total", netTotal);
+            fySummary.put(TOTAL, netTotal);
         });
 
         return summary;

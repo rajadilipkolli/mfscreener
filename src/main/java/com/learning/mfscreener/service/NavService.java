@@ -5,7 +5,9 @@ import com.learning.mfscreener.exception.NavNotFoundException;
 import com.learning.mfscreener.models.MFSchemeDTO;
 import com.learning.mfscreener.utils.AppConstants;
 import com.learning.mfscreener.utils.LocalDateUtility;
+import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -37,6 +39,29 @@ public class NavService {
     public MFSchemeDTO getNavOnDate(Long schemeCode, LocalDate inputDate) {
         LocalDate adjustedDate = LocalDateUtility.getAdjustedDate(inputDate);
         return getNavByDateWithRetry(schemeCode, adjustedDate);
+    }
+
+    @Loggable
+    public BigDecimal getNavByISINOnDate(String isin, LocalDate inputDate) {
+        List<Long> schemeIdByISINList = schemeService.getSchemeIdByISIN(isin);
+        BigDecimal nav = BigDecimal.ZERO;
+        if (!schemeIdByISINList.isEmpty()) {
+            Long schemeCode = schemeIdByISINList.get(0);
+            if (schemeCode < 143000) {
+                try {
+                    MFSchemeDTO navByDateWithRetry = getNavByDateWithRetry(schemeCode, inputDate);
+                    nav = BigDecimal.valueOf(Double.parseDouble(navByDateWithRetry.nav()));
+                } catch (NavNotFoundException ignore) {
+                    // this fund was created after 2018-01-31
+                    LOGGER.error("NAV not found for SchemeCode :{}", schemeCode);
+                }
+            } else {
+                LOGGER.debug("SchemeCode : {} Started after 2018-01-31, hence will return 0", schemeCode);
+            }
+        } else {
+            LOGGER.info("Scheme not found for ISIN :{} ", isin);
+        }
+        return nav;
     }
 
     @Loggable

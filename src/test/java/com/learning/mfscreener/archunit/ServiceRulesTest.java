@@ -31,11 +31,7 @@ class ServiceRulesTest {
             .that()
             .resideInAPackage(SERVICE_PACKAGE)
             .and()
-            .haveSimpleNameNotEndingWith("BeanDefinitions")
-            .and()
-            .areNotInnerClasses()
-            .and()
-            .doNotHaveSimpleName("package-info")
+            .areTopLevelClasses()
             .should()
             .beAnnotatedWith(Service.class)
             .because(ANNOTATED_EXPLANATION.formatted(SERVICE_SUFFIX, "@Service"));

@@ -1,13 +1,13 @@
 package com.learning.mfscreener.web.api;
 
 import com.learning.mfscreener.models.response.PortfolioResponse;
+import com.learning.mfscreener.models.response.ProcessCasResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import jakarta.validation.constraints.PastOrPresent;
 import java.io.IOException;
 import java.time.LocalDate;
-import java.util.Map;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
@@ -15,7 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 public interface PortfolioApi {
 
     @Operation(summary = "Persists the transaction details.")
-    ResponseEntity<Map<String, Object>> upload(@RequestPart("file") MultipartFile multipartFile) throws IOException;
+    ResponseEntity<ProcessCasResponse> upload(@RequestPart("file") MultipartFile multipartFile) throws IOException;
 
     @Operation(
             summary =

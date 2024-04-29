@@ -50,7 +50,7 @@ class PortfolioControllerIT extends AbstractIntegrationTest {
                     .andExpect(status().isOk())
                     .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                     .andExpect(jsonPath("$.importSummary", is("Imported 1 folios and 5 transactions")))
-                    .andExpect(jsonPath("$.FY2022-23", notNullValue()));
+                    .andExpect(jsonPath("$.summaryByFY.FY2022-23", notNullValue()));
         } finally {
             tempFile.deleteOnExit();
         }
@@ -135,7 +135,7 @@ class PortfolioControllerIT extends AbstractIntegrationTest {
                     .andExpect(status().isOk())
                     .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                     .andExpect(jsonPath("$.importSummary", is("Imported 0 folios and 6 transactions")))
-                    .andExpect(jsonPath("$.FY2022-23", notNullValue()));
+                    .andExpect(jsonPath("$.summaryByFY.FY2022-23", notNullValue()));
         } finally {
             tempFile.deleteOnExit();
         }

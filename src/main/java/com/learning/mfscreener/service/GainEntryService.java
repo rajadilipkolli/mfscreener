@@ -1,21 +1,24 @@
-package com.learning.mfscreener.utils;
+package com.learning.mfscreener.service;
 
-import com.learning.mfscreener.helper.NavSearchHelper;
 import com.learning.mfscreener.models.portfolio.Fund;
 import com.learning.mfscreener.models.portfolio.FundType;
 import com.learning.mfscreener.models.portfolio.GainType;
+import com.learning.mfscreener.utils.LocalDateUtility;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
+import org.springframework.stereotype.Service;
 
-public class GainEntry {
+@Service
+public class GainEntryService {
 
     private final Map<String, BigDecimal> CII = loadCostInflationIndexData();
-    private final LocalDate cutoffDate;
-    private final LocalDate sellCutoffDate;
+    private final NavService navService;
 
+    private LocalDate cutoffDate;
+    private LocalDate sellCutoffDate;
     private String finYear;
     private Fund fund;
     private FundType fundType;
@@ -31,7 +34,7 @@ public class GainEntry {
     private String cachedIsin;
     private BigDecimal cachedNav;
 
-    public GainEntry(
+    public GainEntryService init(
             String finYear,
             Fund fund,
             FundType fundType,
@@ -59,18 +62,23 @@ public class GainEntry {
         this.cutoffDate = LocalDate.of(2018, 1, 31);
         this.sellCutoffDate = LocalDate.of(2018, 4, 1);
         updateNav(fund.isin());
+        return this;
     }
 
-    private void updateNav(String isin) {
+    public GainEntryService(NavService navService) {
+        this.navService = navService;
+    }
+
+    public void updateNav(String isin) {
         this.cachedIsin = isin;
-        this.cachedNav = NavSearchHelper.getNav(isin);
+        this.cachedNav = navService.getNavByISINOnDate(isin, LocalDate.of(2018, 1, 31));
     }
 
     public String getFinYear() {
         return finYear;
     }
 
-    public GainEntry setFinYear(String finYear) {
+    public GainEntryService setFinYear(String finYear) {
         this.finYear = finYear;
         return this;
     }
@@ -79,7 +87,7 @@ public class GainEntry {
         return fund;
     }
 
-    public GainEntry setFund(Fund fund) {
+    public GainEntryService setFund(Fund fund) {
         this.fund = fund;
         return this;
     }
@@ -88,7 +96,7 @@ public class GainEntry {
         return fundType;
     }
 
-    public GainEntry setFundType(FundType fundType) {
+    public GainEntryService setFundType(FundType fundType) {
         this.fundType = fundType;
         return this;
     }
@@ -97,7 +105,7 @@ public class GainEntry {
         return purchaseDate;
     }
 
-    public GainEntry setPurchaseDate(LocalDate purchaseDate) {
+    public GainEntryService setPurchaseDate(LocalDate purchaseDate) {
         this.purchaseDate = purchaseDate;
         return this;
     }
@@ -106,7 +114,7 @@ public class GainEntry {
         return purchaseNav;
     }
 
-    public GainEntry setPurchaseNav(BigDecimal purchaseNav) {
+    public GainEntryService setPurchaseNav(BigDecimal purchaseNav) {
         this.purchaseNav = purchaseNav;
         return this;
     }
@@ -115,7 +123,7 @@ public class GainEntry {
         return purchaseValue;
     }
 
-    public GainEntry setPurchaseValue(BigDecimal purchaseValue) {
+    public GainEntryService setPurchaseValue(BigDecimal purchaseValue) {
         this.purchaseValue = purchaseValue;
         return this;
     }
@@ -124,7 +132,7 @@ public class GainEntry {
         return stampDuty;
     }
 
-    public GainEntry setStampDuty(BigDecimal stampDuty) {
+    public GainEntryService setStampDuty(BigDecimal stampDuty) {
         this.stampDuty = stampDuty;
         return this;
     }
@@ -133,7 +141,7 @@ public class GainEntry {
         return saleDate;
     }
 
-    public GainEntry setSaleDate(LocalDate saleDate) {
+    public GainEntryService setSaleDate(LocalDate saleDate) {
         this.saleDate = saleDate;
         return this;
     }
@@ -142,7 +150,7 @@ public class GainEntry {
         return saleNav;
     }
 
-    public GainEntry setSaleNav(BigDecimal saleNav) {
+    public GainEntryService setSaleNav(BigDecimal saleNav) {
         this.saleNav = saleNav;
         return this;
     }
@@ -151,7 +159,7 @@ public class GainEntry {
         return saleValue;
     }
 
-    public GainEntry setSaleValue(BigDecimal saleValue) {
+    public GainEntryService setSaleValue(BigDecimal saleValue) {
         this.saleValue = saleValue;
         return this;
     }
@@ -160,7 +168,7 @@ public class GainEntry {
         return stt;
     }
 
-    public GainEntry setStt(BigDecimal stt) {
+    public GainEntryService setStt(BigDecimal stt) {
         this.stt = stt;
         return this;
     }
@@ -169,7 +177,7 @@ public class GainEntry {
         return units;
     }
 
-    public GainEntry setUnits(BigDecimal units) {
+    public GainEntryService setUnits(BigDecimal units) {
         this.units = units;
         return this;
     }
@@ -202,7 +210,7 @@ public class GainEntry {
         return this.purchaseValue;
     }
 
-    private BigDecimal getFmv() {
+    public BigDecimal getFmv() {
         BigDecimal fmvNav = this.getFmvNav();
         if (fmvNav == null) {
             return this.purchaseValue;
@@ -210,14 +218,14 @@ public class GainEntry {
         return fmvNav.multiply(this.getUnits());
     }
 
-    private BigDecimal getFmvNav() {
+    public BigDecimal getFmvNav() {
         if (!this.fund.isin().equals(this.cachedIsin)) {
             this.updateNav(this.fund.isin());
         }
         return this.cachedNav;
     }
 
-    private BigDecimal getIndexRatio() {
+    public BigDecimal getIndexRatio() {
         return CII.get(LocalDateUtility.getFinYear(this.saleDate))
                 .divide(CII.get(LocalDateUtility.getFinYear(this.purchaseDate)), 2, RoundingMode.HALF_UP);
     }
@@ -236,11 +244,11 @@ public class GainEntry {
         return BigDecimal.ZERO;
     }
 
-    private BigDecimal getGain() {
+    public BigDecimal getGain() {
         return this.saleValue.subtract(this.purchaseValue).setScale(2, RoundingMode.HALF_UP);
     }
 
-    private GainType getGainType() {
+    public GainType getGainType() {
         Map<String, LocalDate> ltcg = new HashMap<>();
         ltcg.put(FundType.EQUITY.name(), this.purchaseDate.plusYears(1));
         ltcg.put(FundType.DEBT.name(), this.purchaseDate.plusYears(3));
@@ -248,7 +256,7 @@ public class GainEntry {
         return this.saleDate.isAfter(ltcg.get(this.fundType.name())) ? GainType.LTCG : GainType.STCG;
     }
 
-    private Map<String, BigDecimal> loadCostInflationIndexData() {
+    public Map<String, BigDecimal> loadCostInflationIndexData() {
         Map<String, BigDecimal> ciiDataMap = new HashMap<>();
         ciiDataMap.put("FY2001-02", BigDecimal.valueOf(100));
         ciiDataMap.put("FY2002-03", BigDecimal.valueOf(105));

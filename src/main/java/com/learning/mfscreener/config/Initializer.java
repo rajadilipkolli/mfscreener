@@ -3,6 +3,7 @@ package com.learning.mfscreener.config;
 import com.learning.mfscreener.entities.MFSchemeEntity;
 import com.learning.mfscreener.mapper.MfSchemeDtoToEntityMapper;
 import com.learning.mfscreener.models.MFSchemeDTO;
+import com.learning.mfscreener.service.HistoricalNavService;
 import com.learning.mfscreener.service.SchemeService;
 import com.learning.mfscreener.utils.AppConstants;
 import java.io.BufferedReader;
@@ -30,14 +31,17 @@ public class Initializer implements CommandLineRunner {
     private final SchemeService schemeService;
     private final MfSchemeDtoToEntityMapper mfSchemeDtoToEntityMapper;
     private final RestTemplate restTemplate;
+    private final HistoricalNavService historicalNavService;
 
     public Initializer(
             SchemeService schemeService,
             MfSchemeDtoToEntityMapper mfSchemeDtoToEntityMapper,
-            RestTemplate restTemplate) {
+            RestTemplate restTemplate,
+            HistoricalNavService historicalNavService) {
         this.schemeService = schemeService;
         this.mfSchemeDtoToEntityMapper = mfSchemeDtoToEntityMapper;
         this.restTemplate = restTemplate;
+        this.historicalNavService = historicalNavService;
     }
 
     @Override
@@ -114,6 +118,10 @@ public class Initializer implements CommandLineRunner {
         } catch (HttpClientErrorException | ResourceAccessException httpClientErrorException) {
             // eating as we can't do much, it should be set when available using Nightly job
             LOGGER.error("Unable to load data from :{}", AppConstants.AMFI_WEBSITE_LINK, httpClientErrorException);
+        }
+
+        if (!schemeService.navLoadedFor31Jan2018()) {
+            historicalNavService.getHistoricalNavOn31Jan2018();
         }
     }
 }

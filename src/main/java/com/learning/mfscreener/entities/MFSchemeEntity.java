@@ -10,6 +10,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -41,6 +42,9 @@ public class MFSchemeEntity extends AuditableEntity<String> implements Serializa
 
     @OneToMany(mappedBy = "mfSchemeEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<MFSchemeNavEntity> mfSchemeNavEntities = new ArrayList<>();
+
+    @Version
+    private Short version;
 
     public Long getSchemeId() {
         return schemeId;
@@ -102,6 +106,15 @@ public class MFSchemeEntity extends AuditableEntity<String> implements Serializa
 
     public MFSchemeEntity setMfSchemeNavEntities(List<MFSchemeNavEntity> mfSchemeNavEntities) {
         this.mfSchemeNavEntities = mfSchemeNavEntities;
+        return this;
+    }
+
+    public Short getVersion() {
+        return version;
+    }
+
+    public MFSchemeEntity setVersion(Short version) {
+        this.version = version;
         return this;
     }
 
