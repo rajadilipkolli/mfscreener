@@ -198,7 +198,7 @@ public class HistoricalNavService {
         }
     }
 
-    private List<Long> findAllSchemeIds() {
+    List<Long> findAllSchemeIds() {
         if (schemeCodeList.isEmpty()) {
             schemeCodeList = schemeService.findAllSchemeIds();
         }
