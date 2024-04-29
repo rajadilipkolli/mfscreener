@@ -3,7 +3,7 @@ package com.learning.mfscreener.utils;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
-import java.time.format.ResolverStyle;
+import java.time.temporal.ChronoField;
 import java.util.Locale;
 
 public final class AppConstants {
@@ -23,9 +23,8 @@ public final class AppConstants {
     public static final int FIRST_RETRY = 1;
     public static final int THIRD_RETRY = 3;
     public static final DateTimeFormatter FLEXIBLE_DATE_FORMATTER = new DateTimeFormatterBuilder()
-            .appendOptional(DateTimeFormatter.ISO_LOCAL_DATE)
-            .appendOptional(FORMATTER_DD_MMM_YYYY)
-            .toFormatter()
-            .withResolverStyle(ResolverStyle.STRICT);
-    ;
+            .appendPattern("[yyyy-MM-dd]") // ISO_LOCAL_DATE
+            .appendPattern("[dd-MMM-yyyy]") // Custom format
+            .parseDefaulting(ChronoField.YEAR_OF_ERA, LocalDate.now().getYear()) // Default year to current year
+            .toFormatter(Locale.ENGLISH); // Ensure English locale for month names
 }
