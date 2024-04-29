@@ -1,12 +1,13 @@
 /* Licensed under Apache-2.0 2021-2024. */
 package com.learning.mfscreener.mapper;
 
+import static com.learning.mfscreener.utils.AppConstants.FLEXIBLE_DATE_FORMATTER;
+
 import com.learning.mfscreener.entities.MFSchemeEntity;
 import com.learning.mfscreener.entities.MFSchemeNavEntity;
 import com.learning.mfscreener.entities.MFSchemeTypeEntity;
 import com.learning.mfscreener.models.MFSchemeDTO;
 import com.learning.mfscreener.repository.MFSchemeTypeRepository;
-import com.learning.mfscreener.utils.AppConstants;
 import jakarta.annotation.Nullable;
 import java.time.LocalDate;
 import java.util.regex.Matcher;
@@ -48,12 +49,8 @@ public abstract class MfSchemeDtoToEntityMapper {
     void updateMFScheme(MFSchemeDTO scheme, @MappingTarget MFSchemeEntity mfSchemeEntity) {
         MFSchemeNavEntity mfSchemenavEntity = new MFSchemeNavEntity();
         mfSchemenavEntity.setNav("N.A.".equals(scheme.nav()) ? 0F : Float.parseFloat(scheme.nav()));
-        LocalDate parsedDate;
-        if (scheme.date().length() == 10) {
-            parsedDate = LocalDate.parse(scheme.date());
-        } else {
-            parsedDate = LocalDate.parse(scheme.date(), AppConstants.FORMATTER_DD_MMM_YYYY);
-        }
+        // Use the flexible formatter to parse the date
+        LocalDate parsedDate = LocalDate.parse(scheme.date(), FLEXIBLE_DATE_FORMATTER);
         mfSchemenavEntity.setNavDate(parsedDate);
         mfSchemeEntity.addSchemeNav(mfSchemenavEntity);
 

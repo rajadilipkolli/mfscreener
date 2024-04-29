@@ -2,6 +2,8 @@ package com.learning.mfscreener.utils;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.time.format.ResolverStyle;
 import java.util.Locale;
 
 public final class AppConstants {
@@ -20,4 +22,10 @@ public final class AppConstants {
     public static final int MAX_RETRIES = 4;
     public static final int FIRST_RETRY = 1;
     public static final int THIRD_RETRY = 3;
+    public static final DateTimeFormatter FLEXIBLE_DATE_FORMATTER = new DateTimeFormatterBuilder()
+            .appendOptional(DateTimeFormatter.ISO_LOCAL_DATE)
+            .appendOptional(DateTimeFormatter.ofPattern("dd-MMM-yyyy"))
+            .toFormatter()
+            .withResolverStyle(ResolverStyle.STRICT);
+    ;
 }
