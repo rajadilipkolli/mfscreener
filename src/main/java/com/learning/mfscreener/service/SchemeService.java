@@ -4,14 +4,19 @@ import com.learning.mfscreener.adapter.ConversionServiceAdapter;
 import com.learning.mfscreener.config.logging.Loggable;
 import com.learning.mfscreener.entities.MFSchemeEntity;
 import com.learning.mfscreener.entities.MFSchemeNavEntity;
+import com.learning.mfscreener.exception.FileNotFoundException;
 import com.learning.mfscreener.exception.SchemeNotFoundException;
+import com.learning.mfscreener.mapper.MfSchemeDtoToEntityMapper;
 import com.learning.mfscreener.models.MFSchemeDTO;
 import com.learning.mfscreener.models.projection.FundDetailProjection;
 import com.learning.mfscreener.models.projection.UserFolioDetailsPanProjection;
 import com.learning.mfscreener.models.response.NavResponse;
 import com.learning.mfscreener.repository.MFSchemeRepository;
 import com.learning.mfscreener.utils.AppConstants;
+import java.io.IOException;
 import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Locale;
@@ -20,6 +25,8 @@ import org.hibernate.exception.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
@@ -36,17 +43,23 @@ public class SchemeService {
     private final RestClient restClient;
     private final MFSchemeRepository mfSchemeRepository;
     private final ConversionServiceAdapter conversionServiceAdapter;
+    private final MfSchemeDtoToEntityMapper mfSchemeDtoToEntityMapper;
     private final UserFolioDetailsService userFolioDetailsService;
+    private final ResourceLoader resourceLoader;
 
     public SchemeService(
             RestClient restClient,
             MFSchemeRepository mfSchemeRepository,
             ConversionServiceAdapter conversionServiceAdapter,
-            UserFolioDetailsService userFolioDetailsService) {
+            MfSchemeDtoToEntityMapper mfSchemeDtoToEntityMapper,
+            UserFolioDetailsService userFolioDetailsService,
+            ResourceLoader resourceLoader) {
         this.restClient = restClient;
         this.mfSchemeRepository = mfSchemeRepository;
         this.conversionServiceAdapter = conversionServiceAdapter;
+        this.mfSchemeDtoToEntityMapper = mfSchemeDtoToEntityMapper;
         this.userFolioDetailsService = userFolioDetailsService;
+        this.resourceLoader = resourceLoader;
     }
 
     @Loggable
@@ -188,13 +201,45 @@ public class SchemeService {
         return mfSchemeRepository.saveAll(mfSchemeEntityList);
     }
 
-    @Transactional(readOnly = true)
-    public boolean navLoadedFor31Jan2018() {
-        return mfSchemeRepository.countByMfSchemeNavEntities_NavDate(AppConstants.GRAND_FATHERED_DATE) > 9000;
-    }
+    @Transactional
+    public void loadHistoricalDataForClosedOrMergedSchemes() {
+        Resource resource = resourceLoader.getResource("classpath:/nav/31Jan2018Navdatadump.csv");
+        try {
+            Path path = resource.getFile().toPath();
+            List<String> lines = Files.lines(path).parallel().toList();
+            List<MFSchemeEntity> mfSchemeEntities = lines.stream()
+                    .skip(1)
+                    .map(csvRow -> {
+                        // Split the row , format nav	nav_date	scheme_id	fund_house	scheme_name	pay_out	type	category
+                        //	sub_category
+                        String[] fields = csvRow.split(",");
 
-    @Transactional(readOnly = true)
-    public MFSchemeEntity getReferenceBySchemeId(Long schemeCode) {
-        return mfSchemeRepository.findBySchemeId(schemeCode).get();
+                        // Trim and remove quotes
+                        for (int i = 0; i < fields.length; i++) {
+                            fields[i] = fields[i].strip().replaceAll("^\"+|\"+$", "");
+                        }
+                        //                        Open Ended Schemes(Debt Scheme - Banking and PSU Fund)
+                        String schemeType;
+                        if (fields[8].equals("NULL")) {
+                            schemeType = fields[6].strip() + "(" + fields[7].strip() + ")";
+                        } else {
+                            schemeType = fields[6].strip() + "(" + fields[7].strip() + " - " + fields[8].strip() + ")";
+                        }
+                        return new MFSchemeDTO(
+                                fields[3],
+                                Long.valueOf(fields[2]),
+                                fields[5],
+                                fields[4],
+                                fields[0],
+                                fields[1],
+                                schemeType);
+                    })
+                    .map(mfSchemeDtoToEntityMapper::mapMFSchemeDTOToMFSchemeEntity)
+                    .toList();
+            List<MFSchemeEntity> persistedEntities = mfSchemeRepository.saveAll(mfSchemeEntities);
+            LOGGER.info("Persisted : {} rows", persistedEntities.size());
+        } catch (IOException e) {
+            throw new FileNotFoundException(e.getMessage());
+        }
     }
 }
