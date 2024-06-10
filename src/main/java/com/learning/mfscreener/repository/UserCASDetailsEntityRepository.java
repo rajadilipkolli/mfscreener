@@ -10,7 +10,8 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface UserCASDetailsEntityRepository extends JpaRepository<UserCASDetailsEntity, Long> {
+public interface UserCASDetailsEntityRepository
+        extends JpaRepository<UserCASDetailsEntity, Long>, CustomUserCASDetailsEntityRepository {
 
     @Query(
             nativeQuery = true,
