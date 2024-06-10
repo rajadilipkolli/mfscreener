@@ -1,10 +1,11 @@
-package com.learning.mfscreener.repository;
+package com.learning.mfscreener.repository.impl;
 
 import com.blazebit.persistence.CriteriaBuilderFactory;
 import com.blazebit.persistence.view.EntityViewManager;
 import com.blazebit.persistence.view.EntityViewSetting;
 import com.learning.mfscreener.entities.UserCASDetailsEntity;
 import com.learning.mfscreener.models.entityviews.UserCASDetailsEntityView;
+import com.learning.mfscreener.repository.CustomUserCASDetailsEntityRepository;
 import jakarta.persistence.EntityManager;
 
 public class CustomUserCASDetailsEntityRepositoryImpl implements CustomUserCASDetailsEntityRepository {
