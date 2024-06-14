@@ -27,8 +27,8 @@ group = "com.learning.mfscreener"
 version = "0.0.1-SNAPSHOT"
 
 java {
-  sourceCompatibility = '17'
-  targetCompatibility = '17'
+  sourceCompatibility = '21'
+  targetCompatibility = '21'
 }
 
 configurations {
