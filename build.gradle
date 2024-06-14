@@ -66,11 +66,6 @@ dependencies {
     runtimeOnly "org.postgresql:postgresql"
     implementation "org.liquibase:liquibase-core"
 
-    // Blaze Persistance
-    implementation('com.blazebit:blaze-persistence-integration-spring-data-3.1')
-    implementation('com.blazebit:blaze-persistence-integration-hibernate-6.2')
-    implementation('com.blazebit:blaze-persistence-integration-entity-view-spring-6.0')
-
     implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:${springdoc_openapi_version}"
     runtimeOnly "io.micrometer:micrometer-registry-prometheus"
 
@@ -83,7 +78,7 @@ dependencies {
     annotationProcessor ("org.mapstruct:mapstruct-processor:1.5.5.Final")
     annotationProcessor ("org.mapstruct.extensions.spring:mapstruct-spring-extensions:1.1.1")
 
-    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+    testAndDevelopmentOnly 'org.springframework.boot:spring-boot-devtools'
     
     testImplementation "org.springframework.boot:spring-boot-starter-test"
     testImplementation "org.springframework.boot:spring-boot-testcontainers"
