@@ -8,7 +8,7 @@ vscode:
   extensions:
     - Pivotal.vscode-boot-dev-pack
     - vscjava.vscode-java-pack
-    - richardwillis.vscode-gradle
+    - vscjava.vscode-gradle
 
 ports:
   - port: 8080
