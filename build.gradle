@@ -3,6 +3,7 @@ import org.gradle.plugins.ide.eclipse.model.SourceFolder
 buildscript {
     repositories {
         mavenCentral()
+        maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
     }
     dependencies {
         classpath "org.owasp:dependency-check-gradle:${owasp_plugin_version}"
@@ -39,6 +40,7 @@ configurations {
 
 repositories {
     mavenCentral()
+    maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
 }
 
 dependencies {
