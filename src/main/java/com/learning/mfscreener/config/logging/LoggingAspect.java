@@ -137,11 +137,13 @@ public class LoggingAspect {
     private void logMethodParamsIfEnabled(ProceedingJoinPoint joinPoint, LogLevel logLevel, String methodName) {
         boolean printParams = shouldLog(joinPoint, Loggable::params);
 
-        if (printParams && !ObjectUtils.isEmpty(joinPoint.getArgs())) {
+        if (printParams && joinPoint.getArgs() != null && !ObjectUtils.isEmpty(joinPoint.getArgs())) {
             String[] parameterNames = ((MethodSignature) joinPoint.getSignature()).getParameterNames();
-            List<String> stringArrayList = getParamsList(joinPoint, parameterNames);
-            String argsString = String.join(", ", stringArrayList);
-            logExecutionDetails(joinPoint, logLevel, methodName + "() args :: -> " + argsString);
+            if (parameterNames != null) {
+                List<String> stringArrayList = getParamsList(joinPoint, parameterNames);
+                String argsString = String.join(", ", stringArrayList);
+                logExecutionDetails(joinPoint, logLevel, methodName + "() args :: -> " + argsString);
+            }
         }
     }
 
