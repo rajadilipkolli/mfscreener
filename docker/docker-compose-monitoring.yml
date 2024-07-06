@@ -2,7 +2,7 @@ version: '3.8'
 services:
 
   grafana:
-    image: grafana/grafana:11.0.0
+    image: grafana/grafana:11.1.0
     extra_hosts: ['host.docker.internal:host-gateway']
     ports:
     - "3000:3000"
@@ -17,7 +17,7 @@ services:
     - prometheus
 
   prometheus:
-    image: prom/prometheus:v2.52.0
+    image: prom/prometheus:v2.53.0
     extra_hosts: ['host.docker.internal:host-gateway']
     ports:
       - "9090:9090"
@@ -28,7 +28,7 @@ services:
       - --config.file=/etc/prometheus/prometheus.yml
 
   loki:
-    image: grafana/loki:3.0.0
+    image: grafana/loki:3.1.0
     container_name: loki
     extra_hosts: [ 'host.docker.internal:host-gateway' ]
     command: -config.file=/etc/loki/local-config.yaml
