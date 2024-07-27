@@ -5,6 +5,8 @@ executors:
   machine_executor_amd64:
     machine:
       image: ubuntu-2404:current
+    docker:
+      - image: 'cimg/openjdk:21.0.4'
     environment:
       architecture: "amd64"
       platform: "linux/amd64"
