@@ -1,4 +1,4 @@
-/* Licensed under Apache-2.0 2022. */
+/* Licensed under Apache-2.0 2022-2024. */
 package com.learning.mfscreener.archunit;
 
 import static com.learning.mfscreener.archunit.CustomConditions.haveGetter;
@@ -7,6 +7,8 @@ import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.constructors;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.fields;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.methods;
 
+import com.tngtech.archunit.base.DescribedPredicate;
+import com.tngtech.archunit.core.domain.JavaClass;
 import com.tngtech.archunit.core.domain.JavaModifier;
 import com.tngtech.archunit.lang.ArchRule;
 import java.util.Arrays;
@@ -178,6 +180,13 @@ public class CommonRules {
                 .areDeclaredInClassesThat()
                 .resideInAPackage(packageName)
                 .and()
+                .areDeclaredInClassesThat(new DescribedPredicate<>("are not enums") {
+                    @Override
+                    public boolean test(JavaClass javaClass) {
+                        return !javaClass.isEnum();
+                    }
+                })
+                .and()
                 .haveNameNotEndingWith("BeanDefinition")
                 .and()
                 .haveNameNotEndingWith("InstanceSupplier")
@@ -191,6 +200,13 @@ public class CommonRules {
                 .that()
                 .areDeclaredInClassesThat()
                 .resideInAnyPackage(packageNames)
+                .and()
+                .areDeclaredInClassesThat(new DescribedPredicate<>("are not enums") {
+                    @Override
+                    public boolean test(JavaClass javaClass) {
+                        return !javaClass.isEnum();
+                    }
+                })
                 .should()
                 .bePublic()
                 .because("Public methods are only allowed in " + Arrays.toString(packageNames));
