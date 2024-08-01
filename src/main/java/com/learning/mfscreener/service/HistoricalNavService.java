@@ -163,6 +163,6 @@ public class HistoricalNavService {
         // tp=1 Open Ended Schemes
         String historicalUrl = "https://portal.amfiindia.com/DownloadNAVHistoryReport_Po.aspx?frmdt=%s&todt=%s"
                 .formatted(fromDate, toDate);
-        return UriComponentsBuilder.fromHttpUrl(historicalUrl).build().toUri();
+        return UriComponentsBuilder.fromUriString(historicalUrl).build().toUri();
     }
 }

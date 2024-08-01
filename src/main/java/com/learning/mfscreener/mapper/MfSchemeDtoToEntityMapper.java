@@ -23,7 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 @Mapper(config = MapperSpringConfig.class)
 public abstract class MfSchemeDtoToEntityMapper {
 
-    private final Logger log = LoggerFactory.getLogger(this.getClass());
+    private static final Logger LOGGER = LoggerFactory.getLogger(MfSchemeDtoToEntityMapper.class);
 
     // Define the regular expressions
     private static final Pattern TYPE_CATEGORY_SUBCATEGORY_PATTERN =
@@ -68,7 +68,7 @@ public abstract class MfSchemeDtoToEntityMapper {
                 String category = schemeType.substring(schemeType.indexOf('(') + 1, schemeType.length() - 1);
                 mfSchemeTypeEntity = findOrCreateMFSchemeTypeEntity(type, category, null, mfSchemeTypeRepository);
             } else {
-                log.error("Unable to parse schemeType :{}", schemeType);
+                LOGGER.error("Unable to parse schemeType :{}", schemeType);
             }
         }
         mfSchemeEntity.setMfSchemeTypeEntity(mfSchemeTypeEntity);

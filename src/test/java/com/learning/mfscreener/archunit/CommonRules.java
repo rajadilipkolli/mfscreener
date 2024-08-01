@@ -103,6 +103,13 @@ public class CommonRules {
                 .areDeclaredInClassesThat()
                 .resideInAnyPackage(packageNames)
                 .and()
+                .areDeclaredInClassesThat(new DescribedPredicate<>("are not enums") {
+                    @Override
+                    public boolean test(JavaClass javaClass) {
+                        return !javaClass.isEnum();
+                    }
+                })
+                .and()
                 .doNotHaveName("serialVersionUID")
                 .should()
                 .notBeFinal()
@@ -129,12 +136,8 @@ public class CommonRules {
                 .doNotHaveModifier(JavaModifier.SYNTHETIC)
                 .should()
                 .beFinal()
-                .because(
-                        ("""
-                Private attributes should be instanced by constructor classes, or\
-                 it should be static in %s\
-                """)
-                                .formatted(packageName));
+                .because("Private attributes should be instanced by constructor classes, or it should be static in %s"
+                        .formatted(packageName));
     }
 
     // Constructors
@@ -172,6 +175,16 @@ public class CommonRules {
                 .should()
                 .notBePrivate()
                 .because("Private methods are not allowed in %s".formatted(packageName));
+    }
+
+    static ArchRule publicMethodsAreNotAllowedRule(String packageName) {
+        return methods()
+                .that()
+                .areDeclaredInClassesThat()
+                .resideInAPackage(packageName)
+                .should()
+                .notBePublic()
+                .because("Public methods are not allowed in %s".formatted(packageName));
     }
 
     static ArchRule staticMethodsAreNotAllowedRule(String packageName) {
