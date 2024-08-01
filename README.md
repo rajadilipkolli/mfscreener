@@ -70,10 +70,16 @@ This overview and class diagram provide a conceptual understanding of the projec
 ```shell
 ./gradlew clean test integrationTest
 ```
-### Run locally
+### Run locally with docker
 
 ```shell
 docker-compose -f docker/docker-compose.yml up -d
+./gradlew bootRun -Plocaldocker
+```
+
+### Run locally
+
+```shell
 ./gradlew bootRun -Plocal
 ```
 
