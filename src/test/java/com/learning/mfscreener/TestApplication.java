@@ -6,7 +6,6 @@ import org.springframework.boot.devtools.restart.RestartScope;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.context.annotation.Bean;
-import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.utility.DockerImageName;
 
@@ -27,14 +26,8 @@ public class TestApplication {
         return new PostgreSQLContainer<>(DockerImageName.parse("postgres").withTag("16-alpine"));
     }
 
-    @Bean
-    @ServiceConnection(name = "openzipkin/zipkin")
-    @RestartScope
-    GenericContainer<?> zipkinContainer() {
-        return new GenericContainer<>("openzipkin/zipkin:latest").withExposedPorts(9411);
-    }
-
     public static void main(String[] args) {
+        System.setProperty("spring.profiles.active", "test");
         SpringApplication.from(Application::main).with(TestApplication.class).run(args);
     }
 }
