@@ -10,6 +10,8 @@ public final class AppConstants {
     public static final String PROFILE_PROD = "prod";
     public static final String PROFILE_NOT_PROD = "!" + PROFILE_PROD;
     public static final String PROFILE_TEST = "test";
+    public static final String PROFILE_LOCAL = "prod";
+    public static final String PROFILE_NOT_LOCAL = "!" + PROFILE_LOCAL;
 
     public static final String AMFI_WEBSITE_LINK = "https://www.amfiindia.com/spages/NAVAll.txt";
     public static final String NAV_SEPARATOR = ";";
