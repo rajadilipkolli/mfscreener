@@ -22,11 +22,11 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @RequestMapping("/api/portfolio")
 @Validated
-public class PortfolioController implements PortfolioApi {
+class PortfolioController implements PortfolioApi {
 
     private final PortfolioService portfolioService;
 
-    public PortfolioController(PortfolioService portfolioService) {
+    PortfolioController(PortfolioService portfolioService) {
         this.portfolioService = portfolioService;
     }
 

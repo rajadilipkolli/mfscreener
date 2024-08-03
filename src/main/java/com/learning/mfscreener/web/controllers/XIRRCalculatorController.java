@@ -17,11 +17,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api")
 @Validated
-public class XIRRCalculatorController implements XIRRCalculatorApi {
+class XIRRCalculatorController implements XIRRCalculatorApi {
 
     private final XIRRCalculatorService xIRRCalculatorService;
 
-    public XIRRCalculatorController(XIRRCalculatorService xIRRCalculatorService) {
+    XIRRCalculatorController(XIRRCalculatorService xIRRCalculatorService) {
         this.xIRRCalculatorService = xIRRCalculatorService;
     }
 

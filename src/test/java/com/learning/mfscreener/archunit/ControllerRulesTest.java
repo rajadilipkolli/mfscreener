@@ -1,4 +1,4 @@
-/* Licensed under Apache-2.0 2022. */
+/* Licensed under Apache-2.0 2022-2-2024. */
 package com.learning.mfscreener.archunit;
 
 import static com.learning.mfscreener.archunit.ArchitectureConstants.ANNOTATED_EXPLANATION;
@@ -8,8 +8,8 @@ import static com.learning.mfscreener.archunit.ArchitectureConstants.DEFAULT_PAC
 import static com.learning.mfscreener.archunit.CommonRules.beanMethodsAreNotAllowedRule;
 import static com.learning.mfscreener.archunit.CommonRules.componentAnnotationIsNotAllowedRule;
 import static com.learning.mfscreener.archunit.CommonRules.fieldsShouldNotBePublic;
+import static com.learning.mfscreener.archunit.CommonRules.packagePrivateConstructorsRule;
 import static com.learning.mfscreener.archunit.CommonRules.privateMethodsAreNotAllowedRule;
-import static com.learning.mfscreener.archunit.CommonRules.publicConstructorsRule;
 import static com.learning.mfscreener.archunit.CommonRules.staticMethodsAreNotAllowedRule;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.methods;
@@ -47,13 +47,21 @@ class ControllerRulesTest {
             .because(ANNOTATED_EXPLANATION.formatted(CONTROLLER_SUFFIX, "@RestController")
                     + ", and not with @Controller");
 
+    @ArchTest
+    static final ArchRule classes_should_be_package_private = classes()
+            .that()
+            .resideInAPackage(CONTROLLER_PACKAGE)
+            .should()
+            .bePackagePrivate()
+            .because("Classes in %s package should be declared package-private");
+
     // Fields
     @ArchTest
     static final ArchRule fields_should_not_be_public = fieldsShouldNotBePublic(CONTROLLER_PACKAGE);
 
     // Constructors
     @ArchTest
-    static final ArchRule constructors_should_not_be_private = publicConstructorsRule(CONTROLLER_PACKAGE);
+    static final ArchRule constructors_should_not_be_private = packagePrivateConstructorsRule(CONTROLLER_PACKAGE);
 
     // Methods
     @ArchTest

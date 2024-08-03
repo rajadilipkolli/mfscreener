@@ -12,11 +12,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/scheme")
-public class SchemeController implements SchemeApi {
+class SchemeController implements SchemeApi {
 
     private final SchemeService schemeService;
 
-    public SchemeController(SchemeService schemeService) {
+    SchemeController(SchemeService schemeService) {
         this.schemeService = schemeService;
     }
 

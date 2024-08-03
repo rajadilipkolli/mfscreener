@@ -15,11 +15,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/nav")
 @Validated
-public class NAVController implements NAVApi {
+class NAVController implements NAVApi {
 
     private final NavService navService;
 
-    public NAVController(NavService navService) {
+    NAVController(NavService navService) {
         this.navService = navService;
     }
 
