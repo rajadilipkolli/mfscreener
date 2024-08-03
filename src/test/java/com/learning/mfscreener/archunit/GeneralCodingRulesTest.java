@@ -9,6 +9,7 @@ import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.methods;
 import static com.tngtech.archunit.library.GeneralCodingRules.DEPRECATED_API_SHOULD_NOT_BE_USED;
 import static com.tngtech.archunit.library.GeneralCodingRules.NO_CLASSES_SHOULD_ACCESS_STANDARD_STREAMS;
 import static com.tngtech.archunit.library.GeneralCodingRules.NO_CLASSES_SHOULD_THROW_GENERIC_EXCEPTIONS;
+import static com.tngtech.archunit.library.GeneralCodingRules.NO_CLASSES_SHOULD_USE_FIELD_INJECTION;
 import static com.tngtech.archunit.library.GeneralCodingRules.NO_CLASSES_SHOULD_USE_JAVA_UTIL_LOGGING;
 import static com.tngtech.archunit.library.GeneralCodingRules.NO_CLASSES_SHOULD_USE_JODATIME;
 
@@ -38,6 +39,9 @@ class GeneralCodingRulesTest {
     @ArchTest
     static final ArchRule noJavaUtilLogging =
             NO_CLASSES_SHOULD_USE_JAVA_UTIL_LOGGING.because("Use org.slf4j.Logger instead");
+
+    @ArchTest
+    static final ArchRule noFieldInjection = NO_CLASSES_SHOULD_USE_FIELD_INJECTION;
 
     @ArchTest
     static final ArchRule deprecatedApiShouldNotBeUsed = DEPRECATED_API_SHOULD_NOT_BE_USED;
