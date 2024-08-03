@@ -49,7 +49,7 @@ class ModelRulesTest {
     static final ArchRule methodsShouldBePublic = methodsShouldBePublicRule(MODEL_PACKAGE);
 
     @ArchTest
-    static final ArchRule classesShouldBeRecordsOrEnumsOnly = classes()
+    static final ArchRule classesShouldBeRecordsOrEnumsOrInterfaceOnly = classes()
             .that()
             .resideInAPackage(MODEL_PACKAGE)
             .should(ArchCondition.ConditionByPredicate.from(

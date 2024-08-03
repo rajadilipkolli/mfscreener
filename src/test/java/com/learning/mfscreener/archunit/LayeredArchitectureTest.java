@@ -3,6 +3,7 @@ package com.learning.mfscreener.archunit;
 
 import static com.learning.mfscreener.archunit.ArchitectureConstants.CONTROLLER_PACKAGE;
 import static com.learning.mfscreener.archunit.ArchitectureConstants.DEFAULT_PACKAGE;
+import static com.learning.mfscreener.archunit.ArchitectureConstants.MAPPER_PACKAGE;
 import static com.learning.mfscreener.archunit.ArchitectureConstants.MODEL_PACKAGE;
 import static com.learning.mfscreener.archunit.ArchitectureConstants.REPOSITORY_PACKAGE;
 import static com.learning.mfscreener.archunit.ArchitectureConstants.SERVICE_PACKAGE;
@@ -19,6 +20,7 @@ class LayeredArchitectureTest {
     private static final String CONTROLLER = "Controller";
     private static final String MODEL = "Model";
     private static final String REPOSITORY = "Repository";
+    private static final String MAPPER = "Mapper";
     private static final String SERVICE = "Service";
 
     @ArchTest
@@ -32,12 +34,16 @@ class LayeredArchitectureTest {
             .definedBy(REPOSITORY_PACKAGE)
             .layer(SERVICE)
             .definedBy(SERVICE_PACKAGE)
+            .layer(MAPPER)
+            .definedBy(MAPPER_PACKAGE)
             .whereLayer(CONTROLLER)
             .mayNotBeAccessedByAnyLayer()
             .whereLayer(MODEL)
-            .mayOnlyBeAccessedByLayers(REPOSITORY, SERVICE, CONTROLLER)
+            .mayOnlyBeAccessedByLayers(CONTROLLER, SERVICE, MAPPER, REPOSITORY)
             .whereLayer(REPOSITORY)
-            .mayOnlyBeAccessedByLayers(SERVICE)
+            .mayOnlyBeAccessedByLayers(SERVICE, MAPPER)
             .whereLayer(SERVICE)
-            .mayOnlyBeAccessedByLayers(CONTROLLER, SERVICE);
+            .mayOnlyBeAccessedByLayers(CONTROLLER)
+            .whereLayer(MAPPER)
+            .mayOnlyBeAccessedByLayers(SERVICE);
 }
