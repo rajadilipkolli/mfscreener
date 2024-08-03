@@ -30,8 +30,7 @@ class XIRRCalculatorController implements XIRRCalculatorApi {
     @Override
     public ResponseEntity<List<XIRRResponse>> getXIRR(
             @PathVariable("pan") String panNumber,
-            @RequestParam(required = false, name = "asOfDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-                    LocalDate asOfDate) {
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate asOfDate) {
         return ResponseEntity.ok(xIRRCalculatorService.calculateTotalXIRRByPan(panNumber, asOfDate));
     }
 }

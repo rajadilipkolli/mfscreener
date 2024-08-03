@@ -43,7 +43,7 @@ public class LocalDateUtility {
             year2 %= 100;
         }
 
-        return String.format("FY%d-%02d", year1, year2);
+        return "FY%d-%02d".formatted(year1, year2);
     }
 
     private LocalDateUtility() {
