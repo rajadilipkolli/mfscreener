@@ -1,4 +1,4 @@
-/* Licensed under Apache-2.0 2022-2-2024. */
+/* Licensed under Apache-2.0 2022-2024. */
 package com.learning.mfscreener.archunit;
 
 import static com.learning.mfscreener.archunit.ArchitectureConstants.ANNOTATED_EXPLANATION;
@@ -61,7 +61,7 @@ class ControllerRulesTest {
 
     // Constructors
     @ArchTest
-    static final ArchRule constructors_should_not_be_private = packagePrivateConstructorsRule(CONTROLLER_PACKAGE);
+    static final ArchRule constructors_should_be_private_package = packagePrivateConstructorsRule(CONTROLLER_PACKAGE);
 
     // Methods
     @ArchTest
