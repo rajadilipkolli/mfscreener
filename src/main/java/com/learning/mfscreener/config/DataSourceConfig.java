@@ -3,17 +3,20 @@ package com.learning.mfscreener.config;
 import com.zaxxer.hikari.HikariDataSource;
 import javax.sql.DataSource;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
+import org.springframework.boot.autoconfigure.jdbc.JdbcConnectionDetails;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
 @Configuration(proxyBeanMethods = false)
-class DataSourceConfig {
+class DBConfiguration {
 
     private final DataSourceProperties dataSourceProperties;
+    private final JdbcConnectionDetails jdbcConnectionDetails;
 
-    DataSourceConfig(DataSourceProperties dataSourceProperties) {
+    DBConfiguration(DataSourceProperties dataSourceProperties, JdbcConnectionDetails jdbcConnectionDetails) {
         this.dataSourceProperties = dataSourceProperties;
+        this.jdbcConnectionDetails = jdbcConnectionDetails;
     }
 
     @Bean
@@ -31,6 +34,10 @@ class DataSourceConfig {
         HikariDataSource hikariDataSource = dataSourceProperties
                 .initializeDataSourceBuilder()
                 .type(HikariDataSource.class)
+                .password(jdbcConnectionDetails.getPassword())
+                .username(jdbcConnectionDetails.getUsername())
+                .url(jdbcConnectionDetails.getJdbcUrl())
+                .driverClassName(jdbcConnectionDetails.getDriverClassName())
                 .build();
         hikariDataSource.setAutoCommit(false);
         hikariDataSource.setPoolName(poolName);
