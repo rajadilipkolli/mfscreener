@@ -1,4 +1,4 @@
-package com.learning.mfscreener.config;
+package com.learning.mfscreener.config.db;
 
 import com.zaxxer.hikari.HikariDataSource;
 import javax.sql.DataSource;
