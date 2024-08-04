@@ -20,11 +20,11 @@ import org.springframework.stereotype.Component;
 @Component
 public class MfSchemeDtoToEntityMapperHelper {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MfSchemeDtoToEntityMapper.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MfSchemeDtoToEntityMapperHelper.class);
 
     // Define the regular expressions
     private static final Pattern TYPE_CATEGORY_SUBCATEGORY_PATTERN =
-            Pattern.compile("^(.+?)\\(([^()]*?)\\s*-\\s*([^()]*?)\\)$");
+            Pattern.compile("^[^()]+\\([^()]*?\\s*-\\s*[^()]*\\)$");
 
     private final MFSchemeTypeRepository mfSchemeTypeRepository;
 
