@@ -68,6 +68,11 @@ dependencies {
     runtimeOnly "org.postgresql:postgresql"
     implementation "org.liquibase:liquibase-core"
 
+    // Blaze Persistance
+    implementation('com.blazebit:blaze-persistence-integration-spring-data-3.3')
+    implementation('com.blazebit:blaze-persistence-integration-hibernate-6.2')
+    implementation('com.blazebit:blaze-persistence-integration-entity-view-spring-6.0')
+
     implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:${springdoc_openapi_version}"
     runtimeOnly "io.micrometer:micrometer-registry-prometheus"
 
