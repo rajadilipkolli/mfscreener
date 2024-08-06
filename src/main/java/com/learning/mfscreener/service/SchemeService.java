@@ -128,7 +128,7 @@ public class SchemeService {
 
     URI getUri(Long schemeCode) {
         LOGGER.info("Fetching SchemeDetails for AMFISchemeCode :{} ", schemeCode);
-        return UriComponentsBuilder.fromHttpUrl(AppConstants.MFAPI_WEBSITE_BASE_URL + schemeCode)
+        return UriComponentsBuilder.fromUriString(AppConstants.MFAPI_WEBSITE_BASE_URL + schemeCode)
                 .build()
                 .toUri();
     }

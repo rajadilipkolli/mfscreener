@@ -25,7 +25,7 @@ import org.springframework.util.ObjectUtils;
 @Component
 public class LoggingAspect {
 
-    private final Logger log = LoggerFactory.getLogger(this.getClass());
+    private static final Logger LOGGER = LoggerFactory.getLogger(LoggingAspect.class);
 
     private final Environment env;
 
@@ -55,7 +55,7 @@ public class LoggingAspect {
     @AfterThrowing(pointcut = "applicationPackagePointcut()", throwing = "e")
     public void logAfterThrowing(JoinPoint joinPoint, Throwable e) {
         if (env.acceptsProfiles(Profiles.of(AppConstants.PROFILE_NOT_PROD))) {
-            log.error(
+            LOGGER.error(
                     "Exception in {}.{}() with cause = '{}' and exception = '{}'",
                     joinPoint.getSignature().getDeclaringTypeName(),
                     joinPoint.getSignature().getName(),
@@ -64,7 +64,7 @@ public class LoggingAspect {
                     e);
 
         } else {
-            log.error(
+            LOGGER.error(
                     "Exception in {}.{}() with cause = {}",
                     joinPoint.getSignature().getDeclaringTypeName(),
                     joinPoint.getSignature().getName(),

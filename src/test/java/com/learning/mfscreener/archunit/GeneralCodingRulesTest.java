@@ -1,11 +1,15 @@
-/* Licensed under Apache-2.0 2022. */
+/* Licensed under Apache-2.0 2022-2024. */
 package com.learning.mfscreener.archunit;
 
 import static com.learning.mfscreener.archunit.ArchitectureConstants.DEFAULT_PACKAGE;
+import static com.learning.mfscreener.archunit.ArchitectureConstants.ENTITIES_PACKAGE;
+import static com.learning.mfscreener.archunit.CommonRules.publicAndFinalFieldsAreNotAllowedRule;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.fields;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.methods;
+import static com.tngtech.archunit.library.GeneralCodingRules.DEPRECATED_API_SHOULD_NOT_BE_USED;
 import static com.tngtech.archunit.library.GeneralCodingRules.NO_CLASSES_SHOULD_ACCESS_STANDARD_STREAMS;
 import static com.tngtech.archunit.library.GeneralCodingRules.NO_CLASSES_SHOULD_THROW_GENERIC_EXCEPTIONS;
+import static com.tngtech.archunit.library.GeneralCodingRules.NO_CLASSES_SHOULD_USE_FIELD_INJECTION;
 import static com.tngtech.archunit.library.GeneralCodingRules.NO_CLASSES_SHOULD_USE_JAVA_UTIL_LOGGING;
 import static com.tngtech.archunit.library.GeneralCodingRules.NO_CLASSES_SHOULD_USE_JODATIME;
 
@@ -36,6 +40,12 @@ class GeneralCodingRulesTest {
     static final ArchRule noJavaUtilLogging =
             NO_CLASSES_SHOULD_USE_JAVA_UTIL_LOGGING.because("Use org.slf4j.Logger instead");
 
+    @ArchTest
+    static final ArchRule noFieldInjection = NO_CLASSES_SHOULD_USE_FIELD_INJECTION;
+
+    @ArchTest
+    static final ArchRule deprecatedApiShouldNotBeUsed = DEPRECATED_API_SHOULD_NOT_BE_USED;
+
     // Fields
     @ArchTest
     static final ArchRule loggersShouldBePrivateStaticAndFinal = fields().that()
@@ -48,10 +58,7 @@ class GeneralCodingRulesTest {
             .beFinal()
             .andShould()
             .haveName("LOGGER")
-            .orShould()
-            .haveName("log")
-            .because("Logger variables should be private, static and final, and it should be" + " named as LOGGER")
-            .allowEmptyShould(true);
+            .because("Logger variables should be private, static and final, and it should be named as LOGGER");
 
     @ArchTest
     static final ArchRule finalStaticVariablesInUppercase = fields().that()
@@ -61,13 +68,11 @@ class GeneralCodingRulesTest {
             .and()
             .doNotHaveName("serialVersionUID")
             .and()
-            .doNotHaveName("log")
-            .and()
             .doNotHaveModifier(JavaModifier.SYNTHETIC)
             .should()
             .haveNameMatching(".*^[A-Z].*")
-            .because("Variables with static and final modifiers should be named in" + " uppercase")
-            .allowEmptyShould(true);
+            .because("Variables with static and final modifiers should be named in uppercase");
+
     // Methods
     @ArchTest
     static final ArchRule beanMethodsShouldBePackagePrivate = methods()
@@ -76,4 +81,8 @@ class GeneralCodingRulesTest {
             .should()
             .bePackagePrivate()
             .because("@Bean annotation should be on PackagePrivate methods only");
+
+    @ArchTest
+    static final ArchRule public_and_final_fields_are_not_allowed =
+            publicAndFinalFieldsAreNotAllowedRule(ENTITIES_PACKAGE);
 }

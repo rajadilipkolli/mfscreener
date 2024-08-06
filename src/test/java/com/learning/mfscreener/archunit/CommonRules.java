@@ -1,4 +1,4 @@
-/* Licensed under Apache-2.0 2022. */
+/* Licensed under Apache-2.0 2022-2024. */
 package com.learning.mfscreener.archunit;
 
 import static com.learning.mfscreener.archunit.CustomConditions.haveGetter;
@@ -7,6 +7,8 @@ import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.constructors;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.fields;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.methods;
 
+import com.tngtech.archunit.base.DescribedPredicate;
+import com.tngtech.archunit.core.domain.JavaClass;
 import com.tngtech.archunit.core.domain.JavaModifier;
 import com.tngtech.archunit.lang.ArchRule;
 import java.util.Arrays;
@@ -101,6 +103,13 @@ public class CommonRules {
                 .areDeclaredInClassesThat()
                 .resideInAnyPackage(packageNames)
                 .and()
+                .areDeclaredInClassesThat(new DescribedPredicate<>("are not enums") {
+                    @Override
+                    public boolean test(JavaClass javaClass) {
+                        return !javaClass.isEnum();
+                    }
+                })
+                .and()
                 .doNotHaveName("serialVersionUID")
                 .should()
                 .notBeFinal()
@@ -127,12 +136,8 @@ public class CommonRules {
                 .doNotHaveModifier(JavaModifier.SYNTHETIC)
                 .should()
                 .beFinal()
-                .because(
-                        ("""
-                Private attributes should be instanced by constructor classes, or\
-                 it should be static in %s\
-                """)
-                                .formatted(packageName));
+                .because("Private attributes should be instanced by constructor classes, or it should be static in %s"
+                        .formatted(packageName));
     }
 
     // Constructors
@@ -147,6 +152,19 @@ public class CommonRules {
                 .should()
                 .bePublic()
                 .because("Public constructors are only allowed in %s".formatted(packageName));
+    }
+
+    static ArchRule packagePrivateConstructorsRule(String packageName) {
+        return constructors()
+                .that()
+                .areDeclaredInClassesThat()
+                .resideInAPackage(packageName)
+                .and()
+                .areDeclaredInClassesThat()
+                .areNotAnonymousClasses()
+                .should()
+                .bePackagePrivate()
+                .because("PackagePrivate constructors are only allowed in %s".formatted(packageName));
     }
 
     // Methods
@@ -172,11 +190,28 @@ public class CommonRules {
                 .because("Private methods are not allowed in %s".formatted(packageName));
     }
 
+    static ArchRule publicMethodsAreNotAllowedRule(String packageName) {
+        return methods()
+                .that()
+                .areDeclaredInClassesThat()
+                .resideInAPackage(packageName)
+                .should()
+                .notBePublic()
+                .because("Public methods are not allowed in %s".formatted(packageName));
+    }
+
     static ArchRule staticMethodsAreNotAllowedRule(String packageName) {
         return methods()
                 .that()
                 .areDeclaredInClassesThat()
                 .resideInAPackage(packageName)
+                .and()
+                .areDeclaredInClassesThat(new DescribedPredicate<>("are not enums") {
+                    @Override
+                    public boolean test(JavaClass javaClass) {
+                        return !javaClass.isEnum();
+                    }
+                })
                 .and()
                 .haveNameNotEndingWith("BeanDefinition")
                 .and()
@@ -191,6 +226,13 @@ public class CommonRules {
                 .that()
                 .areDeclaredInClassesThat()
                 .resideInAnyPackage(packageNames)
+                .and()
+                .areDeclaredInClassesThat(new DescribedPredicate<>("are not enums") {
+                    @Override
+                    public boolean test(JavaClass javaClass) {
+                        return !javaClass.isEnum();
+                    }
+                })
                 .should()
                 .bePublic()
                 .because("Public methods are only allowed in " + Arrays.toString(packageNames));

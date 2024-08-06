@@ -17,11 +17,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api")
 @Validated
-public class XIRRCalculatorController implements XIRRCalculatorApi {
+class XIRRCalculatorController implements XIRRCalculatorApi {
 
     private final XIRRCalculatorService xIRRCalculatorService;
 
-    public XIRRCalculatorController(XIRRCalculatorService xIRRCalculatorService) {
+    XIRRCalculatorController(XIRRCalculatorService xIRRCalculatorService) {
         this.xIRRCalculatorService = xIRRCalculatorService;
     }
 
@@ -30,8 +30,7 @@ public class XIRRCalculatorController implements XIRRCalculatorApi {
     @Override
     public ResponseEntity<List<XIRRResponse>> getXIRR(
             @PathVariable("pan") String panNumber,
-            @RequestParam(required = false, name = "asOfDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-                    LocalDate asOfDate) {
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate asOfDate) {
         return ResponseEntity.ok(xIRRCalculatorService.calculateTotalXIRRByPan(panNumber, asOfDate));
     }
 }

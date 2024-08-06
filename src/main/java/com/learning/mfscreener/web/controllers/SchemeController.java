@@ -12,24 +12,23 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/scheme")
-public class SchemeController implements SchemeApi {
+class SchemeController implements SchemeApi {
 
     private final SchemeService schemeService;
 
-    public SchemeController(SchemeService schemeService) {
+    SchemeController(SchemeService schemeService) {
         this.schemeService = schemeService;
     }
 
     @Override
     @GetMapping(path = "/{schemeName}")
-    public ResponseEntity<List<FundDetailProjection>> fetchSchemes(@PathVariable("schemeName") String schemeName) {
+    public ResponseEntity<List<FundDetailProjection>> fetchSchemes(@PathVariable String schemeName) {
         return ResponseEntity.ok(schemeService.fetchSchemes(schemeName));
     }
 
     @Override
     @GetMapping(path = "/fund/{fundName}")
-    public ResponseEntity<List<FundDetailProjection>> fetchSchemesByFundName(
-            @PathVariable("fundName") String fundName) {
+    public ResponseEntity<List<FundDetailProjection>> fetchSchemesByFundName(@PathVariable String fundName) {
         return ResponseEntity.ok(schemeService.fetchSchemesByFundName(fundName));
     }
 }

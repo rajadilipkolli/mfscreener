@@ -22,11 +22,11 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @RequestMapping("/api/portfolio")
 @Validated
-public class PortfolioController implements PortfolioApi {
+class PortfolioController implements PortfolioApi {
 
     private final PortfolioService portfolioService;
 
-    public PortfolioController(PortfolioService portfolioService) {
+    PortfolioController(PortfolioService portfolioService) {
         this.portfolioService = portfolioService;
     }
 
@@ -41,8 +41,7 @@ public class PortfolioController implements PortfolioApi {
     @Override
     public ResponseEntity<PortfolioResponse> getPortfolio(
             @PathVariable("pan") String panNumber,
-            @RequestParam(required = false, name = "asOfDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-                    LocalDate asOfDate) {
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate asOfDate) {
         return ResponseEntity.ok(portfolioService.getPortfolioByPAN(panNumber, asOfDate));
     }
 }

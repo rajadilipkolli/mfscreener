@@ -15,25 +15,25 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/nav")
 @Validated
-public class NAVController implements NAVApi {
+class NAVController implements NAVApi {
 
     private final NavService navService;
 
-    public NAVController(NavService navService) {
+    NAVController(NavService navService) {
         this.navService = navService;
     }
 
     @Override
     @GetMapping(path = "/{schemeCode}")
-    public ResponseEntity<MFSchemeDTO> getScheme(@PathVariable("schemeCode") Long schemeCode) {
+    public ResponseEntity<MFSchemeDTO> getScheme(@PathVariable Long schemeCode) {
         return ResponseEntity.ok(navService.getNav(schemeCode));
     }
 
     @Override
     @GetMapping(path = "/{schemeCode}/{date}")
     public ResponseEntity<MFSchemeDTO> getSchemeNavOnDate(
-            @PathVariable("schemeCode") Long schemeCode,
-            @PathVariable("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+            @PathVariable Long schemeCode,
+            @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
         return ResponseEntity.ok(navService.getNavOnDate(schemeCode, date));
     }
 }
