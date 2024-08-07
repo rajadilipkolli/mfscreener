@@ -98,12 +98,6 @@ dependencies {
     testAnnotationProcessor("org.mapstruct.extensions.spring:mapstruct-spring-extensions:1.1.1")
 }
 
-dependencyManagement {
-    imports {
-        mavenBom "com.blazebit:blaze-persistence-bom:${blaze_persistence_version}"
-    }
-}
-
 tasks.withType(JavaCompile).configureEach {
     options.compilerArgs += [
             '-Amapstruct.suppressGeneratorTimestamp=true',
