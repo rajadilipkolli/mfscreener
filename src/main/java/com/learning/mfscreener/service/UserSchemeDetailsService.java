@@ -3,6 +3,7 @@ package com.learning.mfscreener.service;
 import com.learning.mfscreener.config.logging.Loggable;
 import com.learning.mfscreener.entities.MFSchemeEntity;
 import com.learning.mfscreener.entities.UserSchemeDetailsEntity;
+import com.learning.mfscreener.models.projection.FundDetailProjection;
 import com.learning.mfscreener.models.projection.SchemeNameAndISIN;
 import com.learning.mfscreener.repository.UserSchemeDetailsEntityRepository;
 import java.util.List;
@@ -58,8 +59,33 @@ public class UserSchemeDetailsService {
                     mfSchemeEntity.ifPresent(schemeEntity -> userSchemeDetailsEntityRepository.updateAmfiAndIsinById(
                             schemeEntity.getSchemeId(), isin, userSchemeDetailsEntity.getId()));
                 }
+            } else {
+                // case where isin and amfi is null
+                List<FundDetailProjection> fundDetailProjections = schemeService.fetchSchemes(scheme);
+                if (!fundDetailProjections.isEmpty()) {
+                    Long schemeId = getSchemeId(fundDetailProjections, scheme);
+                    if (null != schemeId) {
+                        userSchemeDetailsEntityRepository.updateAmfiAndIsinById(
+                                schemeId, null, userSchemeDetailsEntity.getId());
+                    }
+                }
             }
         });
+    }
+
+    Long getSchemeId(List<FundDetailProjection> fundDetailProjections, String scheme) {
+        Long schemeId = null;
+        for (FundDetailProjection fundDetailProjection : fundDetailProjections) {
+            String schemeName = fundDetailProjection.schemeName().strip();
+            if (scheme.contains("Income") && schemeName.contains("IDCW")) {
+                schemeId = fundDetailProjection.schemeId();
+                break;
+            } else if (!scheme.contains("Income") && !schemeName.contains("IDCW")) {
+                schemeId = fundDetailProjection.schemeId();
+                break;
+            }
+        }
+        return schemeId;
     }
 
     @Loggable
