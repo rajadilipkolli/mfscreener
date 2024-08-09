@@ -31,6 +31,8 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.util.Assert;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -46,6 +48,7 @@ public class SchemeService {
     private final MfSchemeDtoToEntityMapper mfSchemeDtoToEntityMapper;
     private final UserFolioDetailsService userFolioDetailsService;
     private final ResourceLoader resourceLoader;
+    private final TransactionTemplate transactionTemplate;
 
     public SchemeService(
             RestClient restClient,
@@ -53,13 +56,16 @@ public class SchemeService {
             ConversionServiceAdapter conversionServiceAdapter,
             MfSchemeDtoToEntityMapper mfSchemeDtoToEntityMapper,
             UserFolioDetailsService userFolioDetailsService,
-            ResourceLoader resourceLoader) {
+            ResourceLoader resourceLoader,
+            TransactionTemplate transactionTemplate) {
         this.restClient = restClient;
         this.mfSchemeRepository = mfSchemeRepository;
         this.conversionServiceAdapter = conversionServiceAdapter;
         this.mfSchemeDtoToEntityMapper = mfSchemeDtoToEntityMapper;
         this.userFolioDetailsService = userFolioDetailsService;
         this.resourceLoader = resourceLoader;
+        transactionTemplate.setPropagationBehaviorName("PROPAGATION_REQUIRES_NEW");
+        this.transactionTemplate = transactionTemplate;
     }
 
     @Loggable
@@ -201,7 +207,6 @@ public class SchemeService {
         return mfSchemeRepository.saveAll(mfSchemeEntityList);
     }
 
-    @Transactional
     public void loadHistoricalDataForClosedOrMergedSchemes() {
         Resource resource = resourceLoader.getResource("classpath:/nav/31Jan2018Navdatadump.csv");
         try {
@@ -236,10 +241,14 @@ public class SchemeService {
                     })
                     .map(mfSchemeDtoToEntityMapper::mapMFSchemeDTOToMFSchemeEntity)
                     .toList();
-            List<MFSchemeEntity> persistedEntities = mfSchemeRepository.saveAll(mfSchemeEntities);
+            List<MFSchemeEntity> persistedEntities =
+                    transactionTemplate.execute(status -> mfSchemeRepository.saveAll(mfSchemeEntities));
+            Assert.notEmpty(persistedEntities, () -> "Response cant be empty");
             LOGGER.info("Persisted : {} rows", persistedEntities.size());
         } catch (IOException e) {
             throw new FileNotFoundException(e.getMessage());
+        } catch (DataIntegrityViolationException e) {
+            LOGGER.error("DataIntegrityViolationException occurred ", e);
         }
     }
 }

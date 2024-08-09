@@ -7,7 +7,6 @@ import com.learning.mfscreener.entities.MFSchemeNavEntity;
 import com.learning.mfscreener.entities.MFSchemeTypeEntity;
 import com.learning.mfscreener.models.MFSchemeDTO;
 import com.learning.mfscreener.repository.MFSchemeTypeRepository;
-import jakarta.annotation.Nullable;
 import java.time.LocalDate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -15,7 +14,9 @@ import org.mapstruct.AfterMapping;
 import org.mapstruct.MappingTarget;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.support.TransactionTemplate;
 
 @Component
 class MfSchemeDtoToEntityMapperHelper {
@@ -27,9 +28,13 @@ class MfSchemeDtoToEntityMapperHelper {
             Pattern.compile("^([^()]+)\\(([^()]+)\\s*-\\s*([^()]+)\\)$");
 
     private final MFSchemeTypeRepository mfSchemeTypeRepository;
+    private final TransactionTemplate transactionTemplate;
 
-    public MfSchemeDtoToEntityMapperHelper(MFSchemeTypeRepository mfSchemeTypeRepository) {
+    public MfSchemeDtoToEntityMapperHelper(
+            MFSchemeTypeRepository mfSchemeTypeRepository, TransactionTemplate transactionTemplate) {
         this.mfSchemeTypeRepository = mfSchemeTypeRepository;
+        transactionTemplate.setPropagationBehaviorName("PROPAGATION_REQUIRES_NEW");
+        this.transactionTemplate = transactionTemplate;
     }
 
     @AfterMapping
@@ -48,12 +53,12 @@ class MfSchemeDtoToEntityMapperHelper {
             String type = matcher.group(1).strip();
             String category = matcher.group(2).strip();
             String subCategory = matcher.group(3).strip();
-            mfSchemeTypeEntity = findOrCreateMFSchemeTypeEntity(type, category, subCategory, mfSchemeTypeRepository);
+            mfSchemeTypeEntity = findOrCreateMFSchemeTypeEntity(type, category, subCategory);
         } else {
             if (!schemeType.contains("-")) {
                 String type = schemeType.substring(0, schemeType.indexOf('('));
                 String category = schemeType.substring(schemeType.indexOf('(') + 1, schemeType.length() - 1);
-                mfSchemeTypeEntity = findOrCreateMFSchemeTypeEntity(type, category, null, mfSchemeTypeRepository);
+                mfSchemeTypeEntity = findOrCreateMFSchemeTypeEntity(type, category, null);
             } else {
                 LOGGER.error("Unable to parse schemeType :{}", schemeType);
             }
@@ -61,8 +66,7 @@ class MfSchemeDtoToEntityMapperHelper {
         mfSchemeEntity.setMfSchemeTypeEntity(mfSchemeTypeEntity);
     }
 
-    MFSchemeTypeEntity findOrCreateMFSchemeTypeEntity(
-            String type, String category, @Nullable String subCategory, MFSchemeTypeRepository mfSchemeTypeRepository) {
+    MFSchemeTypeEntity findOrCreateMFSchemeTypeEntity(String type, String category, @Nullable String subCategory) {
         MFSchemeTypeEntity byTypeAndCategoryAndSubCategory =
                 mfSchemeTypeRepository.findByTypeAndCategoryAndSubCategory(type, category, subCategory);
         if (byTypeAndCategoryAndSubCategory == null) {
@@ -70,7 +74,8 @@ class MfSchemeDtoToEntityMapperHelper {
             mfSchemeType.setType(type);
             mfSchemeType.setCategory(category);
             mfSchemeType.setSubCategory(subCategory);
-            byTypeAndCategoryAndSubCategory = mfSchemeTypeRepository.save(mfSchemeType);
+            byTypeAndCategoryAndSubCategory =
+                    transactionTemplate.execute(status -> mfSchemeTypeRepository.save(mfSchemeType));
         }
         return byTypeAndCategoryAndSubCategory;
     }

@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -64,6 +65,8 @@ public class MFSchemeNavService {
             LOGGER.info("Persisted : {} rows", persistedEntities.size());
         } catch (IOException e) {
             throw new FileNotFoundException(e.getMessage());
+        } catch (DataIntegrityViolationException e) {
+            LOGGER.error("DataIntegrityViolationException occurred ", e);
         }
     }
 
@@ -72,7 +75,7 @@ public class MFSchemeNavService {
         return mfSchemeNavEntityRepository.countByNavDate(AppConstants.GRAND_FATHERED_DATE) >= 5908;
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public boolean navLoadedForClosedOrMergedSchemes() {
         return mfSchemeNavEntityRepository.countByNavDate(AppConstants.GRAND_FATHERED_DATE) >= 9000;
     }
