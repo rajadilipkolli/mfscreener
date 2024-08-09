@@ -2,6 +2,7 @@ package com.learning.mfscreener.service;
 
 import com.learning.mfscreener.config.logging.Loggable;
 import com.learning.mfscreener.entities.UserCASDetailsEntity;
+import com.learning.mfscreener.models.entityviews.UserCASDetailsEntityView;
 import com.learning.mfscreener.models.projection.PortfolioDetailsProjection;
 import com.learning.mfscreener.repository.UserCASDetailsEntityRepository;
 import java.time.LocalDate;
@@ -25,7 +26,7 @@ public class UserCASDetailsService {
         return userCASDetailsEntityRepository.save(casDetailsEntity);
     }
 
-    public UserCASDetailsEntity findByInvestorEmailAndName(String email, String name) {
+    public UserCASDetailsEntityView findByInvestorEmailAndName(String email, String name) {
         return userCASDetailsEntityRepository.findByInvestorEmailAndName(email, name);
     }
 
