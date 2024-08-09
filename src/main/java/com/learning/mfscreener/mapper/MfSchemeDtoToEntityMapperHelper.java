@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.support.TransactionTemplate;
 
 @Component
 class MfSchemeDtoToEntityMapperHelper {
@@ -27,9 +28,13 @@ class MfSchemeDtoToEntityMapperHelper {
             Pattern.compile("^([^()]+)\\(([^()]+)\\s*-\\s*([^()]+)\\)$");
 
     private final MFSchemeTypeRepository mfSchemeTypeRepository;
+    private final TransactionTemplate transactionTemplate;
 
-    public MfSchemeDtoToEntityMapperHelper(MFSchemeTypeRepository mfSchemeTypeRepository) {
+    public MfSchemeDtoToEntityMapperHelper(
+            MFSchemeTypeRepository mfSchemeTypeRepository, TransactionTemplate transactionTemplate) {
         this.mfSchemeTypeRepository = mfSchemeTypeRepository;
+        transactionTemplate.setPropagationBehaviorName("PROPAGATION_REQUIRES_NEW");
+        this.transactionTemplate = transactionTemplate;
     }
 
     @AfterMapping
@@ -69,7 +74,8 @@ class MfSchemeDtoToEntityMapperHelper {
             mfSchemeType.setType(type);
             mfSchemeType.setCategory(category);
             mfSchemeType.setSubCategory(subCategory);
-            byTypeAndCategoryAndSubCategory = mfSchemeTypeRepository.save(mfSchemeType);
+            byTypeAndCategoryAndSubCategory =
+                    transactionTemplate.execute(status -> mfSchemeTypeRepository.save(mfSchemeType));
         }
         return byTypeAndCategoryAndSubCategory;
     }
