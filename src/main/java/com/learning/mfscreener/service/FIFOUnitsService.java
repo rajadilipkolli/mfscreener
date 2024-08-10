@@ -23,8 +23,10 @@ import java.util.stream.IntStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional(readOnly = true)
 public class FIFOUnitsService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FIFOUnitsService.class);

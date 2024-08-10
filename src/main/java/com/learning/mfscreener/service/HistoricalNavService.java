@@ -20,6 +20,7 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClient;
@@ -27,6 +28,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 @Service
 @Loggable
+@Transactional(readOnly = true)
 public class HistoricalNavService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HistoricalNavService.class);
