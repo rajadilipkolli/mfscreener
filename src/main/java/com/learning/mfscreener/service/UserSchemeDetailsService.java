@@ -74,18 +74,14 @@ public class UserSchemeDetailsService {
     }
 
     Long getSchemeId(List<FundDetailProjection> fundDetailProjections, String scheme) {
-        Long schemeId = null;
-        for (FundDetailProjection fundDetailProjection : fundDetailProjections) {
-            String schemeName = fundDetailProjection.schemeName().strip();
-            if (scheme.contains("Income") && schemeName.contains("IDCW")) {
-                schemeId = fundDetailProjection.schemeId();
-                break;
-            } else if (!scheme.contains("Income") && !schemeName.contains("IDCW")) {
-                schemeId = fundDetailProjection.schemeId();
-                break;
-            }
-        }
-        return schemeId;
+        return fundDetailProjections.stream()
+                .filter(fundDetailProjection -> (scheme.contains("Income")
+                                && fundDetailProjection.schemeName().contains("IDCW"))
+                        || (!scheme.contains("Income")
+                                && !fundDetailProjection.schemeName().contains("IDCW")))
+                .map(FundDetailProjection::schemeId)
+                .findFirst()
+                .orElse(null);
     }
 
     @Loggable
