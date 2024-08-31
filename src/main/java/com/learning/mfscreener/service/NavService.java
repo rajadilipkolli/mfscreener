@@ -46,7 +46,7 @@ public class NavService {
         List<Long> schemeIdByISINList = schemeService.getSchemeIdByISIN(isin);
         BigDecimal nav = BigDecimal.ZERO;
         if (!schemeIdByISINList.isEmpty()) {
-            Long schemeCode = schemeIdByISINList.get(0);
+            Long schemeCode = schemeIdByISINList.getFirst();
             if (schemeCode < 143000) {
                 try {
                     MFSchemeDTO navByDateWithRetry = getNavByDateWithRetry(schemeCode, inputDate);

@@ -189,12 +189,12 @@ public class FIFOUnitsService {
                 Double tax = userTransactionDTOS.get(1).amount();
                 buy(
                         dt,
-                        BigDecimal.valueOf(userTransactionDTOS.get(0).units()),
-                        BigDecimal.valueOf(userTransactionDTOS.get(0).nav()),
+                        BigDecimal.valueOf(userTransactionDTOS.getFirst().units()),
+                        BigDecimal.valueOf(userTransactionDTOS.getFirst().nav()),
                         BigDecimal.valueOf(tax));
-            } else if (userTransactionDTOS.get(0).type().compareTo(TransactionType.STT_TAX) == 0) {
+            } else if (userTransactionDTOS.getFirst().type().compareTo(TransactionType.STT_TAX) == 0) {
                 // sell
-                Double tax = userTransactionDTOS.get(0).amount();
+                Double tax = userTransactionDTOS.getFirst().amount();
                 sell(
                         dt,
                         BigDecimal.valueOf(userTransactionDTOS.get(1).units()),
@@ -202,19 +202,19 @@ public class FIFOUnitsService {
                         BigDecimal.valueOf(tax));
             }
         } else if (userTransactionDTOS.size() == 1) {
-            if (userTransactionDTOS.get(0).type().compareTo(TransactionType.REDEMPTION) == 0
-                    || userTransactionDTOS.get(0).type().compareTo(TransactionType.SWITCH_OUT) == 0) {
+            if (userTransactionDTOS.getFirst().type().compareTo(TransactionType.REDEMPTION) == 0
+                    || userTransactionDTOS.getFirst().type().compareTo(TransactionType.SWITCH_OUT) == 0) {
                 sell(
                         dt,
-                        BigDecimal.valueOf(userTransactionDTOS.get(0).units()),
-                        BigDecimal.valueOf(userTransactionDTOS.get(0).nav()),
+                        BigDecimal.valueOf(userTransactionDTOS.getFirst().units()),
+                        BigDecimal.valueOf(userTransactionDTOS.getFirst().nav()),
                         BigDecimal.ZERO);
-            } else if (userTransactionDTOS.get(0).type().compareTo(TransactionType.PURCHASE) == 0
-                    || userTransactionDTOS.get(0).type().compareTo(TransactionType.SWITCH_IN) == 0) {
+            } else if (userTransactionDTOS.getFirst().type().compareTo(TransactionType.PURCHASE) == 0
+                    || userTransactionDTOS.getFirst().type().compareTo(TransactionType.SWITCH_IN) == 0) {
                 buy(
                         dt,
-                        BigDecimal.valueOf(userTransactionDTOS.get(0).units()),
-                        BigDecimal.valueOf(userTransactionDTOS.get(0).nav()),
+                        BigDecimal.valueOf(userTransactionDTOS.getFirst().units()),
+                        BigDecimal.valueOf(userTransactionDTOS.getFirst().nav()),
                         BigDecimal.ZERO);
             }
         }
