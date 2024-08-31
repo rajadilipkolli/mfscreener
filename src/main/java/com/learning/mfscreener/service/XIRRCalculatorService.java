@@ -97,7 +97,7 @@ public class XIRRCalculatorService {
         // XIRR cant be calculated when there are only 2 transactions and both has same date.
         if (currentBalance != 0.0
                 && !(transactionList.size() == 1
-                        && transactionList.get(0).getWhen().equals(asOfDate))) {
+                        && transactionList.getFirst().getWhen().equals(asOfDate))) {
             // Add current Value and current date
             transactionList.add(new Transaction(getCurrentValuation(fundId, currentBalance, asOfDate), asOfDate));
         }
