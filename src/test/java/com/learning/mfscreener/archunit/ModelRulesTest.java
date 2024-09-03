@@ -61,8 +61,6 @@ class ModelRulesTest {
                     }))
             .because("Resources should be records or enums or interfaces in %s".formatted(MODEL_PACKAGE));
 
-    ;
-
     @ArchTest
     static final ArchRule staticMethodsAreNotAllowed = staticMethodsAreNotAllowedRule(MODEL_PACKAGE);
 }
