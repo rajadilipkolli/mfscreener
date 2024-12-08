@@ -12,6 +12,7 @@ import com.learning.mfscreener.entities.UserSchemeDetailsEntity;
 import com.learning.mfscreener.entities.UserTransactionDetailsEntity;
 import com.learning.mfscreener.mapper.CasDetailsMapper;
 import com.learning.mfscreener.models.PortfolioDetailsDTO;
+import com.learning.mfscreener.models.entityviews.UserCASDetailsEntityView;
 import com.learning.mfscreener.models.portfolio.CasDTO;
 import com.learning.mfscreener.models.portfolio.UserFolioDTO;
 import com.learning.mfscreener.models.portfolio.UserSchemeDTO;
@@ -133,7 +134,8 @@ public class PortfolioService {
         long userTransactionCount = portfolioServiceHelper.countTransactionsByUserFolioDTOList(inputUserFolioDTOList);
         List<UserTransactionDetailsEntity> userTransactionDetailsEntityList =
                 this.userTransactionDetailsService.findAllTransactionsByEmailAndName(email, name);
-        UserCASDetailsEntity userCASDetailsEntity = userCASDetailsService.findByInvestorEmailAndName(email, name);
+        UserCASDetailsEntityView userCASDetailsEntityView =
+                userCASDetailsService.findByInvestorEmailAndName(email, name);
 
         if (userTransactionCount == userTransactionDetailsEntityList.size()) {
             LOGGER.info("No new transactions are added");
@@ -141,37 +143,37 @@ public class PortfolioService {
         }
 
         return processFoliosAndTransactions(
-                email, name, casDTO, userCASDetailsEntity, userTransactionCount, userTransactionDetailsEntityList);
+                email, name, casDTO, userCASDetailsEntityView, userTransactionCount, userTransactionDetailsEntityList);
     }
 
     UploadResponseHolder processFoliosAndTransactions(
             String email,
             String name,
             CasDTO casDTO,
-            UserCASDetailsEntity userCASDetailsEntity,
+            UserCASDetailsEntityView userCASDetailsEntityView,
             long userTransactionDTOListCount,
             List<UserTransactionDetailsEntity> userTransactionDetailsEntityList) {
         AtomicInteger folioCounter = new AtomicInteger();
         AtomicInteger transactionsCounter = new AtomicInteger();
 
-        processNewFolios(casDTO.folios(), userCASDetailsEntity, folioCounter, transactionsCounter);
+        processNewFolios(casDTO.folios(), userCASDetailsEntityView, folioCounter, transactionsCounter);
         updateSchemesAndTransactions(
                 email,
                 name,
                 casDTO,
-                userCASDetailsEntity,
+                userCASDetailsEntityView,
                 userTransactionDTOListCount,
                 userTransactionDetailsEntityList,
                 transactionsCounter);
 
-        return new UploadResponseHolder(userCASDetailsEntity, folioCounter.get(), transactionsCounter.get());
+        return new UploadResponseHolder(null, folioCounter.get(), transactionsCounter.get());
     }
 
     void updateSchemesAndTransactions(
             String email,
             String name,
             CasDTO casDTO,
-            UserCASDetailsEntity userCASDetailsEntity,
+            UserCASDetailsEntityView userCASDetailsEntityView,
             long userTransactionDTOListCount,
             List<UserTransactionDetailsEntity> userTransactionDetailsEntityList,
             AtomicInteger transactionsCounter) {
@@ -196,7 +198,8 @@ public class PortfolioService {
                     existingFolioSchemesMap,
                     existingUserFolioDetailsEntityList,
                     transactionsCounter);
-            userCASDetailsEntity.setFolioEntities(existingUserFolioDetailsEntityList);
+            // TODO
+            // userCASDetailsEntityView.setFolioEntities(existingUserFolioDetailsEntityList);
 
             // Check if all new transactions are added as part of adding schemes
             if (userTransactionDTOListCount == (userTransactionDetailsEntityList.size() + transactionsCounter.get())) {
@@ -332,20 +335,21 @@ public class PortfolioService {
 
     void processNewFolios(
             List<UserFolioDTO> userFolioDTOList,
-            UserCASDetailsEntity userCASDetailsEntity,
+            UserCASDetailsEntityView userCASDetailsEntityView,
             AtomicInteger folioCounter,
             AtomicInteger transactionsCounter) {
         // Logic to process new folios
-        List<String> existingFolioNumbers = userCASDetailsEntity.getFolioEntities().stream()
-                .map(UserFolioDetailsEntity::getFolio)
+        List<String> existingFolioNumbers = userCASDetailsEntityView.getFolioEntities().stream()
+                .map(t -> t.getFolio())
                 .toList();
 
         userFolioDTOList.forEach(userFolioDTO -> {
             String folio = userFolioDTO.folio();
             if (!existingFolioNumbers.contains(folio)) {
                 LOGGER.info("New folio: {} created that is not present in the database", folio);
-                userCASDetailsEntity.addFolioEntity(
-                        casDetailsMapper.mapUserFolioDTOToUserFolioDetailsEntity(userFolioDTO));
+                // TODO
+                // userCASDetailsEntityView.addFolioEntity(
+                // casDetailsMapper.mapUserFolioDTOToUserFolioDetailsEntity(userFolioDTO));
                 folioCounter.incrementAndGet();
                 int newTransactions = userFolioDTO.schemes().stream()
                         .map(UserSchemeDTO::transactions)

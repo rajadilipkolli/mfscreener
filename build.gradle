@@ -3,6 +3,7 @@ import org.gradle.plugins.ide.eclipse.model.SourceFolder
 buildscript {
     repositories {
         mavenCentral()
+        maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
     }
     dependencies {
         classpath "org.owasp:dependency-check-gradle:${owasp_plugin_version}"
@@ -67,6 +68,11 @@ dependencies {
     runtimeOnly "org.postgresql:postgresql"
     implementation "org.liquibase:liquibase-core"
 
+    // Blaze Persistance
+    implementation('com.blazebit:blaze-persistence-integration-spring-data-3.3')
+    implementation('com.blazebit:blaze-persistence-integration-hibernate-6.2')
+    implementation('com.blazebit:blaze-persistence-integration-entity-view-spring-6.0')
+
     implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:${springdoc_openapi_version}"
     runtimeOnly "io.micrometer:micrometer-registry-prometheus"
 
@@ -90,6 +96,12 @@ dependencies {
     // If you are using mapstruct in test code
     testAnnotationProcessor("org.mapstruct:mapstruct-processor:1.6.3")
     testAnnotationProcessor("org.mapstruct.extensions.spring:mapstruct-spring-extensions:1.1.2")
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "com.blazebit:blaze-persistence-bom:${blaze_persistence_version}"
+    }
 }
 
 tasks.withType(JavaCompile).configureEach {
