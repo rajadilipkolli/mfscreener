@@ -1,4 +1,4 @@
-/* Licensed under Apache-2.0 2022. */
+/* Licensed under Apache-2.0 2022-2024. */
 package com.learning.mfscreener.archunit;
 
 import static com.learning.mfscreener.archunit.ArchitectureConstants.ANNOTATED_EXPLANATION;
@@ -11,7 +11,10 @@ import static com.learning.mfscreener.archunit.CommonRules.fieldsShouldNotBePubl
 import static com.learning.mfscreener.archunit.CommonRules.privateMethodsAreNotAllowedRule;
 import static com.learning.mfscreener.archunit.CommonRules.publicConstructorsRule;
 import static com.learning.mfscreener.archunit.CommonRules.staticMethodsAreNotAllowedRule;
+import static com.learning.mfscreener.archunit.CustomConditions.beAnnotatedWithTransactionalReadOnlyTrue;
+import static com.learning.mfscreener.archunit.CustomConditions.notBeAnnotatedWithTransactionalReadOnlyTrue;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
+import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.methods;
 
 import com.tngtech.archunit.core.importer.ImportOption;
 import com.tngtech.archunit.junit.AnalyzeClasses;
@@ -34,7 +37,16 @@ class ServiceRulesTest {
             .areTopLevelClasses()
             .should()
             .beAnnotatedWith(Service.class)
-            .because(ANNOTATED_EXPLANATION.formatted(SERVICE_SUFFIX, "@Service"));
+            .andShould(beAnnotatedWithTransactionalReadOnlyTrue)
+            .because(ANNOTATED_EXPLANATION.formatted(SERVICE_SUFFIX, "@Service and @Transactional(readOnly = true)"));
+
+    @ArchTest
+    static final ArchRule methods_should_not_be_annotated_transactionReadOnly = methods()
+            .that()
+            .areDeclaredInClassesThat()
+            .resideInAPackage(SERVICE_PACKAGE)
+            .should(notBeAnnotatedWithTransactionalReadOnlyTrue)
+            .because("Methods in service classes should not be annotated with @Transactional(readOnly = true)");
 
     // Fields
     @ArchTest
