@@ -2,7 +2,7 @@ initscript {
     repositories {
         maven { url "https://plugins.gradle.org/m2" }
     }
-    dependencies { classpath("org.openrewrite:plugin:6.29.3") }
+    dependencies { classpath("org.openrewrite:plugin:6.29.4") }
 }
 rootProject {
     plugins.apply(org.openrewrite.gradle.RewritePlugin)
