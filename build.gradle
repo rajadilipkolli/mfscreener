@@ -86,7 +86,7 @@ dependencies {
     testImplementation "org.testcontainers:junit-jupiter"
     testImplementation "org.testcontainers:postgresql"
     testImplementation('com.tngtech.archunit:archunit-junit5:1.4.0')
-    testImplementation('com.redis:testcontainers-redis:2.2.3')
+    testImplementation('com.redis:testcontainers-redis:2.2.4')
     // If you are using mapstruct in test code
     testAnnotationProcessor("org.mapstruct:mapstruct-processor:1.6.3")
     testAnnotationProcessor("org.mapstruct.extensions.spring:mapstruct-spring-extensions:1.1.2")
