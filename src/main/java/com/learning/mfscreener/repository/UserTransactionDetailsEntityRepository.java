@@ -15,7 +15,9 @@ public interface UserTransactionDetailsEntityRepository extends JpaRepository<Us
     @Query(
             """
             select u from UserTransactionDetailsEntity u
-            where u.userSchemeDetailsEntity.id = :id and u.type not in ('STT_TAX', 'STAMP_DUTY_TAX', 'MISC') and u.transactionDate <= :asOfDate
+            where u.userSchemeDetailsEntity.id = :id and u.type not in ('STT_TAX', 'STAMP_DUTY_TAX', 'MISC')
+            and u.balance is not null
+            and u.transactionDate <= :asOfDate
             order by u.transactionDate
             """)
     List<UserTransactionDetailsProjection> getByUserSchemeIdAndTypeNotInAndTransactionDateLessThanEqual(
