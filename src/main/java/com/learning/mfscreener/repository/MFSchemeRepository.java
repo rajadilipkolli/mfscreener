@@ -16,7 +16,8 @@ public interface MFSchemeRepository extends JpaRepository<MFSchemeEntity, Long> 
 
     Optional<MFSchemeEntity> findByPayOut(String payOut);
 
-    @Query("""
+    @Query(
+            """
             select m from MFSchemeEntity m
                                     inner join fetch m.mfSchemeNavEntities mfSchemeNavEntities
                                     inner join fetch m.mfSchemeTypeEntity mfSchemeTypeEntity
