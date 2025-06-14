@@ -1,7 +1,7 @@
 services:
 
   postgresqldb:
-    image: postgres:16.4-alpine
+    image: postgres:17.5-alpine
     hostname: postgresqldb
     container_name: postgresqldb
     extra_hosts: [ 'host.docker.internal:host-gateway' ]
@@ -54,7 +54,7 @@ services:
       - mfscreener-network
 
   redis:
-    image: 'redis:7.4.0-alpine'
+    image: 'redis:8.0.2-alpine'
     container_name: redis
     extra_hosts: [ 'host.docker.internal:host-gateway' ]
     ports:

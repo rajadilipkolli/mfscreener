@@ -229,11 +229,11 @@ public class TestData {
                         "OK",
                         "OK",
                         List.of(getCanaraScheme())));
-        casDTO.folios().get(0).schemes().add(getICICIUSBlueChipScheme());
+        casDTO.folios().getFirst().schemes().add(getICICIUSBlueChipScheme());
         casDTO.folios()
-                .get(0)
+                .getFirst()
                 .schemes()
-                .get(0)
+                .getFirst()
                 .transactions()
                 .add(new UserTransactionDTO(
                         LocalDate.parse("2021-02-04"),

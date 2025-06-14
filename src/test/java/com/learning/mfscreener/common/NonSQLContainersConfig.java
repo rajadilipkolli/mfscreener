@@ -13,6 +13,6 @@ public class NonSQLContainersConfig {
     @ServiceConnection(name = "redis")
     @RestartScope
     RedisContainer redisContainer() {
-        return new RedisContainer(RedisContainer.DEFAULT_IMAGE_NAME.withTag("7.4.0-alpine"));
+        return new RedisContainer(RedisContainer.DEFAULT_IMAGE_NAME.withTag("8.0.2-alpine"));
     }
 }
