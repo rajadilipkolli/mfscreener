@@ -16,7 +16,12 @@ public interface MFSchemeRepository extends JpaRepository<MFSchemeEntity, Long> 
 
     Optional<MFSchemeEntity> findByPayOut(String payOut);
 
-    @EntityGraph(attributePaths = {"mfSchemeTypeEntity", "mfSchemeNavEntities"})
+    @Query(
+            """
+            select m from MFSchemeEntity m
+                                    inner join fetch m.mfSchemeNavEntities mfSchemeNavEntities
+                                    inner join fetch m.mfSchemeTypeEntity mfSchemeTypeEntity
+            where m.schemeId = :schemeCode and mfSchemeNavEntities.navDate = :date""")
     Optional<MFSchemeEntity> findBySchemeIdAndMfSchemeNavEntities_NavDate(
             @Param("schemeCode") Long schemeCode, @Param("date") LocalDate navDate);
 
