@@ -6,9 +6,9 @@ tasks:
 
 vscode:
   extensions:
-    - Pivotal.vscode-boot-dev-pack
     - vscjava.vscode-java-pack
     - vscjava.vscode-gradle
+    - vmware.vscode-boot-dev-pack
 
 ports:
   - port: 8080
