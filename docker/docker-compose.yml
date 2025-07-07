@@ -54,7 +54,7 @@ services:
       - mfscreener-network
 
   redis:
-    image: 'redis:8.0.2-alpine'
+    image: 'redis:8.0.3-alpine'
     container_name: redis
     extra_hosts: [ 'host.docker.internal:host-gateway' ]
     ports:
