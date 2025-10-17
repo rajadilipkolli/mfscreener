@@ -2,9 +2,9 @@
 apply plugin: 'org.owasp.dependencycheck'
 
 dependencyCheck {
-    autoUpdate=true
-    cveValidForHours=1
-    format='ALL'
+    autoUpdate = true
+    cveValidForHours = 1
+    format = 'ALL'
 }
 
 check.dependsOn dependencyCheckAnalyze
