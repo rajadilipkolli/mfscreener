@@ -4,7 +4,7 @@ orbs:
 executors:
   machine_executor_amd64:
     docker:
-      - image: circleci/openjdk:25-jdk
+      - image: cimg/openjdk:25.0
     environment:
       architecture: "amd64"
       platform: "linux/amd64"
@@ -30,3 +30,4 @@ workflows:
       - gradle/test:
           executor: machine_executor_amd64
       - gradle_integration_test
+
