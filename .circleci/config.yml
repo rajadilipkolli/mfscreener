@@ -1,6 +1,8 @@
 version: 2.1
+
 orbs:
   gradle: circleci/gradle@4.0.0
+
 executors:
   machine_executor_amd64:
     machine:
@@ -8,11 +10,34 @@ executors:
     environment:
       architecture: "amd64"
       platform: "linux/amd64"
+
+commands:
+  install_java25:
+    description: "Install Temurin JDK 25 via Adoptium"
+    steps:
+      - run:
+          name: Add Adoptium APT repository
+          command: |
+            sudo apt-get update
+            sudo apt-get install -y wget apt-transport-https gnupg
+            wget -qO - https://packages.adoptium.net/artifactory/api/gpg/key/public | sudo apt-key add -
+            echo "deb https://packages.adoptium.net/artifactory/deb $(awk -F= '/^VERSION_CODENAME/{print $2}' /etc/os-release) main" \
+              | sudo tee /etc/apt/sources.list.d/adoptium.list
+            sudo apt-get update
+
+      - run:
+          name: Install Temurin JDK 25
+          command: |
+            sudo apt-get install -y temurin-25-jdk
+            java --version
+            javac --version
+
 jobs:
   gradle_integration_test:
     executor: machine_executor_amd64
     steps:
-      - checkout # Checkout your source code
+      - checkout
+      - install_java25
       - restore_cache:
           keys:
             - gradle-cache-v1-{{ checksum "build.gradle" }}
@@ -24,9 +49,12 @@ jobs:
           paths:
             - ~/.gradle/caches
           key: gradle-cache-v1-{{ checksum "build.gradle" }}
+
 workflows:
   gradle_test:
     jobs:
       - gradle/test:
           executor: machine_executor_amd64
+          pre-steps:
+            - install_java25
       - gradle_integration_test

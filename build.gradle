@@ -27,9 +27,9 @@ group = "com.learning.mfscreener"
 version = "0.0.1-SNAPSHOT"
 
 java {
-  toolchain {
-    languageVersion = JavaLanguageVersion.of(21)
-  }
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(25))
+    }
 }
 
 configurations {
@@ -40,7 +40,7 @@ configurations {
 
 repositories {
     mavenCentral()
-    maven { url 'https://repo.spring.io/milestone' }
+    maven { url = 'https://repo.spring.io/milestone' }
 }
 
 dependencies {
@@ -102,7 +102,7 @@ tasks.withType(JavaCompile).configureEach {
     ]
 }
 
-defaultTasks "bootRun"
+defaultTasks = ["bootRun"]
 
 springBoot {
     buildInfo()
@@ -137,6 +137,11 @@ gitProperties {
 
 spotless {
     java {
+        // Only format project source files; exclude generated sources to avoid
+        // validation issues in Gradle 9 where tasks must declare explicit
+        // dependencies on task outputs.
+        target 'src/main/java/**/*.java', 'src/test/java/**/*.java'
+        targetExclude 'build/generated/**'
         importOrder()
         removeUnusedImports()
         palantirJavaFormat("2.74.0")
@@ -159,7 +164,15 @@ test {
 tasks.register('integrationTest', Test) {
     useJUnitPlatform()
 
-    include "**/*IT*", "**/*IntegrationTest*", "**/*IntTest*"
+    // Use compiled test classes (we keep IT tests under src/test/java) so the
+    // task can discover and run them. Ensure test classes are compiled first.
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
+    dependsOn testClasses
+
+    // Match compiled test class files. This is more explicit and reliable
+    // across Gradle versions.
+    include "**/*IT.class", "**/*IntegrationTest.class", "**/*IntTest.class"
     shouldRunAfter test
 
     testLogging {
@@ -184,14 +197,15 @@ tasks.register('integrationTestReport', TestReport) {
 
 sourceSets {
     main {
-        java.srcDirs += 'build/generated/sources/annotationProcesor/java'
+        java.srcDirs += 'build/generated/sources/annotationProcessor/java'
     }
 }
 
 //adding task to fix issue with ConversationService not found in VSCode
 eclipse {
     classpath {
-        containers 'org.eclipse.buildship.core.gradleclasspathcontainer'
+        // use assignment syntax to avoid Groovy space-assignment deprecation in Gradle 9
+        containers = ['org.eclipse.buildship.core.gradleclasspathcontainer']
         file.whenMerged { cp ->
             def entries = cp.entries
             def src = new SourceFolder('build/generated/sources/annotationProcessor/java/main/', null)
