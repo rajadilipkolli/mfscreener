@@ -10,7 +10,8 @@ executors:
       platform: "linux/amd64"
 jobs:
   gradle_integration_test:
-    executor: machine_executor_amd64
+    docker:
+      - image: cimg/openjdk:25.0.0
     steps:
       - checkout # Checkout your source code
       - restore_cache:
@@ -28,5 +29,6 @@ workflows:
   gradle_test:
     jobs:
       - gradle/test:
-          executor: machine_executor_amd64
+          docker:
+            - image: cimg/openjdk:25.0.0
       - gradle_integration_test
