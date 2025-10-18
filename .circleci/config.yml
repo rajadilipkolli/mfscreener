@@ -3,15 +3,14 @@ orbs:
   gradle: circleci/gradle@4.0.0
 executors:
   machine_executor_amd64:
-    machine:
-      image: ubuntu-2404:current
+    docker:
+      - image: circleci/openjdk:25-jdk
     environment:
       architecture: "amd64"
       platform: "linux/amd64"
 jobs:
   gradle_integration_test:
-    docker:
-      - image: cimg/openjdk:25.0.0
+    executor: machine_executor_amd64
     steps:
       - checkout # Checkout your source code
       - restore_cache:
@@ -29,6 +28,5 @@ workflows:
   gradle_test:
     jobs:
       - gradle/test:
-          docker:
-            - image: cimg/openjdk:25.0.0
+          executor: machine_executor_amd64
       - gradle_integration_test
