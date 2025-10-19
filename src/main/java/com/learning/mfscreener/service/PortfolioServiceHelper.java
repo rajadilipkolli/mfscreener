@@ -13,9 +13,11 @@ import java.util.concurrent.CompletableFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Loggable
+@Transactional(readOnly = true)
 public class PortfolioServiceHelper {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PortfolioServiceHelper.class);
@@ -45,10 +47,11 @@ public class PortfolioServiceHelper {
     }
 
     public List<PortfolioDetailsDTO> getPortfolioDetailsByPANAndAsOfDate(String panNumber, LocalDate asOfDate) {
-        return joinFutures(userCASDetailsService.getPortfolioDetailsByPanAndAsOfDate(panNumber, asOfDate).stream()
-                .map(portfolioDetails -> CompletableFuture.supplyAsync(() -> {
+        return userCASDetailsService.getPortfolioDetailsByPanAndAsOfDate(panNumber, asOfDate).stream()
+                .map(portfolioDetails -> {
                     MFSchemeDTO scheme;
                     try {
+                        LOGGER.debug("fetching Nav for SchemeId :{}", portfolioDetails.getSchemeId());
                         scheme = navService.getNavByDateWithRetry(portfolioDetails.getSchemeId(), asOfDate);
                     } catch (NavNotFoundException navNotFoundException) {
                         // Will happen in case of NFO where units are allocated but not ready for subscription
@@ -67,8 +70,8 @@ public class PortfolioServiceHelper {
                             scheme.date(),
                             xIRRCalculatorService.calculateXIRRBySchemeId(
                                     portfolioDetails.getSchemeId(), portfolioDetails.getSchemeDetailId(), asOfDate));
-                }))
-                .toList());
+                })
+                .toList();
     }
 
     public long countTransactionsByUserFolioDTOList(List<UserFolioDTO> folioDTOList) {
