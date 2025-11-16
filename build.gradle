@@ -78,7 +78,7 @@ dependencies {
     implementation ("org.mapstruct.extensions.spring:mapstruct-spring-annotations:1.1.3")
 
     annotationProcessor ("org.mapstruct:mapstruct-processor:1.6.3")
-    annotationProcessor ("org.mapstruct.extensions.spring:mapstruct-spring-extensions:1.1.3")
+    annotationProcessor ("org.mapstruct.extensions.spring:mapstruct-spring-extensions:2.0.0")
 
     testAndDevelopmentOnly 'org.springframework.boot:spring-boot-devtools'
     
@@ -90,7 +90,7 @@ dependencies {
     testImplementation('com.redis:testcontainers-redis:2.2.4')
     // If you are using mapstruct in test code
     testAnnotationProcessor("org.mapstruct:mapstruct-processor:1.6.3")
-    testAnnotationProcessor("org.mapstruct.extensions.spring:mapstruct-spring-extensions:1.1.3")
+    testAnnotationProcessor("org.mapstruct.extensions.spring:mapstruct-spring-extensions:2.0.0")
 }
 
 tasks.withType(JavaCompile).configureEach {
