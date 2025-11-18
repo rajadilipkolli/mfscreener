@@ -1,4 +1,4 @@
-[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/rajadilipkolli/mfscreener) [![Quality gate](https://sonarcloud.io/api/project_badges/quality_gate?project=rajadilipkolli_mfscreener)](https://sonarcloud.io/summary/new_code?id=rajadilipkolli_mfscreener)[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Quality gate](https://sonarcloud.io/api/project_badges/quality_gate?project=rajadilipkolli_mfscreener)](https://sonarcloud.io/summary/new_code?id=rajadilipkolli_mfscreener)[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 
 # mfscreener
@@ -8,7 +8,7 @@
 **Setup:**
 
 1. Clone the repository.
-2. Ensure Java 17, docker and gradle are installed.
+2. Ensure Java 21, docker and gradle are installed.
 3. Navigate to the project directory and follow steps at [run-locally](#run-locally) to start the application.
 
 **Usage:**
