@@ -30,6 +30,7 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.util.Assert;
@@ -38,6 +39,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 @Service
 @Loggable
+@Transactional(readOnly = true)
 public class SchemeService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SchemeService.class);
@@ -68,14 +70,10 @@ public class SchemeService {
         this.transactionTemplate = transactionTemplate;
     }
 
-    @Loggable
-    @Transactional
     public void fetchSchemeDetails(Long schemeCode) {
         processResponseEntity(schemeCode, getNavResponseResponseEntity(schemeCode));
     }
 
-    @Loggable
-    @Transactional
     public void fetchSchemeDetails(String oldSchemeCode, Long newSchemeCode) {
         processResponseEntity(newSchemeCode, getNavResponseResponseEntity(Long.valueOf(oldSchemeCode)));
     }
@@ -95,13 +93,12 @@ public class SchemeService {
     }
 
     // if panKYC is NOT OK then PAN is not set. hence manually setting it.
-    @Loggable
     public void setPANIfNotSet(Long userCasID) {
         // find pan by id
         UserFolioDetailsPanProjection panProjection =
                 userFolioDetailsService.findFirstByUserCasIdAndPanKyc(userCasID, "OK");
         int rowsUpdated = userFolioDetailsService.updatePanByCasId(panProjection.getPan(), userCasID);
-        LOGGER.debug("Updated {} rows with PAN", rowsUpdated);
+        LOGGER.debug("Updated {} rows with PAN for casID :{}", rowsUpdated, userCasID);
     }
 
     @Loggable(result = false)
@@ -157,7 +154,7 @@ public class SchemeService {
                     mfSchemeEntity.addSchemeNav(newSchemeNav);
                 }
                 try {
-                    this.mfSchemeRepository.save(mfSchemeEntity);
+                    transactionTemplate.executeWithoutResult(status -> this.mfSchemeRepository.save(mfSchemeEntity));
                 } catch (ConstraintViolationException | DataIntegrityViolationException exception) {
                     LOGGER.error("ConstraintViolationException or DataIntegrityViolationException ", exception);
                 }
@@ -167,42 +164,37 @@ public class SchemeService {
         }
     }
 
-    @Transactional(readOnly = true)
     public Optional<MFSchemeEntity> findByPayOut(String isin) {
         return mfSchemeRepository.findByPayOut(isin);
     }
 
     @Cacheable(value = "schemeIdByISIN")
-    @Transactional(readOnly = true)
     public List<Long> getSchemeIdByISIN(String isin) {
         return mfSchemeRepository.getSchemeIdByISIN(isin);
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Loggable(result = false, params = false)
     public MFSchemeEntity saveEntity(MFSchemeEntity mfSchemeEntity) {
         return mfSchemeRepository.save(mfSchemeEntity);
     }
 
-    @Transactional(readOnly = true)
     @Loggable(result = false)
     public Optional<MFSchemeEntity> findBySchemeCode(Long schemeCode) {
         return mfSchemeRepository.findBySchemeId(schemeCode);
     }
 
-    @Transactional(readOnly = true)
     public long count() {
         return mfSchemeRepository.count();
     }
 
-    @Transactional(readOnly = true)
     @Loggable(result = false)
     public List<Long> findAllSchemeIds() {
         return mfSchemeRepository.findAllSchemeIds();
     }
 
-    @Transactional
     @Loggable(result = false, params = false)
+    @Transactional
     public List<MFSchemeEntity> saveAllEntities(List<MFSchemeEntity> mfSchemeEntityList) {
         return mfSchemeRepository.saveAll(mfSchemeEntityList);
     }
@@ -243,7 +235,7 @@ public class SchemeService {
                     .toList();
             List<MFSchemeEntity> persistedEntities =
                     transactionTemplate.execute(status -> mfSchemeRepository.saveAll(mfSchemeEntities));
-            Assert.notEmpty(persistedEntities, () -> "Response cant be empty");
+            Assert.notNull(persistedEntities, () -> "persistedEntities cant be null");
             LOGGER.info("Persisted : {} rows", persistedEntities.size());
         } catch (IOException e) {
             throw new FileNotFoundException(e.getMessage());
