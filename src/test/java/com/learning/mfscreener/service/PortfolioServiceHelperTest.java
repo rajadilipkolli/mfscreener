@@ -47,8 +47,8 @@ class PortfolioServiceHelperTest {
     }
 
     @Test
-    @DisplayName("Should read value from bytes using ObjectMapper")
-    void shouldReadValueFromBytesUsingObjectMapper() throws IOException {
+    @DisplayName("Should read value from bytes using JsonMapper")
+    void shouldReadValueFromBytesUsingJsonMapper() throws IOException {
         // Given
         byte[] bytes = "{\"name\":\"test\"}".getBytes();
         TestClass expectedObject = new TestClass("test");

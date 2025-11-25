@@ -59,7 +59,7 @@ public class GlobalExceptionHandler {
     ProblemDetail onException(NavNotFoundException navNotFoundException) {
         ProblemDetail problemDetail =
                 ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(404), navNotFoundException.getMessage());
-        problemDetail.setTitle("Scheme NotFound");
+        problemDetail.setTitle("Nav NotFound");
         problemDetail.setType(URI.create("https://api.mfscreener.com/errors/not-found"));
         return problemDetail;
     }

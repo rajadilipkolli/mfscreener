@@ -1,5 +1,6 @@
 package com.learning.mfscreener.config;
 
+import java.util.Arrays;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -16,9 +17,16 @@ class WebMvcConfig implements WebMvcConfigurer {
     public void addCorsMappings(CorsRegistry registry) {
         ApplicationProperties.Cors propertiesCors = applicationProperties.getCors();
         registry.addMapping(propertiesCors.getPathPattern())
-                .allowedMethods(propertiesCors.getAllowedMethods().split(","))
-                .allowedHeaders(propertiesCors.getAllowedHeaders().split(","))
-                .allowedOriginPatterns(propertiesCors.getAllowedOriginPatterns().split(","))
+                .allowedMethods(Arrays.stream(propertiesCors.getAllowedMethods().split(","))
+                        .map(String::trim)
+                        .toArray(String[]::new))
+                .allowedHeaders(Arrays.stream(propertiesCors.getAllowedHeaders().split(","))
+                        .map(String::trim)
+                        .toArray(String[]::new))
+                .allowedOriginPatterns(
+                        Arrays.stream(propertiesCors.getAllowedOriginPatterns().split(","))
+                                .map(String::trim)
+                                .toArray(String[]::new))
                 .allowCredentials(propertiesCors.isAllowCredentials());
     }
 }
