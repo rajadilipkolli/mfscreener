@@ -1,16 +1,15 @@
 package com.learning.mfscreener.config;
 
-import org.springframework.cache.annotation.EnableCaching;
+import java.util.Arrays;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration(proxyBeanMethods = false)
-@EnableCaching
-public class WebMvcConfig implements WebMvcConfigurer {
+class WebMvcConfig implements WebMvcConfigurer {
     private final ApplicationProperties applicationProperties;
 
-    public WebMvcConfig(ApplicationProperties applicationProperties) {
+    WebMvcConfig(ApplicationProperties applicationProperties) {
         this.applicationProperties = applicationProperties;
     }
 
@@ -18,9 +17,16 @@ public class WebMvcConfig implements WebMvcConfigurer {
     public void addCorsMappings(CorsRegistry registry) {
         ApplicationProperties.Cors propertiesCors = applicationProperties.getCors();
         registry.addMapping(propertiesCors.getPathPattern())
-                .allowedMethods(propertiesCors.getAllowedMethods())
-                .allowedHeaders(propertiesCors.getAllowedHeaders())
-                .allowedOriginPatterns(propertiesCors.getAllowedOriginPatterns())
+                .allowedMethods(Arrays.stream(propertiesCors.getAllowedMethods().split(","))
+                        .map(String::trim)
+                        .toArray(String[]::new))
+                .allowedHeaders(Arrays.stream(propertiesCors.getAllowedHeaders().split(","))
+                        .map(String::trim)
+                        .toArray(String[]::new))
+                .allowedOriginPatterns(
+                        Arrays.stream(propertiesCors.getAllowedOriginPatterns().split(","))
+                                .map(String::trim)
+                                .toArray(String[]::new))
                 .allowCredentials(propertiesCors.isAllowCredentials());
     }
 }

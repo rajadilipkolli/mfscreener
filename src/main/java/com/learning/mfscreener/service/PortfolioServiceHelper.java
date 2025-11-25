@@ -1,18 +1,17 @@
 package com.learning.mfscreener.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.learning.mfscreener.config.logging.Loggable;
 import com.learning.mfscreener.exception.NavNotFoundException;
 import com.learning.mfscreener.models.MFSchemeDTO;
 import com.learning.mfscreener.models.PortfolioDetailsDTO;
 import com.learning.mfscreener.models.portfolio.UserFolioDTO;
-import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import tools.jackson.databind.json.JsonMapper;
 
 @Service
 @Loggable
@@ -20,24 +19,24 @@ public class PortfolioServiceHelper {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PortfolioServiceHelper.class);
 
-    private final ObjectMapper objectMapper;
+    private final JsonMapper jsonMapper;
     private final UserCASDetailsService userCASDetailsService;
     private final NavService navService;
     private final XIRRCalculatorService xIRRCalculatorService;
 
     public PortfolioServiceHelper(
-            ObjectMapper objectMapper,
+            JsonMapper jsonMapper,
             UserCASDetailsService userCASDetailsService,
             NavService navService,
             XIRRCalculatorService xIRRCalculatorService) {
-        this.objectMapper = objectMapper;
+        this.jsonMapper = jsonMapper;
         this.userCASDetailsService = userCASDetailsService;
         this.navService = navService;
         this.xIRRCalculatorService = xIRRCalculatorService;
     }
 
-    public <T> T readValue(byte[] bytes, Class<T> tClass) throws IOException {
-        return this.objectMapper.readValue(bytes, tClass);
+    public <T> T readValue(byte[] bytes, Class<T> tClass) {
+        return this.jsonMapper.readValue(bytes, tClass);
     }
 
     public <T> List<T> joinFutures(List<CompletableFuture<T>> futures) {

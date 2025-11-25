@@ -21,7 +21,7 @@ import org.springframework.util.StopWatch;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.ResourceAccessException;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.RestClient;
 
 @Component
 public class Initializer implements CommandLineRunner {
@@ -30,17 +30,17 @@ public class Initializer implements CommandLineRunner {
 
     private final SchemeService schemeService;
     private final MfSchemeDtoToEntityMapper mfSchemeDtoToEntityMapper;
-    private final RestTemplate restTemplate;
+    private final RestClient restClient;
     private final MFSchemeNavService mfSchemeNavService;
 
     public Initializer(
             SchemeService schemeService,
             MfSchemeDtoToEntityMapper mfSchemeDtoToEntityMapper,
-            RestTemplate restTemplate,
+            RestClient restClient,
             MFSchemeNavService mfSchemeNavService) {
         this.schemeService = schemeService;
         this.mfSchemeDtoToEntityMapper = mfSchemeDtoToEntityMapper;
-        this.restTemplate = restTemplate;
+        this.restClient = restClient;
         this.mfSchemeNavService = mfSchemeNavService;
     }
 
@@ -49,7 +49,11 @@ public class Initializer implements CommandLineRunner {
         long start = System.currentTimeMillis();
         LOGGER.info("Loading All Funds...");
         try {
-            String allNAVs = restTemplate.getForObject(AppConstants.AMFI_WEBSITE_LINK, String.class);
+            String allNAVs = restClient
+                    .get()
+                    .uri(AppConstants.AMFI_WEBSITE_LINK)
+                    .retrieve()
+                    .body(String.class);
             Reader inputString = new StringReader(Objects.requireNonNull(allNAVs));
             List<MFSchemeDTO> chopArrayList = new ArrayList<>();
             try (BufferedReader br = new BufferedReader(inputString)) {

@@ -46,7 +46,8 @@ repositories {
 dependencies {
     implementation "org.springframework.boot:spring-boot-starter-actuator"
     implementation "org.springframework.boot:spring-boot-starter-validation"
-    implementation "org.springframework.boot:spring-boot-starter-web"
+    implementation "org.springframework.boot:spring-boot-starter-webmvc"
+    implementation "org.springframework.boot:spring-boot-starter-restclient"
 
     // caching
     implementation 'org.springframework.boot:spring-boot-starter-cache'
@@ -54,9 +55,10 @@ dependencies {
     implementation 'org.apache.commons:commons-pool2'
 
     // Observability
-    implementation 'io.micrometer:micrometer-tracing-bridge-otel'
-    implementation 'io.opentelemetry:opentelemetry-exporter-zipkin'
-    implementation("net.ttddyy.observation:datasource-micrometer-spring-boot:1.2.0")
+    implementation 'org.springframework.boot:spring-boot-starter-zipkin'
+    implementation 'io.micrometer:micrometer-tracing-bridge-brave'
+
+    implementation("net.ttddyy.observation:datasource-micrometer-spring-boot:2.0.0")
 
     implementation 'org.decampo:xirr:1.2'
 
@@ -64,15 +66,16 @@ dependencies {
     annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
 
     implementation "org.springframework.boot:spring-boot-starter-data-jpa"
+    implementation "org.springframework.boot:spring-boot-liquibase"
     runtimeOnly "com.h2database:h2"
     runtimeOnly "org.postgresql:postgresql"
-    implementation "org.liquibase:liquibase-core"
 
     implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:${springdoc_openapi_version}"
     runtimeOnly "io.micrometer:micrometer-registry-prometheus"
 
     // Scheduler
-    implementation("org.jobrunr:jobrunr-spring-boot-3-starter:8.3.0")
+    implementation("org.jobrunr:jobrunr-spring-boot-4-starter:8.3.0")
+    implementation 'nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect:3.4.0'
     // Mapstruct
     implementation ("org.mapstruct:mapstruct:1.6.3")
     implementation ("org.mapstruct.extensions.spring:mapstruct-spring-annotations:2.0.0")
@@ -82,10 +85,13 @@ dependencies {
 
     testAndDevelopmentOnly 'org.springframework.boot:spring-boot-devtools'
     
-    testImplementation "org.springframework.boot:spring-boot-starter-test"
+    testImplementation "org.springframework.boot:spring-boot-starter-webmvc-test"
+    testImplementation "org.springframework.boot:spring-boot-starter-data-jpa-test"
+    testImplementation 'org.springframework.boot:spring-boot-micrometer-tracing-test'
+    testImplementation 'org.springframework.boot:spring-boot-starter-zipkin-test'
     testImplementation "org.springframework.boot:spring-boot-testcontainers"
-    testImplementation "org.testcontainers:junit-jupiter"
-    testImplementation "org.testcontainers:postgresql"
+    testImplementation "org.testcontainers:testcontainers-junit-jupiter"
+    testImplementation "org.testcontainers:testcontainers-postgresql"
     testImplementation('com.tngtech.archunit:archunit-junit5:1.4.1')
     testImplementation('com.redis:testcontainers-redis:2.2.4')
     // If you are using mapstruct in test code

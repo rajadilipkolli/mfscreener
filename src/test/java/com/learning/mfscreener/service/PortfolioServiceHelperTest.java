@@ -1,10 +1,8 @@
 package com.learning.mfscreener.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.learning.mfscreener.exception.NavNotFoundException;
 import com.learning.mfscreener.models.MFSchemeDTO;
 import com.learning.mfscreener.models.PortfolioDetailsDTO;
@@ -23,12 +21,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import tools.jackson.databind.json.JsonMapper;
 
 @ExtendWith(MockitoExtension.class)
 class PortfolioServiceHelperTest {
 
     @Mock
-    private ObjectMapper objectMapper;
+    private JsonMapper jsonMapper;
 
     @Mock
     private UserCASDetailsService userCASDetailsService;
@@ -44,39 +43,23 @@ class PortfolioServiceHelperTest {
     @BeforeEach
     void setUp() {
         portfolioServiceHelper =
-                new PortfolioServiceHelper(objectMapper, userCASDetailsService, navService, xIRRCalculatorService);
+                new PortfolioServiceHelper(jsonMapper, userCASDetailsService, navService, xIRRCalculatorService);
     }
 
     @Test
-    @DisplayName("Should read value from bytes using ObjectMapper")
-    void shouldReadValueFromBytesUsingObjectMapper() throws IOException {
+    @DisplayName("Should read value from bytes using JsonMapper")
+    void shouldReadValueFromBytesUsingJsonMapper() throws IOException {
         // Given
         byte[] bytes = "{\"name\":\"test\"}".getBytes();
         TestClass expectedObject = new TestClass("test");
-        when(objectMapper.readValue(bytes, TestClass.class)).thenReturn(expectedObject);
+        when(jsonMapper.readValue(bytes, TestClass.class)).thenReturn(expectedObject);
 
         // When
         TestClass result = portfolioServiceHelper.readValue(bytes, TestClass.class);
 
         // Then
         assertThat(result).isEqualTo(expectedObject);
-        verify(objectMapper).readValue(bytes, TestClass.class);
-    }
-
-    @Test
-    @DisplayName("Should propagate IOException from ObjectMapper")
-    void shouldPropagateIOExceptionFromObjectMapper() throws IOException {
-        // Given
-        byte[] bytes = "invalid json".getBytes();
-        IOException expectedException = new IOException("Invalid JSON");
-        when(objectMapper.readValue(bytes, TestClass.class)).thenThrow(expectedException);
-
-        // When & Then
-        assertThatThrownBy(() -> portfolioServiceHelper.readValue(bytes, TestClass.class))
-                .isInstanceOf(IOException.class)
-                .hasMessage("Invalid JSON");
-
-        verify(objectMapper).readValue(bytes, TestClass.class);
+        verify(jsonMapper).readValue(bytes, TestClass.class);
     }
 
     @Test
@@ -276,29 +259,6 @@ class PortfolioServiceHelperTest {
         return scheme;
     }
 
-    // Test class for ObjectMapper testing
-    public static class TestClass {
-        private final String name;
-
-        public TestClass(String name) {
-            this.name = name;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (this == obj) return true;
-            if (obj == null || getClass() != obj.getClass()) return false;
-            TestClass testClass = (TestClass) obj;
-            return name != null ? name.equals(testClass.name) : testClass.name == null;
-        }
-
-        @Override
-        public int hashCode() {
-            return name != null ? name.hashCode() : 0;
-        }
-    }
+    // Test class for JsonMapper testing
+    public record TestClass(String name) {}
 }
