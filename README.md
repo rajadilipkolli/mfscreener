@@ -8,7 +8,7 @@
 **Setup:**
 
 1. Clone the repository.
-2. Ensure Java 21, docker and gradle are installed.
+2. Ensure Java 25, docker and gradle are installed.
 3. Navigate to the project directory and follow steps at [run-locally](#run-locally) to start the application.
 
 **Usage:**

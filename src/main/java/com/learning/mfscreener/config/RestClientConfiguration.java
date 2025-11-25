@@ -7,7 +7,7 @@ import org.springframework.web.client.RestClient;
 
 @Configuration(proxyBeanMethods = false)
 @EnableCaching
-public class RestTemplateConfiguration {
+public class RestClientConfiguration {
 
     @Bean
     RestClient restClient(RestClient.Builder builder) {
