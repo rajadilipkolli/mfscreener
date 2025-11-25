@@ -75,6 +75,7 @@ dependencies {
 
     // Scheduler
     implementation("org.jobrunr:jobrunr-spring-boot-4-starter:8.3.0")
+    implementation 'nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect:3.4.0'
     // Mapstruct
     implementation ("org.mapstruct:mapstruct:1.6.3")
     implementation ("org.mapstruct.extensions.spring:mapstruct-spring-annotations:2.0.0")
