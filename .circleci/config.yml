@@ -1,7 +1,7 @@
 version: 2.1
 
 orbs:
-  gradle: circleci/gradle@4.0.0
+  gradle: circleci/gradle@4.1.0
 
 executors:
   machine_executor_amd64:
