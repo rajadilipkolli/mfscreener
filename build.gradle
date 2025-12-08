@@ -58,7 +58,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-zipkin'
     implementation 'io.micrometer:micrometer-tracing-bridge-brave'
 
-    implementation("net.ttddyy.observation:datasource-micrometer-spring-boot:2.0.0")
+    implementation("net.ttddyy.observation:datasource-micrometer-spring-boot:2.0.1")
 
     implementation 'org.decampo:xirr:1.2'
 
