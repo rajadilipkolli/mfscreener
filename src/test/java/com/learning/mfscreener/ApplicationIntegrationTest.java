@@ -16,7 +16,7 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(get("/actuator").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$._links.size()", is(15)))
+                .andExpect(jsonPath("$._links.size()", is(14)))
                 .andExpect(jsonPath("$._links.self.href").value("http://localhost/actuator"))
                 .andExpect(jsonPath("$._links.health.href").value("http://localhost/actuator/health"))
                 .andExpect(jsonPath("$._links.health-path.href").value("http://localhost/actuator/health/{*path}"))
