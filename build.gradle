@@ -85,11 +85,11 @@ dependencies {
     
     testImplementation "org.springframework.boot:spring-boot-starter-webmvc-test"
     testImplementation "org.springframework.boot:spring-boot-starter-data-jpa-test"
-    testImplementation 'org.springframework.boot:spring-boot-micrometer-tracing-test'
-    testImplementation 'org.springframework.boot:spring-boot-starter-zipkin-test'
+    testImplementation 'org.springframework.boot:spring-boot-starter-opentelemetry-test'
     testImplementation "org.springframework.boot:spring-boot-testcontainers"
     testImplementation "org.testcontainers:testcontainers-junit-jupiter"
     testImplementation "org.testcontainers:testcontainers-postgresql"
+    testImplementation "org.testcontainers:testcontainers-grafana"
     testImplementation('com.tngtech.archunit:archunit-junit5:1.4.1')
     testImplementation('com.redis:testcontainers-redis:2.2.4')
     // If you are using mapstruct in test code
