@@ -73,7 +73,7 @@ dependencies {
     runtimeOnly "io.micrometer:micrometer-registry-prometheus"
 
     // Scheduler
-    implementation("org.jobrunr:jobrunr-spring-boot-4-starter:8.4.1")
+    implementation("org.jobrunr:jobrunr-spring-boot-4-starter:8.4.2")
     // Mapstruct
     implementation ("org.mapstruct:mapstruct:1.6.3")
     implementation ("org.mapstruct.extensions.spring:mapstruct-spring-annotations:2.0.0")
