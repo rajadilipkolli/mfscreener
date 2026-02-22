@@ -25,7 +25,7 @@ This file gives short, practical guidance for AI coding agents (Copilot-like) to
 - Reports: `./gradlew testReport` and `./gradlew integrationTestReport` create aggregated reports.
 
 **Test infrastructure notes**
-- Tests use Testcontainers: see `src/test/java/com/learning/mfscreener/common/SQLContainersConfig.java` — Postgres image pinned to `postgres:18.1-alpine`.
+- Tests use Testcontainers: see `src/test/java/com/learning/mfscreener/common/SQLContainersConfig.java` — Postgres image pinned to `postgres:18.2-alpine`.
 - Use Testcontainers rather than relying on a host Postgres for CI. Integration test class naming matters to be included by `integrationTest` task.
 
 **Conventions & patterns specific to this repo**
