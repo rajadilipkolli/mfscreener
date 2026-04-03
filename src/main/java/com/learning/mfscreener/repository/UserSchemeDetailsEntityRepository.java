@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.NativeQuery;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -35,14 +36,12 @@ public interface UserSchemeDetailsEntityRepository extends JpaRepository<UserSch
     @Transactional(readOnly = true)
     Optional<SchemeNameAndISIN> findFirstByAmfi(Long amfi);
 
-    @Query(
-            value =
-                    """
+    @NativeQuery(
+            """
                     select mf_scheme_id, count(msn.id) from public.user_scheme_details usd join mf_scheme_nav msn
                     on usd.amfi = msn.mf_scheme_id
                     group by mf_scheme_id having count(msn.id) < 3
-                    """,
-            nativeQuery = true)
+                    """)
     @Transactional(readOnly = true)
     List<Long> getHistoricalDataNotLoadedSchemeIdList();
 }
