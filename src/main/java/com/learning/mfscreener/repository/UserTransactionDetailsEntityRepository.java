@@ -12,7 +12,8 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface UserTransactionDetailsEntityRepository extends JpaRepository<UserTransactionDetailsEntity, Long> {
 
-    @Query("""
+    @Query(
+            """
             select u.id          as id,
                    u.type        as type,
                    u.amount      as amount,
