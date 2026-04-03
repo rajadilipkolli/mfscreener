@@ -21,8 +21,8 @@ class NavControllerIT extends AbstractIntegrationTest {
                 .perform(get("/api/nav/{schemeCode}", 159999).accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound())
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
-                .andExpect(jsonPath("$.type", is("about:blank")))
-                .andExpect(jsonPath("$.title", is("Scheme NotFound")))
+                .andExpect(jsonPath("$.type", is("https://api.mfscreener.com/errors/not-found")))
+                .andExpect(jsonPath("$.title", is("Nav NotFound")))
                 .andExpect(jsonPath("$.status", is(404)))
                 .andExpect(jsonPath("$.detail", containsString("Nav Not Found for schemeCode - 159999 on")))
                 .andExpect(jsonPath("$.instance", is("/api/nav/159999")));
@@ -79,8 +79,8 @@ class NavControllerIT extends AbstractIntegrationTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound())
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
-                .andExpect(jsonPath("$.type", is("about:blank")))
-                .andExpect(jsonPath("$.title", is("Scheme NotFound")))
+                .andExpect(jsonPath("$.type", is("https://api.mfscreener.com/errors/not-found")))
+                .andExpect(jsonPath("$.title", is("Nav NotFound")))
                 .andExpect(jsonPath("$.status", is(404)))
                 .andExpect(jsonPath("$.detail", is("Nav Not Found for schemeCode - 144610 on 2023-07-06")))
                 .andExpect(jsonPath("$.instance", is("/api/nav/144610/2023-07-12")));
@@ -93,8 +93,8 @@ class NavControllerIT extends AbstractIntegrationTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound())
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
-                .andExpect(jsonPath("$.type", is("about:blank")))
-                .andExpect(jsonPath("$.title", is("Scheme NotFound")))
+                .andExpect(jsonPath("$.type", is("https://api.mfscreener.com/errors/not-found")))
+                .andExpect(jsonPath("$.title", is("Nav NotFound")))
                 .andExpect(jsonPath("$.status", is(404)))
                 .andExpect(jsonPath("$.detail", is("Nav Not Found for schemeCode - 141565 on 2017-09-25")))
                 .andExpect(jsonPath("$.instance", is("/api/nav/141565/2017-10-01")));
