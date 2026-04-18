@@ -90,7 +90,7 @@ dependencies {
     testImplementation "org.testcontainers:testcontainers-junit-jupiter"
     testImplementation "org.testcontainers:testcontainers-postgresql"
     testImplementation "org.testcontainers:testcontainers-grafana"
-    testImplementation('com.tngtech.archunit:archunit-junit5:1.4.1')
+    testImplementation('com.tngtech.archunit:archunit-junit5:1.4.2')
     testImplementation('com.redis:testcontainers-redis:2.2.4')
     // If you are using mapstruct in test code
     testAnnotationProcessor("org.mapstruct:mapstruct-processor:1.6.3")
