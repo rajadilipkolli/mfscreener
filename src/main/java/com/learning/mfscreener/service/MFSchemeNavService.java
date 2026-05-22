@@ -17,9 +17,12 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.util.Assert;
 
 @Service
 @Loggable
+@Transactional(readOnly = true)
 public class MFSchemeNavService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MFSchemeNavService.class);
@@ -27,14 +30,18 @@ public class MFSchemeNavService {
     private final MFSchemeNavEntityRepository mfSchemeNavEntityRepository;
     private final MFSchemeRepository mfSchemeRepository;
     private final ResourceLoader resourceLoader;
+    private final TransactionTemplate transactionTemplate;
 
     public MFSchemeNavService(
             MFSchemeNavEntityRepository mfSchemeNavEntityRepository,
             MFSchemeRepository mfSchemeRepository,
-            ResourceLoader resourceLoader) {
+            ResourceLoader resourceLoader,
+            TransactionTemplate transactionTemplate) {
         this.mfSchemeNavEntityRepository = mfSchemeNavEntityRepository;
         this.mfSchemeRepository = mfSchemeRepository;
         this.resourceLoader = resourceLoader;
+        transactionTemplate.setPropagationBehaviorName("PROPAGATION_REQUIRES_NEW");
+        this.transactionTemplate = transactionTemplate;
     }
 
     public void loadHistoricalNavOn31Jan2018ForExistingSchemes() {
@@ -61,7 +68,9 @@ public class MFSchemeNavService {
                         return mfSchemeNavEntity;
                     })
                     .toList();
-            List<MFSchemeNavEntity> persistedEntities = mfSchemeNavEntityRepository.saveAll(mfSchemeNavEntities);
+            List<MFSchemeNavEntity> persistedEntities =
+                    transactionTemplate.execute(status -> mfSchemeNavEntityRepository.saveAll(mfSchemeNavEntities));
+            Assert.notNull(persistedEntities, () -> "persistedEntities cant be null");
             LOGGER.info("Persisted : {} rows", persistedEntities.size());
         } catch (IOException e) {
             throw new FileNotFoundException(e.getMessage());
@@ -70,12 +79,10 @@ public class MFSchemeNavService {
         }
     }
 
-    @Transactional(readOnly = true)
     public boolean navLoadedFor31Jan2018ForExistingSchemes() {
         return mfSchemeNavEntityRepository.countByNavDate(AppConstants.GRAND_FATHERED_DATE) >= 5908;
     }
 
-    @Transactional(readOnly = true)
     public boolean navLoadedForClosedOrMergedSchemes() {
         return mfSchemeNavEntityRepository.countByNavDate(AppConstants.GRAND_FATHERED_DATE) >= 9000;
     }

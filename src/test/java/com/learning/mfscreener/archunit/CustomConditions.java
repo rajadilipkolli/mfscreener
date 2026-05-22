@@ -1,4 +1,4 @@
-/* Licensed under Apache-2.0 2022. */
+/* Licensed under Apache-2.0 2022-2024. */
 package com.learning.mfscreener.archunit;
 
 import com.tngtech.archunit.core.domain.JavaClass;
@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.springframework.transaction.annotation.Transactional;
 
 public class CustomConditions {
 
@@ -33,6 +34,43 @@ public class CustomConditions {
     public static final ArchCondition<JavaClass> HAVE_NOT_STATIC_METHODS = buildStaticMethodsAreNotAllowedCondition();
 
     private CustomConditions() {}
+
+    public static ArchCondition<JavaClass> beAnnotatedWithTransactionalReadOnlyTrue =
+            new ArchCondition<>("be annotated with @Transactional(readOnly = true)") {
+                @Override
+                public void check(JavaClass javaClass, ConditionEvents events) {
+                    boolean isAnnotatedCorrectly = javaClass.getAnnotations().stream()
+                            .filter(annotation ->
+                                    annotation.getRawType().getFullName().equals(Transactional.class.getName()))
+                            .anyMatch(annotation -> Boolean.TRUE.equals(
+                                    annotation.get("readOnly").orElse(false)));
+
+                    if (!isAnnotatedCorrectly) {
+                        String message = String.format(
+                                "Class %s is not annotated with @Transactional(readOnly = true)", javaClass.getName());
+                        events.add(SimpleConditionEvent.violated(javaClass, message));
+                    }
+                }
+            };
+
+    public static ArchCondition<JavaMethod> notBeAnnotatedWithTransactionalReadOnlyTrue =
+            new ArchCondition<>("not be annotated with @Transactional(readOnly = true)") {
+                @Override
+                public void check(JavaMethod javaMethod, ConditionEvents events) {
+                    boolean isAnnotatedIncorrectly = javaMethod.getAnnotations().stream()
+                            .filter(annotation ->
+                                    annotation.getRawType().getFullName().equals(Transactional.class.getName()))
+                            .anyMatch(annotation -> Boolean.TRUE.equals(
+                                    annotation.get("readOnly").orElse(false)));
+
+                    if (isAnnotatedIncorrectly) {
+                        String message = String.format(
+                                "Method %s in class %s is annotated with @Transactional(readOnly = true)",
+                                javaMethod.getName(), javaMethod.getOwner().getName());
+                        events.add(SimpleConditionEvent.violated(javaMethod, message));
+                    }
+                }
+            };
 
     public static ArchCondition<JavaField> haveGetter(Map<String, String> exclusions) {
         return buildFieldHaveGetterAndSetterCondition(false, exclusions);
