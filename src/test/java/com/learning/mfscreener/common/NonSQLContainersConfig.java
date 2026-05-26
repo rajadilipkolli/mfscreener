@@ -16,14 +16,14 @@ public class NonSQLContainersConfig {
     @ServiceConnection(name = "redis")
     @RestartScope
     RedisContainer redisContainer() {
-        return new RedisContainer(RedisContainer.DEFAULT_IMAGE_NAME.withTag("8.6.2-alpine"));
+        return new RedisContainer(RedisContainer.DEFAULT_IMAGE_NAME.withTag("8.6.3-alpine"));
     }
 
     @Bean
     @ServiceConnection
     @RestartScope
     LgtmStackContainer lgtmContainer() {
-        return new LgtmStackContainer(DockerImageName.parse("grafana/otel-lgtm:0.23.0"))
+        return new LgtmStackContainer(DockerImageName.parse("grafana/otel-lgtm:0.28.0"))
                 .withStartupTimeout(Duration.ofMinutes(2));
     }
 }
