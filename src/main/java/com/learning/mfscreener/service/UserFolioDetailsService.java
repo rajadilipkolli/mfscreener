@@ -8,6 +8,7 @@ import com.learning.mfscreener.repository.UserFolioDetailsEntityRepository;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
@@ -33,7 +34,7 @@ public class UserFolioDetailsService {
         return userFolioDetailsEntityRepository.findFirstByUserCasDetailsEntity_IdAndPanKyc(userCasID, ok);
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public int updatePanByCasId(String pan, Long userCasID) {
         return userFolioDetailsEntityRepository.updatePanByCasId(pan, userCasID);
     }

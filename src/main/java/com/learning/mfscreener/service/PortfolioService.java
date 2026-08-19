@@ -30,10 +30,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @Loggable
+@Transactional(readOnly = true)
 public class PortfolioService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PortfolioService.class);

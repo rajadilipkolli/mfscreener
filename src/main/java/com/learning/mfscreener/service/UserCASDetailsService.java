@@ -7,6 +7,7 @@ import com.learning.mfscreener.repository.UserCASDetailsEntityRepository;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Loggable
@@ -20,7 +21,7 @@ public class UserCASDetailsService {
         this.userCASDetailsEntityRepository = userCASDetailsEntityRepository;
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public UserCASDetailsEntity saveEntity(UserCASDetailsEntity casDetailsEntity) {
         return userCASDetailsEntityRepository.save(casDetailsEntity);
     }
