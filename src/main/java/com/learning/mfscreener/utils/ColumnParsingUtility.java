@@ -20,7 +20,7 @@ public class ColumnParsingUtility {
         if (name == null) {
             return "";
         }
-        return name.trim().replaceAll("\\s+", " ").toLowerCase();
+        return name.trim().replaceAll("\\s+", " ").replaceAll("\\s*/\\s*", "/").toLowerCase();
     }
 
     public String extractFieldValue(String[] row, String... aliases) {
