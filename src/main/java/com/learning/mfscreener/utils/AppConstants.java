@@ -25,6 +25,27 @@ public final class AppConstants {
     public static final DateTimeFormatter FLEXIBLE_DATE_FORMATTER = new DateTimeFormatterBuilder()
             .appendPattern("[yyyy-MM-dd]") // ISO_LOCAL_DATE
             .appendPattern("[dd-MMM-yyyy]") // Custom format
+            .appendPattern("[M/d/yyyy]")
+            .appendPattern("[d/M/yyyy]")
             .parseDefaulting(ChronoField.YEAR_OF_ERA, LocalDate.now().getYear()) // Default year to current year
             .toFormatter(Locale.ENGLISH); // Ensure English locale for month names
+
+    public static final String SCHEME_CODE = "Scheme Code";
+    public static final String ISIN_DIV_PAYOUT_GROWTH = "ISIN Div Payout/ ISIN Growth";
+    public static final String ISIN_DIV_REINVESTMENT = "ISIN Div Reinvestment";
+    public static final String SCHEME_NAME = "Scheme Name";
+    public static final String PLAN = "Plan";
+    public static final String OPTION = "Option";
+    public static final String NET_ASSET_VALUE = "Net Asset Value";
+    public static final String DATE = "Date";
+
+    public static final String CSV_NAV = "nav";
+    public static final String CSV_NAV_DATE = "nav_date";
+    public static final String CSV_SCHEME_ID = "scheme_id";
+    public static final String CSV_FUND_HOUSE = "fund_house";
+    public static final String CSV_SCHEME_NAME = "scheme_name";
+    public static final String CSV_PAY_OUT = "pay_out";
+    public static final String CSV_TYPE = "type";
+    public static final String CSV_CATEGORY = "category";
+    public static final String CSV_SUB_CATEGORY = "sub_category";
 }
