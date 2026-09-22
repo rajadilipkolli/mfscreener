@@ -98,7 +98,8 @@ public class Initializer implements CommandLineRunner {
                         final String payout = utility.extractFieldValue(tokenize, AppConstants.ISIN_DIV_PAYOUT_GROWTH);
                         final String reinvestment =
                                 utility.extractFieldValue(tokenize, AppConstants.ISIN_DIV_REINVESTMENT);
-                        final String schemename = utility.extractFieldValue(tokenize, AppConstants.SCHEME_NAME);
+                        final String schemename =
+                                utility.extractFieldValue(tokenize, AppConstants.SCHEME_NAME, AppConstants.NAV_NAME);
                         final String nav = utility.extractFieldValue(tokenize, AppConstants.NET_ASSET_VALUE);
                         final String date = utility.extractFieldValue(tokenize, AppConstants.DATE);
                         final MFSchemeDTO tempObj = new MFSchemeDTO(

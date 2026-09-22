@@ -34,6 +34,7 @@ public final class AppConstants {
     public static final String ISIN_DIV_PAYOUT_GROWTH = "ISIN Div Payout/ ISIN Growth";
     public static final String ISIN_DIV_REINVESTMENT = "ISIN Div Reinvestment";
     public static final String SCHEME_NAME = "Scheme Name";
+    public static final String NAV_NAME = "NAV Name";
     public static final String PLAN = "Plan";
     public static final String OPTION = "Option";
     public static final String NET_ASSET_VALUE = "Net Asset Value";

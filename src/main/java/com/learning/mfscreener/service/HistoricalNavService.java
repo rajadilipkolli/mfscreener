@@ -172,7 +172,8 @@ public class HistoricalNavService {
             if (persistSchemeInfo) {
                 String nav = utility.extractFieldValue(tokenize, AppConstants.NET_ASSET_VALUE);
                 String date = utility.extractFieldValue(tokenize, AppConstants.DATE);
-                String schemeName = utility.extractFieldValue(tokenize, AppConstants.SCHEME_NAME);
+                String schemeName =
+                        utility.extractFieldValue(tokenize, AppConstants.SCHEME_NAME, AppConstants.NAV_NAME);
                 MFSchemeDTO mfSchemeDTO = new MFSchemeDTO(amc, schemeCode, payout, schemeName, nav, date, schemeType);
                 MFSchemeEntity mfSchemeEntity = mfSchemeDtoToEntityMapper.mapMFSchemeDTOToMFSchemeEntity(mfSchemeDTO);
                 schemeService.saveEntity(mfSchemeEntity);
