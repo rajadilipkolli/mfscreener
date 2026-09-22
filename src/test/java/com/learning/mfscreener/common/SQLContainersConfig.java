@@ -10,6 +10,11 @@ import org.testcontainers.utility.DockerImageName;
 @TestConfiguration(proxyBeanMethods = false)
 public class SQLContainersConfig {
 
+    /**
+     * Creates the PostgreSQL container used by integration tests.
+     *
+     * @return configured PostgreSQL container
+     */
     @Bean
     @ServiceConnection
     @RestartScope

@@ -208,6 +208,7 @@ public class SchemeService {
         return mfSchemeRepository.saveAll(mfSchemeEntityList);
     }
 
+    /** Loads bundled scheme and NAV data for schemes that have since closed or merged. */
     public void loadHistoricalDataForClosedOrMergedSchemes() {
         Resource resource = resourceLoader.getResource("classpath:/nav/31Jan2018Navdatadump.csv");
         try {

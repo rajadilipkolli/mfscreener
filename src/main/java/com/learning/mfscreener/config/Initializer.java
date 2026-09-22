@@ -45,6 +45,12 @@ public class Initializer implements CommandLineRunner {
         this.mfSchemeNavService = mfSchemeNavService;
     }
 
+    /**
+     * Loads the latest AMFI scheme data and any required historical NAV data at startup.
+     *
+     * @param args application command-line arguments
+     * @throws IOException if the AMFI response cannot be read
+     */
     @Override
     public void run(String... args) throws IOException {
         long start = System.currentTimeMillis();

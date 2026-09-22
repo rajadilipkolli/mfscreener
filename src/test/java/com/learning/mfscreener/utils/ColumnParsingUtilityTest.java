@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 
 class ColumnParsingUtilityTest {
 
+    /** Verifies field extraction from the six-column AMFI layout. */
     @Test
     void test6ColumnAmfi() throws IOException {
         List<String> lines = Files.readAllLines(Paths.get("src/test/resources/amfi_6_column.txt"));
@@ -25,6 +26,7 @@ class ColumnParsingUtilityTest {
         assertThat(utility.extractFieldValue(tokenize, AppConstants.DATE)).isEqualTo("22-Sep-2026");
     }
 
+    /** Verifies field extraction from the eight-column AMFI layout. */
     @Test
     void test8ColumnAmfi() throws IOException {
         List<String> lines = Files.readAllLines(Paths.get("src/test/resources/amfi_8_column.txt"));
@@ -42,6 +44,7 @@ class ColumnParsingUtilityTest {
         assertThat(utility.extractFieldValue(tokenize, AppConstants.DATE)).isEqualTo("22-Sep-2026");
     }
 
+    /** Verifies field extraction from a historical AMFI report. */
     @Test
     void testHistoricalReport() throws IOException {
         List<String> lines = Files.readAllLines(Paths.get("src/test/resources/historical_report.txt"));
@@ -57,6 +60,7 @@ class ColumnParsingUtilityTest {
         assertThat(utility.extractFieldValue(tokenize, AppConstants.DATE)).isEqualTo("22-Sep-2026");
     }
 
+    /** Verifies field extraction from the bundled NAV data. */
     @Test
     void testBundledNavData() throws IOException {
         List<String> lines = Files.readAllLines(Paths.get("src/test/resources/nav/31Jan2018Navdata.csv"));
@@ -70,6 +74,7 @@ class ColumnParsingUtilityTest {
                 .isEqualTo("121721");
     }
 
+    /** Verifies field extraction from the bundled closed-scheme NAV data. */
     @Test
     void testBundledNavDataDump() throws IOException {
         List<String> lines = Files.readAllLines(Paths.get("src/test/resources/nav/31Jan2018Navdatadump.csv"));

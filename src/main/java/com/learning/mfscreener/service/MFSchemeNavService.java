@@ -38,6 +38,7 @@ public class MFSchemeNavService {
         this.resourceLoader = resourceLoader;
     }
 
+    /** Loads the bundled 31 January 2018 NAV values for schemes already in the database. */
     public void loadHistoricalNavOn31Jan2018ForExistingSchemes() {
 
         Resource resource = resourceLoader.getResource("classpath:/nav/31Jan2018Navdata.csv");

@@ -83,6 +83,16 @@ public class HistoricalNavService {
         }
     }
 
+    /**
+     * Finds the requested scheme in an AMFI historical NAV response.
+     *
+     * @param inputString historical NAV response
+     * @param isin ISIN to match when the scheme is discontinued
+     * @param persistSchemeInfo whether a newly discovered scheme should be persisted
+     * @param schemeCode scheme code to match
+     * @param navDate requested NAV date
+     * @return the matched scheme code, or {@code null} when no row matches
+     */
     String parseNavData(
             Reader inputString, String isin, boolean persistSchemeInfo, Long schemeCode, LocalDate navDate) {
         String oldSchemeId = null;
@@ -131,6 +141,19 @@ public class HistoricalNavService {
         return lineValue;
     }
 
+    /**
+     * Processes a data row from a historical NAV response.
+     *
+     * @param isin ISIN to match
+     * @param persistSchemeInfo whether a newly discovered scheme should be persisted
+     * @param tokenize row values split by the NAV delimiter
+     * @param oldSchemeId previously matched scheme code
+     * @param amc asset management company name
+     * @param schemeType scheme type from the surrounding section
+     * @param inputSchemeCode scheme code to match
+     * @param utility header-aware column lookup utility
+     * @return the matched scheme code, or the previous value when the row does not match
+     */
     String handleMultipleTokenLine(
             String isin,
             boolean persistSchemeInfo,

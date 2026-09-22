@@ -12,6 +12,11 @@ import org.testcontainers.utility.DockerImageName;
 @TestConfiguration(proxyBeanMethods = false)
 public class NonSQLContainersConfig {
 
+    /**
+     * Creates the Redis container used by integration tests.
+     *
+     * @return configured Redis container
+     */
     @Bean
     @ServiceConnection(name = "redis")
     @RestartScope
@@ -19,6 +24,11 @@ public class NonSQLContainersConfig {
         return new RedisContainer(RedisContainer.DEFAULT_IMAGE_NAME.withTag("8.10.2-alpine"));
     }
 
+    /**
+     * Creates the Grafana observability container used by integration tests.
+     *
+     * @return configured Grafana LGTM container
+     */
     @Bean
     @ServiceConnection
     @RestartScope
