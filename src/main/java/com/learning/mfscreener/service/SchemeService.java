@@ -13,6 +13,7 @@ import com.learning.mfscreener.models.projection.UserFolioDetailsPanProjection;
 import com.learning.mfscreener.models.response.NavResponse;
 import com.learning.mfscreener.repository.MFSchemeRepository;
 import com.learning.mfscreener.utils.AppConstants;
+import com.learning.mfscreener.utils.ColumnParsingUtility;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
@@ -212,31 +213,44 @@ public class SchemeService {
         try {
             Path path = resource.getFile().toPath();
             List<String> lines = Files.lines(path).parallel().toList();
+            if (lines.isEmpty()) return;
+            ColumnParsingUtility utility = new ColumnParsingUtility(lines.get(0), ",");
             List<MFSchemeEntity> mfSchemeEntities = lines.stream()
                     .skip(1)
                     .map(csvRow -> {
-                        // Split the row , format nav	nav_date	scheme_id	fund_house	scheme_name	pay_out	type	category
-                        //	sub_category
                         String[] fields = csvRow.split(",");
 
                         // Trim and remove quotes
                         for (int i = 0; i < fields.length; i++) {
                             fields[i] = fields[i].strip().replaceAll("^\"+|\"+$", "");
                         }
-                        //                        Open Ended Schemes(Debt Scheme - Banking and PSU Fund)
+
+                        String nav = utility.extractFieldValue(fields, AppConstants.CSV_NAV);
+                        String navDate = utility.extractFieldValue(fields, AppConstants.CSV_NAV_DATE);
+                        String schemeId = utility.extractFieldValue(fields, AppConstants.CSV_SCHEME_ID);
+                        String fundHouse = utility.extractFieldValue(fields, AppConstants.CSV_FUND_HOUSE);
+                        String schemeName = utility.extractFieldValue(fields, AppConstants.CSV_SCHEME_NAME);
+                        String payOut = utility.extractFieldValue(fields, AppConstants.CSV_PAY_OUT);
+                        String type = utility.extractFieldValue(fields, AppConstants.CSV_TYPE);
+                        String category = utility.extractFieldValue(fields, AppConstants.CSV_CATEGORY);
+                        String subCategory = utility.extractFieldValue(fields, AppConstants.CSV_SUB_CATEGORY);
+
                         String schemeType;
-                        if (fields[8].equals("NULL")) {
-                            schemeType = fields[6].strip() + "(" + fields[7].strip() + ")";
+                        if ("NULL".equals(subCategory)) {
+                            schemeType = (type != null ? type.strip() : "") + "("
+                                    + (category != null ? category.strip() : "") + ")";
                         } else {
-                            schemeType = fields[6].strip() + "(" + fields[7].strip() + " - " + fields[8].strip() + ")";
+                            schemeType = (type != null ? type.strip() : "") + "("
+                                    + (category != null ? category.strip() : "") + " - "
+                                    + (subCategory != null ? subCategory.strip() : "") + ")";
                         }
                         return new MFSchemeDTO(
-                                fields[3],
-                                Long.valueOf(fields[2]),
-                                fields[5],
-                                fields[4],
-                                fields[0],
-                                fields[1],
+                                fundHouse,
+                                schemeId != null ? Long.valueOf(schemeId) : null,
+                                payOut,
+                                schemeName,
+                                nav,
+                                navDate,
                                 schemeType);
                     })
                     .map(mfSchemeDtoToEntityMapper::mapMFSchemeDTOToMFSchemeEntity)
