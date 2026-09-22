@@ -32,7 +32,11 @@ public class ColumnParsingUtility {
         if (name == null) {
             return "";
         }
-        return name.trim().replaceAll("\\s+", " ").replaceAll("\\s*/\\s*", "/").toLowerCase();
+        return name.replaceAll("^\"+|\"+$", "")
+                .trim()
+                .replaceAll("\\s+", " ")
+                .replaceAll("\\s*/\\s*", "/")
+                .toLowerCase();
     }
 
     /**
