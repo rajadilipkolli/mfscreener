@@ -1,0 +1,24 @@
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="add-trigram-search-indexes" author="appUser">
+        <preConditions onFail="MARK_RAN">
+            <dbms type="postgresql" />
+        </preConditions>
+        
+        <sql>CREATE EXTENSION IF NOT EXISTS pg_trgm;</sql>
+
+        <!-- Trigram index for wildcard searching -->
+        <sql>
+            CREATE INDEX idx_mf_scheme_name_trgm 
+            ON mf_scheme USING GIN (UPPER(REPLACE(scheme_name, '- ', '')) gin_trgm_ops);
+        </sql>
+
+        <rollback>
+            <sql>DROP INDEX IF EXISTS idx_mf_scheme_name_trgm;</sql>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>
