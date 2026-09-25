@@ -1,5 +1,6 @@
 package com.learning.mfscreener.repository;
 
+import com.learning.mfscreener.entities.UserCASDetailsEntity;
 import com.learning.mfscreener.entities.UserTransactionDetailsEntity;
 import com.learning.mfscreener.models.projection.UserTransactionDetailsProjection;
 import java.time.LocalDate;
@@ -8,6 +9,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 @Repository
 public interface UserTransactionDetailsEntityRepository extends JpaRepository<UserTransactionDetailsEntity, Long> {
@@ -29,6 +31,7 @@ public interface UserTransactionDetailsEntityRepository extends JpaRepository<Us
     List<UserTransactionDetailsProjection> getByUserSchemeIdAndTypeNotInAndTransactionDateLessThanEqual(
             @Param("id") Long id, @Param("asOfDate") LocalDate transactionDate);
 
+    @Transactional(readOnly = true)
     @Query(
             """
             select utd from UserTransactionDetailsEntity utd
@@ -40,4 +43,7 @@ public interface UserTransactionDetailsEntityRepository extends JpaRepository<Us
             """)
     List<UserTransactionDetailsEntity> findAllTransactionsByEmailAndName(
             @Param("email") String email, @Param("name") String name);
+
+    List<UserTransactionDetailsEntity> findByUserSchemeDetailsEntity_UserFolioDetailsEntity_UserCasDetailsEntity(
+            UserCASDetailsEntity userCasDetailsEntity);
 }
