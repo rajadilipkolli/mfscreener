@@ -8,9 +8,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Loggable
+@Transactional(readOnly = true)
 public class CachedNavService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CachedNavService.class);
@@ -21,8 +23,12 @@ public class CachedNavService {
         this.schemeService = schemeService;
     }
 
-    @Cacheable(cacheNames = "getNavForDate", unless = "#result == null")
     @Loggable(result = false)
+    @Cacheable(
+            value = "getNavForDate",
+            key =
+                    "#root.targetClass.simpleName + ':' + #root.methodName + ':schemeCode:' + #schemeCode + ':navDate:' + #navDate",
+            unless = "#result == null")
     public MFSchemeDTO getNavForDate(Long schemeCode, LocalDate navDate) {
         LOGGER.info("Fetching Nav for AMFISchemeCode: {} for date: {} from Database", schemeCode, navDate);
         return schemeService
