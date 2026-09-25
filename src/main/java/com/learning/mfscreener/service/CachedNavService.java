@@ -12,7 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Loggable
-@Transactional(readOnly = true)
+@Transactional(readOnly = true, noRollbackFor = NavNotFoundException.class)
 public class CachedNavService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CachedNavService.class);
