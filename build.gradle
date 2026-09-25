@@ -1,0 +1,219 @@
+import org.gradle.plugins.ide.eclipse.model.SourceFolder
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath "org.owasp:dependency-check-gradle:${owasp_plugin_version}"
+    }
+}
+plugins {
+    id "org.springframework.boot"
+    id "io.spring.dependency-management"
+    id "java-library"
+    id "eclipse"
+    id "com.gorylenko.gradle-git-properties"
+    id "io.github.ben-manes.versions"
+    id "com.diffplug.spotless"
+    id "org.sonarqube" apply false
+}
+apply from: "gradle/code-quality.gradle"
+if (project.hasProperty("ci")) {
+    apply from: "gradle/owasp.gradle"
+}
+
+group = "com.learning.mfscreener"
+version = "0.0.1-SNAPSHOT"
+
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(25))
+    }
+}
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
+    maven { url = 'https://repo.spring.io/milestone' }
+}
+
+dependencies {
+    implementation "org.springframework.boot:spring-boot-starter-actuator"
+    implementation "org.springframework.boot:spring-boot-starter-validation"
+    implementation "org.springframework.boot:spring-boot-starter-webmvc"
+    implementation "org.springframework.boot:spring-boot-starter-restclient"
+
+    // caching
+    implementation 'org.springframework.boot:spring-boot-starter-cache'
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    implementation 'org.apache.commons:commons-pool2'
+
+    // Observability
+    implementation 'org.springframework.boot:spring-boot-starter-opentelemetry'
+
+    implementation("net.ttddyy.observation:datasource-micrometer-spring-boot:2.3.0")
+
+    implementation 'org.decampo:xirr:1.2'
+
+    developmentOnly "org.springframework.boot:spring-boot-devtools"
+    annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
+
+    implementation "org.springframework.boot:spring-boot-starter-data-jpa"
+    implementation "org.springframework.boot:spring-boot-liquibase"
+    runtimeOnly "com.h2database:h2"
+    runtimeOnly "org.postgresql:postgresql"
+
+    implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:${springdoc_openapi_version}"
+    runtimeOnly "io.micrometer:micrometer-registry-prometheus"
+
+    // Scheduler
+    implementation("org.jobrunr:jobrunr-spring-boot-4-starter:8.8.2")
+    // Mapstruct
+    implementation ("org.mapstruct:mapstruct:1.6.3")
+    implementation ("org.mapstruct.extensions.spring:mapstruct-spring-annotations:2.0.0")
+
+    annotationProcessor ("org.mapstruct:mapstruct-processor:1.6.3")
+    annotationProcessor ("org.mapstruct.extensions.spring:mapstruct-spring-extensions:2.0.0")
+
+    testAndDevelopmentOnly 'org.springframework.boot:spring-boot-devtools'
+    
+    testImplementation "org.springframework.boot:spring-boot-starter-webmvc-test"
+    testImplementation "org.springframework.boot:spring-boot-starter-data-jpa-test"
+    testImplementation 'org.springframework.boot:spring-boot-starter-opentelemetry-test'
+    testImplementation "org.springframework.boot:spring-boot-testcontainers"
+    testImplementation "org.testcontainers:testcontainers-junit-jupiter"
+    testImplementation "org.testcontainers:testcontainers-postgresql"
+    testImplementation "org.testcontainers:testcontainers-grafana"
+    testImplementation('com.tngtech.archunit:archunit-junit5:1.5.1')
+    testImplementation('com.redis:testcontainers-redis:2.2.4')
+    // If you are using mapstruct in test code
+    testAnnotationProcessor("org.mapstruct:mapstruct-processor:1.6.3")
+    testAnnotationProcessor("org.mapstruct.extensions.spring:mapstruct-spring-extensions:2.0.0")
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.compilerArgs += [
+            '-Amapstruct.suppressGeneratorTimestamp=true',
+            '-Amapstruct.suppressGeneratorVersionInfoComment=true',
+            '-Amapstruct.verbose=true',
+            '-Amapstruct.defaultComponentModel=spring'
+    ]
+}
+
+defaultTasks = ["bootRun"]
+
+springBoot {
+    buildInfo()
+}
+
+bootJar {
+    //launchScript()
+}
+
+bootBuildImage {
+    imageName = "DOCKER_USERNAME/mfdcreener"
+}
+
+compileJava.dependsOn processResources
+processResources.dependsOn bootBuildInfo
+
+if (project.hasProperty("local")) {
+    bootRun {
+        args = ["--spring.profiles.active=local"]
+    }
+}
+
+gitProperties {
+    failOnNoGitDirectory = false
+    keys = [
+            "git.branch",
+            "git.commit.id.abbrev",
+            "git.commit.user.name",
+            "git.commit.message.full"
+    ]
+}
+
+spotless {
+    java {
+        // Only format project source files; exclude generated sources to avoid
+        // validation issues in Gradle 9 where tasks must declare explicit
+        // dependencies on task outputs.
+        target 'src/main/java/**/*.java', 'src/test/java/**/*.java'
+        targetExclude 'build/generated/**'
+        importOrder()
+        removeUnusedImports()
+        palantirJavaFormat("2.74.0")
+        formatAnnotations()
+    }
+}
+
+check.dependsOn spotlessCheck
+
+test {
+    useJUnitPlatform()
+    exclude "**/*IT*", "**/*IntegrationTest*", "**/*IntTest*"
+    testLogging {
+        events = ["PASSED", "FAILED", "SKIPPED"]
+        showStandardStreams = true
+        exceptionFormat = "full"
+    }
+}
+
+tasks.register('integrationTest', Test) {
+    useJUnitPlatform()
+
+    // Use compiled test classes (we keep IT tests under src/test/java) so the
+    // task can discover and run them. Ensure test classes are compiled first.
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
+    dependsOn testClasses
+
+    // Match compiled test class files. This is more explicit and reliable
+    // across Gradle versions.
+    include "**/*IT.class", "**/*IntegrationTest.class", "**/*IntTest.class"
+    shouldRunAfter test
+
+    testLogging {
+        events = ["PASSED", "FAILED", "SKIPPED"]
+        showStandardStreams = true
+        exceptionFormat = "full"
+    }
+}
+
+check.dependsOn integrationTest
+check.dependsOn jacocoTestReport
+
+tasks.register('testReport', TestReport) {
+    destinationDirectory = file("$buildFile/reports/tests")
+    testResults.from(test)
+}
+
+tasks.register('integrationTestReport', TestReport) {
+    destinationDirectory = file("$buildFile/reports/tests")
+    testResults.from(integrationTest)
+}
+
+sourceSets {
+    main {
+        java.srcDirs += 'build/generated/sources/annotationProcessor/java'
+    }
+}
+
+//adding task to fix issue with ConversationService not found in VSCode
+eclipse {
+    classpath {
+        // use assignment syntax to avoid Groovy space-assignment deprecation in Gradle 9
+        containers = ['org.eclipse.buildship.core.gradleclasspathcontainer']
+        file.whenMerged { cp ->
+            def entries = cp.entries
+            def src = new SourceFolder('build/generated/sources/annotationProcessor/java/main/', null)
+            entries.add(src)
+        }
+    }
+}

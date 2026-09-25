@@ -1,0 +1,5 @@
+Scheme Code;ISIN Div Payout/ ISIN Growth;ISIN Div Reinvestment;Scheme Name;Net Asset Value;Date
+ 
+Open Ended Schemes( Equity Scheme - Flexi Cap Fund)
+Aditya Birla Sun Life Mutual Fund
+120465;INF209K01157;INF209K01165;Aditya Birla Sun Life Flexi Cap Fund - Dividend;139.81;22-Sep-2026

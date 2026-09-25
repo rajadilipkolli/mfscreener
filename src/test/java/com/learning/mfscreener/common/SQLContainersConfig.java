@@ -1,0 +1,24 @@
+package com.learning.mfscreener.common;
+
+import org.springframework.boot.devtools.restart.RestartScope;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.springframework.context.annotation.Bean;
+import org.testcontainers.postgresql.PostgreSQLContainer;
+import org.testcontainers.utility.DockerImageName;
+
+@TestConfiguration(proxyBeanMethods = false)
+public class SQLContainersConfig {
+
+    /**
+     * Creates the PostgreSQL container used by integration tests.
+     *
+     * @return configured PostgreSQL container
+     */
+    @Bean
+    @ServiceConnection
+    @RestartScope
+    PostgreSQLContainer postgreSQLContainer() {
+        return new PostgreSQLContainer(DockerImageName.parse("postgres").withTag("18.6-alpine"));
+    }
+}

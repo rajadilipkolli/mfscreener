@@ -1,19 +1,25 @@
 {
-    // Use IntelliSense to learn about possible attributes.
-    // Hover to view descriptions of existing attributes.
-    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
-    "version": "0.2.0",
     "configurations": [
         {
             "type": "java",
-            "name": "Launch MFScreenerApplication",
+            "name": "Spring Boot-Application<mfscreener>",
             "request": "launch",
-            "mainClass": "com.example.mfscreener.MFScreenerApplication",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.learning.mfscreener.Application",
             "projectName": "mfscreener",
-            "sourcePaths": [
-                "${workspaceFolder}/build/generated/"
-            ],
-            "args": "--spring.profiles.active=local"
+            "args": "--spring.profiles.active=localdocker",
+            "envFile": "${workspaceFolder}/.env",
+            "vmArgs": " -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=40371 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dspring.jmx.enabled=true -Djava.rmi.server.hostname=localhost -Dspring.application.admin.enabled=true -Dspring.boot.project.name=mfscreener"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-TestApplication<mfscreener>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.learning.mfscreener.TestApplication",
+            "projectName": "mfscreener",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
         }
     ]
 }

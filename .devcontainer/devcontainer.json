@@ -1,38 +1,41 @@
 // For format details, see https://aka.ms/devcontainer.json. For config options, see the
-// README at: https://github.com/devcontainers/templates/tree/main/src/universal
+// README at: https://github.com/devcontainers/templates/tree/main/src/java
 {
-	"name": "Default Linux Universal",
-	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
-	"image": "mcr.microsoft.com/devcontainers/universal:2-linux",
+	"name": "Java",
+	"image": "mcr.microsoft.com/devcontainers/java:25",
 	"features": {
 		"ghcr.io/devcontainers/features/java:1": {
-			"installGradle": true,
-			"version": "17",
-			"jdkDistro": "ms",
-			"gradleVersion": "latest",
-			"installMaven": false,
-			"installAnt": false
+			"version": "none",
+			"installMaven": "false",
+			"installGradle": "true"
+		},
+		"ghcr.io/devcontainers/features/docker-in-docker:4": {
+			"moby": false
+		},
+		"ghcr.io/devcontainers/features/git:1": {},
+		"ghcr.io/devcontainers/features/node:2": {
+			"version": "lts"
 		}
 	},
 	"customizations": {
 		"vscode": {
 			"extensions": [
+				"vscjava.vscode-gradle",
 				"vscjava.vscode-java-pack",
-				"vmware.vscode-boot-dev-pack",
-				"vscjava.vscode-lombok",
-				"vscjava.vscode-gradle"
+				"vmware.vscode-boot-dev-pack"
 			]
 		}
-	}
-
-	// Features to add to the dev container. More info: https://containers.dev/features.
-	// "features": {},
+	},
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
-	// "forwardPorts": [],
+	"forwardPorts": [
+		8080,
+		8000,
+		5050
+	],
 
 	// Use 'postCreateCommand' to run commands after the container is created.
-	// "postCreateCommand": "uname -a",
+	"postCreateCommand": "./gradlew build -x test"
 
 	// Configure tool-specific properties.
 	// "customizations": {},
