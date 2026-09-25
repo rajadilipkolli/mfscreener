@@ -12,6 +12,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Objects;
 import org.hibernate.proxy.HibernateProxy;
@@ -31,7 +32,7 @@ public class MFSchemeNavEntity extends AuditableEntity<String> implements Serial
     @Column(name = "id", nullable = false)
     private Long id;
 
-    private Float nav;
+    private BigDecimal nav;
 
     @Column(name = "nav_date")
     private LocalDate navDate;
@@ -49,11 +50,11 @@ public class MFSchemeNavEntity extends AuditableEntity<String> implements Serial
         return this;
     }
 
-    public Float getNav() {
+    public BigDecimal getNav() {
         return nav;
     }
 
-    public MFSchemeNavEntity setNav(Float nav) {
+    public MFSchemeNavEntity setNav(BigDecimal nav) {
         this.nav = nav;
         return this;
     }
@@ -88,8 +89,7 @@ public class MFSchemeNavEntity extends AuditableEntity<String> implements Serial
                 : this.getClass();
         if (thisEffectiveClass != oEffectiveClass) return false;
         MFSchemeNavEntity that = (MFSchemeNavEntity) o;
-        return Objects.equals(getNav(), that.getNav())
-                && Objects.equals(
+        return Objects.equals(
                         getMfSchemeEntity().getSchemeId(),
                         that.getMfSchemeEntity().getSchemeId())
                 && Objects.deepEquals(getNavDate(), that.getNavDate());

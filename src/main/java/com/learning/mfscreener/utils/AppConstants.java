@@ -38,7 +38,24 @@ public final class AppConstants {
     public static final String PLAN = "Plan";
     public static final String OPTION = "Option";
     public static final String NET_ASSET_VALUE = "Net Asset Value";
+    public static final String REPURCHASE_PRICE = "Repurchase Price";
+    public static final String SALE_PRICE = "Sale Price";
     public static final String DATE = "Date";
+
+    // CAS Formats
+    public static final String SCHEME = "Scheme";
+    public static final String FOLIO = "Folio";
+    public static final String AMOUNT = "Amount";
+    public static final String UNITS = "Units";
+    public static final String PRICE = "Price";
+    public static final String BALANCE = "Balance";
+    public static final String TYPE = "Type";
+    public static final String KYC = "KYC";
+    public static final String PAN = "PAN";
+    public static final String DESCRIPTION = "Description";
+    public static final String ADVISOR = "Advisor";
+    public static final String MYOPEN = "MyOpen";
+    public static final String CLOSE = "Close";
 
     public static final String CSV_NAV = "nav";
     public static final String CSV_NAV_DATE = "nav_date";

@@ -1,0 +1,17 @@
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="align-timestamptz-columns" author="appUser" dbms="postgresql">
+        <modifyDataType tableName="mf_scheme" columnName="created_date" newDataType="timestamptz"/>
+        <modifyDataType tableName="mf_scheme" columnName="last_modified_date" newDataType="timestamptz"/>
+        
+        <modifyDataType tableName="mf_scheme_nav" columnName="created_date" newDataType="timestamptz"/>
+        <modifyDataType tableName="mf_scheme_nav" columnName="last_modified_date" newDataType="timestamptz"/>
+        
+        <modifyDataType tableName="mf_scheme_types" columnName="created_date" newDataType="timestamptz"/>
+        <modifyDataType tableName="mf_scheme_types" columnName="last_modified_date" newDataType="timestamptz"/>
+    </changeSet>
+
+</databaseChangeLog>

@@ -1,0 +1,20 @@
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="migrate-monetary-columns-to-numeric" author="appUser">
+        <!-- Re-create the unique constraint on mf_scheme_nav -->
+        <!-- We redefine it on (nav_date, mf_scheme_id) because nav is not required for uniqueness -->
+        <dropUniqueConstraint tableName="mf_scheme_nav" constraintName="uc_mf_scheme_nav"/>
+        
+        <modifyDataType tableName="mf_scheme_nav" columnName="nav" newDataType="NUMERIC(15, 4)"/>
+        <modifyDataType tableName="user_transaction_details" columnName="amount" newDataType="NUMERIC(15, 4)"/>
+        <modifyDataType tableName="user_transaction_details" columnName="units" newDataType="NUMERIC(15, 4)"/>
+        <modifyDataType tableName="user_transaction_details" columnName="nav" newDataType="NUMERIC(15, 4)"/>
+        <modifyDataType tableName="user_transaction_details" columnName="balance" newDataType="NUMERIC(15, 4)"/>
+
+        <addUniqueConstraint tableName="mf_scheme_nav" columnNames="nav_date, mf_scheme_id" constraintName="uc_mf_scheme_nav"/>
+    </changeSet>
+
+</databaseChangeLog>

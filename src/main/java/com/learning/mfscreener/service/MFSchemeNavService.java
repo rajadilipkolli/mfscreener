@@ -8,6 +8,7 @@ import com.learning.mfscreener.repository.MFSchemeRepository;
 import com.learning.mfscreener.utils.AppConstants;
 import com.learning.mfscreener.utils.ColumnParsingUtility;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -61,7 +62,7 @@ public class MFSchemeNavService {
                         String schemeIdStr = utility.extractFieldValue(fields, AppConstants.CSV_SCHEME_ID);
 
                         MFSchemeNavEntity mfSchemeNavEntity = new MFSchemeNavEntity();
-                        mfSchemeNavEntity.setNav(Float.valueOf(navStr));
+                        mfSchemeNavEntity.setNav(new BigDecimal(navStr));
                         mfSchemeNavEntity.setNavDate(AppConstants.GRAND_FATHERED_DATE);
                         mfSchemeNavEntity.setMfSchemeEntity(
                                 mfSchemeRepository.getReferenceById(Long.valueOf(schemeIdStr.replace("\"\"", ""))));
