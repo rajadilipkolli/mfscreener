@@ -36,7 +36,7 @@ class NavControllerIT extends AbstractIntegrationTest {
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_JSON_VALUE)))
                 .andExpect(jsonPath("$.schemeCode", is(120503L), Long.class))
                 .andExpect(jsonPath("$.payout", is("INF846K01EW2")))
-                .andExpect(jsonPath("$.schemeName", is("Axis ELSS Tax Saver Fund - Direct Plan - Growth Option")))
+                .andExpect(jsonPath("$.schemeName", is("Axis ELSS- Tax Saver Fund")))
                 .andExpect(jsonPath("$.nav", notNullValue(String.class)))
                 .andExpect(jsonPath("$.date", notNullValue(String.class)));
     }
@@ -50,10 +50,10 @@ class NavControllerIT extends AbstractIntegrationTest {
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_JSON_VALUE)))
                 .andExpect(jsonPath("$.schemeCode", is(120503L), Long.class))
                 .andExpect(jsonPath("$.payout", is("INF846K01EW2")))
-                .andExpect(jsonPath("$.schemeName", is("Axis ELSS Tax Saver Fund - Direct Plan - Growth Option")))
+                .andExpect(jsonPath("$.schemeName", is("Axis ELSS- Tax Saver Fund")))
                 .andExpect(jsonPath("$.nav", is("73.6085")))
                 .andExpect(jsonPath("$.date", is("2022-12-20")))
-                .andExpect(jsonPath("$.schemeType", is("Open Ended Schemes(Equity Scheme - ELSS)")));
+                .andExpect(jsonPath("$.schemeType", is("Open Ended Schemes(Equity Schemes - ELSS - Tax Saver Fund)")));
     }
 
     @Test
@@ -109,9 +109,9 @@ class NavControllerIT extends AbstractIntegrationTest {
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_JSON_VALUE)))
                 .andExpect(jsonPath("$.schemeCode", is(151113L), Long.class))
                 .andExpect(jsonPath("$.payout", is("INF917K01HD4")))
-                .andExpect(jsonPath("$.schemeName", is("HSBC Value Fund - Direct Growth")))
-                .andExpect(jsonPath("$.nav", is("63.162")))
+                .andExpect(jsonPath("$.schemeName", is("HSBC Value Fund")))
+                .andExpect(jsonPath("$.nav", is("63.1620")))
                 .andExpect(jsonPath("$.date", is("2022-10-20")))
-                .andExpect(jsonPath("$.schemeType", is("Open Ended Schemes(Equity Scheme - Value Fund)")));
+                .andExpect(jsonPath("$.schemeType", is("Open Ended Schemes(Equity Schemes - Value Fund)")));
     }
 }

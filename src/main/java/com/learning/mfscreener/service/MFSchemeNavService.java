@@ -6,7 +6,9 @@ import com.learning.mfscreener.exception.FileNotFoundException;
 import com.learning.mfscreener.repository.MFSchemeNavEntityRepository;
 import com.learning.mfscreener.repository.MFSchemeRepository;
 import com.learning.mfscreener.utils.AppConstants;
+import com.learning.mfscreener.utils.ColumnParsingUtility;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -44,12 +46,15 @@ public class MFSchemeNavService {
         this.transactionTemplate = transactionTemplate;
     }
 
+    /** Loads the bundled 31 January 2018 NAV values for schemes already in the database. */
     public void loadHistoricalNavOn31Jan2018ForExistingSchemes() {
 
         Resource resource = resourceLoader.getResource("classpath:/nav/31Jan2018Navdata.csv");
         try {
             Path path = resource.getFile().toPath();
             List<String> lines = Files.lines(path).parallel().toList();
+            if (lines.isEmpty()) return;
+            ColumnParsingUtility utility = new ColumnParsingUtility(lines.get(0), ",");
             List<MFSchemeNavEntity> mfSchemeNavEntities = lines.stream()
                     .skip(1)
                     .map(csvRow -> {
@@ -60,11 +65,14 @@ public class MFSchemeNavService {
                         for (int i = 0; i < fields.length; i++) {
                             fields[i] = fields[i].trim().replaceAll("^\"+|\"+$", "");
                         }
+                        String navStr = utility.extractFieldValue(fields, AppConstants.CSV_NAV);
+                        String schemeIdStr = utility.extractFieldValue(fields, AppConstants.CSV_SCHEME_ID);
+
                         MFSchemeNavEntity mfSchemeNavEntity = new MFSchemeNavEntity();
-                        mfSchemeNavEntity.setNav(Float.valueOf(fields[0]));
+                        mfSchemeNavEntity.setNav(new BigDecimal(navStr));
                         mfSchemeNavEntity.setNavDate(AppConstants.GRAND_FATHERED_DATE);
                         mfSchemeNavEntity.setMfSchemeEntity(
-                                mfSchemeRepository.getReferenceById(Long.valueOf(fields[2].replace("\"\"", ""))));
+                                mfSchemeRepository.getReferenceById(Long.valueOf(schemeIdStr.replace("\"\"", ""))));
                         return mfSchemeNavEntity;
                     })
                     .toList();

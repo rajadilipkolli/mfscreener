@@ -11,6 +11,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Objects;
 import org.hibernate.Hibernate;
@@ -27,10 +28,10 @@ public class UserTransactionDetailsEntity extends AuditableEntity<String> implem
 
     private LocalDate transactionDate;
     private String description;
-    private Double amount;
-    private Double units;
-    private Double nav;
-    private Double balance;
+    private BigDecimal amount;
+    private BigDecimal units;
+    private BigDecimal nav;
+    private BigDecimal balance;
     private String type;
     private String dividendRate;
 
@@ -65,38 +66,38 @@ public class UserTransactionDetailsEntity extends AuditableEntity<String> implem
         return this;
     }
 
-    public Double getAmount() {
+    public BigDecimal getAmount() {
         return amount;
     }
 
-    public UserTransactionDetailsEntity setAmount(Double amount) {
+    public UserTransactionDetailsEntity setAmount(BigDecimal amount) {
         this.amount = amount;
         return this;
     }
 
-    public Double getUnits() {
+    public BigDecimal getUnits() {
         return units;
     }
 
-    public UserTransactionDetailsEntity setUnits(Double units) {
+    public UserTransactionDetailsEntity setUnits(BigDecimal units) {
         this.units = units;
         return this;
     }
 
-    public Double getNav() {
+    public BigDecimal getNav() {
         return nav;
     }
 
-    public UserTransactionDetailsEntity setNav(Double nav) {
+    public UserTransactionDetailsEntity setNav(BigDecimal nav) {
         this.nav = nav;
         return this;
     }
 
-    public Double getBalance() {
+    public BigDecimal getBalance() {
         return balance;
     }
 
-    public UserTransactionDetailsEntity setBalance(Double balance) {
+    public UserTransactionDetailsEntity setBalance(BigDecimal balance) {
         this.balance = balance;
         return this;
     }

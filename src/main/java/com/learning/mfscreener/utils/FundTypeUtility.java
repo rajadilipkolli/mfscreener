@@ -3,6 +3,7 @@ package com.learning.mfscreener.utils;
 import com.learning.mfscreener.models.portfolio.FundType;
 import com.learning.mfscreener.models.portfolio.TransactionType;
 import com.learning.mfscreener.models.portfolio.UserTransactionDTO;
+import java.math.BigDecimal;
 import java.util.List;
 
 public class FundTypeUtility {
@@ -19,7 +20,9 @@ public class FundTypeUtility {
      */
     public static FundType deriveFundTypeFromTransactions(List<UserTransactionDTO> transactions) {
         boolean valid = transactions.stream()
-                .anyMatch(x -> x.units() != null && x.units() < 0 && x.type() != TransactionType.REVERSAL);
+                .anyMatch(x -> x.units() != null
+                        && x.units().compareTo(BigDecimal.ZERO) < 0
+                        && x.type() != TransactionType.REVERSAL);
 
         if (!valid) {
             return FundType.UNKNOWN;

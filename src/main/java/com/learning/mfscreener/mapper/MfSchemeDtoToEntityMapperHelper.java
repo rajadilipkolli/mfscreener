@@ -7,6 +7,7 @@ import com.learning.mfscreener.entities.MFSchemeNavEntity;
 import com.learning.mfscreener.entities.MFSchemeTypeEntity;
 import com.learning.mfscreener.models.MFSchemeDTO;
 import com.learning.mfscreener.repository.MFSchemeTypeRepository;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -40,7 +41,8 @@ class MfSchemeDtoToEntityMapperHelper {
     @AfterMapping
     void updateMFScheme(MFSchemeDTO scheme, @MappingTarget MFSchemeEntity mfSchemeEntity) {
         MFSchemeNavEntity mfSchemenavEntity = new MFSchemeNavEntity();
-        mfSchemenavEntity.setNav("N.A.".equals(scheme.nav()) ? 0F : Float.parseFloat(scheme.nav()));
+        mfSchemenavEntity.setNav(
+                "N.A.".equals(scheme.nav()) ? java.math.BigDecimal.ZERO : new BigDecimal(scheme.nav()));
         // Use the flexible formatter to parse the date
         LocalDate parsedDate = LocalDate.parse(scheme.date(), FLEXIBLE_DATE_FORMATTER);
         mfSchemenavEntity.setNavDate(parsedDate);

@@ -9,6 +9,7 @@ import com.learning.mfscreener.mapper.MfSchemeDtoToEntityMapper;
 import com.learning.mfscreener.models.MFSchemeDTO;
 import com.learning.mfscreener.models.projection.SchemeNameAndISIN;
 import com.learning.mfscreener.utils.AppConstants;
+import com.learning.mfscreener.utils.ColumnParsingUtility;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
@@ -84,12 +85,24 @@ public class HistoricalNavService {
         }
     }
 
+    /**
+     * Finds the requested scheme in an AMFI historical NAV response.
+     *
+     * @param inputString historical NAV response
+     * @param isin ISIN to match when the scheme is discontinued
+     * @param persistSchemeInfo whether a newly discovered scheme should be persisted
+     * @param schemeCode scheme code to match
+     * @param navDate requested NAV date
+     * @return the matched scheme code, or {@code null} when no row matches
+     */
     String parseNavData(
             Reader inputString, String isin, boolean persistSchemeInfo, Long schemeCode, LocalDate navDate) {
         String oldSchemeId = null;
         try (BufferedReader br = new BufferedReader(inputString)) {
+            String headerLine = br.readLine();
+            ColumnParsingUtility utility = new ColumnParsingUtility(headerLine, AppConstants.NAV_SEPARATOR);
             String lineValue = br.readLine();
-            for (int i = 0; i < 2; ++i) {
+            for (int i = 0; i < 1; ++i) { // previously was 2, now 1 because header is read
                 lineValue = br.readLine();
             }
             String schemeType = lineValue;
@@ -106,12 +119,12 @@ public class HistoricalNavService {
                     } else {
                         amc = tempVal;
                         oldSchemeId = handleMultipleTokenLine(
-                                isin, persistSchemeInfo, tokenize, oldSchemeId, amc, schemeType, schemeCode);
+                                isin, persistSchemeInfo, tokenize, oldSchemeId, amc, schemeType, schemeCode, utility);
                     }
 
                 } else {
                     oldSchemeId = handleMultipleTokenLine(
-                            isin, persistSchemeInfo, tokenize, oldSchemeId, amc, schemeType, schemeCode);
+                            isin, persistSchemeInfo, tokenize, oldSchemeId, amc, schemeType, schemeCode, utility);
                 }
                 lineValue = readNextNonEmptyLine(br);
             }
@@ -130,6 +143,19 @@ public class HistoricalNavService {
         return lineValue;
     }
 
+    /**
+     * Processes a data row from a historical NAV response.
+     *
+     * @param isin ISIN to match
+     * @param persistSchemeInfo whether a newly discovered scheme should be persisted
+     * @param tokenize row values split by the NAV delimiter
+     * @param oldSchemeId previously matched scheme code
+     * @param amc asset management company name
+     * @param schemeType scheme type from the surrounding section
+     * @param inputSchemeCode scheme code to match
+     * @param utility header-aware column lookup utility
+     * @return the matched scheme code, or the previous value when the row does not match
+     */
     String handleMultipleTokenLine(
             String isin,
             boolean persistSchemeInfo,
@@ -137,15 +163,19 @@ public class HistoricalNavService {
             String oldSchemeId,
             String amc,
             String schemeType,
-            Long inputSchemeCode) {
-        final Long schemeCode = Long.valueOf(tokenize[0]);
-        final String payout = tokenize[2];
-        if (payout.equalsIgnoreCase(isin) || schemeCode.equals(inputSchemeCode)) {
+            Long inputSchemeCode,
+            ColumnParsingUtility utility) {
+        final String schemeCodeStr = utility.extractFieldValue(tokenize, AppConstants.SCHEME_CODE);
+        final Long schemeCode = schemeCodeStr != null && !schemeCodeStr.isEmpty() ? Long.valueOf(schemeCodeStr) : null;
+        final String payout = utility.extractFieldValue(tokenize, AppConstants.ISIN_DIV_PAYOUT_GROWTH);
+        if (schemeCode != null
+                && (payout != null && payout.equalsIgnoreCase(isin) || schemeCode.equals(inputSchemeCode))) {
             oldSchemeId = String.valueOf(schemeCode);
             if (persistSchemeInfo) {
-                String nav = tokenize[4];
-                String date = tokenize[7];
-                String schemeName = tokenize[1];
+                String nav = utility.extractFieldValue(tokenize, AppConstants.NET_ASSET_VALUE);
+                String date = utility.extractFieldValue(tokenize, AppConstants.DATE);
+                String schemeName =
+                        utility.extractFieldValue(tokenize, AppConstants.SCHEME_NAME, AppConstants.NAV_NAME);
                 MFSchemeDTO mfSchemeDTO = new MFSchemeDTO(amc, schemeCode, payout, schemeName, nav, date, schemeType);
                 MFSchemeEntity mfSchemeEntity = mfSchemeDtoToEntityMapper.mapMFSchemeDTOToMFSchemeEntity(mfSchemeDTO);
                 schemeService.saveEntity(mfSchemeEntity);
