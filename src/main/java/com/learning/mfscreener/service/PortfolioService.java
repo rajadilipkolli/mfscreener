@@ -19,6 +19,7 @@ import com.learning.mfscreener.models.portfolio.UserTransactionDTO;
 import com.learning.mfscreener.models.response.PortfolioResponse;
 import com.learning.mfscreener.models.response.ProcessCasResponse;
 import com.learning.mfscreener.models.response.UploadResponseHolder;
+import com.learning.mfscreener.repository.util.UserCasEntityGraphBuilder;
 import com.learning.mfscreener.utils.LocalDateUtility;
 import java.io.IOException;
 import java.time.LocalDate;
@@ -46,7 +47,6 @@ public class PortfolioService {
 
     private final SchemeService schemeService;
     private final UserTransactionDetailsService userTransactionDetailsService;
-    private final UserFolioDetailsService userFolioDetailsService;
     private final UserSchemeDetailsService userSchemeDetailsService;
     private final PortfolioServiceHelper portfolioServiceHelper;
     private final UserCASDetailsService userCASDetailsService;
@@ -58,7 +58,6 @@ public class PortfolioService {
             CasDetailsMapper casDetailsMapper,
             UserTransactionDetailsService userTransactionDetailsService,
             SchemeService schemeService,
-            UserFolioDetailsService userFolioDetailsService,
             UserSchemeDetailsService userSchemeDetailsService,
             PortfolioServiceHelper portfolioServiceHelper,
             UserCASDetailsService userCASDetailsService,
@@ -68,7 +67,6 @@ public class PortfolioService {
         this.casDetailsMapper = casDetailsMapper;
         this.userCASDetailsService = userCASDetailsService;
         this.schemeService = schemeService;
-        this.userFolioDetailsService = userFolioDetailsService;
         this.userSchemeDetailsService = userSchemeDetailsService;
         this.userTransactionDetailsService = userTransactionDetailsService;
         this.portfolioServiceHelper = portfolioServiceHelper;
@@ -137,20 +135,20 @@ public class PortfolioService {
         long userTransactionCount = portfolioServiceHelper.countTransactionsByUserFolioDTOList(inputUserFolioDTOList);
         List<UserTransactionDetailsEntity> userTransactionDetailsEntityList =
                 this.userTransactionDetailsService.findAllTransactionsByEmailAndName(email, name);
-        UserCASDetailsEntity userCASDetailsEntity = userCASDetailsService.findByInvestorEmailAndName(email, name);
-
         if (userTransactionCount == userTransactionDetailsEntityList.size()) {
             LOGGER.info("No new transactions are added");
             return null;
         }
 
+        UserCASDetailsEntity userCASDetailsEntity = UserCasEntityGraphBuilder.rebuild(
+                userCASDetailsService.findByInvestorEmailAndName(email, name),
+                userSchemeDetailsService.getSchemesByEmailAndName(email, name),
+                userTransactionDetailsEntityList);
         return processFoliosAndTransactions(
-                email, name, casDTO, userCASDetailsEntity, userTransactionCount, userTransactionDetailsEntityList);
+                casDTO, userCASDetailsEntity, userTransactionCount, userTransactionDetailsEntityList);
     }
 
     UploadResponseHolder processFoliosAndTransactions(
-            String email,
-            String name,
             CasDTO casDTO,
             UserCASDetailsEntity userCASDetailsEntity,
             long userTransactionDTOListCount,
@@ -160,8 +158,6 @@ public class PortfolioService {
 
         processNewFolios(casDTO.folios(), userCASDetailsEntity, folioCounter, transactionsCounter);
         updateSchemesAndTransactions(
-                email,
-                name,
                 casDTO,
                 userCASDetailsEntity,
                 userTransactionDTOListCount,
@@ -172,8 +168,6 @@ public class PortfolioService {
     }
 
     void updateSchemesAndTransactions(
-            String email,
-            String name,
             CasDTO casDTO,
             UserCASDetailsEntity userCASDetailsEntity,
             long userTransactionDTOListCount,
@@ -189,8 +183,7 @@ public class PortfolioService {
             Map<String, List<UserSchemeDTO>> requestedFolioSchemesMap = groupSchemesByFolio(casDTO.folios());
 
             // Grouping by folio for existingFolioSchemesMap
-            List<UserFolioDetailsEntity> existingUserFolioDetailsEntityList =
-                    userFolioDetailsService.findByUserEmailAndName(email, name);
+            List<UserFolioDetailsEntity> existingUserFolioDetailsEntityList = userCASDetailsEntity.getFolioEntities();
             Map<String, List<UserSchemeDetailsEntity>> existingFolioSchemesMap =
                     groupExistingSchemesByEmailAndName(existingUserFolioDetailsEntityList);
 
@@ -200,8 +193,6 @@ public class PortfolioService {
                     existingFolioSchemesMap,
                     existingUserFolioDetailsEntityList,
                     transactionsCounter);
-            userCASDetailsEntity.setFolioEntities(existingUserFolioDetailsEntityList);
-
             // Check if all new transactions are added as part of adding schemes
             if (userTransactionDTOListCount == (userTransactionDetailsEntityList.size() + transactionsCounter.get())) {
                 LOGGER.info("All new transactions are added as part of adding schemes, hence skipping");
@@ -213,7 +204,9 @@ public class PortfolioService {
                         groupTransactionBySchemes(casDTO.folios());
 
                 List<UserSchemeDetailsEntity> existingUserSchemeDetailsList =
-                        userSchemeDetailsService.getSchemesByEmailAndName(email, name);
+                        existingUserFolioDetailsEntityList.stream()
+                                .flatMap(folio -> folio.getSchemeEntities().stream())
+                                .toList();
 
                 // Grouping by ISIN for userSchemaTransactionMapFromDB
                 Map<String, List<UserTransactionDetailsEntity>> userSchemaTransactionMapFromDB =
