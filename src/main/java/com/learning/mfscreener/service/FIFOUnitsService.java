@@ -23,8 +23,10 @@ import java.util.stream.IntStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional(readOnly = true)
 public class FIFOUnitsService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FIFOUnitsService.class);
@@ -166,18 +168,10 @@ public class FIFOUnitsService {
     }
 
     void processTransaction(UserTransactionDTO userTransactionDTO) {
-        if (userTransactionDTO.units() > 0) {
-            buy(
-                    userTransactionDTO.date(),
-                    BigDecimal.valueOf(userTransactionDTO.units()),
-                    BigDecimal.valueOf(userTransactionDTO.nav()),
-                    BigDecimal.ZERO);
-        } else if (userTransactionDTO.units() < 0) {
-            sell(
-                    userTransactionDTO.date(),
-                    BigDecimal.valueOf(userTransactionDTO.units()),
-                    BigDecimal.valueOf(userTransactionDTO.nav()),
-                    BigDecimal.ZERO);
+        if (userTransactionDTO.units().compareTo(BigDecimal.ZERO) > 0) {
+            buy(userTransactionDTO.date(), userTransactionDTO.units(), userTransactionDTO.nav(), BigDecimal.ZERO);
+        } else if (userTransactionDTO.units().compareTo(BigDecimal.ZERO) < 0) {
+            sell(userTransactionDTO.date(), userTransactionDTO.units(), userTransactionDTO.nav(), BigDecimal.ZERO);
         }
     }
 
@@ -186,35 +180,35 @@ public class FIFOUnitsService {
         if (userTransactionDTOS.size() == 2) {
             if (userTransactionDTOS.get(1).type().compareTo(TransactionType.STAMP_DUTY_TAX) == 0) {
                 // buy
-                Double tax = userTransactionDTOS.get(1).amount();
+                BigDecimal tax = userTransactionDTOS.get(1).amount();
                 buy(
                         dt,
-                        BigDecimal.valueOf(userTransactionDTOS.get(0).units()),
-                        BigDecimal.valueOf(userTransactionDTOS.get(0).nav()),
-                        BigDecimal.valueOf(tax));
-            } else if (userTransactionDTOS.get(0).type().compareTo(TransactionType.STT_TAX) == 0) {
+                        userTransactionDTOS.getFirst().units(),
+                        userTransactionDTOS.getFirst().nav(),
+                        tax);
+            } else if (userTransactionDTOS.getFirst().type().compareTo(TransactionType.STT_TAX) == 0) {
                 // sell
-                Double tax = userTransactionDTOS.get(0).amount();
+                BigDecimal tax = userTransactionDTOS.getFirst().amount();
                 sell(
                         dt,
-                        BigDecimal.valueOf(userTransactionDTOS.get(1).units()),
-                        BigDecimal.valueOf(userTransactionDTOS.get(1).nav()),
-                        BigDecimal.valueOf(tax));
+                        userTransactionDTOS.get(1).units(),
+                        userTransactionDTOS.get(1).nav(),
+                        tax);
             }
         } else if (userTransactionDTOS.size() == 1) {
-            if (userTransactionDTOS.get(0).type().compareTo(TransactionType.REDEMPTION) == 0
-                    || userTransactionDTOS.get(0).type().compareTo(TransactionType.SWITCH_OUT) == 0) {
+            if (userTransactionDTOS.getFirst().type().compareTo(TransactionType.REDEMPTION) == 0
+                    || userTransactionDTOS.getFirst().type().compareTo(TransactionType.SWITCH_OUT) == 0) {
                 sell(
                         dt,
-                        BigDecimal.valueOf(userTransactionDTOS.get(0).units()),
-                        BigDecimal.valueOf(userTransactionDTOS.get(0).nav()),
+                        userTransactionDTOS.getFirst().units(),
+                        userTransactionDTOS.getFirst().nav(),
                         BigDecimal.ZERO);
-            } else if (userTransactionDTOS.get(0).type().compareTo(TransactionType.PURCHASE) == 0
-                    || userTransactionDTOS.get(0).type().compareTo(TransactionType.SWITCH_IN) == 0) {
+            } else if (userTransactionDTOS.getFirst().type().compareTo(TransactionType.PURCHASE) == 0
+                    || userTransactionDTOS.getFirst().type().compareTo(TransactionType.SWITCH_IN) == 0) {
                 buy(
                         dt,
-                        BigDecimal.valueOf(userTransactionDTOS.get(0).units()),
-                        BigDecimal.valueOf(userTransactionDTOS.get(0).nav()),
+                        userTransactionDTOS.getFirst().units(),
+                        userTransactionDTOS.getFirst().nav(),
                         BigDecimal.ZERO);
             }
         }

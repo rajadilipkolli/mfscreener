@@ -15,9 +15,11 @@ import org.decampo.xirr.Transaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Loggable
+@Transactional(readOnly = true)
 public class XIRRCalculatorService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(XIRRCalculatorService.class);
@@ -97,7 +99,7 @@ public class XIRRCalculatorService {
         // XIRR cant be calculated when there are only 2 transactions and both has same date.
         if (currentBalance != 0.0
                 && !(transactionList.size() == 1
-                        && transactionList.get(0).getWhen().equals(asOfDate))) {
+                        && transactionList.getFirst().getWhen().equals(asOfDate))) {
             // Add current Value and current date
             transactionList.add(new Transaction(getCurrentValuation(fundId, currentBalance, asOfDate), asOfDate));
         }

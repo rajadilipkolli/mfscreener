@@ -1,18 +1,39 @@
 package com.learning.mfscreener.common;
 
 import com.redis.testcontainers.RedisContainer;
+import java.time.Duration;
 import org.springframework.boot.devtools.restart.RestartScope;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.context.annotation.Bean;
+import org.testcontainers.grafana.LgtmStackContainer;
+import org.testcontainers.utility.DockerImageName;
 
 @TestConfiguration(proxyBeanMethods = false)
 public class NonSQLContainersConfig {
 
+    /**
+     * Creates the Redis container used by integration tests.
+     *
+     * @return configured Redis container
+     */
     @Bean
     @ServiceConnection(name = "redis")
     @RestartScope
     RedisContainer redisContainer() {
-        return new RedisContainer(RedisContainer.DEFAULT_IMAGE_NAME.withTag("7.4.0-alpine"));
+        return new RedisContainer(RedisContainer.DEFAULT_IMAGE_NAME.withTag("8.10.2-alpine"));
+    }
+
+    /**
+     * Creates the Grafana observability container used by integration tests.
+     *
+     * @return configured Grafana LGTM container
+     */
+    @Bean
+    @ServiceConnection
+    @RestartScope
+    LgtmStackContainer lgtmContainer() {
+        return new LgtmStackContainer(DockerImageName.parse("grafana/otel-lgtm:0.33.1"))
+                .withStartupTimeout(Duration.ofMinutes(2));
     }
 }

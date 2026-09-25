@@ -3,6 +3,7 @@ package com.learning.mfscreener.config;
 import com.learning.mfscreener.exception.NavNotFoundException;
 import com.learning.mfscreener.exception.SchemeNotFoundException;
 import jakarta.validation.ConstraintViolationException;
+import java.net.URI;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -27,6 +28,7 @@ public class GlobalExceptionHandler {
         ProblemDetail problemDetail =
                 ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(400), "Invalid request content.");
         problemDetail.setTitle("Constraint Violation");
+        problemDetail.setType(URI.create("https://api.mfscreener.com/errors/validation-error"));
         List<ApiValidationError> validationErrorsList = methodArgumentNotValidException.getAllErrors().stream()
                 .map(objectError -> {
                     FieldError fieldError = (FieldError) objectError;
@@ -48,6 +50,7 @@ public class GlobalExceptionHandler {
         ProblemDetail problemDetail =
                 ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(404), schemeNotFoundException.getMessage());
         problemDetail.setTitle("Scheme NotFound");
+        problemDetail.setType(URI.create("https://api.mfscreener.com/errors/not-found"));
         return problemDetail;
     }
 
@@ -56,7 +59,8 @@ public class GlobalExceptionHandler {
     ProblemDetail onException(NavNotFoundException navNotFoundException) {
         ProblemDetail problemDetail =
                 ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(404), navNotFoundException.getMessage());
-        problemDetail.setTitle("Scheme NotFound");
+        problemDetail.setTitle("Nav NotFound");
+        problemDetail.setType(URI.create("https://api.mfscreener.com/errors/not-found"));
         return problemDetail;
     }
 
@@ -66,6 +70,7 @@ public class GlobalExceptionHandler {
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
                 HttpStatusCode.valueOf(400), constraintViolationException.getMessage());
         problemDetail.setTitle("Constraint Violation");
+        problemDetail.setType(URI.create("https://api.mfscreener.com/errors/validation-error"));
         return problemDetail;
     }
 

@@ -22,6 +22,8 @@ public class UserTransactionDetailsService {
     }
 
     public List<UserTransactionDetailsProjection> fetchTransactions(Long schemeIdInDb, LocalDate asOfDate) {
+        // fundId 120502 is dividend only fund... handle balance diligently, need to add Dividends as well to the final
+        // balance
         return userTransactionDetailsEntityRepository.getByUserSchemeIdAndTypeNotInAndTransactionDateLessThanEqual(
                 schemeIdInDb, asOfDate);
     }

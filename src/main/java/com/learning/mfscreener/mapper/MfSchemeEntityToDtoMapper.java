@@ -29,8 +29,10 @@ public interface MfSchemeEntityToDtoMapper extends Converter<MFSchemeEntity, MFS
         String date = null;
         String nav = null;
         if (!mfSchemeEntity.getMfSchemeNavEntities().isEmpty()) {
-            LocalDate localDate = mfSchemeEntity.getMfSchemeNavEntities().get(0).getNavDate();
-            nav = String.valueOf(mfSchemeEntity.getMfSchemeNavEntities().get(0).getNav());
+            LocalDate localDate =
+                    mfSchemeEntity.getMfSchemeNavEntities().getFirst().getNavDate();
+            nav = String.valueOf(
+                    mfSchemeEntity.getMfSchemeNavEntities().getFirst().getNav());
             if (null != localDate) {
                 date = localDate.toString();
             }

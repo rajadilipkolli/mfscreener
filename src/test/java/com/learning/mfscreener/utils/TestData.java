@@ -8,6 +8,7 @@ import com.learning.mfscreener.models.portfolio.UserFolioDTO;
 import com.learning.mfscreener.models.portfolio.UserSchemeDTO;
 import com.learning.mfscreener.models.portfolio.UserTransactionDTO;
 import com.learning.mfscreener.models.portfolio.ValuationDTO;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -42,34 +43,34 @@ public class TestData {
         UserTransactionDTO userTransactionDTO = new UserTransactionDTO(
                 LocalDate.parse("2021-03-31"),
                 "SIP Purchase - INA100009859",
-                100.0d,
-                0.859d,
-                116.4d,
-                0.859d,
+                BigDecimal.valueOf(100.0),
+                BigDecimal.valueOf(0.859),
+                BigDecimal.valueOf(116.4),
+                BigDecimal.valueOf(0.859),
                 TransactionType.PURCHASE_SIP,
                 null);
         UserTransactionDTO userTransactionDTO1 = new UserTransactionDTO(
                 LocalDate.parse("2021-05-24"),
                 "SIP Purchase - INA100009859",
-                100.0d,
-                0.823d,
-                121.58d,
-                0.823d,
+                BigDecimal.valueOf(100.0),
+                BigDecimal.valueOf(0.823),
+                BigDecimal.valueOf(121.58),
+                BigDecimal.valueOf(0.823),
                 TransactionType.PURCHASE_SIP,
                 null);
         UserTransactionDTO buyTransaction = new UserTransactionDTO(
                 LocalDate.parse("2022-09-08"),
                 "Purchase-BSE - - INA200005166",
-                999.95d,
-                6.954d,
-                143.79d,
-                58.584d,
+                BigDecimal.valueOf(999.95),
+                BigDecimal.valueOf(6.954),
+                BigDecimal.valueOf(143.79),
+                BigDecimal.valueOf(58.584),
                 TransactionType.PURCHASE,
                 null);
         UserTransactionDTO buyTransactionTax = new UserTransactionDTO(
                 LocalDate.parse("2022-09-08"),
                 "*** Stamp Duty ***",
-                0.05d,
+                BigDecimal.valueOf(0.05),
                 null,
                 null,
                 null,
@@ -78,16 +79,16 @@ public class TestData {
         UserTransactionDTO sellTransaction = new UserTransactionDTO(
                 LocalDate.parse("2022-09-08"),
                 "*Redemption - ELECTRONIC PAYMENT-BSE - - N256222117703332 ,\t\tess STT l",
-                -1000.0,
-                -6.955,
-                143.79,
-                51.629,
+                BigDecimal.valueOf(-1000.0),
+                BigDecimal.valueOf(-6.955),
+                BigDecimal.valueOf(143.79),
+                BigDecimal.valueOf(51.629),
                 TransactionType.REDEMPTION,
                 null);
         UserTransactionDTO sellTransactionTax = new UserTransactionDTO(
                 LocalDate.parse("2022-09-08"),
                 "*** SSTT Paid ***",
-                0.01,
+                BigDecimal.valueOf(0.01),
                 null,
                 null,
                 null,
@@ -119,10 +120,10 @@ public class TestData {
         UserTransactionDTO userTransactionDTO = new UserTransactionDTO(
                 LocalDate.parse("2017-09-20"),
                 "Purchase",
-                1000.0d,
-                23.711d,
-                42.1747d,
-                23.711d,
+                BigDecimal.valueOf(1000.0),
+                BigDecimal.valueOf(23.711),
+                BigDecimal.valueOf(42.1747),
+                BigDecimal.valueOf(23.711),
                 TransactionType.PURCHASE,
                 null);
         transactions.add(userTransactionDTO);
@@ -130,10 +131,10 @@ public class TestData {
             transactions.add(new UserTransactionDTO(
                     LocalDate.parse("2017-09-22"),
                     "Purchase",
-                    500.0d,
-                    12.031d,
-                    41.5579d,
-                    35.742d,
+                    BigDecimal.valueOf(500.0),
+                    BigDecimal.valueOf(12.031),
+                    BigDecimal.valueOf(41.5579),
+                    BigDecimal.valueOf(35.742),
                     TransactionType.PURCHASE,
                     null));
         }
@@ -157,16 +158,16 @@ public class TestData {
         UserTransactionDTO userTransactionDTO = new UserTransactionDTO(
                 LocalDate.parse("2021-07-19"),
                 "Switch In - From Liquid Fund - DP Growth - INA000006651",
-                24383.78d,
-                153.371d,
-                158.9851d,
-                153.371d,
+                BigDecimal.valueOf(24383.78),
+                BigDecimal.valueOf(153.371),
+                BigDecimal.valueOf(158.9851),
+                BigDecimal.valueOf(153.371),
                 TransactionType.SWITCH_IN,
                 null);
         UserTransactionDTO taxTransaction = new UserTransactionDTO(
                 LocalDate.parse("2021-07-19"),
                 "*** Stamp Duty ***",
-                1.22d,
+                BigDecimal.valueOf(1.22),
                 null,
                 null,
                 null,
@@ -175,16 +176,16 @@ public class TestData {
         UserTransactionDTO sellUserTransactionDTO = new UserTransactionDTO(
                 LocalDate.parse("2022-08-01"),
                 "*Switch Out - To Nifty 50 Index Fund-DP Growth-BSE - , less STT",
-                -5000.0d,
-                -28.261d,
-                176.9251d,
-                125.110d,
+                BigDecimal.valueOf(-5000.0),
+                BigDecimal.valueOf(-28.261),
+                BigDecimal.valueOf(176.9251),
+                BigDecimal.valueOf(125.110),
                 TransactionType.SWITCH_OUT,
                 null);
         UserTransactionDTO sellTaxTransaction = new UserTransactionDTO(
                 LocalDate.parse("2022-08-01"),
                 "*** STT Paid ***",
-                0.05d,
+                BigDecimal.valueOf(0.05),
                 null,
                 null,
                 null,
@@ -193,10 +194,10 @@ public class TestData {
         UserTransactionDTO userTransactionDTO1 = new UserTransactionDTO(
                 LocalDate.parse("2021-01-14"),
                 "SIP Purchase-BSE - - INA200005166",
-                499.98d,
-                15.965d,
-                31.3182d,
-                15.965d,
+                BigDecimal.valueOf(499.98),
+                BigDecimal.valueOf(15.965),
+                BigDecimal.valueOf(31.3182),
+                BigDecimal.valueOf(15.965),
                 TransactionType.PURCHASE_SIP,
                 null);
         transactions.add(userTransactionDTO);
@@ -229,19 +230,19 @@ public class TestData {
                         "OK",
                         "OK",
                         List.of(getCanaraScheme())));
-        casDTO.folios().get(0).schemes().add(getICICIUSBlueChipScheme());
+        casDTO.folios().getFirst().schemes().add(getICICIUSBlueChipScheme());
         casDTO.folios()
-                .get(0)
+                .getFirst()
                 .schemes()
-                .get(0)
+                .getFirst()
                 .transactions()
                 .add(new UserTransactionDTO(
                         LocalDate.parse("2021-02-04"),
                         "Switch In - From Multicap Fund - DP - Growth-BSE - - INA200005166",
-                        100d,
-                        3.221d,
-                        31.0496d,
-                        19.186d,
+                        BigDecimal.valueOf(100),
+                        BigDecimal.valueOf(3.221),
+                        BigDecimal.valueOf(31.0496),
+                        BigDecimal.valueOf(19.186),
                         TransactionType.SWITCH_IN,
                         null));
         return casDTO;
@@ -252,10 +253,10 @@ public class TestData {
         UserTransactionDTO userTransactionDTO = new UserTransactionDTO(
                 LocalDate.parse("2020-06-22"),
                 "SIP Purchase Appln : 72611 - INA100006898",
-                100d,
-                2.796d,
-                35.76d,
-                2.796d,
+                BigDecimal.valueOf(100),
+                BigDecimal.valueOf(2.796),
+                BigDecimal.valueOf(35.76),
+                BigDecimal.valueOf(2.796),
                 TransactionType.PURCHASE_SIP,
                 null);
         transactions.add(userTransactionDTO);
@@ -279,10 +280,10 @@ public class TestData {
         UserTransactionDTO userTransactionDTO = new UserTransactionDTO(
                 LocalDate.parse("2023-06-15"),
                 "Systematic Investment (1)",
-                2999.85d,
-                10.359d,
-                289.6d,
-                10.359d,
+                BigDecimal.valueOf(2999.85),
+                BigDecimal.valueOf(10.359),
+                BigDecimal.valueOf(289.6),
+                BigDecimal.valueOf(10.359),
                 TransactionType.PURCHASE_SIP,
                 null);
         transactions.add(userTransactionDTO);

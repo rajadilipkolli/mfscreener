@@ -6,6 +6,7 @@ import com.learning.mfscreener.models.MFSchemeDTO;
 import com.learning.mfscreener.service.MFSchemeNavService;
 import com.learning.mfscreener.service.SchemeService;
 import com.learning.mfscreener.utils.AppConstants;
+import com.learning.mfscreener.utils.ColumnParsingUtility;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
@@ -21,7 +22,7 @@ import org.springframework.util.StopWatch;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.ResourceAccessException;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.RestClient;
 
 @Component
 public class Initializer implements CommandLineRunner {
@@ -30,31 +31,44 @@ public class Initializer implements CommandLineRunner {
 
     private final SchemeService schemeService;
     private final MfSchemeDtoToEntityMapper mfSchemeDtoToEntityMapper;
-    private final RestTemplate restTemplate;
+    private final RestClient restClient;
     private final MFSchemeNavService mfSchemeNavService;
 
     public Initializer(
             SchemeService schemeService,
             MfSchemeDtoToEntityMapper mfSchemeDtoToEntityMapper,
-            RestTemplate restTemplate,
+            RestClient restClient,
             MFSchemeNavService mfSchemeNavService) {
         this.schemeService = schemeService;
         this.mfSchemeDtoToEntityMapper = mfSchemeDtoToEntityMapper;
-        this.restTemplate = restTemplate;
+        this.restClient = restClient;
         this.mfSchemeNavService = mfSchemeNavService;
     }
 
+    /**
+     * Loads the latest AMFI scheme data and any required historical NAV data at startup.
+     *
+     * @param args application command-line arguments
+     * @throws IOException if the AMFI response cannot be read
+     */
     @Override
     public void run(String... args) throws IOException {
         long start = System.currentTimeMillis();
         LOGGER.info("Loading All Funds...");
         try {
-            String allNAVs = restTemplate.getForObject(AppConstants.AMFI_WEBSITE_LINK, String.class);
+            String allNAVs = restClient
+                    .get()
+                    .uri(AppConstants.AMFI_WEBSITE_LINK)
+                    .retrieve()
+                    .body(String.class);
             Reader inputString = new StringReader(Objects.requireNonNull(allNAVs));
             List<MFSchemeDTO> chopArrayList = new ArrayList<>();
             try (BufferedReader br = new BufferedReader(inputString)) {
+                String headerLine = br.readLine();
+                ColumnParsingUtility utility = new ColumnParsingUtility(headerLine, AppConstants.NAV_SEPARATOR);
+
                 String lineValue = br.readLine();
-                for (int i = 0; i < 2; ++i) {
+                for (int i = 0; i < 1; ++i) { // previously was 2, now 1 because we already read header
                     lineValue = br.readLine();
                 }
                 String schemeType = lineValue;
@@ -80,12 +94,14 @@ public class Initializer implements CommandLineRunner {
                         }
                     }
                     if (nonAmcRow || processRowByForce) {
-                        final String schemecode = tokenize[0];
-                        final String payout = tokenize[1];
-                        final String reinvestment = tokenize[2];
-                        final String schemename = tokenize[3];
-                        final String nav = tokenize[4];
-                        final String date = tokenize[5];
+                        final String schemecode = utility.extractFieldValue(tokenize, AppConstants.SCHEME_CODE);
+                        final String payout = utility.extractFieldValue(tokenize, AppConstants.ISIN_DIV_PAYOUT_GROWTH);
+                        final String reinvestment =
+                                utility.extractFieldValue(tokenize, AppConstants.ISIN_DIV_REINVESTMENT);
+                        final String schemename =
+                                utility.extractFieldValue(tokenize, AppConstants.SCHEME_NAME, AppConstants.NAV_NAME);
+                        final String nav = utility.extractFieldValue(tokenize, AppConstants.NET_ASSET_VALUE);
+                        final String date = utility.extractFieldValue(tokenize, AppConstants.DATE);
                         final MFSchemeDTO tempObj = new MFSchemeDTO(
                                 amc, Long.valueOf(schemecode), payout, schemename, nav, date, schemeType);
                         chopArrayList.add(tempObj);

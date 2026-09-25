@@ -1,0 +1,28 @@
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="add-foreign-key-indexes" author="appUser">
+        <createIndex tableName="mf_scheme_nav" indexName="idx_mf_scheme_nav_scheme_id">
+            <column name="mf_scheme_id"/>
+        </createIndex>
+
+        <createIndex tableName="mf_scheme" indexName="idx_mf_scheme_type_id">
+            <column name="mf_scheme_type_id"/>
+        </createIndex>
+
+        <createIndex tableName="user_scheme_details" indexName="idx_user_scheme_details_folio_id">
+            <column name="user_folio_id"/>
+        </createIndex>
+
+        <createIndex tableName="user_transaction_details" indexName="idx_user_transaction_details_scheme_detail_id">
+            <column name="user_scheme_detail_id"/>
+        </createIndex>
+
+        <createIndex tableName="user_folio_details" indexName="idx_user_folio_details_cas_details_id">
+            <column name="user_cas_details_id"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>

@@ -31,6 +31,5 @@ public interface PortfolioApi {
                             in = ParameterIn.QUERY,
                             name = "asOfDate",
                             example = "2023-12-31")
-                    @PastOrPresent(message = "Date should be past or today")
-                    LocalDate asOfDate);
+                    @PastOrPresent(message = "Date should be past or today") LocalDate asOfDate);
 }

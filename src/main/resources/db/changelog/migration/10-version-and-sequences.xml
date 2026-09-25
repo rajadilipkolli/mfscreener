@@ -1,0 +1,23 @@
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="update-version-columns-and-sequences" author="appUser">
+        <!-- Update version columns to SMALLINT -->
+        <modifyDataType tableName="mf_scheme" columnName="version" newDataType="SMALLINT"/>
+        <modifyDataType tableName="mf_scheme_types" columnName="version" newDataType="SMALLINT"/>
+        <modifyDataType tableName="user_scheme_details" columnName="version" newDataType="SMALLINT"/>
+
+        <!-- Remove identity and add sequence default to user_cas_details -->
+        <sql dbms="postgresql">ALTER TABLE user_cas_details ALTER COLUMN id DROP IDENTITY IF EXISTS</sql>
+        <sql dbms="postgresql">SELECT setval('user_cas_details_seq', COALESCE(MAX(id), 1), MAX(id) IS NOT NULL) FROM user_cas_details</sql>
+        <addDefaultValue tableName="user_cas_details" columnName="id" defaultValueSequenceNext="user_cas_details_seq"/>
+
+        <!-- Remove identity and add sequence default to user_folio_details -->
+        <sql dbms="postgresql">ALTER TABLE user_folio_details ALTER COLUMN id DROP IDENTITY IF EXISTS</sql>
+        <sql dbms="postgresql">SELECT setval('user_folio_details_seq', COALESCE(MAX(id), 1), MAX(id) IS NOT NULL) FROM user_folio_details</sql>
+        <addDefaultValue tableName="user_folio_details" columnName="id" defaultValueSequenceNext="user_folio_details_seq"/>
+    </changeSet>
+
+</databaseChangeLog>
