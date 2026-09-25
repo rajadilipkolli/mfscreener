@@ -31,6 +31,13 @@ public class UserCASDetailsService {
         return userCASDetailsEntityRepository.findByInvestorEmailAndName(email, name);
     }
 
+    public UserCASDetailsEntity findEntityById(Long id) {
+        UserCASDetailsEntity entity =
+                userCASDetailsEntityRepository.findById(id).orElseThrow();
+        entity.getFolioEntities().size();
+        return entity;
+    }
+
     public List<PortfolioDetailsProjection> getPortfolioDetailsByPanAndAsOfDate(String panNumber, LocalDate asOfDate) {
         return userCASDetailsEntityRepository.getPortfolioDetails(panNumber, asOfDate);
     }

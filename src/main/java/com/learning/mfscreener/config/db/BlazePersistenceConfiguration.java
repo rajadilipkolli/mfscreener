@@ -18,11 +18,15 @@ package com.learning.mfscreener.config.db;
 
 import com.blazebit.persistence.Criteria;
 import com.blazebit.persistence.CriteriaBuilderFactory;
-import com.blazebit.persistence.integration.view.spring.EnableEntityViews;
 import com.blazebit.persistence.spi.CriteriaBuilderConfiguration;
-import com.blazebit.persistence.spring.data.repository.config.EnableBlazeRepositories;
 import com.blazebit.persistence.view.EntityViewManager;
+import com.blazebit.persistence.view.EntityViews;
 import com.blazebit.persistence.view.spi.EntityViewConfiguration;
+import com.learning.mfscreener.models.entityviews.InvestorInfoEntityView;
+import com.learning.mfscreener.models.entityviews.UserCASDetailsEntityView;
+import com.learning.mfscreener.models.entityviews.UserFolioDetailsEntityView;
+import com.learning.mfscreener.models.entityviews.UserSchemeDetailsEntityView;
+import com.learning.mfscreener.models.entityviews.UserTransactionDetailsEntityView;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.PersistenceUnit;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -32,8 +36,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 
 @Configuration(proxyBeanMethods = false)
-@EnableEntityViews(basePackages = {"com.learning.mfscreener.models.entityviews"})
-@EnableBlazeRepositories(basePackages = "com.learning.mfscreener.repository")
 public class BlazePersistenceConfiguration {
 
     @PersistenceUnit
@@ -45,6 +47,17 @@ public class BlazePersistenceConfiguration {
     CriteriaBuilderFactory createCriteriaBuilderFactory() {
         CriteriaBuilderConfiguration config = Criteria.getDefault();
         return config.createCriteriaBuilderFactory(entityManagerFactory);
+    }
+
+    @Bean
+    EntityViewConfiguration createEntityViewConfiguration() {
+        EntityViewConfiguration config = EntityViews.createDefaultConfiguration();
+        config.addEntityView(InvestorInfoEntityView.class);
+        config.addEntityView(UserCASDetailsEntityView.class);
+        config.addEntityView(UserFolioDetailsEntityView.class);
+        config.addEntityView(UserSchemeDetailsEntityView.class);
+        config.addEntityView(UserTransactionDetailsEntityView.class);
+        return config;
     }
 
     @Bean

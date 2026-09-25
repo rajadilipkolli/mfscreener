@@ -3,6 +3,7 @@ package com.learning.mfscreener.models.entityviews;
 import com.blazebit.persistence.view.EntityView;
 import com.blazebit.persistence.view.IdMapping;
 import com.learning.mfscreener.entities.UserTransactionDetailsEntity;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -26,13 +27,13 @@ public interface UserTransactionDetailsEntityView {
 
     String getDescription();
 
-    Double getAmount();
+    BigDecimal getAmount();
 
-    Double getUnits();
+    BigDecimal getUnits();
 
-    Double getNav();
+    BigDecimal getNav();
 
-    Double getBalance();
+    BigDecimal getBalance();
 
     String getType();
 
