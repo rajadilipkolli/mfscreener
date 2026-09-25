@@ -10,21 +10,14 @@
         
         <sql>CREATE EXTENSION IF NOT EXISTS pg_trgm;</sql>
 
-        <!-- Index for exact unspaced aliases -->
-        <sql>
-            CREATE INDEX idx_mf_scheme_name_unspaced_upper 
-            ON mf_scheme (UPPER(REPLACE(scheme_name, ' ', '')));
-        </sql>
-
         <!-- Trigram index for wildcard searching -->
         <sql>
             CREATE INDEX idx_mf_scheme_name_trgm 
-            ON mf_scheme USING GIN (UPPER(scheme_name) gin_trgm_ops);
+            ON mf_scheme USING GIN (UPPER(REPLACE(scheme_name, '- ', '')) gin_trgm_ops);
         </sql>
 
         <rollback>
             <sql>DROP INDEX IF EXISTS idx_mf_scheme_name_trgm;</sql>
-            <sql>DROP INDEX IF EXISTS idx_mf_scheme_name_unspaced_upper;</sql>
         </rollback>
     </changeSet>
 

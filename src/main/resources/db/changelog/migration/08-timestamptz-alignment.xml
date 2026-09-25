@@ -4,14 +4,30 @@
                    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
 
     <changeSet id="align-timestamptz-columns" author="appUser" dbms="postgresql">
-        <modifyDataType tableName="mf_scheme" columnName="created_date" newDataType="timestamptz"/>
-        <modifyDataType tableName="mf_scheme" columnName="last_modified_date" newDataType="timestamptz"/>
-        
-        <modifyDataType tableName="mf_scheme_nav" columnName="created_date" newDataType="timestamptz"/>
-        <modifyDataType tableName="mf_scheme_nav" columnName="last_modified_date" newDataType="timestamptz"/>
-        
-        <modifyDataType tableName="mf_scheme_types" columnName="created_date" newDataType="timestamptz"/>
-        <modifyDataType tableName="mf_scheme_types" columnName="last_modified_date" newDataType="timestamptz"/>
+        <!-- Set the Liquibase parameter legacyAuditTimestampsAreUtc=true only after
+             confirming existing timestamp-without-time-zone values were stored as UTC. -->
+        <preConditions onFail="HALT" onFailMessage="Confirm legacy audit timestamps are UTC and set legacyAuditTimestampsAreUtc=true before converting populated columns">
+            <or>
+                <changeLogPropertyDefined property="legacyAuditTimestampsAreUtc" value="true"/>
+                <sqlCheck expectedResult="0">
+                    SELECT (SELECT COUNT(*) FROM mf_scheme WHERE created_date IS NOT NULL OR last_modified_date IS NOT NULL)
+                         + (SELECT COUNT(*) FROM mf_scheme_nav WHERE created_date IS NOT NULL OR last_modified_date IS NOT NULL)
+                         + (SELECT COUNT(*) FROM mf_scheme_types WHERE created_date IS NOT NULL OR last_modified_date IS NOT NULL)
+                </sqlCheck>
+            </or>
+        </preConditions>
+
+        <sql>
+            ALTER TABLE mf_scheme
+                ALTER COLUMN created_date TYPE timestamptz USING created_date AT TIME ZONE 'UTC',
+                ALTER COLUMN last_modified_date TYPE timestamptz USING last_modified_date AT TIME ZONE 'UTC';
+            ALTER TABLE mf_scheme_nav
+                ALTER COLUMN created_date TYPE timestamptz USING created_date AT TIME ZONE 'UTC',
+                ALTER COLUMN last_modified_date TYPE timestamptz USING last_modified_date AT TIME ZONE 'UTC';
+            ALTER TABLE mf_scheme_types
+                ALTER COLUMN created_date TYPE timestamptz USING created_date AT TIME ZONE 'UTC',
+                ALTER COLUMN last_modified_date TYPE timestamptz USING last_modified_date AT TIME ZONE 'UTC';
+        </sql>
     </changeSet>
 
 </databaseChangeLog>

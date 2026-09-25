@@ -22,7 +22,7 @@ import org.hibernate.proxy.HibernateProxy;
         uniqueConstraints = {
             @UniqueConstraint(
                     name = "uc_mf_scheme_nav",
-                    columnNames = {"nav", "nav_date", "mf_scheme_id"})
+                    columnNames = {"nav_date", "mf_scheme_id"})
         })
 @Entity
 public class MFSchemeNavEntity extends AuditableEntity<String> implements Serializable {

@@ -11,10 +11,12 @@
 
         <!-- Remove identity and add sequence default to user_cas_details -->
         <sql dbms="postgresql">ALTER TABLE user_cas_details ALTER COLUMN id DROP IDENTITY IF EXISTS</sql>
+        <sql dbms="postgresql">SELECT setval('user_cas_details_seq', COALESCE(MAX(id), 1), MAX(id) IS NOT NULL) FROM user_cas_details</sql>
         <addDefaultValue tableName="user_cas_details" columnName="id" defaultValueSequenceNext="user_cas_details_seq"/>
 
         <!-- Remove identity and add sequence default to user_folio_details -->
         <sql dbms="postgresql">ALTER TABLE user_folio_details ALTER COLUMN id DROP IDENTITY IF EXISTS</sql>
+        <sql dbms="postgresql">SELECT setval('user_folio_details_seq', COALESCE(MAX(id), 1), MAX(id) IS NOT NULL) FROM user_folio_details</sql>
         <addDefaultValue tableName="user_folio_details" columnName="id" defaultValueSequenceNext="user_folio_details_seq"/>
     </changeSet>
 

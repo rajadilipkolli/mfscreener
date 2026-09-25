@@ -7,12 +7,24 @@
         <!-- Re-create the unique constraint on mf_scheme_nav -->
         <!-- We redefine it on (nav_date, mf_scheme_id) because nav is not required for uniqueness -->
         <dropUniqueConstraint tableName="mf_scheme_nav" constraintName="uc_mf_scheme_nav"/>
-        
+
         <modifyDataType tableName="mf_scheme_nav" columnName="nav" newDataType="NUMERIC(15, 4)"/>
         <modifyDataType tableName="user_transaction_details" columnName="amount" newDataType="NUMERIC(15, 4)"/>
-        <modifyDataType tableName="user_transaction_details" columnName="units" newDataType="NUMERIC(15, 4)"/>
+        <modifyDataType tableName="user_transaction_details" columnName="units" newDataType="NUMERIC"/>
         <modifyDataType tableName="user_transaction_details" columnName="nav" newDataType="NUMERIC(15, 4)"/>
         <modifyDataType tableName="user_transaction_details" columnName="balance" newDataType="NUMERIC(15, 4)"/>
+
+        <!-- Keep the highest-id NAV row for each date and scheme. The old constraint
+             also included nav, so historical rows may have different values for the same date. -->
+        <sql>
+            DELETE FROM mf_scheme_nav
+            WHERE nav_date IS NOT NULL AND mf_scheme_id IS NOT NULL
+              AND id NOT IN (
+                  SELECT MAX(id) FROM mf_scheme_nav
+                  WHERE nav_date IS NOT NULL AND mf_scheme_id IS NOT NULL
+                  GROUP BY nav_date, mf_scheme_id
+              );
+        </sql>
 
         <addUniqueConstraint tableName="mf_scheme_nav" columnNames="nav_date, mf_scheme_id" constraintName="uc_mf_scheme_nav"/>
     </changeSet>
