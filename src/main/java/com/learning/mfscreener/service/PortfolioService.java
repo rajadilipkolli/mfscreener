@@ -30,6 +30,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -75,6 +76,7 @@ public class PortfolioService {
         this.capitalGainsService = capitalGainsService;
     }
 
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public ProcessCasResponse upload(MultipartFile portfolioFile) throws IOException {
         CasDTO casDTO = parseCasDTO(portfolioFile);
         String response = processCasDTO(casDTO);

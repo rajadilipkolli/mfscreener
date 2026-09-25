@@ -2,7 +2,6 @@ package com.learning.mfscreener.repository;
 
 import com.learning.mfscreener.entities.MFSchemeEntity;
 import com.learning.mfscreener.models.projection.FundDetailProjection;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -15,15 +14,6 @@ import org.springframework.stereotype.Repository;
 public interface MFSchemeRepository extends JpaRepository<MFSchemeEntity, Long> {
 
     Optional<MFSchemeEntity> findByPayOut(String payOut);
-
-    @Query(
-            """
-            select m from MFSchemeEntity m
-                                    inner join fetch m.mfSchemeNavEntities mfSchemeNavEntities
-                                    inner join fetch m.mfSchemeTypeEntity mfSchemeTypeEntity
-            where m.schemeId = :schemeCode and mfSchemeNavEntities.navDate = :date""")
-    Optional<MFSchemeEntity> findBySchemeIdAndMfSchemeNavEntities_NavDate(
-            @Param("schemeCode") Long schemeCode, @Param("date") LocalDate navDate);
 
     @EntityGraph(attributePaths = {"mfSchemeTypeEntity", "mfSchemeNavEntities"})
     Optional<MFSchemeEntity> findBySchemeId(@Param("schemeId") Long schemeId);

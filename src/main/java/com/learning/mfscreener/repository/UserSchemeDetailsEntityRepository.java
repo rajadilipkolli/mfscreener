@@ -39,8 +39,7 @@ public interface UserSchemeDetailsEntityRepository extends JpaRepository<UserSch
                     select mf_scheme_id, count(msn.id) from public.user_scheme_details usd join mf_scheme_nav msn
                     on usd.amfi = msn.mf_scheme_id
                     group by mf_scheme_id having count(msn.id) < 3
-                    """,
-            nativeQuery = true)
+                    """)
     @Transactional(readOnly = true)
     List<Long> getHistoricalDataNotLoadedSchemeIdList();
 }

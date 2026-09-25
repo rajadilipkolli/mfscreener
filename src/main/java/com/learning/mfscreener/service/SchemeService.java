@@ -4,6 +4,7 @@ import com.learning.mfscreener.adapter.ConversionServiceAdapter;
 import com.learning.mfscreener.config.logging.Loggable;
 import com.learning.mfscreener.entities.MFSchemeEntity;
 import com.learning.mfscreener.entities.MFSchemeNavEntity;
+import com.learning.mfscreener.entities.MFSchemeTypeEntity;
 import com.learning.mfscreener.exception.FileNotFoundException;
 import com.learning.mfscreener.exception.SchemeNotFoundException;
 import com.learning.mfscreener.mapper.MfSchemeDtoToEntityMapper;
@@ -11,6 +12,7 @@ import com.learning.mfscreener.models.MFSchemeDTO;
 import com.learning.mfscreener.models.projection.FundDetailProjection;
 import com.learning.mfscreener.models.projection.UserFolioDetailsPanProjection;
 import com.learning.mfscreener.models.response.NavResponse;
+import com.learning.mfscreener.repository.MFSchemeNavEntityRepository;
 import com.learning.mfscreener.repository.MFSchemeRepository;
 import com.learning.mfscreener.utils.AppConstants;
 import com.learning.mfscreener.utils.ColumnParsingUtility;
@@ -19,9 +21,11 @@ import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.Set;
 import org.hibernate.exception.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,6 +39,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -47,6 +52,7 @@ public class SchemeService {
 
     private final RestClient restClient;
     private final MFSchemeRepository mfSchemeRepository;
+    private final MFSchemeNavEntityRepository mfSchemeNavEntityRepository;
     private final ConversionServiceAdapter conversionServiceAdapter;
     private final MfSchemeDtoToEntityMapper mfSchemeDtoToEntityMapper;
     private final UserFolioDetailsService userFolioDetailsService;
@@ -56,6 +62,7 @@ public class SchemeService {
     public SchemeService(
             RestClient restClient,
             MFSchemeRepository mfSchemeRepository,
+            MFSchemeNavEntityRepository mfSchemeNavEntityRepository,
             ConversionServiceAdapter conversionServiceAdapter,
             MfSchemeDtoToEntityMapper mfSchemeDtoToEntityMapper,
             UserFolioDetailsService userFolioDetailsService,
@@ -63,6 +70,7 @@ public class SchemeService {
             TransactionTemplate transactionTemplate) {
         this.restClient = restClient;
         this.mfSchemeRepository = mfSchemeRepository;
+        this.mfSchemeNavEntityRepository = mfSchemeNavEntityRepository;
         this.conversionServiceAdapter = conversionServiceAdapter;
         this.mfSchemeDtoToEntityMapper = mfSchemeDtoToEntityMapper;
         this.userFolioDetailsService = userFolioDetailsService;
@@ -104,9 +112,24 @@ public class SchemeService {
 
     @Loggable(result = false)
     public Optional<MFSchemeDTO> getMfSchemeDTO(Long schemeCode, LocalDate navDate) {
-        return this.mfSchemeRepository
-                .findBySchemeIdAndMfSchemeNavEntities_NavDate(schemeCode, navDate)
-                .map(conversionServiceAdapter::mapMFSchemeEntityToMFSchemeDTO);
+        return this.mfSchemeNavEntityRepository
+                .findNavBySchemeIdAndDate(schemeCode, navDate)
+                .map(nav -> {
+                    MFSchemeEntity scheme = nav.getMfSchemeEntity();
+                    MFSchemeTypeEntity type = scheme.getMfSchemeTypeEntity();
+                    String categoryAndSubCategory = type.getCategory();
+                    if (StringUtils.hasText(type.getSubCategory())) {
+                        categoryAndSubCategory += " - " + type.getSubCategory();
+                    }
+                    return new MFSchemeDTO(
+                            scheme.getFundHouse(),
+                            scheme.getSchemeId(),
+                            scheme.getPayOut(),
+                            scheme.getSchemeName(),
+                            nav.getNav().toString(),
+                            nav.getNavDate().toString(),
+                            type.getType() + "(" + categoryAndSubCategory + ")");
+                });
     }
 
     void processResponseEntity(Long schemeCode, NavResponse navResponse) {
@@ -138,30 +161,25 @@ public class SchemeService {
     }
 
     void mergeList(NavResponse navResponse, MFSchemeEntity mfSchemeEntity, Long schemeCode) {
-        if (navResponse.data().size() != mfSchemeEntity.getMfSchemeNavEntities().size()) {
-            List<MFSchemeNavEntity> navList = navResponse.data().stream()
-                    .map(navDataDTO -> navDataDTO.withSchemeId(schemeCode))
-                    .map(conversionServiceAdapter::mapNAVDataDTOToMFSchemeNavEntity)
-                    .toList();
-            LOGGER.info("No of entries from Server :{} for schemeCode/amfi :{}", navList.size(), schemeCode);
-            List<MFSchemeNavEntity> newNavs = navList.stream()
-                    .filter(nav -> !mfSchemeEntity.getMfSchemeNavEntities().contains(nav))
-                    .toList();
+        Set<LocalDate> existingDates = new HashSet<>(mfSchemeNavEntityRepository.findNavDatesBySchemeId(schemeCode));
+        List<MFSchemeNavEntity> newNavs = navResponse.data().stream()
+                .map(navDataDTO -> navDataDTO.withSchemeId(schemeCode))
+                .map(conversionServiceAdapter::mapNAVDataDTOToMFSchemeNavEntity)
+                .filter(nav -> existingDates.add(nav.getNavDate()))
+                .toList();
+        LOGGER.info(
+                "No of entries from Server :{} for schemeCode/amfi :{}",
+                navResponse.data().size(),
+                schemeCode);
+        LOGGER.info("No of entities to insert :{} for schemeCode/amfi :{}", newNavs.size(), schemeCode);
 
-            LOGGER.info("No of entities to insert :{} for schemeCode/amfi :{}", newNavs.size(), schemeCode);
-
-            if (!newNavs.isEmpty()) {
-                for (MFSchemeNavEntity newSchemeNav : newNavs) {
-                    mfSchemeEntity.addSchemeNav(newSchemeNav);
-                }
-                try {
-                    transactionTemplate.executeWithoutResult(status -> this.mfSchemeRepository.save(mfSchemeEntity));
-                } catch (ConstraintViolationException | DataIntegrityViolationException exception) {
-                    LOGGER.error("ConstraintViolationException or DataIntegrityViolationException ", exception);
-                }
+        if (!newNavs.isEmpty()) {
+            newNavs.forEach(nav -> nav.setMfSchemeEntity(mfSchemeEntity));
+            try {
+                transactionTemplate.executeWithoutResult(status -> mfSchemeNavEntityRepository.saveAll(newNavs));
+            } catch (ConstraintViolationException | DataIntegrityViolationException exception) {
+                LOGGER.error("ConstraintViolationException or DataIntegrityViolationException ", exception);
             }
-        } else {
-            LOGGER.info("data in db and from service is same hence ignoring");
         }
     }
 
