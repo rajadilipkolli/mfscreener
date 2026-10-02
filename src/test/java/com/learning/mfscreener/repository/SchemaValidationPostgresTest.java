@@ -3,6 +3,7 @@ package com.learning.mfscreener.repository;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.learning.mfscreener.common.SQLContainersConfig;
+import com.learning.mfscreener.config.db.BlazePersistenceConfiguration;
 import com.zaxxer.hikari.HikariDataSource;
 import javax.sql.DataSource;
 import org.junit.jupiter.api.Test;
@@ -11,7 +12,7 @@ import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.context.annotation.Import;
 
 @DataJpaTest(properties = {"spring.jpa.hibernate.ddl-auto=validate", "spring.test.database.replace=none"})
-@Import(SQLContainersConfig.class)
+@Import({SQLContainersConfig.class, BlazePersistenceConfiguration.class})
 class SchemaValidationPostgresTest {
 
     @Autowired
