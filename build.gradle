@@ -91,7 +91,7 @@ dependencies {
     testImplementation "org.testcontainers:testcontainers-postgresql"
     testImplementation "org.testcontainers:testcontainers-grafana"
     testImplementation('com.tngtech.archunit:archunit-junit5:1.5.1')
-    testImplementation('com.redis:testcontainers-redis:2.2.4')
+    testImplementation('com.redis:testcontainers-redis:3.0.1')
     // If you are using mapstruct in test code
     testAnnotationProcessor("org.mapstruct:mapstruct-processor:1.6.3")
     testAnnotationProcessor("org.mapstruct.extensions.spring:mapstruct-spring-extensions:2.0.0")
