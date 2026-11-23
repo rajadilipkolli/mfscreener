@@ -1,7 +1,10 @@
 package com.learning.mfscreener.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.learning.mfscreener.adapter.ConversionServiceAdapter;
@@ -11,6 +14,7 @@ import com.learning.mfscreener.entities.UserSchemeDetailsEntity;
 import com.learning.mfscreener.entities.UserTransactionDetailsEntity;
 import com.learning.mfscreener.mapper.CasDetailsMapper;
 import com.learning.mfscreener.models.portfolio.CasDTO;
+import com.learning.mfscreener.models.portfolio.InvestorInfoDTO;
 import com.learning.mfscreener.models.portfolio.UserFolioDTO;
 import com.learning.mfscreener.models.portfolio.UserSchemeDTO;
 import com.learning.mfscreener.models.portfolio.UserTransactionDTO;
@@ -31,6 +35,7 @@ class PortfolioServiceDeltaTest {
     private final UserSchemeDetailsService schemes = mock(UserSchemeDetailsService.class);
     private final PortfolioServiceHelper helper = mock(PortfolioServiceHelper.class);
     private final UserCASDetailsService casDetails = mock(UserCASDetailsService.class);
+    private final InvestorInfoService investors = mock(InvestorInfoService.class);
     private PortfolioService portfolio;
 
     @BeforeEach
@@ -43,7 +48,7 @@ class PortfolioServiceDeltaTest {
                 schemes,
                 helper,
                 casDetails,
-                mock(InvestorInfoService.class),
+                investors,
                 mock(CapitalGainsService.class));
     }
 
@@ -109,42 +114,81 @@ class PortfolioServiceDeltaTest {
     }
 
     @Test
-    void deltaProcessingCanReadExistingFolioSchemeAndTransactions() {
+    void savesMixedImportOnceAndMatchesTransactionsWithinEachFolio() {
+        LocalDate oldDate = LocalDate.of(2020, 1, 1);
+        LocalDate newDate = LocalDate.of(2021, 1, 1);
+        LocalDate addedFolioDate = LocalDate.of(2022, 1, 1);
         UserCASDetailsEntity cas = new UserCASDetailsEntity().setId(1L);
         UserFolioDetailsEntity folio = new UserFolioDetailsEntity().setId(2L).setFolio("existing");
-        cas.setFolioEntities(new ArrayList<>(List.of(folio)));
+        UserFolioDetailsEntity otherFolio =
+                new UserFolioDetailsEntity().setId(5L).setFolio("other");
+        cas.addFolioEntity(folio);
+        cas.addFolioEntity(otherFolio);
+
         UserSchemeDetailsEntity scheme = new UserSchemeDetailsEntity().setId(3L).setIsin("ISIN");
-        scheme.setUserFolioDetailsEntity(folio);
+        UserSchemeDetailsEntity otherScheme =
+                new UserSchemeDetailsEntity().setId(6L).setIsin("ISIN");
+        folio.addSchemeEntity(scheme);
+        otherFolio.addSchemeEntity(otherScheme);
         UserTransactionDetailsEntity oldTransaction =
-                new UserTransactionDetailsEntity().setId(4L).setTransactionDate(LocalDate.of(2020, 1, 1));
-        oldTransaction.setUserSchemeDetailsEntity(scheme);
-        UserTransactionDetailsEntity newTransaction =
-                new UserTransactionDetailsEntity().setTransactionDate(LocalDate.of(2021, 1, 1));
-        UserTransactionDTO oldRequestTransaction = mock(UserTransactionDTO.class);
-        when(oldRequestTransaction.date()).thenReturn(LocalDate.of(2020, 1, 1));
-        UserTransactionDTO newRequestTransaction = mock(UserTransactionDTO.class);
-        when(newRequestTransaction.date()).thenReturn(LocalDate.of(2021, 1, 1));
-        UserSchemeDTO requestScheme = mock(UserSchemeDTO.class);
-        when(requestScheme.isin()).thenReturn("ISIN");
-        when(requestScheme.transactions()).thenReturn(List.of(oldRequestTransaction, newRequestTransaction));
-        UserFolioDTO requestFolio = mock(UserFolioDTO.class);
-        when(requestFolio.folio()).thenReturn("existing");
-        when(requestFolio.schemes()).thenReturn(List.of(requestScheme));
-        CasDTO request = mock(CasDTO.class);
-        when(request.folios()).thenReturn(List.of(requestFolio));
-        when(helper.countTransactionsByUserFolioDTOList(request.folios())).thenReturn(2L);
+                new UserTransactionDetailsEntity().setId(4L).setTransactionDate(oldDate);
+        UserTransactionDetailsEntity otherTransaction =
+                new UserTransactionDetailsEntity().setId(7L).setTransactionDate(newDate);
+        scheme.addTransactionEntity(oldTransaction);
+        otherScheme.addTransactionEntity(otherTransaction);
+
+        UserFolioDetailsEntity addedFolio = new UserFolioDetailsEntity().setFolio("added");
+        UserSchemeDetailsEntity addedScheme = new UserSchemeDetailsEntity().setIsin("ISIN");
+        UserTransactionDetailsEntity addedTransaction =
+                new UserTransactionDetailsEntity().setTransactionDate(addedFolioDate);
+        addedFolio.addSchemeEntity(addedScheme);
+        addedScheme.addTransactionEntity(addedTransaction);
+
+        UserTransactionDTO newRequestTransaction = requestTransaction(newDate);
+        UserFolioDTO requestFolio = requestFolio("existing", requestTransaction(oldDate), newRequestTransaction);
+        UserFolioDTO otherRequestFolio = requestFolio("other", requestTransaction(newDate));
+        UserFolioDTO addedRequestFolio = requestFolio("added", requestTransaction(addedFolioDate));
+        CasDTO request = new CasDTO(
+                null,
+                null,
+                null,
+                new InvestorInfoDTO(EMAIL, NAME, null, null),
+                List.of(requestFolio, otherRequestFolio, addedRequestFolio));
+        UserTransactionDetailsEntity newTransaction = new UserTransactionDetailsEntity().setTransactionDate(newDate);
+
+        when(investors.existsByEmailAndName(EMAIL, NAME)).thenReturn(true);
+        when(helper.countTransactionsByUserFolioDTOList(request.folios())).thenReturn(4L);
         when(casDetails.findByInvestorEmailAndName(EMAIL, NAME)).thenReturn(cas);
-        when(schemes.getSchemesByEmailAndName(EMAIL, NAME)).thenReturn(List.of(scheme));
-        when(transactions.findAllTransactionsByEmailAndName(EMAIL, NAME)).thenReturn(List.of(oldTransaction));
+        when(casDetails.saveEntity(cas)).thenReturn(cas);
+        when(schemes.getSchemesByEmailAndName(EMAIL, NAME)).thenReturn(List.of(scheme, otherScheme));
+        when(transactions.findAllTransactionsByEmailAndName(EMAIL, NAME))
+                .thenReturn(List.of(oldTransaction, otherTransaction));
+        when(mapper.mapUserFolioDTOToUserFolioDetailsEntity(addedRequestFolio)).thenReturn(addedFolio);
         when(mapper.transactionDTOToTransactionEntity(newRequestTransaction)).thenReturn(newTransaction);
 
-        UploadResponseHolder result = portfolio.findDelta(EMAIL, NAME, request);
+        assertThat(portfolio.processCasDTO(request)).isEqualTo("Imported 1 folios and 2 transactions");
 
-        assertThat(result.transactionsCount()).isEqualTo(1);
-        assertThat(result.userCASDetailsEntity().getFolioEntities()).containsExactly(folio);
-        assertThat(folio.getSchemeEntities()).containsExactly(scheme);
+        verify(casDetails).saveEntity(cas);
+        verify(schemes, never()).saveUserScheme(any());
+        assertThat(cas.getFolioEntities()).containsExactly(folio, otherFolio, addedFolio);
         assertThat(scheme.getTransactionEntities()).containsExactly(oldTransaction, newTransaction);
         assertThat(newTransaction.getUserSchemeDetailsEntity()).isSameAs(scheme);
+        assertThat(otherScheme.getTransactionEntities()).containsExactly(otherTransaction);
+        assertThat(addedFolio.getSchemeEntities()).containsExactly(addedScheme);
+        assertThat(addedScheme.getTransactionEntities()).containsExactly(addedTransaction);
+    }
+
+    private UserFolioDTO requestFolio(String folioNumber, UserTransactionDTO... transactions) {
+        UserSchemeDTO scheme = mock(UserSchemeDTO.class);
+        when(scheme.isin()).thenReturn("ISIN");
+        when(scheme.transactions()).thenReturn(List.of(transactions));
+        return new UserFolioDTO(folioNumber, null, null, null, null, List.of(scheme));
+    }
+
+    private UserTransactionDTO requestTransaction(LocalDate date) {
+        UserTransactionDTO transaction = mock(UserTransactionDTO.class);
+        when(transaction.date()).thenReturn(date);
+        return transaction;
     }
 
     @Test

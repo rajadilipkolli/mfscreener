@@ -197,82 +197,47 @@ public class PortfolioService {
             if (userTransactionDTOListCount == (userTransactionDetailsEntityList.size() + transactionsCounter.get())) {
                 LOGGER.info("All new transactions are added as part of adding schemes, hence skipping");
             } else {
-                // New transactions are added
-
-                // Grouping by ISIN for userSchemaTransactionMap
-                Map<String, List<UserTransactionDTO>> userSchemaTransactionMap =
-                        groupTransactionBySchemes(casDTO.folios());
-
-                List<UserSchemeDetailsEntity> existingUserSchemeDetailsList =
-                        existingUserFolioDetailsEntityList.stream()
-                                .flatMap(folio -> folio.getSchemeEntities().stream())
-                                .toList();
-
-                // Grouping by ISIN for userSchemaTransactionMapFromDB
-                Map<String, List<UserTransactionDetailsEntity>> userSchemaTransactionMapFromDB =
-                        groupExistingTransactionsByIsin(existingUserSchemeDetailsList);
-
-                // Update transactions in existing schemes
                 processNewTransactions(
-                        transactionsCounter,
-                        userSchemaTransactionMap,
-                        userSchemaTransactionMapFromDB,
-                        existingUserSchemeDetailsList);
+                        transactionsCounter, requestedFolioSchemesMap, existingUserFolioDetailsEntityList);
             }
         }
     }
 
     void processNewTransactions(
             AtomicInteger transactionsCounter,
-            Map<String, List<UserTransactionDTO>> userSchemaTransactionMap,
-            Map<String, List<UserTransactionDetailsEntity>> userSchemaTransactionMapFromDB,
-            List<UserSchemeDetailsEntity> existingUserSchemeDetailsList) {
-        userSchemaTransactionMap.forEach((isinFromRequest, requestTransactions) -> {
-            List<UserTransactionDetailsEntity> dbTransactions =
-                    userSchemaTransactionMapFromDB.getOrDefault(isinFromRequest, List.of());
-            if (requestTransactions.size() != dbTransactions.size()) {
-                // New transactions added to scheme
-                List<LocalDate> transactionDateListDB = dbTransactions.stream()
+            Map<String, List<UserSchemeDTO>> requestedFolioSchemes,
+            List<UserFolioDetailsEntity> existingFolios) {
+        for (UserFolioDetailsEntity folio : existingFolios) {
+            Map<String, List<UserTransactionDTO>> requestedTransactionsByIsin =
+                    requestedFolioSchemes.getOrDefault(folio.getFolio(), List.of()).stream()
+                            .filter(scheme -> scheme.isin() != null)
+                            .collect(groupingBy(
+                                    UserSchemeDTO::isin,
+                                    flatMapping(scheme -> scheme.transactions().stream(), toList())));
+
+            for (UserSchemeDetailsEntity scheme : folio.getSchemeEntities()) {
+                List<UserTransactionDTO> requestTransactions = requestedTransactionsByIsin.get(scheme.getIsin());
+                List<UserTransactionDetailsEntity> existingTransactions = scheme.getTransactionEntities();
+                if (requestTransactions == null || requestTransactions.size() == existingTransactions.size()) {
+                    continue;
+                }
+
+                List<LocalDate> existingDates = existingTransactions.stream()
                         .map(UserTransactionDetailsEntity::getTransactionDate)
                         .toList();
-                requestTransactions.forEach(userTransactionDTO -> {
-                    LocalDate newTransactionDate = userTransactionDTO.date();
-                    if (!transactionDateListDB.contains(newTransactionDate)) {
+                for (UserTransactionDTO transaction : requestTransactions) {
+                    if (!existingDates.contains(transaction.date())) {
                         LOGGER.info(
-                                "New transaction on date: {} created for isin {} that is not present in the database",
-                                newTransactionDate,
-                                isinFromRequest);
-                        UserTransactionDetailsEntity userTransactionDetailsEntity =
-                                casDetailsMapper.transactionDTOToTransactionEntity(userTransactionDTO);
-                        existingUserSchemeDetailsList.forEach(userSchemeDetailsEntity -> {
-                            if (isinFromRequest.equals(userSchemeDetailsEntity.getIsin())) {
-                                userSchemeDetailsEntity.addTransactionEntity(userTransactionDetailsEntity);
-                                // TODO convert to bulkInsert
-                                userSchemeDetailsService.saveUserScheme(userSchemeDetailsEntity);
-                                transactionsCounter.incrementAndGet();
-                            }
-                        });
+                                "New transaction on date {} for folio {} and ISIN {}",
+                                transaction.date(),
+                                folio.getFolio(),
+                                scheme.getIsin());
+                        scheme.addTransactionEntity(casDetailsMapper.transactionDTOToTransactionEntity(transaction));
+                        transactionsCounter.incrementAndGet();
                     }
-                });
+                }
             }
-        });
-    }
-
-    Map<String, List<UserTransactionDetailsEntity>> groupExistingTransactionsByIsin(
-            List<UserSchemeDetailsEntity> existingUserSchemeDetailsList) {
-        return existingUserSchemeDetailsList.stream()
-                .collect(groupingBy(
-                        UserSchemeDetailsEntity::getIsin,
-                        flatMapping(
-                                userSchemeDetailsEntity -> userSchemeDetailsEntity.getTransactionEntities().stream(),
-                                toList())));
-    }
-
-    Map<String, List<UserTransactionDTO>> groupTransactionBySchemes(List<UserFolioDTO> userFolioDTOList) {
-        return userFolioDTOList.stream()
-                .flatMap(userFolioDTO -> userFolioDTO.schemes().stream())
-                .collect(groupingBy(
-                        UserSchemeDTO::isin, flatMapping(schemeDTO -> schemeDTO.transactions().stream(), toList())));
+        }
     }
 
     void updateExistingFoliosWithNewSchemes(
