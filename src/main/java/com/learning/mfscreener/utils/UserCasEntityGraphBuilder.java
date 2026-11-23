@@ -1,4 +1,4 @@
-package com.learning.mfscreener.repository.util;
+package com.learning.mfscreener.utils;
 
 import com.learning.mfscreener.entities.UserCASDetailsEntity;
 import com.learning.mfscreener.entities.UserFolioDetailsEntity;

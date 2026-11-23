@@ -15,7 +15,7 @@ import com.learning.mfscreener.models.portfolio.UserFolioDTO;
 import com.learning.mfscreener.models.portfolio.UserSchemeDTO;
 import com.learning.mfscreener.models.portfolio.UserTransactionDTO;
 import com.learning.mfscreener.models.response.UploadResponseHolder;
-import com.learning.mfscreener.repository.util.UserCasEntityGraphBuilder;
+import com.learning.mfscreener.utils.UserCasEntityGraphBuilder;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -152,7 +152,8 @@ class PortfolioServiceDeltaTest {
         UserCASDetailsEntity cas = new UserCASDetailsEntity().setId(1L);
         UserFolioDetailsEntity existing = new UserFolioDetailsEntity().setId(2L).setFolio("existing");
         cas.setFolioEntities(new ArrayList<>(List.of(existing)));
-        UserSchemeDetailsEntity emptyScheme = new UserSchemeDetailsEntity().setId(3L).setIsin("EMPTY");
+        UserSchemeDetailsEntity emptyScheme =
+                new UserSchemeDetailsEntity().setId(3L).setIsin("EMPTY");
         emptyScheme.setUserFolioDetailsEntity(existing);
         UserFolioDetailsEntity added = new UserFolioDetailsEntity().setFolio("added");
 
