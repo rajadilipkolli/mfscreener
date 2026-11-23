@@ -255,7 +255,7 @@ class PortfolioControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.title", is("Constraint Violation")))
                 .andExpect(jsonPath("$.status", is(400)))
                 .andExpect(jsonPath("$.detail", is("getPortfolio.asOfDate: Date should be past or today")))
-                .andExpect(jsonPath("$.instance", is("/api/portfolio/ABCDE1234F")));
+                .andExpect(jsonPath("$.instance").doesNotHaveJsonPath());
     }
 
     @Test
