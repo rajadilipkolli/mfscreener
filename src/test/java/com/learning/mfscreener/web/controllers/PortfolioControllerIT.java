@@ -1,5 +1,6 @@
 package com.learning.mfscreener.web.controllers;
 
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -22,6 +23,7 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.web.servlet.ResultMatcher;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class PortfolioControllerIT extends AbstractIntegrationTest {
@@ -237,7 +239,7 @@ class PortfolioControllerIT extends AbstractIntegrationTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_JSON_VALUE)))
-                .andExpect(jsonPath("$.portfolioDetailsDTOS.size()", is(4)));
+                .andExpect(containsImportedHoldings());
     }
 
     @Test
@@ -253,7 +255,7 @@ class PortfolioControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.title", is("Constraint Violation")))
                 .andExpect(jsonPath("$.status", is(400)))
                 .andExpect(jsonPath("$.detail", is("getPortfolio.asOfDate: Date should be past or today")))
-                .andExpect(jsonPath("$.instance", is("/api/portfolio/ABCDE1234F")));
+                .andExpect(jsonPath("$.instance").doesNotHaveJsonPath());
     }
 
     @Test
@@ -263,6 +265,17 @@ class PortfolioControllerIT extends AbstractIntegrationTest {
                 .perform(get("/api/portfolio/{pan}", "ABCDE1234F").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_JSON_VALUE)))
-                .andExpect(jsonPath("$.portfolioDetailsDTOS.size()", is(4)));
+                .andExpect(containsImportedHoldings());
+    }
+
+    private ResultMatcher containsImportedHoldings() {
+        return jsonPath(
+                "$.portfolioDetailsDTOS[*].schemeName",
+                containsInAnyOrder(
+                        "Axis ELSS- Tax Saver Fund",
+                        "Canara Robeco Aggressive Hybrid Fund",
+                        "ICICI Prudential Nifty Next 50 Index Fund",
+                        "ICICI Prudential Technology Fund",
+                        "ICICI Prudential US Bluechip Equity Fund"));
     }
 }

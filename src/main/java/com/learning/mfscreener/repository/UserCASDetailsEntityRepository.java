@@ -57,4 +57,11 @@ public interface UserCASDetailsEntityRepository
                     """)
     List<PortfolioDetailsProjection> getPortfolioDetails(
             @Param("pan") String panNumber, @Param("asOfDate") LocalDate asOfDate);
+
+    @Query(
+            """
+              select u from UserCASDetailsEntity u left join fetch u.folioEntities join fetch u.investorInfoEntity as i
+              where i.email = :email and i.name = :name
+              """)
+    UserCASDetailsEntity findByInvestorEmailAndName(@Param("email") String email, @Param("name") String name);
 }

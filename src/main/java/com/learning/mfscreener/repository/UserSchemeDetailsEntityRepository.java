@@ -26,7 +26,7 @@ public interface UserSchemeDetailsEntityRepository extends JpaRepository<UserSch
 
     @Query(
             """
-            select u from UserSchemeDetailsEntity u join fetch u.transactionEntities
+            select u from UserSchemeDetailsEntity u left join fetch u.transactionEntities
             where u.userFolioDetailsEntity.userCasDetailsEntity.investorInfoEntity.email = :email and
                   u.userFolioDetailsEntity.userCasDetailsEntity.investorInfoEntity.name = :name
             """)

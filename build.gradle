@@ -58,7 +58,7 @@ dependencies {
     // Observability
     implementation 'org.springframework.boot:spring-boot-starter-opentelemetry'
 
-    implementation("net.ttddyy.observation:datasource-micrometer-spring-boot:2.3.0")
+    implementation("net.ttddyy.observation:datasource-micrometer-spring-boot:2.3.1")
 
     implementation 'org.decampo:xirr:1.2'
 
@@ -79,7 +79,7 @@ dependencies {
     runtimeOnly "io.micrometer:micrometer-registry-prometheus"
 
     // Scheduler
-    implementation("org.jobrunr:jobrunr-spring-boot-4-starter:8.8.2")
+    implementation("org.jobrunr:jobrunr-spring-boot-4-starter:9.0.5")
     // Mapstruct
     implementation ("org.mapstruct:mapstruct:1.6.3")
     implementation ("org.mapstruct.extensions.spring:mapstruct-spring-annotations:2.0.0")
@@ -97,7 +97,7 @@ dependencies {
     testImplementation "org.testcontainers:testcontainers-postgresql"
     testImplementation "org.testcontainers:testcontainers-grafana"
     testImplementation('com.tngtech.archunit:archunit-junit5:1.5.1')
-    testImplementation('com.redis:testcontainers-redis:2.2.4')
+    testImplementation('com.redis:testcontainers-redis:3.0.1')
     // If you are using mapstruct in test code
     testAnnotationProcessor("org.mapstruct:mapstruct-processor:1.6.3")
     testAnnotationProcessor("org.mapstruct.extensions.spring:mapstruct-spring-extensions:2.0.0")
