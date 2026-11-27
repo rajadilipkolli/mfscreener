@@ -13,6 +13,8 @@ import com.learning.mfscreener.entities.UserFolioDetailsEntity;
 import com.learning.mfscreener.entities.UserSchemeDetailsEntity;
 import com.learning.mfscreener.entities.UserTransactionDetailsEntity;
 import com.learning.mfscreener.mapper.CasDetailsMapper;
+import com.learning.mfscreener.models.entityviews.UserCASDetailsEntityView;
+import com.learning.mfscreener.models.entityviews.UserFolioDetailsEntityView;
 import com.learning.mfscreener.models.portfolio.CasDTO;
 import com.learning.mfscreener.models.portfolio.InvestorInfoDTO;
 import com.learning.mfscreener.models.portfolio.UserFolioDTO;
@@ -76,11 +78,11 @@ class PortfolioServiceDeltaTest {
     void repeatImportKeepsExistingGraphAndNewFolio() {
         UserCASDetailsEntity cas = new UserCASDetailsEntity().setId(1L);
         UserFolioDetailsEntity existing = new UserFolioDetailsEntity().setId(2L).setFolio("existing");
-        cas.setFolioEntities(new ArrayList<>(List.of(existing)));
+        cas.addFolioEntity(existing);
         UserSchemeDetailsEntity scheme = new UserSchemeDetailsEntity().setId(3L).setIsin("ISIN");
-        scheme.setUserFolioDetailsEntity(existing);
+        existing.addSchemeEntity(scheme);
         UserTransactionDetailsEntity transaction = new UserTransactionDetailsEntity().setId(4L);
-        transaction.setUserSchemeDetailsEntity(scheme);
+        scheme.addTransactionEntity(transaction);
         UserFolioDetailsEntity added = new UserFolioDetailsEntity().setFolio("added");
         UserSchemeDetailsEntity addedScheme = new UserSchemeDetailsEntity().setIsin("NEW");
         added.addSchemeEntity(addedScheme);
@@ -97,8 +99,7 @@ class PortfolioServiceDeltaTest {
         CasDTO request = mock(CasDTO.class);
         when(request.folios()).thenReturn(List.of(oldRequest, newRequest));
         when(helper.countTransactionsByUserFolioDTOList(request.folios())).thenReturn(2L);
-        when(casDetails.findByInvestorEmailAndName(EMAIL, NAME)).thenReturn(cas);
-        when(schemes.getSchemesByEmailAndName(EMAIL, NAME)).thenReturn(List.of(scheme));
+        stubExistingCas(cas);
         when(transactions.findAllTransactionsByEmailAndName(EMAIL, NAME)).thenReturn(List.of(transaction));
         when(mapper.mapUserFolioDTOToUserFolioDetailsEntity(newRequest)).thenReturn(added);
 
@@ -158,9 +159,8 @@ class PortfolioServiceDeltaTest {
 
         when(investors.existsByEmailAndName(EMAIL, NAME)).thenReturn(true);
         when(helper.countTransactionsByUserFolioDTOList(request.folios())).thenReturn(4L);
-        when(casDetails.findByInvestorEmailAndName(EMAIL, NAME)).thenReturn(cas);
+        stubExistingCas(cas);
         when(casDetails.saveEntity(cas)).thenReturn(cas);
-        when(schemes.getSchemesByEmailAndName(EMAIL, NAME)).thenReturn(List.of(scheme, otherScheme));
         when(transactions.findAllTransactionsByEmailAndName(EMAIL, NAME))
                 .thenReturn(List.of(oldTransaction, otherTransaction));
         when(mapper.mapUserFolioDTOToUserFolioDetailsEntity(addedRequestFolio)).thenReturn(addedFolio);
@@ -176,6 +176,21 @@ class PortfolioServiceDeltaTest {
         assertThat(otherScheme.getTransactionEntities()).containsExactly(otherTransaction);
         assertThat(addedFolio.getSchemeEntities()).containsExactly(addedScheme);
         assertThat(addedScheme.getTransactionEntities()).containsExactly(addedTransaction);
+    }
+
+    private void stubExistingCas(UserCASDetailsEntity cas) {
+        UserCASDetailsEntityView view = mock(UserCASDetailsEntityView.class);
+        when(view.getId()).thenReturn(cas.getId());
+        List<UserFolioDetailsEntityView> folioViews = cas.getFolioEntities().stream()
+                .map(folio -> {
+                    UserFolioDetailsEntityView folioView = mock(UserFolioDetailsEntityView.class);
+                    when(folioView.getFolio()).thenReturn(folio.getFolio());
+                    return folioView;
+                })
+                .toList();
+        when(view.getFolioEntities()).thenReturn(folioViews);
+        when(casDetails.findByInvestorEmailAndName(EMAIL, NAME)).thenReturn(view);
+        when(casDetails.findEntityById(cas.getId())).thenReturn(cas);
     }
 
     private UserFolioDTO requestFolio(String folioNumber, UserTransactionDTO... transactions) {
@@ -195,10 +210,10 @@ class PortfolioServiceDeltaTest {
     void existingInvestorWithNoTransactionsCanImportNewFolio() {
         UserCASDetailsEntity cas = new UserCASDetailsEntity().setId(1L);
         UserFolioDetailsEntity existing = new UserFolioDetailsEntity().setId(2L).setFolio("existing");
-        cas.setFolioEntities(new ArrayList<>(List.of(existing)));
+        cas.addFolioEntity(existing);
         UserSchemeDetailsEntity emptyScheme =
                 new UserSchemeDetailsEntity().setId(3L).setIsin("EMPTY");
-        emptyScheme.setUserFolioDetailsEntity(existing);
+        existing.addSchemeEntity(emptyScheme);
         UserFolioDetailsEntity added = new UserFolioDetailsEntity().setFolio("added");
 
         UserFolioDTO oldRequest = mock(UserFolioDTO.class);
@@ -211,8 +226,7 @@ class PortfolioServiceDeltaTest {
         CasDTO request = mock(CasDTO.class);
         when(request.folios()).thenReturn(List.of(oldRequest, newRequest));
         when(helper.countTransactionsByUserFolioDTOList(request.folios())).thenReturn(1L);
-        when(casDetails.findByInvestorEmailAndName(EMAIL, NAME)).thenReturn(cas);
-        when(schemes.getSchemesByEmailAndName(EMAIL, NAME)).thenReturn(List.of(emptyScheme));
+        stubExistingCas(cas);
         when(transactions.findAllTransactionsByEmailAndName(EMAIL, NAME)).thenReturn(List.of());
         when(mapper.mapUserFolioDTOToUserFolioDetailsEntity(newRequest)).thenReturn(added);
 

@@ -7,6 +7,7 @@ import com.learning.mfscreener.models.projection.PortfolioDetailsProjection;
 import com.learning.mfscreener.repository.UserCASDetailsEntityRepository;
 import java.time.LocalDate;
 import java.util.List;
+import org.hibernate.Hibernate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,7 +35,9 @@ public class UserCASDetailsService {
     public UserCASDetailsEntity findEntityById(Long id) {
         UserCASDetailsEntity entity =
                 userCASDetailsEntityRepository.findById(id).orElseThrow();
-        entity.getFolioEntities().size();
+        // The upload mutates this graph after the read transaction ends.
+        entity.getFolioEntities().forEach(folio -> folio.getSchemeEntities()
+                .forEach(scheme -> Hibernate.initialize(scheme.getTransactionEntities())));
         return entity;
     }
 

@@ -21,7 +21,6 @@ import com.learning.mfscreener.models.response.PortfolioResponse;
 import com.learning.mfscreener.models.response.ProcessCasResponse;
 import com.learning.mfscreener.models.response.UploadResponseHolder;
 import com.learning.mfscreener.utils.LocalDateUtility;
-import com.learning.mfscreener.utils.UserCasEntityGraphBuilder;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -141,12 +140,10 @@ public class PortfolioService {
             return null;
         }
 
-        UserCASDetailsEntity userCASDetailsEntity = UserCasEntityGraphBuilder.rebuild(
-                userCASDetailsService.findByInvestorEmailAndName(email, name),
-                userSchemeDetailsService.getSchemesByEmailAndName(email, name),
-                userTransactionDetailsEntityList);
+        UserCASDetailsEntityView userCASDetailsEntityView =
+                userCASDetailsService.findByInvestorEmailAndName(email, name);
         return processFoliosAndTransactions(
-                casDTO, userCASDetailsEntity, userTransactionCount, userTransactionDetailsEntityList);
+                casDTO, userCASDetailsEntityView, userTransactionCount, userTransactionDetailsEntityList);
     }
 
     UploadResponseHolder processFoliosAndTransactions(
