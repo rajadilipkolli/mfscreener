@@ -1,0 +1,9 @@
+Scheme Code;Scheme Name;ISIN Div Payout/ISIN Growth;ISIN Div Reinvestment;Net Asset Value;Repurchase Price;Sale Price;Date
+
+Open Ended Schemes(Equity Scheme - Focused Fund)
+Sundaram Mutual Fund
+119578;Sundaram Select Focus Direct Plan - Growth;INF903J01MV8;-;176.0000;;;19-Dec-2018
+
+Open Ended Schemes(Equity Schemes - Value Fund)
+L&T Mutual Fund
+119404;L&T India Value Fund;INF917K01HD4;-;63.0000;;;19-Oct-2022

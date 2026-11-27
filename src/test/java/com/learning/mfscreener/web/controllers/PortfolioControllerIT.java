@@ -1,5 +1,7 @@
 package com.learning.mfscreener.web.controllers;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
@@ -11,6 +13,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.learning.mfscreener.common.AbstractIntegrationTest;
+import com.learning.mfscreener.models.projection.PortfolioDetailsProjection;
+import com.learning.mfscreener.repository.UserCASDetailsEntityRepository;
 import com.learning.mfscreener.utils.TestData;
 import java.io.File;
 import java.io.FileInputStream;
@@ -20,6 +24,7 @@ import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
@@ -27,6 +32,9 @@ import org.springframework.test.web.servlet.ResultMatcher;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class PortfolioControllerIT extends AbstractIntegrationTest {
+
+    @Autowired
+    private UserCASDetailsEntityRepository casRepository;
 
     @Test
     @Order(1)
@@ -233,9 +241,11 @@ class PortfolioControllerIT extends AbstractIntegrationTest {
     @Test
     @Order(101)
     void getPortfolio() throws Exception {
+        LocalDate asOfDate = LocalDate.now().minusDays(2);
+        awaitImportedHoldings(asOfDate);
         this.mockMvc
                 .perform(get("/api/portfolio/{pan}", "ABCDE1234F")
-                        .param("asOfDate", LocalDate.now().minusDays(2).toString())
+                        .param("asOfDate", asOfDate.toString())
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_JSON_VALUE)))
@@ -261,11 +271,19 @@ class PortfolioControllerIT extends AbstractIntegrationTest {
     @Test
     @Order(103)
     void getPortfolioWithOutDate() throws Exception {
+        awaitImportedHoldings(LocalDate.now());
         this.mockMvc
                 .perform(get("/api/portfolio/{pan}", "ABCDE1234F").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_JSON_VALUE)))
                 .andExpect(containsImportedHoldings());
+    }
+
+    private void awaitImportedHoldings(LocalDate asOfDate) {
+        // Upload fills missing PAN and scheme IDs in background transactions.
+        await().untilAsserted(() -> assertThat(casRepository.getPortfolioDetails("ABCDE1234F", asOfDate))
+                .extracting(PortfolioDetailsProjection::getSchemeId)
+                .containsExactlyInAnyOrder(118272L, 120186L, 120503L, 120594L, 120684L));
     }
 
     private ResultMatcher containsImportedHoldings() {

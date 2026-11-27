@@ -1,5 +1,7 @@
 package com.learning.mfscreener.web.controllers;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
@@ -11,19 +13,26 @@ import com.learning.mfscreener.common.AbstractIntegrationTest;
 import com.learning.mfscreener.models.portfolio.CasDTO;
 import com.learning.mfscreener.models.portfolio.InvestorInfoDTO;
 import com.learning.mfscreener.models.portfolio.UserFolioDTO;
+import com.learning.mfscreener.models.projection.UserFolioDetailsProjection;
+import com.learning.mfscreener.repository.UserFolioDetailsEntityRepository;
 import com.learning.mfscreener.utils.TestData;
 import java.time.LocalDate;
 import java.util.List;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 
 class XIRRCalculatorControllerIntTest extends AbstractIntegrationTest {
 
+    @Autowired
+    private UserFolioDetailsEntityRepository folioRepository;
+
     @Test
     void getXIRR() throws Exception {
         String pan = "XIRRA1234F";
+        LocalDate asOfDate = LocalDate.of(2024, 4, 15);
         CasDTO template = TestData.getCasDTO(false, false, false);
         UserFolioDTO folio = template.folios().getFirst();
         CasDTO statement = new CasDTO(
@@ -37,8 +46,13 @@ class XIRRCalculatorControllerIntTest extends AbstractIntegrationTest {
                 "file", "xirr.json", MediaType.APPLICATION_JSON_VALUE, objectMapper.writeValueAsBytes(statement));
         mockMvc.perform(multipart("/api/portfolio/upload").file(upload)).andExpect(status().isOk());
 
+        // The upload returns before the background scheme ID lookup commits.
+        await().untilAsserted(() -> assertThat(folioRepository.findByPanAndAsOfDate(pan, asOfDate))
+                .extracting(UserFolioDetailsProjection::amfi)
+                .containsExactly(120684L));
+
         mockMvc.perform(get("/api/xirr/{pan}", pan)
-                        .param("asOfDate", "2024-04-15")
+                        .param("asOfDate", asOfDate.toString())
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_JSON_VALUE)))
