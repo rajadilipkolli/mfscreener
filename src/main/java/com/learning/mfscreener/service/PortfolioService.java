@@ -12,6 +12,7 @@ import com.learning.mfscreener.entities.UserSchemeDetailsEntity;
 import com.learning.mfscreener.entities.UserTransactionDetailsEntity;
 import com.learning.mfscreener.mapper.CasDetailsMapper;
 import com.learning.mfscreener.models.PortfolioDetailsDTO;
+import com.learning.mfscreener.models.entityviews.UserCASDetailsEntityView;
 import com.learning.mfscreener.models.portfolio.CasDTO;
 import com.learning.mfscreener.models.portfolio.UserFolioDTO;
 import com.learning.mfscreener.models.portfolio.UserSchemeDTO;
@@ -20,7 +21,6 @@ import com.learning.mfscreener.models.response.PortfolioResponse;
 import com.learning.mfscreener.models.response.ProcessCasResponse;
 import com.learning.mfscreener.models.response.UploadResponseHolder;
 import com.learning.mfscreener.utils.LocalDateUtility;
-import com.learning.mfscreener.utils.UserCasEntityGraphBuilder;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -140,23 +140,24 @@ public class PortfolioService {
             return null;
         }
 
-        UserCASDetailsEntity userCASDetailsEntity = UserCasEntityGraphBuilder.rebuild(
-                userCASDetailsService.findByInvestorEmailAndName(email, name),
-                userSchemeDetailsService.getSchemesByEmailAndName(email, name),
-                userTransactionDetailsEntityList);
+        UserCASDetailsEntityView userCASDetailsEntityView =
+                userCASDetailsService.findByInvestorEmailAndName(email, name);
         return processFoliosAndTransactions(
-                casDTO, userCASDetailsEntity, userTransactionCount, userTransactionDetailsEntityList);
+                casDTO, userCASDetailsEntityView, userTransactionCount, userTransactionDetailsEntityList);
     }
 
     UploadResponseHolder processFoliosAndTransactions(
             CasDTO casDTO,
-            UserCASDetailsEntity userCASDetailsEntity,
+            UserCASDetailsEntityView userCASDetailsEntityView,
             long userTransactionDTOListCount,
             List<UserTransactionDetailsEntity> userTransactionDetailsEntityList) {
         AtomicInteger folioCounter = new AtomicInteger();
         AtomicInteger transactionsCounter = new AtomicInteger();
+        UserCASDetailsEntity userCASDetailsEntity =
+                userCASDetailsService.findEntityById(userCASDetailsEntityView.getId());
 
-        processNewFolios(casDTO.folios(), userCASDetailsEntity, folioCounter, transactionsCounter);
+        processNewFolios(
+                casDTO.folios(), userCASDetailsEntityView, userCASDetailsEntity, folioCounter, transactionsCounter);
         updateSchemesAndTransactions(
                 casDTO,
                 userCASDetailsEntity,
@@ -294,12 +295,13 @@ public class PortfolioService {
 
     void processNewFolios(
             List<UserFolioDTO> userFolioDTOList,
+            UserCASDetailsEntityView userCASDetailsEntityView,
             UserCASDetailsEntity userCASDetailsEntity,
             AtomicInteger folioCounter,
             AtomicInteger transactionsCounter) {
         // Logic to process new folios
-        List<String> existingFolioNumbers = userCASDetailsEntity.getFolioEntities().stream()
-                .map(UserFolioDetailsEntity::getFolio)
+        List<String> existingFolioNumbers = userCASDetailsEntityView.getFolioEntities().stream()
+                .map(folio -> folio.getFolio())
                 .toList();
 
         userFolioDTOList.forEach(userFolioDTO -> {

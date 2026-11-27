@@ -31,6 +31,6 @@ class SchemeControllerIT extends AbstractIntegrationTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_JSON_VALUE)))
-                .andExpect(jsonPath("$.size()", is(284)));
+                .andExpect(jsonPath("$[*].schemeId", contains(130001, 130002)));
     }
 }

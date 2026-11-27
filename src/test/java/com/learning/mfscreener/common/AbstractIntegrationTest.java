@@ -13,7 +13,7 @@ import tools.jackson.databind.ObjectMapper;
 @ActiveProfiles({PROFILE_TEST})
 @SpringBootTest(
         webEnvironment = RANDOM_PORT,
-        classes = {SQLContainersConfig.class, NonSQLContainersConfig.class})
+        classes = {SQLContainersConfig.class, NonSQLContainersConfig.class, MarketDataFixtures.class})
 @AutoConfigureMockMvc
 public abstract class AbstractIntegrationTest {
 

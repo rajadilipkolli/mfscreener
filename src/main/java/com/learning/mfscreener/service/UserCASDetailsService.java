@@ -2,10 +2,12 @@ package com.learning.mfscreener.service;
 
 import com.learning.mfscreener.config.logging.Loggable;
 import com.learning.mfscreener.entities.UserCASDetailsEntity;
+import com.learning.mfscreener.models.entityviews.UserCASDetailsEntityView;
 import com.learning.mfscreener.models.projection.PortfolioDetailsProjection;
 import com.learning.mfscreener.repository.UserCASDetailsEntityRepository;
 import java.time.LocalDate;
 import java.util.List;
+import org.hibernate.Hibernate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,8 +28,17 @@ public class UserCASDetailsService {
         return userCASDetailsEntityRepository.save(casDetailsEntity);
     }
 
-    public UserCASDetailsEntity findByInvestorEmailAndName(String email, String name) {
+    public UserCASDetailsEntityView findByInvestorEmailAndName(String email, String name) {
         return userCASDetailsEntityRepository.findByInvestorEmailAndName(email, name);
+    }
+
+    public UserCASDetailsEntity findEntityById(Long id) {
+        UserCASDetailsEntity entity =
+                userCASDetailsEntityRepository.findById(id).orElseThrow();
+        // The upload mutates this graph after the read transaction ends.
+        entity.getFolioEntities().forEach(folio -> folio.getSchemeEntities()
+                .forEach(scheme -> Hibernate.initialize(scheme.getTransactionEntities())));
+        return entity;
     }
 
     public List<PortfolioDetailsProjection> getPortfolioDetailsByPanAndAsOfDate(String panNumber, LocalDate asOfDate) {
