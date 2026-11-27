@@ -1,0 +1,48 @@
+Scheme Code;ISIN Div Payout/ ISIN Growth;ISIN Div Reinvestment;Scheme Name;Net Asset Value;Date
+
+Open Ended Schemes(Equity Schemes - ELSS - Tax Saver Fund)
+
+Axis Mutual Fund
+120503;INF846K01EW2;-;Axis ELSS- Tax Saver Fund;97.3520;12-Apr-2024
+
+Open Ended Schemes(Hybrid Schemes - Aggressive Hybrid Fund)
+
+Canara Robeco Mutual Fund
+118272;INF760K01EZ8;-;Canara Robeco Aggressive Hybrid Fund;300.0000;12-Apr-2024
+
+Open Ended Schemes(Equity Schemes)
+
+ICICI Prudential Mutual Fund
+120186;INF109K01Z71;-;ICICI Prudential US Bluechip Equity Fund;63.0400;12-Apr-2024
+120594;INF109K01Z48;-;ICICI Prudential Technology Fund;190.1100;12-Apr-2024
+120684;INF109K01Y80;-;ICICI Prudential Nifty Next 50 Index Fund;58.1998;12-Apr-2024
+
+Open Ended Schemes(Equity Schemes - Small Cap Fund)
+
+SBI Mutual Fund
+125494;INF200K01001;-;SBI Small Cap Fund Direct Growth;100.0000;12-Apr-2024
+125495;INF200K01002;-;SBI Small Cap Fund Direct IDCW;100.0000;12-Apr-2024
+125496;INF200K01003;-;SBI Small Cap Fund Regular Growth;100.0000;12-Apr-2024
+125497;INF200K01004;-;SBI Small Cap Fund Regular IDCW;100.0000;12-Apr-2024
+
+Open Ended Schemes(Equity Schemes)
+
+Mirae Asset Mutual Fund
+130001;INF769K01001;-;Mirae Fixture Growth Fund;100.0000;12-Apr-2024
+130002;INF769K01002;-;Mirae Fixture Index Fund;100.0000;12-Apr-2024
+
+Close Ended Schemes(Equity Schemes)
+
+Sundaram Mutual Fund
+141565;INF903JA1AX5;-;Sundaram Long Term Micro Cap Fund;23.6892;12-Apr-2024
+
+Open Ended Schemes(Equity Schemes - Value Fund)
+
+HSBC Mutual Fund
+151113;INF917K01HD4;-;HSBC Value Fund;63.1620;12-Apr-2024
+
+Open Ended Schemes(Equity Schemes)
+
+Fixture Mutual Fund
+121721;INF000K01001;-;Grandfathered Fixture Fund A;20.0000;12-Apr-2024
+121722;INF000K01002;-;Grandfathered Fixture Fund B;25.0000;12-Apr-2024
